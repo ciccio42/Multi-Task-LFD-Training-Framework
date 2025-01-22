@@ -30,8 +30,8 @@ import torch
 import torch.nn as nn
 from typing import Optional
 
-from pytorch_robotics_transformer.film_efficientnet.film_efficientnet_encoder import EfficientNetB3
-from pytorch_robotics_transformer.film_efficientnet.film_conditioning_layer import FilmConditioning
+from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.film_efficientnet.film_efficientnet_encoder import EfficientNetB3
+from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.film_efficientnet.film_conditioning_layer import FilmConditioning
 
 class EfficientNetEncoder(nn.Module):
     def __init__(self,

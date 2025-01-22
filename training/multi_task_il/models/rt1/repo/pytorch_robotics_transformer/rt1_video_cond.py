@@ -89,7 +89,7 @@ class RT1_video_cond(nn.Module):
         # self.cond_module = CondModule(model_name='r2plus1d_18', demo_linear_dim=[512, 512, 512], pretrained=True)
         try:
             weights = torch.load(cond_module_model_path, weights_only=True)
-        except RuntimeError:
+        except Exception:
             weights = torch.load(cond_module_model_path, map_location='cuda:0') # this is when you load the cond module on your pc when testing
         self.cond_module.load_state_dict(weights)
         self.cond_module.eval()

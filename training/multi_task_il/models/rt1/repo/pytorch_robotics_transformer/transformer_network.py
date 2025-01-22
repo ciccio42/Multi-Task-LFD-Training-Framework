@@ -17,10 +17,10 @@
 
 # You can find the original code from here[https://github.com/google-research/robotics_transformer].
 
-from pytorch_robotics_transformer.tokenizers import action_tokenizer
-from pytorch_robotics_transformer.tokenizers import image_tokenizer
-from pytorch_robotics_transformer import transformer
-from pytorch_robotics_transformer.film_efficientnet import preprocessors
+from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.tokenizers import action_tokenizer
+from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.tokenizers import image_tokenizer
+from multi_task_il.models.rt1.repo.pytorch_robotics_transformer import transformer
+from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.film_efficientnet import preprocessors
 
 from typing import Optional, Tuple, Union, Any, Dict, List
 import numpy as np
@@ -192,29 +192,53 @@ class TransformerNetwork(nn.Module):
                                                         dtype=eval(gripper_closedness_conf['dtype'])))
                 ])
             )
+        # else: # with no terminate episode
+        #     action_space = spaces.Dict(
+        #     OrderedDict([
+        #         ('world_vector', spaces.Box(low=world_vec_conf['low'],
+        #                                     high=world_vec_conf['high'],
+        #                                     shape=world_vec_conf['shape'],
+        #                                     dtype=eval(world_vec_conf['dtype']))),
+        #         # When normalization range is [-pi/2, pi/2]
+        #         # ('rotation_delta', spaces.Box(low= eval(rotation_delta_conf['low']),
+        #         #                               high= eval(rotation_delta_conf['high']),
+        #         #                               shape=rotation_delta_conf['shape'],
+        #         #                               dtype=eval(rotation_delta_conf['dtype']))),
+        #         # When normalization range is [-1.0, 1.0]
+        #         ('rotation_delta', spaces.Box(low=rotation_delta_conf['low'],
+        #                                     high=rotation_delta_conf['high'],
+        #                                     shape=rotation_delta_conf['shape'],
+        #                                     dtype=eval(rotation_delta_conf['dtype']))),
+        #         ('gripper_closedness_action', spaces.Box(low= gripper_closedness_conf['low'],
+        #                                                 high= gripper_closedness_conf['high'],
+        #                                                 shape=gripper_closedness_conf['shape'],
+        #                                                 dtype=eval(gripper_closedness_conf['dtype'])))
+        #         ])
+        #     )
         else: # with no terminate episode
             action_space = spaces.Dict(
             OrderedDict([
-                ('world_vector', spaces.Box(low=world_vec_conf['low'],
-                                            high=world_vec_conf['high'],
-                                            shape=world_vec_conf['shape'],
-                                            dtype=eval(world_vec_conf['dtype']))),
+                ('world_vector', spaces.Box(low=np.array([world_vec_conf['low_x'], world_vec_conf['low_y'], world_vec_conf['low_z']]),
+                                            high=np.array([world_vec_conf['high_x'], world_vec_conf['high_y'], world_vec_conf['high_z']]),
+                                            dtype=np.float32
+                                            )),
                 # When normalization range is [-pi/2, pi/2]
                 # ('rotation_delta', spaces.Box(low= eval(rotation_delta_conf['low']),
                 #                               high= eval(rotation_delta_conf['high']),
                 #                               shape=rotation_delta_conf['shape'],
                 #                               dtype=eval(rotation_delta_conf['dtype']))),
                 # When normalization range is [-1.0, 1.0]
-                ('rotation_delta', spaces.Box(low=eval(rotation_delta_conf['low']),
-                                            high=eval(rotation_delta_conf['high']),
-                                            shape=rotation_delta_conf['shape'],
-                                            dtype=eval(rotation_delta_conf['dtype']))),
+                ('rotation_delta', spaces.Box(low=np.array([rotation_delta_conf['low_phi'], rotation_delta_conf['low_theta'], rotation_delta_conf['low_psi']]),
+                                            high=np.array([rotation_delta_conf['high_phi'], rotation_delta_conf['high_theta'], rotation_delta_conf['high_psi']]),
+                                            dtype=np.float32
+                                            )),
                 ('gripper_closedness_action', spaces.Box(low= gripper_closedness_conf['low'],
                                                         high= gripper_closedness_conf['high'],
                                                         shape=gripper_closedness_conf['shape'],
-                                                        dtype=eval(gripper_closedness_conf['dtype'])))
+                                                        dtype=eval(gripper_closedness_conf['dtype'])
+                                                        ))
                 ])
-            )           
+            ) 
         
         return state_space, action_space
 
@@ -437,30 +461,70 @@ class TransformerNetwork(nn.Module):
             gt_act_tokens = action_tokens[:, -1, :]
             
             bin_accuracies = {}
+            bin_accuracies_interval = {}
             for j in range(gt_act_tokens.shape[1]):
                 bin_accuracies[j] = []
+                bin_accuracies_interval[j] = []
                         
             for k in range(gt_act_tokens.shape[0]): # for every vector
                 for j in range(gt_act_tokens.shape[1]): # for every bin of the vector
                     bin_accuracies[j].append(1 if gt_act_tokens[k][j] - predicted_tokens_for_output[k][j] == 0 else 0)
                     
                     #TODO: implement for interval
+                    bin_accuracies_interval[j].append(1 if abs(gt_act_tokens[k][j] - predicted_tokens_for_output[k][j]) < 5 else 0)
                 
                 if k == range(gt_act_tokens.shape[0])[-1]: # last step
                     for j in range(gt_act_tokens.shape[1]): # for every bin of the vector
                         bin_accuracies[j] = np.average(bin_accuracies[j])
+                        bin_accuracies_interval[j] = np.average(bin_accuracies_interval[j])
                         
             output_actions = self._action_tokenizer.detokenize(predicted_tokens_for_output)
             
-            bin_acc_str = {}
-            for k,v in bin_accuracies.items():
-                bin_acc_str[f'bin_{str(k)}'] = v
+            # bin_acc_str = {}
+            # bin_accuracies_interval_str = {}
+            # for k,v in bin_accuracies.items():
+            #     bin_acc_str[f'bin_{str(k)}'] = v
+                
+            # for k,v in bin_accuracies_interval.items():
+            #     bin_accuracies_interval_str[f'bin_{str(k)}'] = v
 
-            return output_actions, network_state, bin_acc_str
+            return output_actions, network_state, bin_accuracies, bin_accuracies_interval
 
         # output_actions: Dict[str, np.ndarray]
         output_actions = self._action_tokenizer.detokenize(predicted_tokens_for_output)
-
+        
+        
+        
+        # import matplotlib.pyplot as plt        
+        # Z_MIN = -0.0704068709459174
+        # Z_MAX = 0.07021173179142365
+        
+        # z_reals = []
+        
+        # # filename = 'x_rt1_outputs.txt'
+        # Z_DIM = 2
+        # for bin_value in range(0,255):
+        #     predicted_tokens_for_output[0][Z_DIM] = bin_value
+        #     if bin_value == 0:
+        #         z_real_min_1 = 0.0
+        #     else:
+        #         z_real_min_1 = z_real
+        #     z_real = self._action_tokenizer.detokenize(predicted_tokens_for_output)['world_vector'][0][Z_DIM]
+        #     diff = z_real - z_real_min_1
+        #     print(f'{bin_value} -> {z_real}, diff: {z_real - z_real_min_1}')
+        #     z_reals.append(z_real.cpu().item())
+        #     # with open('x_bin.txt', 'a') as f:
+        #     #     print(f'{bin_value} -> {x_real}', file=f) 
+        
+        
+        # x = np.arange(Z_MIN, Z_MAX, diff.cpu().item())
+        # plt.plot(z_reals, 'bo')
+        # # Set the range of x-axis
+        # plt.xlim(Z_MIN, Z_MAX)
+        
+        # plt.savefig('z_delta_distr.png')
+        
+                
         # output_actions is the last actions.
         # network_stape is the past state that is used for next inference.
         return output_actions, network_state

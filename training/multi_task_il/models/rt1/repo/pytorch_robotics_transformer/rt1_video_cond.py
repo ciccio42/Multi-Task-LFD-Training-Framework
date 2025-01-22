@@ -90,7 +90,7 @@ class RT1_video_cond(nn.Module):
         try:
             weights = torch.load(cond_module_model_path, weights_only=True)
         except RuntimeError:
-            weights = torch.load(cond_module_model_path, weights_only=True, map_location='cuda:0') # this is when you load the cond module on your pc when testing
+            weights = torch.load(cond_module_model_path, map_location='cuda:0') # this is when you load the cond module on your pc when testing
         self.cond_module.load_state_dict(weights)
         self.cond_module.eval()
         # used to store network_state

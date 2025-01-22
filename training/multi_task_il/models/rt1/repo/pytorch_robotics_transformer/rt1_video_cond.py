@@ -87,7 +87,10 @@ class RT1_video_cond(nn.Module):
         
         # load pretrained weights of cond_module
         # self.cond_module = CondModule(model_name='r2plus1d_18', demo_linear_dim=[512, 512, 512], pretrained=True)
-        weights = torch.load(cond_module_model_path, weights_only=True)
+        try:
+            weights = torch.load(cond_module_model_path, weights_only=True)
+        except RuntimeError:
+            weights = torch.load(cond_module_model_path, weights_only=True, map_location='cuda:0') # this is when you load the cond module on your pc when testing
         self.cond_module.load_state_dict(weights)
         self.cond_module.eval()
         # used to store network_state
@@ -172,7 +175,7 @@ class RT1_video_cond(nn.Module):
                 rt1_network_state = self.rt1_memory # retrieve the network state of the previous timestep
                
         if actions is not None: # training-eval: compute also accuracy on action bins
-            out, rt1_network_state, bin_acc = self.rt1(rt1_obs, rt1_network_state)
+            out, rt1_network_state, bin_acc, bin_acc_interval = self.rt1(rt1_obs, rt1_network_state)
         else: # inference: don't compute accuracy
             out, rt1_network_state = self.rt1(rt1_obs, rt1_network_state)
             
@@ -182,7 +185,7 @@ class RT1_video_cond(nn.Module):
             self.rt1_memory = rt1_network_state # save new network state
             return out, rt1_network_state
         else: # training
-            return out, self.rt1._aux_info['action_loss'], bin_acc
+            return out, self.rt1._aux_info['action_loss'], bin_acc, bin_acc_interval
         
 if __name__ == '__main__':
     pass

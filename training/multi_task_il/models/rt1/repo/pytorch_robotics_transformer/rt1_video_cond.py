@@ -133,13 +133,76 @@ class RT1_video_cond(nn.Module):
         # TODO: load the weights of pretrained cond_module
         with torch.no_grad():
             cond_embedding = self.cond_module(demo) # 15GB for the computation graph -> 4GB with torch no grad
+        
+        
+        # batch_embedding_folder = 'batch_embedding_save_val'
+        # import time
+        # with open(f'{batch_embedding_folder}/cond_embedding_val_{time.time()}.npy', 'wb') as f:
+        #     np.save(f, cond_embedding.cpu().numpy())
+        
+        # import os    
+        # os.mkdir('task_debug')
+        
+        # visualize cond module embedding
+        # c = np.array(range(16))
+        # print(cond_embedding.shape)
+        
+        # import time
+        # import seaborn as sns
+        # y = np.array(range(16))
+        # labels = [str(y_i) for y_i in y]
+        # import matplotlib.pyplot as plt
+        # from sklearn.manifold import TSNE
+        # import pandas as pd
+        
+        # transformed = TSNE(n_components=2, perplexity=5.0,random_state=0).fit_transform(cond_embedding.cpu())
+        
+        # y_unsqueeze = np.expand_dims(y, axis=-1)
+        # data = pd.DataFrame(np.concatenate((transformed, y_unsqueeze), axis=-1))
+        # # pd.DataFrame(np.concatenate((transformed, y_unsqueeze), axis=-1))
+        
+        # import colorcet as cc
+        # palette = sns.color_palette(cc.glasbey, n_colors=16)
+        # plt.figure()
+        # ax = sns.scatterplot(
+        #     x=0, y=1,
+        #     hue=2,
+        #     palette=palette,
+        #     data=data,
+        #     legend="full",
+        #     # alpha=0.3
+        # )
+        # plt.savefig(f'scatter_embedding_sorted_{time.time()}.png')
+        
+        
+        # import os
+        # task_dir = 'task_debug_no_subsample'
+        # os.mkdir(task_dir)
+        # for task_id, task_imgs in enumerate(images):
+        #     os.mkdir(f'{task_dir}/task_{task_id:02d}')
+        #     for t,step_img in enumerate(task_imgs):
+        #         cv2.imwrite(f'{task_dir}/task_{task_id:02d}/step_{t}.png', np.moveaxis(
+        #                     step_img.cpu().numpy()*255, 0, -1))
+                
+            
+            
+        # demo_dir = 'demo_debug_val'
+        # os.mkdir(demo_dir)
+        # for task_id, task_imgs in enumerate(demo):
+        #     os.mkdir(f'{demo_dir}/task_{task_id:02d}')
+        #     for t,step_img in enumerate(task_imgs):
+        #         cv2.imwrite(f'{demo_dir}/task_{task_id:02d}/step_{t}.png', np.moveaxis(
+        #                     step_img.cpu().numpy()*255, 0, -1))
+
+            
+            
         if actions is not None:
             # not inference: there is more than one time step
             t = actions.shape[1]
             cond_embedding = cond_embedding.tile((t,1,1)).permute(1,0,2)
 
             rt1_obs = {
-                "image": images[:,:-1,:,:,:], # we exclude the last one
+                "image": images,
                 "natural_language_embedding": cond_embedding
             }
             
@@ -164,7 +227,7 @@ class RT1_video_cond(nn.Module):
             
             if debug:
                 img_debug = np.moveaxis(rt1_obs['image'][0].detach().cpu().numpy()*255, 0, -1)
-                cv2.imwrite(f"debug_rt1_obs.png", img_debug) #images are already rgb
+                # cv2.imwrite(f"debug_rt1_obs.png", img_debug) #images are already rgb
             # cv2.imwrite(f"debug_rt1.png", img_tensor[:, :, ::-1]) #BGR -> RGB
             
             if self.rt1_memory == None: # if this is the initial step

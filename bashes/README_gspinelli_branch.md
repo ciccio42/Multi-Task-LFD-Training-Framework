@@ -47,8 +47,8 @@ in order to test
 * get the results in the same folder where the checkpoints are stored
 
 # create video from test
-* navigate to `multi-task-lfd-framework` folder
-* select the project folder
+* navigate to `multi-task-lfd-framework` folder (`multi-task-lfd-framework/utils/analysis`)
+* change the project folder in the `--base_path` argument
 * execute `create_video_from_test.sh` script
 
 # visualize finetuning dataset
@@ -76,6 +76,9 @@ image
 
 ## heatmap
 heatmap
+
+### embedding cond module in RT1 input
+/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/plot_embedding_cond_module.py
 
 ## come sono fatti batch sampler
 

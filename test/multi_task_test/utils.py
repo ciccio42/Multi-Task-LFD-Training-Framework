@@ -25,8 +25,14 @@ from torchvision.transforms import ToTensor
 from robosuite import load_controller_config
 from multi_task_test import ENV_OBJECTS, TASK_MAP
 from collections import OrderedDict
-from robosuite.utils.transform_utils import quat2axisangle, axisangle2quat, quat2mat, mat2quat 
+from robosuite.utils.transform_utils import quat2axisangle, axisangle2quat, quat2mat, mat2quat, mat2euler, euler2mat
 import time
+from copy import deepcopy
+
+
+_TIME_COUNTER_ = 0
+PICKED = False
+
 
 DEBUG = False
 set_start_method('forkserver', force=True)
@@ -53,6 +59,15 @@ T_g_robot_to_g_sim = np.array([[0, 1, 0, 0],
                               [-1, 0, 0, 0],
                               [0, 0, 1, 0],
                                [0, 0, 0, 1]])
+R_g_sim_to_g_robot = np.array([[0, -1, 0], 
+                              [1, 0, 0],
+                              [0, 0, 1]])
+R_ws_x = np.array([[0.9104503, -0.4136117, -0.0023614],
+                   [-0.4135816, -0.9104307,  0.0081400],
+                   [-0.0055167, -0.0064344, -0.9999641]]) @ np.array([[-0.4304586, -0.9014726, -0.0453046],
+                                                                      [-0.9026073,  0.4300453,  0.0190052],
+                                                                      [0.0023503,  0.0490732, -0.9987924] ])
+         
 
 def make_prompt(env: object, obs: object, command: str, task_name: str):
     ret_dict = {'states': [],
@@ -397,6 +412,42 @@ def adjust_bb(bb, crop_params=[20, 25, 80, 75]):
     y2 = int((y2_old/y_scale)+top)
     return [x1, y1, x2, y2]
 
+def transform_action_from_robot_to_world_RT1(action):
+    aa_gripper = action[3:-1]
+    # convert axes-angle into rotation matrix
+    R_bl_sim_to_gripper_r = euler2mat(aa_gripper)
+    
+    gripper_pos = action[0:3]
+    
+    T_bl_sim_gripper_r = np.zeros((4,4))
+    T_bl_sim_gripper_r[3,3] = 1
+    
+    # position
+    T_bl_sim_gripper_r[0,3] = gripper_pos[0]
+    T_bl_sim_gripper_r[1,3] = gripper_pos[1]
+    T_bl_sim_gripper_r[2,3] = gripper_pos[2]
+    # orientation
+    T_bl_sim_gripper_r[0:3, 0:3] = R_bl_sim_to_gripper_r
+    
+    T_bl_sim_gripper_sim = T_bl_sim_gripper_r @ T_g_robot_to_g_sim
+    
+    T_wl_sim_gripper_sim = T_w_sim_to_bl_sim @ T_bl_sim_gripper_sim
+    
+    R_wl_sim_gripper_sim = T_wl_sim_gripper_sim[0:3, 0:3]
+    
+    action_wl_sim = np.zeros((7))
+    action_wl_sim[0:3] = T_wl_sim_gripper_sim[0:3, 3]
+    action_wl_sim[3:6] = quat2axisangle(mat2quat(R_wl_sim_gripper_sim))
+    if action[-1] < 0.8:
+        action_wl_sim[6] = -1
+    else:
+        action_wl_sim[6] = 1
+    
+    return action_wl_sim
+
+
+
+
 def transform_action_from_robot_to_world(action):
     aa_gripper = action[3:-1]
     # convert axes-angle into rotation matrix
@@ -432,7 +483,7 @@ def transform_action_from_robot_to_world(action):
 
 
 
-def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, images, context, gpu_id, n_steps, max_T=80, baseline=None, action_ranges=[], target_obj_embedding=None, t=-1, real=False, convert_action=False):
+def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, images, context, gpu_id, n_steps, max_T=80, baseline=None, action_ranges=[], target_obj_embedding=None, t=-1, real=False, convert_action=False, obs=None):
     
     s_t = torch.from_numpy(np.concatenate(states, 0).astype(np.float32))[None]
     if isinstance(images[-1], np.ndarray):
@@ -483,7 +534,7 @@ def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, ima
                     predicted_prob = None
                 
             else:
-                # RT1 inference
+                # RT1 inference (states is not used)
                 out, _ = model(images=i_t,
                                 states=s_t,
                                 demo=context,
@@ -503,40 +554,71 @@ def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, ima
                     
                 action = torch.cat(temp_action_list).cpu().numpy()
 
-    # action[3:7] = [1.0, 1.0, 0.0, 0.0]
-    if len(action.shape) != 1:
-        action_list = list()
-        for t in range(action.shape[0]):
-            action_list.append(denormalize_action(action[t], action_ranges))
-        action = action_list
-    else:
-        action = denormalize_action(action, action_ranges)
+    if 'RT1_video_cond' in str(model.__class__):
         
-        if convert_action:
-            action = transform_action_from_robot_to_world(action)
+        # get current pos and RPY of the eef wrt to WF
+        pos_t = deepcopy(obs['eef_pos'])
+        # TODO capire chi genera eef_quat
+        rot_t  =  (R_ws_x @ quat2mat(deepcopy(obs['eef_quat'])))
         
-        # print(f"Model first_phase {model.first_phase}")
-        if not real:
-            action[-1] = 1 if action[-1] > 0 and n_steps < max_T - 1 else -1
-            if hasattr(model, 'last_gripper'):
-                model.last_gripper = action[-1] 
-        if getattr(model, 'first_phase', None) is not None:
-            # if model.first_phase and action[-1] == 1:
-            #     print("Delay picking")
-            #     global t_delay
-            #     if t_delay < DELAY:
-            #         action[-1] = -1
-            #         t_delay += 1
-            #     else:
-            #         t_delay = 0
-            model.first_phase = action[-1] != 1.
-            # if not model.first_phase:
-            #     print("changed phase")
-            
-    if 'RT1' in str(model.__class__):
+        
+        # in this case the output of this model are deltas (dxdydz, drolldpitchdyaw), which have to be summed to the current observation.
+        delta_pos = action[:3]
+        delta_rot = action[3:-1]
+        rot_t = mat2quat(rot_t @ euler2mat(delta_rot))
+        
+        # 1) 
+        action[:3] = pos_t + T_w_sim_to_bl_sim[:3,:3] @ delta_pos
+        action[3:-1] = quat2axisangle(rot_t)
+        
+        action[-1] = 1.0 if action[-1] == 0.0 else 0.0  # rt1 outputs 0.0 for closed and 1.0 for open gripper
+        
+        # global PICKED
+        # if not PICKED:
+        #     global _TIME_COUNTER_
+        #     if action[-1] == 1.0 and _TIME_COUNTER_ < 5:
+        #         _TIME_COUNTER_ += 1
+        #         action[-1] = 0.0
+        #     elif action[-1] == 1.0 and _TIME_COUNTER_ == 5:
+        #         _TIME_COUNTER_ = 0
+        #         PICKED = True
+        
         return action, None, None, None, None, None
-    else:
-        return action, predicted_prob, target_obj_embedding, out.get('activation_map', None), out.get('target_obj_prediction', None), out.get('predicted_bb', None)
+        
+    else:               
+        # action[3:7] = [1.0, 1.0, 0.0, 0.0]
+        if len(action.shape) != 1:
+            action_list = list()
+            for t in range(action.shape[0]):
+                action_list.append(denormalize_action(action[t], action_ranges))
+            action = action_list
+        else:
+            action = denormalize_action(action, action_ranges)
+            
+            if convert_action:
+                action = transform_action_from_robot_to_world(action)
+            
+            # print(f"Model first_phase {model.first_phase}")
+
+            if not real:
+                action[-1] = 1 if action[-1] > 0 and n_steps < max_T - 1 else -1
+                if hasattr(model, 'last_gripper'):
+                    model.last_gripper = action[-1] 
+        
+            if getattr(model, 'first_phase', None) is not None:
+                # if model.first_phase and action[-1] == 1:
+                #     print("Delay picking")
+                #     global t_delay
+                #     if t_delay < DELAY:
+                #         action[-1] = -1
+                #         t_delay += 1
+                #     else:
+                #         t_delay = 0
+                model.first_phase = action[-1] != 1.
+                # if not model.first_phase:
+                #     print("changed phase")
+                
+    return action, predicted_prob, target_obj_embedding, out.get('activation_map', None), out.get('target_obj_prediction', None), out.get('predicted_bb', None)
 
 
 def set_obj_pos(env_name, dest_env, src_env, obs):
@@ -1751,13 +1833,13 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
         [.0, .0, .0, .0]).to(
         device=gpu_id).float())
 
-    # convert observation from BGR to RGB
+    # convert observation from RGB to BGR
     if config.augs.get("old_aug", True):
         images.append(img_formatter(
             obs['camera_front_image'][:, :, ::-1])[None])
     else:
         img_aug, bb_t_aug = img_formatter(
-            obs['camera_front_image'][:, :, ::-1], bb_t)
+            obs['camera_front_image'][:, :, ::-1], bb_t) # it's BGR
         images.append(img_aug[None])
         # debug_img = np.array(np.moveaxis(
         #     img_aug[:, :, :].cpu().numpy()*255, 0, -1), dtype=np.uint8)
@@ -1766,6 +1848,8 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
             bb.append(bb_t_aug[None][None])
             gt_classes.append(torch.from_numpy(
                 gt_t[None][None]).to(device=gpu_id))
+            
+
 
     elapsed_time = 0
     start = time.time()
@@ -1786,7 +1870,8 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
             action_ranges=action_ranges,
             target_obj_embedding=target_obj_emb,
             t=n_steps,
-            convert_action=convert_action
+            convert_action=convert_action,
+            obs=obs
         )
     else:
         action, target_pred, target_obj_emb, activation_map, prediction_internal_obj, predicted_bb = get_action(
@@ -1804,7 +1889,8 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
             baseline=baseline,
             action_ranges=action_ranges,
             target_obj_embedding=target_obj_emb,
-            convert_action=convert_action
+            convert_action=convert_action,
+            obs=obs
         )
 
     end = time.time()
@@ -1933,8 +2019,8 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
             image = np.array(obs['camera_front_image'][:, :, ::-1])
 
         # debug for steps
-        # cv2.imwrite(
-        #     f"step_test_prova_{time.time()}.png",  image)
+        cv2.imwrite(
+            f"step_test_prova.png",  image)
         
         
         # if controller is not None and gt_env is not None:

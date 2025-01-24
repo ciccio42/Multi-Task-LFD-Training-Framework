@@ -166,11 +166,11 @@ class FinetuningPairedDataset(Dataset):
         
         # for t,frame in enumerate(demo_data['demo']):
         #     img_debug = np.moveaxis(frame.detach().cpu().numpy()*255, 0, -1)
-        #     cv2.imwrite(f"w_debug_demo_{t}.png", img_debug)
+        #     cv2.imwrite(f"y_debug_demo_{t}.png", img_debug)
         
         # for t,frame in enumerate(traj['images']):
         #     img_debug = np.moveaxis(frame.detach().cpu().numpy()*255, 0, -1)
-        #     cv2.imwrite(f"w_debug_traj_{t}.png", img_debug)
+        #     cv2.imwrite(f"y_debug_traj_{t}.png", img_debug)
     
         return {'demo_data': demo_data, 'traj': traj, 'task_name': 'finetuning'} # task_name key is for the collate_fn, loss grouping...
     
@@ -180,35 +180,63 @@ class FinetuningPairedDataset(Dataset):
     def _make_traj(self, traj, command, task_name, sub_task_id, sim_crop, convert_action):
 
         ret_dict = {}
-
+        
+        # subsampling
+        subsampling = self.dataset_samples_spec[task_name]['subsample']
+        if subsampling:
+            subsample_factor = self.dataset_samples_spec[task_name]['subsample_factor']
+        
         end = len(traj)
-        start = torch.randint(low=1, high=max(
-            1, end - self._obs_T + 1), size=(1,))
+        if not subsampling:
+            start = torch.randint(low=1, high=max(
+                1, end - self._obs_T + 1), size=(1,)) # no downsampling
+        else:
+            start = torch.randint(low=1, high=max(
+                1, end - (self._obs_T-1)*subsample_factor - 1), size=(1,)) # downsampling
 
         if self._take_first_frame:
             first_frame = [torch.tensor(1)]
             chosen_t = first_frame + [j + start for j in range(self._obs_T)]
         else:
-            chosen_t = [j + start for j in range(self._obs_T)]
+            
+            if not subsampling:
+                chosen_t = [j + start for j in range(self._obs_T)] # no downsampling
+            else:
+                chosen_t = [j*subsample_factor + start for j in range(self._obs_T)] # downsampling
 
         if self.non_sequential:
             chosen_t = torch.randperm(end)
             chosen_t = chosen_t[chosen_t != 0][:self._obs_T]
 
-        ############################## TODO
         self._load_state_spec = False
-        images, images_cp, bb, obj_classes, action, states, points = create_sample(
-            dataset_loader=self,
-            traj=traj,
-            chosen_t=chosen_t,
-            task_name=task_name,
-            command=command,
-            load_action=True,
-            load_state=self._load_state_spec,
-            load_eef_point=self._load_eef_point,
-            agent_task_id=sub_task_id,
-            sim_crop=sim_crop,
-            convert_action=convert_action)
+        if not subsampling:
+            images, images_cp, bb, obj_classes, action, states, points = create_sample(
+                dataset_loader=self,
+                traj=traj,
+                chosen_t=chosen_t,
+                task_name=task_name,
+                command=command,
+                load_action=True,
+                load_state=self._load_state_spec,
+                load_eef_point=self._load_eef_point,
+                agent_task_id=sub_task_id,
+                sim_crop=sim_crop,
+                convert_action=convert_action)
+        else:
+            images, images_cp, bb, obj_classes, action, states, points = create_sample(
+                dataset_loader=self,
+                traj=traj,
+                chosen_t=chosen_t,
+                task_name=task_name,
+                command=command,
+                load_action=True,
+                load_state=self._load_state_spec,
+                load_eef_point=self._load_eef_point,
+                agent_task_id=sub_task_id,
+                sim_crop=sim_crop,
+                convert_action=convert_action,
+                subsampling=subsampling,
+                subsample_factor=subsample_factor)
 
         ret_dict['images'] = torch.stack(images)
 
@@ -245,23 +273,39 @@ class FinetuningPairedDatasetSampler(BatchSampler):
         self.dataset = dataset
         # self.batch_size = batch_size # no, ci fermiamo quando abbiamo campionato un indice per ogni task
         self.shuffle = shuffle
+        self.batch_size = None
         
         # save the longest idxs lenght
         self.max_len = 0
+        self.task_counter = 0
         for dataset_str in self.dataset.map_tasks_to_idxs.keys():
             for task_str in self.dataset.map_tasks_to_idxs[dataset_str].keys():
                 if type(self.dataset.map_tasks_to_idxs[dataset_str][task_str]) == list: # if we found idxs
                     idx_len = len(self.dataset.map_tasks_to_idxs[dataset_str][task_str])
                     self.max_len = idx_len if idx_len > self.max_len else self.max_len
+                    self.task_counter += 1
                 else:
                     for subtask_str in self.dataset.map_tasks_to_idxs[dataset_str][task_str].keys():
                         if type(self.dataset.map_tasks_to_idxs[dataset_str][task_str][subtask_str]) == list: # if we found idxs
                             idx_len = len(self.dataset.map_tasks_to_idxs[dataset_str][task_str][subtask_str])
                             self.max_len = idx_len if idx_len > self.max_len else self.max_len
+                            self.task_counter += 1
                         else:
                             raise NotImplementedError
                         
+                        
+        # if self.max_len < 48:
+        #     print(f"max_len is {self.max_len} < 48. Switching to 48...")
+        #     self.max_len = 48
+        
+        if self.task_counter < 64:
+            self.batch_size = 64
+        else:
+            self.batch_size = self.task_counter
+        
+                        
         print(f"[{self.dataset.mode.capitalize()}][Sampler] max_len: {self.max_len}")
+        print(f"[{self.dataset.mode.capitalize()}][Sampler] batch_size: {self.batch_size}")
         
         # sampler per ogni task (random sampler)
         self.task_idx_samplers = {} # store all samplers here
@@ -303,9 +347,11 @@ class FinetuningPairedDatasetSampler(BatchSampler):
         #         print('reset sampler')
         #         self.task_iterators[iter_idx] = iter(self.task_idx_samplers[iter_idx])
         #     batch.append(sample)
-        
+        reset = True
         for i in range(self.max_len): # quante volte farlo? fino alla lunghezza del task con più traiettorie
-            batch = []
+            if reset:
+                batch = []
+                task_cnt = 0
             for dataset_str in self.task_iterators.keys(): # per come è ora si ferma appena ha letto tutti i task
                 for task_str in self.task_iterators[dataset_str].keys():
                     if type(self.task_iterators[dataset_str][task_str]) == dict:
@@ -316,13 +362,15 @@ class FinetuningPairedDatasetSampler(BatchSampler):
                                         self.task_iterators[dataset_str][task_str][subtask_str]
                                     )]
                                 )
+                                task_cnt += 1
                             except StopIteration:
                                 self.task_iterators[dataset_str][task_str][subtask_str] = iter(self.task_idx_samplers[dataset_str][task_str][subtask_str])
                                 batch.append(
                                     self.dataset.map_tasks_to_idxs[dataset_str][task_str][subtask_str][next(
                                         self.task_iterators[dataset_str][task_str][subtask_str]
                                     )]
-                                )    
+                                )
+                                task_cnt += 1
                     else:
                         try:
                             batch.append(
@@ -330,6 +378,7 @@ class FinetuningPairedDatasetSampler(BatchSampler):
                                     self.task_iterators[dataset_str][task_str]
                                 )]
                             )
+                            task_cnt += 1
                         except StopIteration:
                             self.task_iterators[dataset_str][task_str] = iter(self.task_idx_samplers[dataset_str][task_str])
                             batch.append(
@@ -337,19 +386,24 @@ class FinetuningPairedDatasetSampler(BatchSampler):
                                     self.task_iterators[dataset_str][task_str]
                                 )]
                             )
+                            task_cnt += 1
             
             
-            if self.shuffle:
-                random.shuffle(batch)
-                # print(f"batch: {batch}")
-                yield batch
-            else:   
-                # print(f"batch: {batch}")
-                yield batch
+            if task_cnt >= self.batch_size: # con insiemi di task > 64, succederà al primo controllo
+                reset = True
+                if self.shuffle:
+                    random.shuffle(batch)
+                    # print(f"batch: {batch}")
+                    yield batch
+                else:   
+                    # print(f"batch: {batch}")
+                    yield batch
+            else:
+                reset = False # rimanere gli elementi nel batch fino a quando non raggiunge la dimensione giusta
         
     
     def __len__(self):
-        return self.max_len
+        return self.max_len // (self.batch_size // self.task_counter)
 
 class ResultsDisplayer():
     

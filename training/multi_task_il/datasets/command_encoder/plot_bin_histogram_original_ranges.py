@@ -133,7 +133,7 @@ def plot_scaling(old_actions, new_actions, dataset_str, min_old, max_old, min_ne
     #         os.mkdir('test_scalings_toRT1')
     #     plt.savefig(f'test_scalings_toRT1/scaling_old_actions_{dataset_str}.png')
     
-def plot_hist(tokens_actions, bucket_size, dataset_str, min_old, max_old, min_new, max_new, action_el_str, ax, tokenizer):
+def plot_hist(tokens_actions, bucket_size, dataset_str, min_old, max_old, action_el_str, ax, tokenizer):
     
     ax.set_xticks(np.arange(0, bucket_size, 25))
 
@@ -145,12 +145,10 @@ def plot_hist(tokens_actions, bucket_size, dataset_str, min_old, max_old, min_ne
     N, bins, patches = ax.hist(tokens_actions,bins=[i for i in range(bucket_size)], label='freq of bin')    
     ax.grid()
     
-    # plt.title(f'{dataset_str}: frequency of bins in [{min_new:.2f},{max_new:.2f}]')
-    
     if action_el_str not in ['dphi', 'dtheta', 'dpsi']:
-        ax.set_title(f'original range: [{min_old:.4f},{max_old:.4f}] [m], bins physical range: [{min_new:.4f}, {max_new:.4f}] [m]')
+        ax.set_title(f'original range: [{min_old:.4f},{max_old:.4f}] [m]')
     else:
-        ax.set_title(f'original range: [{min_old:.4f},{max_old:.4f}] [rad], bins physical range: [{min_new:.4f}, {max_new:.4f}] [rad]')
+        ax.set_title(f'original range: [{min_old:.4f},{max_old:.4f}] [rad]')
     # if action_el_str == 'dx': # if you plot grids columns-wise
     ax.set_ylabel(f'frequency')
     ax.set_xlabel(f'bins for {action_el_str}')
@@ -182,31 +180,6 @@ if __name__ == '__main__':
     min_max_dict['real_new_ur5e_pick_place_converted'] = min_max_dict_2['real_new_ur5e_pick_place_converted']
     min_max_dict['sim_new_ur5e_pick_place_converted'] = min_max_dict_2['sim_new_ur5e_pick_place_converted']
         
-    mins_array = np.stack([min_max_dict[i]['min'][:3] for i in min_max_dict.keys()])
-    maxs_array = np.stack([min_max_dict[i]['max'][:3] for i in min_max_dict.keys()])
-    min_min = np.min(mins_array, axis=0)
-    max_max = np.max(maxs_array, axis=0)
-    arg_mins = np.argmin(mins_array, axis=0)
-    arg_maxs = np.argmax(maxs_array, axis=0)
-    
-    # all_axis_min = np.min(min_min)
-    # all_axis_max = np.max(max_max)
-    # all_angles_min = -math.pi
-    # all_angles_max = math.pi
-    
-    all_axis_min = -1.0
-    all_axis_max = 1.0
-    all_angles_min = -1.0
-    all_angles_max = 1.0
-    
-    print('**POSITIONS**')
-    print(f"min_min: {min_min}\nmax_max: {max_max}")
-    print(f"argmins: {arg_mins}, argmaxs: {arg_maxs}")
-    print(f"all axis range: {all_axis_min, all_axis_max}")
-    
-    print('**ANGLES**')
-    print(f"all angles range: {all_angles_min, all_angles_max}")
-    
     BUCKET_SIZE = 256
     
     all_pkl_paths_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/all_pkl_paths.json'
@@ -247,12 +220,10 @@ if __name__ == '__main__':
     
 
     # min_new and max_new are the same for alle 3 axis
-    min_new = all_axis_min
-    max_new = all_axis_max
     
     ### istantiate tokenizers
-    axis_tokenizer = SimTokenizer(min_new, max_new, BUCKET_SIZE)
-    angle_tokenizer = SimTokenizer(all_angles_min, all_angles_max, BUCKET_SIZE)
+    # axis_tokenizer = SimTokenizer(min_new, max_new, BUCKET_SIZE)
+    # angle_tokenizer = SimTokenizer(all_angles_min, all_angles_max, BUCKET_SIZE)
     
     for dataset_str in min_max_dict.keys():
         if dataset_str not in BLACK_LIST:
@@ -288,23 +259,16 @@ if __name__ == '__main__':
 
                 hist_dataset_axes = [ax00, ax01, ax02, ax03, ax04, ax05]
             
-            tokenizer_instance = axis_tokenizer # start with axis tokenizer
-            
             for act_id, action_el_str in enumerate(ACTIONS_ELS): # plot each coord
                 
-                # min_new = min_min[act_id]
-                # max_new = max_max[act_id]
-                if act_id >= 3 and not only_axes:
-                    # changes to angles
-                    
-                    min_new = all_angles_min
-                    max_new = all_angles_max
-                    
-                    tokenizer_instance = angle_tokenizer # change tokenizer to angle tokenizer
-
                 min_old = min_max_dict[dataset_str]['min'][act_id]
                 max_old = min_max_dict[dataset_str]['max'][act_id]
                 
+                tokenizer_instance = SimTokenizer(min=min_old,
+                                                  max=max_old,
+                                                  vocabsize=BUCKET_SIZE)
+
+
                 dataset_iterator = DatasetIterator(all_pkl_dict[dataset_str])
                 
                 tokens_actions_per_dataset = []
@@ -312,7 +276,6 @@ if __name__ == '__main__':
                     # print(traj_dict)
                     traj = traj_dict['traj_el']['traj']
                     old_actions = [] # the original delta in datasets
-                    new_actions = [] # the deltas scaled to [-1, 1] where [-1,1] is defined in according to the min_min and max_max
                     
                     # for every step in trajectory
                     for step_t in traj:
@@ -320,19 +283,16 @@ if __name__ == '__main__':
                         act_value_token = tokenizer_instance.tokenize(action_t[act_id]) # tokenize wrt the min and max range for all axes
                         # print(f'{action_t[act_id]} -> {act_value} -> {act_value_token}')
                         old_actions.append(action_t[act_id])
-                        # new_actions.append(act_value)
                         tokens_actions_per_dataset.append(act_value_token)
-                    
-                    # plot_scaling(old_actions, new_actions, dataset_str, min_new, max_new, -1.0, 1.0, ACTIONS_ELS[act_id]) # to plot values from new dat range to RT1 input tokenization range
                     
                     # break # to plot only 1 traj for each dataset (outer loop)
                     
                 
-                plot_hist(tokens_actions_per_dataset, tokenizer_instance.vocabsize, dataset_str, min_old, max_old, min_new, max_new, action_el_str, hist_dataset_axes[act_id], tokenizer_instance)
+                plot_hist(tokens_actions_per_dataset, tokenizer_instance.vocabsize, dataset_str, min_old, max_old, action_el_str, hist_dataset_axes[act_id], tokenizer_instance)
             
-            if not os.path.exists('test_hists_dx_dy_dz_with_angles__minus1_1'):
-                    os.mkdir('test_hists_dx_dy_dz_with_angles__minus1_1')
-            plt.savefig(f'test_hists_dx_dy_dz_with_angles__minus1_1/bin_freq_{dataset_str}.png')
+            if not os.path.exists('test_hists_dx_dy_dz_with_angles_only_original_range'):
+                    os.mkdir('test_hists_dx_dy_dz_with_angles_only_original_range')
+            plt.savefig(f'test_hists_dx_dy_dz_with_angles_only_original_range/bin_freq_{dataset_str}.png')
             
             # exit() # to plot all traj for first dataset     
     

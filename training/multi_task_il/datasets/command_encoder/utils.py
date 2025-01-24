@@ -536,17 +536,17 @@ def make_demo_finetuning(dataset, traj, task_name):
             if dataset.dataset_samples_spec[task_name]['image_channel_format'] == 'BGR':
                 try:
                     obs = copy.copy(
-                        traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
-                except KeyError:
-                    obs = copy.copy( 
-                        traj.get(n)['obs']['image'][:, :, ::-1])
-            elif dataset.dataset_samples_spec[task_name]['image_channel_format'] == 'RGB': # in this else the image is already rgb, we don't need to convert
-                try:
-                    obs = copy.copy(
-                        traj.get(n)['obs']['camera_front_image'])
+                        traj.get(n)['obs']['camera_front_image']) # we want to stay in BGR
                 except KeyError:
                     obs = copy.copy( 
                         traj.get(n)['obs']['image'])
+            elif dataset.dataset_samples_spec[task_name]['image_channel_format'] == 'RGB': # in this else the image is rgb, we want to convert in bgr
+                try:
+                    obs = copy.copy(
+                        traj.get(n)['obs']['camera_front_image'][:, :, ::-1]) # RGB -> BGR
+                except KeyError:
+                    obs = copy.copy( 
+                        traj.get(n)['obs']['image'][:, :, ::-1]) # RGB -> BGR
             else:
                 raise AttributeError
             processed = dataset.frame_aug(
@@ -1440,7 +1440,7 @@ def trasform_from_world_to_bl(action):
     
     return action_bl
 
-def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_action=False, load_state=False, load_eef_point=False, distractor=False, subtask_id=-1, agent_task_id=-1, bb_sequence=False, take_place_loc=False, sim_crop=True, convert_action=True):
+def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_action=False, load_state=False, load_eef_point=False, distractor=False, subtask_id=-1, agent_task_id=-1, bb_sequence=False, take_place_loc=False, sim_crop=True, convert_action=True, subsampling=False, subsample_factor=None):
 
     images = []
     images_cp = []
@@ -1455,22 +1455,23 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
     for j, t in enumerate(chosen_t):
         t = t.item()
         step_t = traj.get(t)
+        # print(f't: {t}')
 
         if dataset_loader.dataset_samples_spec[task_name]['image_channel_format'] == 'BGR':
             # cv2.imwrite("prova.png", step_t['obs']['camera_front_image'])
             try:
                 image = copy.copy(
-                    step_t['obs']['camera_front_image'][:, :, ::-1])
-            except KeyError:
-                image = copy.copy(
-                    step_t['obs']['image'][:, :, ::-1])
-        elif dataset_loader.dataset_samples_spec[task_name]['image_channel_format'] == 'RGB':
-            try:
-                image = copy.copy(
-                    step_t['obs']['camera_front_image'])
+                    step_t['obs']['camera_front_image']) # we want to stay in BGR domain
             except KeyError:
                 image = copy.copy(
                     step_t['obs']['image'])
+        elif dataset_loader.dataset_samples_spec[task_name]['image_channel_format'] == 'RGB':
+            try:
+                image = copy.copy(
+                    step_t['obs']['camera_front_image'][:, :, ::-1]) # RGB -> BGR
+            except KeyError:
+                image = copy.copy(
+                    step_t['obs']['image'][:, :, ::-1]) # RGB -> BGR
         else:
             raise AttributeError
 
@@ -1565,44 +1566,63 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                 cv2.imwrite("adjusted_point.png", cv2.UMat(image))
             logger.debug(f"EEF point: {time.time()-eef_point_time}")
 
-        if load_action and (j >= 1 or ("real" in dataset_loader.agent_name and not dataset_loader.pick_next)):
+        if load_action and ('FinetuningPairedDataset' in str(type(dataset_loader)) or j >= 1 or ("real" in dataset_loader.agent_name and not dataset_loader.pick_next)):
             action_time = time.time()
             # Load action
             action_list = list()
-            for next_t in range(dataset_loader._action_T):
-                if t+next_t <= len(traj)-1:
-                    action = step_t['action'] if next_t == 0 else traj.get(
-                        t+next_t)['action']
-                else:
-                    action = step_t['action']
-                if "real" in dataset_loader.agent_name:
-                    if not sim_crop:
-                        from robosuite.utils.transform_utils import quat2axisangle
-                        rot_quat = action[3:7]
-                        rot_axis_angle = quat2axisangle(rot_quat)
-                        action = normalize_action(
-                            action=np.concatenate(
-                                (action[:3], rot_axis_angle, [action[7]])),
-                            n_action_bin=dataset_loader._n_action_bin,
-                            action_ranges=dataset_loader._normalization_ranges)
+            if not subsampling:
+                for next_t in range(dataset_loader._action_T):
+                    if t+next_t <= len(traj)-1:
+                        action = step_t['action'] if next_t == 0 else traj.get(
+                            t+next_t)['action']
                     else:
-                        action =normalize_action(
-                            action=trasform_from_world_to_bl(action),
-                            n_action_bin=dataset_loader._n_action_bin,
-                            action_ranges=dataset_loader._normalization_ranges)                 
-                else:
-                    if dataset_loader._normalize_action:
-                        if not convert_action:
+                        action = step_t['action']
+                    if "real" in dataset_loader.agent_name:
+                        if not sim_crop:
+                            from robosuite.utils.transform_utils import quat2axisangle
+                            rot_quat = action[3:7]
+                            rot_axis_angle = quat2axisangle(rot_quat)
                             action = normalize_action(
-                                action=action,
+                                action=np.concatenate(
+                                    (action[:3], rot_axis_angle, [action[7]])),
                                 n_action_bin=dataset_loader._n_action_bin,
                                 action_ranges=dataset_loader._normalization_ranges)
                         else:
-                            action = normalize_action(
+                            action =normalize_action(
                                 action=trasform_from_world_to_bl(action),
                                 n_action_bin=dataset_loader._n_action_bin,
-                                action_ranges=dataset_loader._normalization_ranges)
-                action_list.append(action)
+                                action_ranges=dataset_loader._normalization_ranges)                 
+                    else:
+                        if dataset_loader._normalize_action:
+                            if not convert_action:
+                                action = normalize_action(
+                                    action=action,
+                                    n_action_bin=dataset_loader._n_action_bin,
+                                    action_ranges=dataset_loader._normalization_ranges)
+                            else:
+                                action = normalize_action(
+                                    action=trasform_from_world_to_bl(action),
+                                    n_action_bin=dataset_loader._n_action_bin,
+                                    action_ranges=dataset_loader._normalization_ranges)
+                    action_list.append(action)
+            else: # subsampling: you can use this only if the actions are deltas
+                for next_t in range(dataset_loader._action_T):
+                    # print([(t + subsample_factor*next_t + delta_t) for delta_t in range(subsample_factor)])
+                    try:
+                        delta_sum_action = [traj.get(t + subsample_factor*next_t + delta_t)['action'] for delta_t in range(subsample_factor)]
+                    except Exception:
+                        if len(traj)-1 == t:
+                            delta_sum_action = [traj.get(t + subsample_factor*next_t + delta_t)['action'] for delta_t in range(subsample_factor-2)]
+                        elif len(traj)-2 == t:
+                            delta_sum_action = [traj.get(t + subsample_factor*next_t + delta_t)['action'] for delta_t in range(subsample_factor-1)]
+                    
+                    gripper_last_t = delta_sum_action[-1][-1]
+                    
+                    delta_sum_action = np.sum(np.stack(delta_sum_action), axis=0)
+                    delta_sum_action[-1] = gripper_last_t
+                                    
+                    action_list.append(delta_sum_action)
+                    
 
             actions.append(action_list)
             logger.debug(f"Action: {time.time()-action_time}")

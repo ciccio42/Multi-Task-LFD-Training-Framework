@@ -1,6 +1,6 @@
 # info on bash scripts
 
-## to generate embeddings/centroid embeddings from Universal Sentence encoder
+<!-- ## to generate embeddings/centroid embeddings from Universal Sentence encoder
 * run `generate_pick_place_centroid_embeddings_from_sentences.sh`
 * embeddings are saved for every subtask in `/raid/home/frosa_Loc/opt_dataset/pick_place/new_centroids_commands_embs`
 * you can run the USE on a json of textual commands, such as `../training/multi_task_il/models/muse/commands/command_files_extended_11-01_21:01.json`
@@ -18,7 +18,7 @@ run `train_RT1_video_cond` *bash* script
 run `bashes/test_RT1_video_cond.sh`
 * results are saved in `/user/frosa/multi_task_lfd/checkpoint_save_folder`
 * *to download videos from traj_--.pkl results*, run `/raid/home/frosa_Loc/Multi-Task-LFD-Framework/utils/analysis/create_video_from_test.sh`
-
+ -->
 
 # finetuning
 

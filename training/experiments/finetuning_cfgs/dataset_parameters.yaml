@@ -2,42 +2,51 @@ asu_table_top_converted:
   name:                             'asu_table_top_converted'
   crop:                             [0,35,0,0]
   image_channel_format:             'RGB'
+  subsample:                        False
 
 berkeley_autolab_ur5_converted:
   name:                             'berkeley_autolab_ur5_converted'
   crop:                             [0,0,0,0]
   image_channel_format:             'RGB'
+  subsample:                        False
 
 iamlab_cmu_pickup_insert_converted:
   name:                             'iamlab_cmu_pickup_insert_converted'
   crop:                             [0,0,0,0]
   image_channel_format:             'RGB'
+  subsample:                        False
 
 taco_play_converted:
   name:                             'taco_play_converted'
   crop:                             [0,0,0,0]
   image_channel_format:             'RGB'
+  subsample:                        False
 
 droid_converted:
   name:                             'droid_converted'
   crop:                             [0,0,0,0]
   image_channel_format:             'RGB'
+  subsample:                        False
 
 sim_new_ur5e_pick_place_converted:
   name:                             'sim_new_ur5e_pick_place_converted'
   crop:                             [20, 25, 80, 75]
   image_channel_format:             'RGB' #TODO: check
+  subsample:                        False 
 
 real_new_ur5e_pick_place_converted:
   name:                             'real_new_ur5e_pick_place_converted' 
   n_tasks:                          16
-  crop:                             [20, 25, 80, 75] #[20, 25, 80, 75]  # Render: 200, 360 
+  crop:                             [0, 30, 120, 120] #[20, 25, 80, 75]  # Render: 200, 360 
   image_channel_format:             'BGR'
+  subsample:                        True
+  subsample_factor:                 3
 
 panda_pick_place:
   name:                             'panda_pick_place'
   crop:                             [20, 25, 80, 75]
   image_channel_format:             'RGB'
+  subsample:                        False
 
 
 # this conf works also when working with couples when training RT1

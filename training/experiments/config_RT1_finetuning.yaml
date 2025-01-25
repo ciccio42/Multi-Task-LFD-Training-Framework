@@ -10,8 +10,8 @@ save_freq: 1
 cosine_annealing: False
 save_optim:     True
 resume:         False
-resume_path:    null
-resume_step:    -1
+resume_path:    'RT1__pick_place__sim__90_epochs__5e-4_lr__bs_16__fixed_orig_range-Batch32'
+resume_step:    178200
 device:         0
 exp_name:       -1
 epochs:         10
@@ -99,7 +99,7 @@ dataset_cfg:
   aux_pose: True
   use_strong_augs: target_update_freq
   data_augs: ${augs}
-  black_list: ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'sim_new_ur5e_pick_place_converted', 'panda_pick_place']
+  black_list: ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'real_new_ur5e_pick_place_converted', 'panda_pick_place']
   select_random_frames: True # the 4 frames: [first, random, random, last]
   convert_action: False # this is because we already converted them
   take_first_frame: False # if True the agent trajectory in the training starts with the first frame
@@ -167,7 +167,7 @@ policy: ???  # set to any set of configs via command line, e.g. policy='${tosil}
 # rt1_conditioner:
 #   _target_:
 
-cond_module_path: '/user/frosa/multi_task_lfd/checkpoint_save_folder/cond_module__pick_place__ASU_BERK_IAMLAB_TACO_PANDAPP__10_epochs__1e-4_lr-Batch32/model_save-2530.pt'
+cond_module_path: ''
 
 rt1_video_cond:
   _target_: multi_task_il.models.rt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
@@ -188,21 +188,38 @@ rt1_video_cond:
       dtype: numpy.float32
   output_tensor_space:
     # terminate_episode: 2 #TODO: valutare se metterlo
-    world_vector:
-      low: -0.09278694540262222
-      high: 0.07072460325913366
-      shape: [3]
-      dtype: numpy.float32
+    ###### REAL DATASET RANGE
+    # world_vector:
+    #   low_x: -0.06380009500880568
+    #   low_y: -0.03028889610015273
+    #   low_z: -0.0704068709459174
+    #   high_x: 0.06980392185648596
+    #   high_y: 0.07072460325913366
+    #   high_z: 0.07021173179142365
     # rotation_delta:
-    #   low: -numpy.pi/2
-    #   high: numpy.pi/2
-    #   shape: [3]
-    #   dtype: numpy.float32
+    #   low_phi: -0.003910541534423828
+    #   low_theta: -0.002797393244691193
+    #   low_psi: -0.20186077058315277
+    #   high_phi: 0.00528717041015625
+    #   high_theta: 0.001934595697093755
+    #   high_psi: 0.21899563074111938 
+    ###### END REAL DATASET RANGE
+    ###### SIM DATASET RANGE
+    world_vector:
+      low_x: -0.022396106330059812
+      low_y: -0.012810371375099994
+      low_z: -0.022224188537053435
+      high_x: 0.023765907425059823
+      high_y: 0.026371781277360895
+      high_z: 0.023476719384129763
     rotation_delta:
-      low: -numpy.pi
-      high: numpy.pi
-      shape: [3]
-      dtype: numpy.float32
+      low_phi: -0.025511089955465138
+      low_theta: -0.02048192172869181
+      low_psi: 0.0
+      high_phi: 0.06495165824890137
+      high_theta: 0.03541510179890125
+      high_psi: 0.3452828499066527
+    ###### END SIM DATASET RANGE
     gripper_closedness_action:
       low: 0.0 # 0.0 chiuso
       high: 1.0 # 1.0 aperto
@@ -216,7 +233,7 @@ rt1_video_cond:
   num_heads: 8
   feed_forward_size: 512
   dropout_rate: 0.1
-  time_sequence_length: 6 # 7
+  time_sequence_length: 7 #6 # 7
   crop_size: 236
   use_token_learner: True
   return_attention_scores: False

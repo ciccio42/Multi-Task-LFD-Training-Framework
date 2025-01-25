@@ -29,13 +29,13 @@ SAVE_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder
 POLICY='${rt1_video_cond}'
 TARGET='multi_task_il.models.mt_rep.VideoImitation'
 # COND_MODULE_PATH='/user/frosa/multi_task_lfd/checkpoint_save_folder/1Task-pick_place-cond_module_no_lr_1e-4-Batch32/model_save-96.pt'
-COND_MODULE_PATH='/user/frosa/multi_task_lfd/checkpoint_save_folder/cond_module__pick_place__ASU_BERK_IAMLAB_TACO_PANDAPP__10_epochs__1e-4_lr-Batch32/model_save-2530.pt'
+COND_MODULE_PATH='/user/frosa/multi_task_lfd/checkpoint_save_folder/cond_module__pick_place__ASU_BERK_IAMLAB_TACO_PANDAPP__10_epochs__1e-4_lr_BGR-Batch32/model_save-1265.pt'
 
 SAVE_FREQ=-1
 LOG_FREQ=10
 VAL_FREQ=-1
 # DEVICE=0    # cuda gpu selection
-DEVICE=3   # cuda gpu selection
+DEVICE=2   # cuda gpu selection
 DEBUG=false
 WANDB_LOG=true
 ROLLOUT=false
@@ -58,11 +58,10 @@ LOAD_INV=true
 CONCAT_STATE=true
 
 RESUME=false
-BSIZE=32 #this is the size of the minibatch
+BSIZE=32 # cercare di mettere sempre il numero autentico
 # Policy 1: At each slot is assigned a RandomSampler
 SET_SAME_N=2
 
-NORMALIZE_ACTION=true
 EARLY_STOPPING_PATIECE=-1
 OPTIMIZER='AdamW'
 # LR=0.0005
@@ -75,8 +74,10 @@ HEIGHT=100
 WIDTH=180
 
 TASK_str="pick_place" #[pick_place,nut_assembly,stack_block,button]
-EXP_NAME="RT1__pick_place__from_scratch__90_epochs__5e-4_lr__bs_16" #1Task-pick_place-Panda_dem_sim_agent_ur5e_sim_cond_module_h100_w180_good_condmodule #1Task-pick_place-Panda_dem_sim_agent_ur5e_sim_cond_module_h100_w180_good_condmodule #1Task-${TASK_str}-Panda_dem_sim_agent_ur5e_sim_cond_module_h100_w180_condmodule_lr1e-4_step24   #1Task-${TASK_str}-MOSAIC-Rollout
+EXP_NAME="RT1__pick_place__sim__90_epochs__5e-4_lr__bs_64"
 PROJECT_NAME=${EXP_NAME}
+
+TIME_SEQUENCE_LENGHT=7 #6
 
 # srun --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME}
 python -u ../training/train_scripts/train_any.py \

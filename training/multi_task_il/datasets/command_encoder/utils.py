@@ -536,17 +536,17 @@ def make_demo_finetuning(dataset, traj, task_name):
             if dataset.dataset_samples_spec[task_name]['image_channel_format'] == 'BGR':
                 try:
                     obs = copy.copy(
-                        traj.get(n)['obs']['camera_front_image']) # we want to stay in BGR
+                        traj.get(n)['obs']['camera_front_image'][:, :, ::-1]) # BGR -> RGB
                 except KeyError:
                     obs = copy.copy( 
-                        traj.get(n)['obs']['image'])
+                        traj.get(n)['obs']['image'][:, :, ::-1]) # BGR -> RGB
             elif dataset.dataset_samples_spec[task_name]['image_channel_format'] == 'RGB': # in this else the image is rgb, we want to convert in bgr
                 try:
                     obs = copy.copy(
-                        traj.get(n)['obs']['camera_front_image'][:, :, ::-1]) # RGB -> BGR
+                        traj.get(n)['obs']['camera_front_image']) # we stay in RGB
                 except KeyError:
                     obs = copy.copy( 
-                        traj.get(n)['obs']['image'][:, :, ::-1]) # RGB -> BGR
+                        traj.get(n)['obs']['image'])
             else:
                 raise AttributeError
             processed = dataset.frame_aug(
@@ -1457,15 +1457,15 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
         step_t = traj.get(t)
         # print(f't: {t}')
 
-        if dataset_loader.dataset_samples_spec[task_name]['image_channel_format'] == 'BGR':
+        if dataset_loader.dataset_samples_spec[task_name]['image_channel_format'] == 'RGB':
             # cv2.imwrite("prova.png", step_t['obs']['camera_front_image'])
             try:
                 image = copy.copy(
-                    step_t['obs']['camera_front_image']) # we want to stay in BGR domain
+                    step_t['obs']['camera_front_image']) # we want to stay in RGB domain
             except KeyError:
                 image = copy.copy(
                     step_t['obs']['image'])
-        elif dataset_loader.dataset_samples_spec[task_name]['image_channel_format'] == 'RGB':
+        elif dataset_loader.dataset_samples_spec[task_name]['image_channel_format'] == 'BGR':
             try:
                 image = copy.copy(
                     step_t['obs']['camera_front_image'][:, :, ::-1]) # RGB -> BGR

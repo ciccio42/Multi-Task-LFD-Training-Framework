@@ -269,11 +269,11 @@ class FinetuningPairedDataset(Dataset):
     
 class FinetuningPairedDatasetSampler(BatchSampler):
     
-    def __init__(self, dataset, shuffle=True):
+    def __init__(self, dataset, batch_size, shuffle=True):
         self.dataset = dataset
         # self.batch_size = batch_size # no, ci fermiamo quando abbiamo campionato un indice per ogni task
         self.shuffle = shuffle
-        self.batch_size = None
+        self.batch_size = batch_size
         
         # save the longest idxs lenght
         self.max_len = 0
@@ -292,20 +292,19 @@ class FinetuningPairedDatasetSampler(BatchSampler):
                             self.task_counter += 1
                         else:
                             raise NotImplementedError
-                        
-                        
+                                
         # if self.max_len < 48:
         #     print(f"max_len is {self.max_len} < 48. Switching to 48...")
         #     self.max_len = 48
         
-        if self.task_counter < 64:
-            self.batch_size = 64
+        if self.task_counter < self.batch_size: # we want to guarantee at least a batch size of 32
+            self.batch_size = self.batch_size
         else:
             self.batch_size = self.task_counter
-        
                         
         print(f"[{self.dataset.mode.capitalize()}][Sampler] max_len: {self.max_len}")
         print(f"[{self.dataset.mode.capitalize()}][Sampler] batch_size: {self.batch_size}")
+        print(f"[{self.dataset.mode.capitalize()}][Sampler] shuffle?: {self.shuffle}")
         
         # sampler per ogni task (random sampler)
         self.task_idx_samplers = {} # store all samplers here
@@ -404,15 +403,6 @@ class FinetuningPairedDatasetSampler(BatchSampler):
     
     def __len__(self):
         return self.max_len // (self.batch_size // self.task_counter)
-
-class ResultsDisplayer():
-    
-    def __init__(self):
-        pass
-    
-    def display_results(self):
-        pass
-    
     
 if __name__ == '__main__':
 

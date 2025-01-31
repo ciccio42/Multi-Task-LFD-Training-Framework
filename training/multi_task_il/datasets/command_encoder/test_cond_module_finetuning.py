@@ -66,7 +66,7 @@ dataset_samples_spec = {
     "real_new_ur5e_pick_place_converted": {
         "name": "real_new_ur5e_pick_place_converted",
         "n_tasks": 16,
-        "crop": [20, 25, 80, 75],
+        "crop": [20, 25, 80, 75], ############################
         "image_channel_format": "BGR",
     },
     "panda_pick_place": {
@@ -169,7 +169,7 @@ def create_embedding_plot(embedding_dict, centroids_per_task):
     num_classes = len(list(centroids_per_task.keys()))
     all_tensor = torch.cat((embeddings_tensor, centroids_tensor), 0)
     time_start = time.time()
-    tsne = TSNE(n_components=2, verbose=1, perplexity=30, n_iter=300) # vedere se cambiare parametri
+    tsne = TSNE(n_components=2, verbose=1, perplexity=40, n_iter=500) # vedere se cambiare parametri
     tsne_results = tsne.fit_transform(all_tensor)
     print('t-SNE done! Time elapsed: {} seconds'.format(time.time()-time_start))
 
@@ -184,8 +184,27 @@ def create_embedding_plot(embedding_dict, centroids_per_task):
     #----------plotting
     import colorcet as cc
     palette = sns.color_palette(cc.glasbey, n_colors=num_classes)
+    palette[0] = (0.0, 0.37, 0.0)
+    palette[1] = (0.0, 0.5, 0.0)
+    palette[2] = (0.0, 0.75, 0.0)
+    palette[3] = (0.0, 1.0, 0.0)
+    
+    palette[4] = (0.37, 0.37, 0.0)
+    palette[5] = (0.5, 0.5, 0.0)
+    palette[6] = (0.75, 0.75, 0.0)
+    palette[7] = (1.0, 1.0, 0.0)
+    
+    palette[8] = (0.0, 0.0, 0.37)
+    palette[9] = (0.0, 0.0, 0.5)
+    palette[10] = (0.0, 0.0, 0.75)
+    palette[11] = (0.0, 0.0, 1.0)
+    
+    palette[12] = (0.37, 0.0, 0.0)
+    palette[13] = (0.5, 0.0, 0.0)
+    palette[14] = (0.75, 0.0, 0.0)
+    palette[15] = (1.0, 0.0, 0.0)
 
-    plt.figure(figsize=(15,20))
+    plt.figure(figsize=(10,5))
     ax = sns.scatterplot(
         x="tsne-2d-one", y="tsne-2d-two",
         hue="y", # per ora non la uso visto che ogni campione è a se
@@ -205,6 +224,11 @@ def create_embedding_plot(embedding_dict, centroids_per_task):
         legend="full",
         ax=ax
     )
+    
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.6, box.height])
+    
+    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     
     from datetime import datetime
     ts = datetime.now().strftime("%m-%d_%H:%M")
@@ -258,7 +282,7 @@ if __name__ == '__main__':
     ]
 
     val_loader = create_val_loader(tasks_spec, args.black_list, DATA_AUGS)
-
+    
     ## loading model
     cond_module = CondModule(model_name='r2plus1d_18', demo_linear_dim=[512, 512, 512], pretrained=True).to(device)
     weights = torch.load(args.weights_path, weights_only=True)

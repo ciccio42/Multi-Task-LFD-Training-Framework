@@ -110,7 +110,7 @@ class TransformerNetwork(nn.Module):
         self._action_token_emb = nn.Linear(self._vocab_size, self._token_embedding_size)
 
         # define loss function
-        self._loss_object = nn.CrossEntropyLoss(reduction='none')
+        self._loss_object = nn.CrossEntropyLoss(reduction='mean')
 
         self._attention_scores = []
         self._use_token_learner = use_token_learner
@@ -304,7 +304,21 @@ class TransformerNetwork(nn.Module):
                     if (action_j == action_i and j <= i):
                         mask = 1
                 action_mask[i, j] = mask
-        self._default_attention_mask -= action_mask
+        self._default_attention_mask -= action_mask # togli le azioni per la predizione
+        
+
+        # import matplotlib.pyplot as plt        
+        # fig, ax = plt.subplots()
+        # # Using matshow here just because it sets the ticks up nicely. imshow is faster.
+        
+
+        
+        # cax = ax.matshow(self._default_attention_mask)
+        # ax.set_title('attention mask utilizzata (è la matrice causale modificata togliendo i token delle azioni)')
+        # fig.colorbar(cax)
+            
+        # plt.savefig('default_att_mask_no_actions.png')
+        
 
 
     def forward(self,
@@ -329,6 +343,25 @@ class TransformerNetwork(nn.Module):
         # outer_rank will be 1 -> [b] during inference
         outer_rank = self._get_outer_rank(observations)
         assert outer_rank in (1, 2), "outer rank should be 1 or 2"
+
+        
+        # img_inference = np.array(np.moveaxis(
+        #     observations['image'][0].cpu().numpy()*255, 0, -1), dtype=np.uint8)
+        
+        # import cv2
+        
+        # for i in range(7):
+        #     img_training = np.array(np.moveaxis(
+        #         observations['image'][3][i].cpu().numpy()*255, 0, -1), dtype=np.uint8)
+        #     cv2.imwrite(f"rt1_input_image_training_{i}.png", img_training)
+        
+        
+        # from PIL import Image
+        # data =  np.moveaxis(observations['image'][0][-1].cpu().numpy()*255, 0, -1).astype(np.uint8)
+        # im = Image.fromarray(
+        #    data
+        # )
+        # im.save('test_rt1_step_training.png')
 
         b, t = self._get_batch_size_and_seq_len(network_state)
         # network_state is used when inference.
@@ -430,69 +463,63 @@ class TransformerNetwork(nn.Module):
             # predicted_tokens_for_output is [b, self._tokens_per_action]
             predicted_tokens_for_output = torch.argmax(action_logits_for_output, dim=-1)
 
-            num_items = (float(b * t) * self._single_time_step_num_tokens)
+            num_items = (float(b * t) * self._single_time_step_num_tokens) # inutile
+            
             # action_logits_for_training: (b, t, self._tokens_per_action, vocab_size)
             # action_tokens, (b, t, self._tokens_per_action)
             # action_loss: (b, t) 
             
+            # test to check if loss of batch 32 is equal to the mean of losses for two batches of 16
+            # loss_1 = self._loss_object(action_logits_for_training[:16].permute(0, 3, 1, 2), action_tokens[:16].to(torch.int64))
+            # loss_2 = self._loss_object(action_logits_for_training[16:].permute(0, 3, 1, 2), action_tokens[16:].to(torch.int64))
+            # print((loss_1.item() + loss_2.item()) / 2 == self._loss_object(action_logits_for_training.permute(0, 3, 1, 2), action_tokens.to(torch.int64)))
+            
             # implementazione errata
+            # la mia correzione è in linea con la correzione in questa repo: https://github.com/ioai-tech/pytorch_rt1_with_trainer_and_tester/blob/main/IO_trainer_torch.py
+            # self._loss_object = nn.CrossEntropyLoss(reduction='none')
             # action_loss = torch.mean( # action_tokens must be the gt action
             #     self._loss_object(action_logits_for_training.permute(0, 3, 1, 2), action_tokens.to(torch.int64)) /num_items, # (b, t, self._tokens_per_action)
             #     dim=-1)
-            action_loss = self._loss_object(
-                action_logits_for_training.permute(0, 3, 1, 2), action_tokens.to(torch.int64)
-            )  # (b, t, self._tokens_per_action)
-                
-            self._loss = action_loss
+            
+            self._loss = self._loss_object(action_logits_for_training.permute(0, 3, 1, 2), action_tokens.to(torch.int64))
 
             # store action labels and predictions for visualization
             self._aux_info.update({
                 'action_predictions':
                     torch.argmax(action_logits_for_training, dim=-1),
                 'action_loss':
-                    torch.mean(self._loss), # media nella dimensione delle azioni, tempo e batch
-                    # torch.mean(self._loss, dim=-1), # media solo nella dimensione delle azioni
+                    self._loss, # media nella dimensione delle azioni, tempo e batch
                 'actor_loss_mask':
                     torch.ones((b), dtype=torch.float32)
             })
-            
-            # compute action bin accuracy (exact and within an interval)
-            # this is for computing accuracy
-            gt_act_tokens = action_tokens[:, -1, :]
-            
-            bin_accuracies = {}
-            bin_accuracies_interval = {}
-            for j in range(gt_act_tokens.shape[1]):
-                bin_accuracies[j] = []
-                bin_accuracies_interval[j] = []
-                        
-            for k in range(gt_act_tokens.shape[0]): # for every vector
-                for j in range(gt_act_tokens.shape[1]): # for every bin of the vector
-                    bin_accuracies[j].append(1 if gt_act_tokens[k][j] - predicted_tokens_for_output[k][j] == 0 else 0)
-                    
-                    #TODO: implement for interval
-                    bin_accuracies_interval[j].append(1 if abs(gt_act_tokens[k][j] - predicted_tokens_for_output[k][j]) < 5 else 0)
-                
-                if k == range(gt_act_tokens.shape[0])[-1]: # last step
-                    for j in range(gt_act_tokens.shape[1]): # for every bin of the vector
-                        bin_accuracies[j] = np.average(bin_accuracies[j])
-                        bin_accuracies_interval[j] = np.average(bin_accuracies_interval[j])
-                        
+
+
             output_actions = self._action_tokenizer.detokenize(predicted_tokens_for_output)
             
-            # bin_acc_str = {}
-            # bin_accuracies_interval_str = {}
-            # for k,v in bin_accuracies.items():
-            #     bin_acc_str[f'bin_{str(k)}'] = v
-                
-            # for k,v in bin_accuracies_interval.items():
-            #     bin_accuracies_interval_str[f'bin_{str(k)}'] = v
+            # for each bin
+            bin_accuracies = {}
+            for dim_idx in range(self._aux_info['action_labels'].shape[-1]): # action dimension
+                # bin_accuracies[dim_idx] = torch.sum(self._aux_info['action_labels'][:,:,dim_idx] == self._aux_info['action_predictions'][:,:,dim_idx]).detach().item() / num_action_tokens_single_act_dimension
+                bin_accuracies[dim_idx] = torch.mean(torch.where(self._aux_info['action_labels'][:,:,dim_idx] == self._aux_info['action_predictions'][:,:,dim_idx], 1.0, 0.0)).detach().item()
+        
+            # interval accuracy
+            range_int = 3
+            bin_accuracies_interval = {}
+            for dim_idx in range(self._aux_info['action_labels'].shape[-1]): # action dimension
+                bin_accuracies_interval[dim_idx] = torch.mean(
+                                                    torch.where(
+                                                        torch.abs(
+                                                            self._aux_info['action_labels'][:,:,dim_idx] - self._aux_info['action_predictions'][:,:,dim_idx]) < range_int,
+                                                            1.0,
+                                                            0.0
+                                                        )
+                                                    ).detach().item()
+            
 
             return output_actions, network_state, bin_accuracies, bin_accuracies_interval
 
         # output_actions: Dict[str, np.ndarray]
         output_actions = self._action_tokenizer.detokenize(predicted_tokens_for_output)
-        
         
         
         # import matplotlib.pyplot as plt        

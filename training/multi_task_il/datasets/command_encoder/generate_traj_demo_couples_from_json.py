@@ -35,6 +35,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action='store_true', help="whether or not attach the debugger")
     parser.add_argument("--trajectory_json_file_path", default='val_pkl_paths.json')
+    parser.add_argument("--dir_name_save", default=None)
         
     args = parser.parse_args()
     
@@ -55,13 +56,14 @@ if __name__ == '__main__':
     # For example, couples of real_ur5e must be in the form (panda_dem, real_ur5e_traj)
     # real_ur5e -> (panda_dem, real_ur5e_traj)
     # sim_ur5e -> (panda_dem, sim_ur5e_traj)
-    non_reflexive_combination_datasets = ['real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'panda_pick_place']
+    exclude_droid_list = ['droid_converted', 'droid_converted_0_to_2909', 'droid_converted_2909_to_4645']
+    non_reflexive_combination_datasets = ['real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_deltas_no_converted_rounded', 'panda_pick_place', 'ur5e_pick_place']
     
     couples_dataset_counter = {}
     couples_dataset = {}
     # for finetuning datasets
     for dataset_str in data.keys():
-        if dataset_str not in non_reflexive_combination_datasets:
+        if dataset_str not in non_reflexive_combination_datasets and dataset_str not in exclude_droid_list:
             couples_dataset[dataset_str] = {}
             couples_dataset_counter[dataset_str] = {}
             for task_str in data[dataset_str].keys():
@@ -88,20 +90,23 @@ if __name__ == '__main__':
                         else:
                             raise NotImplementedError
                     
-    # for real and sim ur5e, couple with panda demonstration
-    
+    ##### for real and sim ur5e, couple with panda demonstration
     pick_place_demos_traj = data['panda_pick_place']
     real_ur5e_traj = data['real_new_ur5e_pick_place_converted']
     sim_ur5e_traj = data['sim_new_ur5e_pick_place_converted']
+    sim_ur5e_no_conv_traj = data['sim_new_ur5e_pick_place_deltas_no_converted_rounded']
     
     couples_dataset['real_new_ur5e_pick_place_converted'] = {}
     couples_dataset['sim_new_ur5e_pick_place_converted'] = {}
+    couples_dataset['sim_new_ur5e_pick_place_deltas_no_converted_rounded'] = {}
     couples_dataset_counter['real_new_ur5e_pick_place_converted'] = {}
     couples_dataset_counter['sim_new_ur5e_pick_place_converted'] = {}
+    couples_dataset_counter['sim_new_ur5e_pick_place_deltas_no_converted_rounded'] = {}
     
     for task in pick_place_demos_traj.keys():
         couples_dataset['real_new_ur5e_pick_place_converted'][task] = []
         couples_dataset['sim_new_ur5e_pick_place_converted'][task] = []
+        couples_dataset['sim_new_ur5e_pick_place_deltas_no_converted_rounded'][task] = []
         task_panda_demos = pick_place_demos_traj[task]
         for demo in task_panda_demos:
             for traj in real_ur5e_traj[task]:
@@ -109,21 +114,47 @@ if __name__ == '__main__':
                 
             for traj in sim_ur5e_traj[task]:
                 couples_dataset['sim_new_ur5e_pick_place_converted'][task].append((demo, traj))
+                
+            for traj in sim_ur5e_no_conv_traj[task]:
+                couples_dataset['sim_new_ur5e_pick_place_deltas_no_converted_rounded'][task].append((demo, traj))
     
             couples_dataset_counter['real_new_ur5e_pick_place_converted'][task] = len(couples_dataset['real_new_ur5e_pick_place_converted'][task])
             couples_dataset_counter['sim_new_ur5e_pick_place_converted'][task] = len(couples_dataset['sim_new_ur5e_pick_place_converted'][task])
+            couples_dataset_counter['sim_new_ur5e_pick_place_deltas_no_converted_rounded'][task] = len(couples_dataset['sim_new_ur5e_pick_place_deltas_no_converted_rounded'][task])
+    
+    
+    #### only for ur5e_pick_place sim
+    pick_place_demos_traj = data['panda_pick_place']
+    sim_ur5e_traj = data['ur5e_pick_place']
+    
+    couples_dataset['ur5e_pick_place'] = {}
+    couples_dataset_counter['ur5e_pick_place'] = {}
+    
+    for task in pick_place_demos_traj.keys():
+        couples_dataset['ur5e_pick_place'][task] = []
+        task_panda_demos = pick_place_demos_traj[task]
+        for demo in task_panda_demos:
+            for traj in sim_ur5e_traj[task]:
+                couples_dataset['ur5e_pick_place'][task].append((demo, traj))
+    
+            couples_dataset_counter['ur5e_pick_place'][task] = len(couples_dataset['ur5e_pick_place'][task])
+    
+    
+    # dir_name_save = 'traj_couples'
+    
+    import os
+    if not os.path.exists(args.dir_name_save):
+        os.mkdir(args.dir_name_save)
     
     # import os
     # os.mkdir('traj_couples/')
     orig_json_name = args.trajectory_json_file_path.split('/')[-1].split('.')[0]
-    with open(f"traj_couples/{orig_json_name}_couples.json", "w") as outfile: 
+    with open(f"{args.dir_name_save}/{orig_json_name}_couples.json", "w") as outfile: 
         json.dump(couples_dataset,outfile,indent=2)
-    with open(f"traj_couples/{orig_json_name}_couples_count.json", "w") as outfile: 
+    with open(f"{args.dir_name_save}/{orig_json_name}_couples_count.json", "w") as outfile: 
         json.dump(couples_dataset_counter,outfile,indent=2)
         
     ### TODO: CONTARE LE COPPIE
-    
-    
     
     ### TODO: GENERARE IMMAGINE CHE SPIEGA CHE COMBINAZIONI USATE
     

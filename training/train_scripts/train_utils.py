@@ -92,6 +92,7 @@ def make_data_loaders(config, dataset_cfg):
     elif dataset_cfg._target_.split(".")[-1] == 'FinetuningPairedDataset':
         samplerClass = FinetuningPairedDatasetSampler
         train_sampler = samplerClass(dataset,
+                                     config.get('bsize'),
                                      shuffle=True) #################
     else:
         if not dataset_cfg.change_command_epoch:
@@ -168,6 +169,7 @@ def make_data_loaders(config, dataset_cfg):
         elif dataset_cfg._target_.split(".")[-1] == 'FinetuningPairedDataset':
             samplerClass = FinetuningPairedDatasetSampler
             val_sampler = samplerClass(val_dataset,
+                                        config.get('bsize'),
                                         shuffle=True) ###### val
         else:
             if not dataset_cfg.change_command_epoch:
@@ -724,70 +726,14 @@ def calculate_task_loss(config, train_cfg, device, model, task_inputs, val=False
             #         for t, img in enumerate(ep):
             #             cv2.imwrite(f'{ep_idx}_{t}.png', (img*255).type(torch.IntTensor).permute(1,2,0).cpu().numpy())
             
-            if 'finetuning_paired_dataset' in config.dataset_cfg._target_: # if we're doing pretraining on large dataset
-                batch_size = model_inputs['demo'].shape[0] # the full size of the batch
-                mini_batch_size = config.bsize
-                import math
-                steps_minibatch = math.ceil(batch_size / mini_batch_size)
-                ce_loss_avg_per_minibatch = [] # array for storing the loss for each minibatc
-                avg_bin_acc_per_minibatch = {0: 0.0, 1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0, 5: 0.0, 6: 0.0}
-                avg_bin_acc_interval_per_minibatch = {0: 0.0, 1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0, 5: 0.0, 6: 0.0}
-                for step in range(steps_minibatch):
-                    if step == (steps_minibatch - 1): # last step
-                        out, ce_loss, bin_acc, bin_acc_interval = model(
-                            images=copy.deepcopy(model_inputs['images'][step*mini_batch_size:]), # sono obs_T step perché la traiettoria viene tagliata
-                            states=copy.deepcopy(model_inputs['states'][step*mini_batch_size:]),
-                            demo=copy.deepcopy(model_inputs['demo'][step*mini_batch_size:]),
-                            actions=copy.deepcopy(model_inputs['actions'][step*mini_batch_size:]),
-                            bsize=model_inputs['images'][step*mini_batch_size:].shape[0]
-                        )
-                        
-                        # add the accuracy for the last mini batch
-                        ce_loss_avg_per_minibatch.append(ce_loss)
-                        for i, k in bin_acc.items():
-                            avg_bin_acc_per_minibatch[i] += k
-                        for i, k in bin_acc_interval.items():
-                            avg_bin_acc_interval_per_minibatch[i] += k
-                        
-                        # at the end, compute the mean for all mini batch
-                        for i, k in avg_bin_acc_per_minibatch.items():
-                            avg_bin_acc_per_minibatch[i] = k / steps_minibatch
-                            
-                        for i, k in avg_bin_acc_interval_per_minibatch.items():
-                            avg_bin_acc_interval_per_minibatch[i] = k / steps_minibatch
-                            
-                        
-                        if not val:
-                            ce_loss = ce_loss / steps_minibatch
-                            ce_loss.backward()
-                        
-                    else:
-                        out, ce_loss, bin_acc, bin_acc_interval = model(
-                            images=copy.deepcopy(model_inputs['images'][step*mini_batch_size:(step+1)*mini_batch_size]), # sono obs_T step perché la traiettoria viene tagliata
-                            states=copy.deepcopy(model_inputs['states'][step*mini_batch_size:(step+1)*mini_batch_size]),
-                            demo=copy.deepcopy(model_inputs['demo'][step*mini_batch_size:(step+1)*mini_batch_size]),
-                            actions=copy.deepcopy(model_inputs['actions'][step*mini_batch_size:(step+1)*mini_batch_size]),
-                            bsize=mini_batch_size
-                        )
-                        
-                        ce_loss_avg_per_minibatch.append(ce_loss) # this is saved BEFORE dividing per steps_minibatch
-                        for i, k in bin_acc.items():
-                            avg_bin_acc_per_minibatch[i] = avg_bin_acc_per_minibatch[i] + k
-                        for i, k in bin_acc_interval.items():
-                            avg_bin_acc_interval_per_minibatch[i] = avg_bin_acc_interval_per_minibatch[i] + k
-                        
-                        if not val:
-                            ce_loss = ce_loss / steps_minibatch
-                            ce_loss.backward()
-                
-            else: 
-                out, ce_loss, bin_acc = model(  # 1550MB
-                    images=copy.deepcopy(model_inputs['images']), # sono obs_T step perché la traiettoria viene tagliata
-                    states=copy.deepcopy(model_inputs['states']),
-                    demo=copy.deepcopy(model_inputs['demo']),
-                    actions=copy.deepcopy(model_inputs['actions']),
-                    bsize=config.bsize
-                )
+
+            out, ce_loss, bin_acc, bin_acc_interval = model(  # 1550MB
+                images=copy.deepcopy(model_inputs['images']), # sono obs_T step perché la traiettoria viene tagliata
+                states=copy.deepcopy(model_inputs['states']),
+                demo=copy.deepcopy(model_inputs['demo']),
+                actions=copy.deepcopy(model_inputs['actions']),
+                bsize=config.bsize
+            )
         elif "CondModule" in config.policy._target_:
             
             # debug_cond = False
@@ -828,9 +774,6 @@ def calculate_task_loss(config, train_cfg, device, model, task_inputs, val=False
                 else:
                     act_prob = rearrange(act_prob,
                                         'B T A -> B (T A)')
-
-            elif "rt1" in config.policy._target_:
-                pass
             else:
                 actions = rearrange(actions, 'B T act_dim -> (B T) act_dim')
                 act_prob = - out['bc_distrib'].log_prob(actions)
@@ -925,9 +868,10 @@ def calculate_task_loss(config, train_cfg, device, model, task_inputs, val=False
             if "rt1" in config.policy._target_:
                 
                 if 'finetuning_paired_dataset' in config.dataset_cfg._target_: # if we're doing pretraining on large dataset
-                    task_losses[task_name]['l_ce'] = torch.mean(torch.stack(ce_loss_avg_per_minibatch)) # the loss of the entire batch is the mean of the losses of each minibatch
+                    # task_losses[task_name]['l_ce'] = torch.mean(torch.stack(ce_loss_avg_per_minibatch))
+                    task_losses[task_name]['l_ce'] = ce_loss
                     task_losses[task_name]['loss_sum'] = task_losses[task_name]['l_ce']
-                    return task_losses, avg_bin_acc_per_minibatch, avg_bin_acc_interval_per_minibatch
+                    return task_losses, bin_acc, bin_acc_interval
                 else:
                     task_losses[task_name]['l_ce'] = ce_loss # loss is computed internally in rt1 implementation
                     task_losses[task_name]['loss_sum'] = task_losses['pick_place']['l_ce']
@@ -1371,18 +1315,19 @@ class Trainer:
                     
                 task_names = sorted(task_losses.keys())
                 if "grad_norm" not in self.config.get("loss", ""):
-                    if not 'finetuning_paired_dataset' in self.config.dataset_cfg._target_:
-                        optimizer.zero_grad()
-                        if 'finetuning' in task_names:
-                            weighted_task_loss = task_losses['finetuning']['loss_sum']
-                        else:
-                            weighted_task_loss = sum(
-                                [l["loss_sum"] * task_loss_muls.get(name) for name, l in task_losses.items()])
-                        weighted_task_loss.backward()
-                        optimizer.step()
+                    # TODO: minibatch implementation
+                    # if not 'finetuning_paired_dataset' in self.config.dataset_cfg._target_:
+                    optimizer.zero_grad()
+                    if 'finetuning' in task_names:
+                        weighted_task_loss = task_losses['finetuning']['loss_sum']
                     else:
-                        optimizer.step()
-                        optimizer.zero_grad()
+                        weighted_task_loss = sum(
+                            [l["loss_sum"] * task_loss_muls.get(name) for name, l in task_losses.items()])
+                    weighted_task_loss.backward()
+                    optimizer.step()
+                    # else:
+                    #     optimizer.step()
+                    #     optimizer.zero_grad()
                 else:
                     task_loss = torch.stack([l["loss_sum"]
                                             for name, l in task_losses.items()])
@@ -1482,7 +1427,7 @@ class Trainer:
                         if self._step % self.train_cfg.target_update_freq == 0:
                             mod.soft_param_update()
                             
-                #break # break train loop
+                # break # break train loop
                             
             #### ---- Validation step ----####
             # e != 0 and self._step % val_freq == 0

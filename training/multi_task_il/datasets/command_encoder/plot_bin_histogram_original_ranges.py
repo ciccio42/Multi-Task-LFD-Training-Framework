@@ -168,17 +168,21 @@ if __name__ == '__main__':
         print("Waiting for debugger attach")
         debugpy.wait_for_client()
         
-    min_max_traj_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_datasets.json'
-    min_max_traj_path_2 = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_datasets_2.json'
+    # min_max_traj_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_datasets.json'
+    # min_max_traj_path_2 = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_datasets_2.json'
+    min_max_traj_path_abs = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_datasets_abs.json'
     
-    with open(min_max_traj_path, 'r') as file:
+    # with open(min_max_traj_path, 'r') as file:
+    #     min_max_dict = json.load(file)
+        
+    # with open(min_max_traj_path_2, 'r') as file:
+    #     min_max_dict_2 = json.load(file)
+    
+    with open(min_max_traj_path_abs, 'r') as file:
         min_max_dict = json.load(file)
         
-    with open(min_max_traj_path_2, 'r') as file:
-        min_max_dict_2 = json.load(file)
-        
-    min_max_dict['real_new_ur5e_pick_place_converted'] = min_max_dict_2['real_new_ur5e_pick_place_converted']
-    min_max_dict['sim_new_ur5e_pick_place_converted'] = min_max_dict_2['sim_new_ur5e_pick_place_converted']
+    # min_max_dict['real_new_ur5e_pick_place_converted'] = min_max_dict_2['real_new_ur5e_pick_place_converted']
+    # min_max_dict['sim_new_ur5e_pick_place_converted'] = min_max_dict_2['sim_new_ur5e_pick_place_converted']
         
     BUCKET_SIZE = 256
     
@@ -264,8 +268,12 @@ if __name__ == '__main__':
                 min_old = min_max_dict[dataset_str]['min'][act_id]
                 max_old = min_max_dict[dataset_str]['max'][act_id]
                 
-                tokenizer_instance = SimTokenizer(min=min_old,
-                                                  max=max_old,
+                # tokenizer_instance = SimTokenizer(min=min_old,
+                #                                   max=max_old,
+                #                                   vocabsize=BUCKET_SIZE)
+                
+                tokenizer_instance = SimTokenizer(min=-1,
+                                                  max=1,
                                                   vocabsize=BUCKET_SIZE)
 
 
@@ -279,20 +287,24 @@ if __name__ == '__main__':
                     
                     # for every step in trajectory
                     for step_t in traj:
-                        action_t = step_t['action']
-                        act_value_token = tokenizer_instance.tokenize(action_t[act_id]) # tokenize wrt the min and max range for all axes
-                        # print(f'{action_t[act_id]} -> {act_value} -> {act_value_token}')
-                        old_actions.append(action_t[act_id])
-                        tokens_actions_per_dataset.append(act_value_token)
-                    
+                        try:
+                            action_t = step_t['action']
+                            act_value_token = tokenizer_instance.tokenize(action_t[act_id]) # tokenize wrt the min and max range for all axes
+                            # print(f'{action_t[act_id]} -> {act_value} -> {act_value_token}')
+                            old_actions.append(action_t[act_id])
+                            tokens_actions_per_dataset.append(act_value_token)
+                        except Exception:
+                            pass # skip action 0 which does not exists if here    
+                        
+                        
                     # break # to plot only 1 traj for each dataset (outer loop)
                     
                 
                 plot_hist(tokens_actions_per_dataset, tokenizer_instance.vocabsize, dataset_str, min_old, max_old, action_el_str, hist_dataset_axes[act_id], tokenizer_instance)
             
-            if not os.path.exists('test_hists_dx_dy_dz_with_angles_only_original_range'):
-                    os.mkdir('test_hists_dx_dy_dz_with_angles_only_original_range')
-            plt.savefig(f'test_hists_dx_dy_dz_with_angles_only_original_range/bin_freq_{dataset_str}.png')
+            if not os.path.exists('test_hists_dx_dy_dz_with_angles_absolute_ranges'):
+                    os.mkdir('test_hists_dx_dy_dz_with_angles_absolute_ranges')
+            plt.savefig(f'test_hists_dx_dy_dz_with_angles_absolute_ranges/bin_freq_{dataset_str}.png')
             
             # exit() # to plot all traj for first dataset     
     

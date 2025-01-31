@@ -82,3 +82,16 @@ heatmap
 
 ## come sono fatti batch sampler
 
+
+# Trajectories workflow
+Convert: ./convert_real_sim_delta.sh
+Generate paths: ./generate_train_val_paths_finetuning.sh
+Generate couples (video + traj): ./generate_traj_demo_couples_from_json.sh
+Plot histograms: ./plot_bin_histogram.sh
+find min max: ./find_min_max_actions.sh
+
+complete black list:
+
+  black_list: ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'droid_converted_2909_to_4645', 'droid_converted_0_to_2909', 'real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_deltas_no_converted_rounded', 'panda_pick_place', 'ur5e_pick_place']
+
+  BLACK_LIST = ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'droid_converted_2909_to_4645', 'droid_converted_0_to_2909', 'real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_deltas_no_converted_rounded', 'panda_pick_place', 'ur5e_pick_place']

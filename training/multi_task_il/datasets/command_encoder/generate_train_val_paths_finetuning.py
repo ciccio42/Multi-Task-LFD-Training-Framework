@@ -26,13 +26,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_folder', default='/user/frosa/multi_task_lfd/datasets')
     parser.add_argument('--panda_pick_place_folder', default='/user/frosa/multi_task_lfd/ur_multitask_dataset/opt_dataset/pick_place/panda_pick_place')
+    parser.add_argument('--ur5e_sim_pick_place_folder', default='/raid/home/frosa_Loc/opt_dataset/pick_place/ur5e_pick_place')
     parser.add_argument("--debug", action='store_true', help="whether or not attach the debugger")
     parser.add_argument("--write_all_pkl_path", action='store_true', help="whether or not write all pkl paths")
     parser.add_argument("--write_train_pkl_path", action='store_true', help="whether or not write pkl for training file")
     parser.add_argument("--write_val_pkl_path", action='store_true', help="whether or not write pkl validation file")
     parser.add_argument("--split", default='0.9,0.1')
     parser.add_argument("--skip_pretraining_datasets", action='store_true')
-    parser.add_argument("--ur5e_sim_panda", action='store_true')
+    parser.add_argument("--ur5e_sim_dataset", action='store_true')
+    parser.add_argument("--panda_sim_dataset", action='store_true')
     # parser.add_argument("--ur5e_real", action='store_true')
     
     args = parser.parse_args()
@@ -50,7 +52,6 @@ def main():
     root_depth = 0
     train_val_split = [float(i) for i in args.split.split(',')]
     # ur5e_sim_pick_place_path = '/user/frosa/multi_task_lfd/ur_multitask_dataset/opt_dataset/pick_place/panda_pick_place'
-    
     
     # this is the folder where we store the datasets for finetuning
     if not args.skip_pretraining_datasets:
@@ -138,24 +139,57 @@ def main():
                                         task_name = root.split('/')[-1]
                                         
                                         for pkl_dict in pkl_files_paths:
-                                            pkl_dict[dataset_name][task_name].append(f'{root}/{file}')
+                                            try:
+                                                pkl_dict[dataset_name][task_name].append(f'{root}/{file}')
+                                            except Exception: ########### there are some key errors (droid)
+                                                pass
 
     # this is to store pkl paths of the ur5e_panda_dataset
-    if args.ur5e_sim_panda:
+    if args.panda_sim_dataset:
         print(f'searching into {args.panda_pick_place_folder}')
         for root, dirs, files in os.walk(args.panda_pick_place_folder):
             # print(root)
             # print(dirs)
             # print(files)
             # print('\n')
-            if len(dirs) != 0:
+            if len(dirs) != 0 and root.split('/')[-1] == 'panda_pick_place':
                 dataset_name = root.split('/')[-1]
                 for pkl_dict in pkl_files_paths:
                     pkl_dict[dataset_name] = {}
                     
                 for task in sorted(dirs):
-                    for pkl_dict in pkl_files_paths:
-                        pkl_dict[dataset_name][task] = []
+                    if task != 'img' and task != 'video':
+                        for pkl_dict in pkl_files_paths:
+                            pkl_dict[dataset_name][task] = []
+            elif len(files) != 0:
+                files = [i for i in files if i.endswith(".pkl") and i != 'task_embedding.pkl']
+                files = sorted(files)
+                idxs_train = split_files(len(files), train_val_split, 'train')
+                idxs_val = split_files(len(files), train_val_split, 'val')
+                task_name = root.split('/')[-1]
+                for _idx, file in enumerate(files):
+                    all_pkl_files_paths[dataset_name][task_name].append(f'{root}/{file}')
+                    if _idx in idxs_train:
+                        train_pkl_files_paths[dataset_name][task_name].append(f'{root}/{file}')
+                    elif _idx in idxs_val:
+                        val_pkl_files_paths[dataset_name][task_name].append(f'{root}/{file}')
+                        
+    if args.ur5e_sim_dataset:
+        print(f'searching into {args.ur5e_sim_pick_place_folder}')
+        for root, dirs, files in os.walk(args.ur5e_sim_pick_place_folder):
+            # print(root)
+            # print(dirs)
+            # print(files)
+            # print('\n')
+            if len(dirs) != 0 and root.split('/')[-1] == args.ur5e_sim_pick_place_folder.split('/')[-1]:
+                dataset_name = root.split('/')[-1]
+                for pkl_dict in pkl_files_paths:
+                    pkl_dict[dataset_name] = {}
+                    
+                for task in sorted(dirs):
+                    if task != 'img' and task != 'video':
+                        for pkl_dict in pkl_files_paths:
+                            pkl_dict[dataset_name][task] = []
             elif len(files) != 0:
                 files = [i for i in files if i.endswith(".pkl") and i != 'task_embedding.pkl']
                 files = sorted(files)

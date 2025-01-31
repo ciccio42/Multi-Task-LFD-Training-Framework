@@ -60,7 +60,8 @@ def convert_to_delta(traj_data, is_sim=True):
             # action_t_minus_1 is the one saved at the previous step
             
         delta_t = np.array([0.0] * 7)
-        delta_t[:-1] = action_t[:-1] - action_t_minus_1[:-1]
+        delta_t[:-1] = np.round(action_t[:-1] - action_t_minus_1[:-1], 2)
+        
         delta_t[-1] = action_t[-1] # gripper
         # fake_delta_t = np.array([0.0] * 7)
         # fake_delta_t[:-1] = action_t[:-1] - fake_action_t_minus_1[:-1]
@@ -97,12 +98,12 @@ def convert_to_delta(traj_data, is_sim=True):
                 else:
                     print(f'[WARNING] unexpected situation when computing angle:\nang_t:{ang_t}, ang_t_minus_1:{ang_t_minus_1}')
                     
-                delta_angle = ang_t - ang_t_minus_1
+                delta_angle = np.round(ang_t - ang_t_minus_1, 2)
                 delta_t[angle_idx+3] = delta_angle
                 
-            elif delta_angle >= 0.2 or delta_angle <= -0.2:
+            # elif delta_angle >= 0.2 or delta_angle <= -0.2:
                 
-                print('boh')
+                # print('boh')
                 
             elif delta_angle >= 1.0 or delta_angle <= -1.0:
                 
@@ -224,11 +225,11 @@ if __name__ == '__main__':
     real_ur5_dataset_path = '/raid/home/frosa_Loc/opt_dataset/pick_place/real_new_ur5e_pick_place'
     sim_ur5_dataset_path = '/user/frosa/multi_task_lfd/ur_multitask_dataset/opt_dataset/pick_place/ur5e_pick_place'
     
-    root_save_real_ur5_conv_dataset_path = '/user/frosa/multi_task_lfd/datasets/real_new_ur5e_pick_place_converted'
-    root_save_sim_ur5_conv_dataset_path = '/user/frosa/multi_task_lfd/datasets/sim_new_ur5e_pick_place_converted'
+    # root_save_real_ur5_conv_dataset_path = '/user/frosa/multi_task_lfd/datasets/real_new_ur5e_pick_place_no_conv_rounded'
+    root_save_sim_ur5_conv_dataset_path = '/user/frosa/multi_task_lfd/datasets/sim_new_ur5e_pick_place_deltas_no_converted_rounded'
     
-    if not os.path.exists(root_save_real_ur5_conv_dataset_path):
-        os.mkdir(root_save_real_ur5_conv_dataset_path)
+    # if not os.path.exists(root_save_real_ur5_conv_dataset_path):
+    #     os.mkdir(root_save_real_ur5_conv_dataset_path)
         
     if not os.path.exists(root_save_sim_ur5_conv_dataset_path):
         os.mkdir(root_save_sim_ur5_conv_dataset_path)
@@ -354,46 +355,46 @@ if __name__ == '__main__':
                         saved_orig_traj = True
                         
                     ####----conversion
-                    for t in range(traj_data['len']):
-                        action_t = traj_data['traj'].get(t)['action']
+                    # for t in range(traj_data['len']):
+                    #     action_t = traj_data['traj'].get(t)['action']
                         
-                        action_t_conv = apply_transf_ur5e_sim(action_t)
+                    #     action_t_conv = apply_transf_ur5e_sim(action_t)
                         
-                        change_action(traj_data['traj'], t, action_t_conv)
+                    #     change_action(traj_data['traj'], t, action_t_conv)
                         
-                    if not saved_conv_traj:
-                        conv_traj = deepcopy(traj_data) # pass by value
-                        plot_action(conv_traj['traj'], 'conv traj sim', 'delta_script_conv_traj_sim')
-                        saved_conv_traj = True     
+                    # if not saved_conv_traj:
+                    #     conv_traj = deepcopy(traj_data) # pass by value
+                    #     plot_action(conv_traj['traj'], 'conv traj sim', 'delta_script_conv_traj_sim')
+                    #     saved_conv_traj = True 
                         
                     ####----- convert to deltas
                     traj_data = convert_to_delta(traj_data) # in sim we excludes obs0 cause the objects and gripper are in a different place at obs0
                         
                     if not saved_conv_delta_traj:
                         conv_delta_traj = deepcopy(traj_data)
-                        plot_action(conv_delta_traj['traj'], 'conv traj delta sim', 'delta_script_conv_traj_delta_sim')
+                        plot_action(conv_delta_traj['traj'], 'conv traj delta sim', 'delta_script_NO_conv_traj_delta_sim')
                         saved_conv_delta_traj = True
                         
                     # exit() # to apply the script only for 1 traj
                     
                     # save the converted trajectory
-                    # traj_pkl_save_path = root_save_sim_ur5_conv_dataset_path + '/' + task_dir + '/' + traj_path.split('/')[-1]
+                    traj_pkl_save_path = root_save_sim_ur5_conv_dataset_path + '/' + task_dir + '/' + traj_path.split('/')[-1]
                     
-                    # try:
-                    #     pickle.dump({
-                    #         'traj': traj_data['traj'],
-                    #         'len': len(traj_data['traj']),
-                    #         'env_type': traj_data['env_type'],
-                    #         'task_id': traj_data['task_id']}, open(traj_pkl_save_path, 'wb'))
-                    # except Exception:
-                    #     task_path_dir = root_save_sim_ur5_conv_dataset_path + '/' + task_dir 
-                    #     if not os.path.exists(task_path_dir):
-                    #         os.mkdir(task_path_dir)
-                    #     pickle.dump({
-                    #         'traj': traj_data['traj'],
-                    #         'len': len(traj_data['traj']),
-                    #         'env_type': traj_data['env_type'],
-                    #         'task_id': traj_data['task_id']}, open(traj_pkl_save_path, 'wb'))
+                    try:
+                        pickle.dump({
+                            'traj': traj_data['traj'],
+                            'len': len(traj_data['traj']),
+                            'env_type': traj_data['env_type'],
+                            'task_id': traj_data['task_id']}, open(traj_pkl_save_path, 'wb'))
+                    except Exception:
+                        task_path_dir = root_save_sim_ur5_conv_dataset_path + '/' + task_dir 
+                        if not os.path.exists(task_path_dir):
+                            os.mkdir(task_path_dir)
+                        pickle.dump({
+                            'traj': traj_data['traj'],
+                            'len': len(traj_data['traj']),
+                            'env_type': traj_data['env_type'],
+                            'task_id': traj_data['task_id']}, open(traj_pkl_save_path, 'wb'))
     
     
     

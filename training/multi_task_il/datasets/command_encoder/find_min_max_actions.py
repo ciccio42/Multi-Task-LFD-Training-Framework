@@ -17,7 +17,10 @@ def compute_min_max_for_traj(traj_path):
         agent_file_data = pkl.load(f)
     
     # array of action for all t
-    all_t_action = np.array([ t['action'][:-1] for t in agent_file_data['traj'] ])
+    try:
+        all_t_action = np.array([ t['action'][:-1] for t in agent_file_data['traj'] ])
+    except Exception:
+        all_t_action = np.array([ t['action'][:-1] for idx,t in enumerate(agent_file_data['traj']) if idx != 0 ]) # exclude step 0
     max_all_t_action = np.max(all_t_action, 0)
     min_all_t_action = np.min(all_t_action, 0)
     
@@ -47,8 +50,7 @@ if __name__ == '__main__':
         debugpy.wait_for_client()
         
         
-    BLACK_LIST = ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'panda_pick_place']
-    
+    BLACK_LIST = ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'droid_converted_2909_to_4645', 'droid_converted_0_to_2909', 'real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'panda_pick_place', 'ur5e_pick_place']    
     min_max_actions_per_dataset = {}
         
     all_traj_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/all_pkl_paths.json'
@@ -58,11 +60,12 @@ if __name__ == '__main__':
         
     all_file_count = 0
     for dataset_name in all_pkl_paths_dict.keys():
-        min_max_actions_per_dataset[dataset_name] = {
-            'min' : [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf], # we exclude gripper
-            'max' : [-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf]
-        }
         if dataset_name not in BLACK_LIST:
+            min_max_actions_per_dataset[dataset_name] = {
+                'min' : [np.inf, np.inf, np.inf, np.inf, np.inf, np.inf], # we exclude gripper
+                'max' : [-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf]
+            }
+            
             for task in tqdm(all_pkl_paths_dict[dataset_name].keys(), desc=f'analyzing {dataset_name}'):
                 if type(all_pkl_paths_dict[dataset_name][task]) == list:
                     for t_path in all_pkl_paths_dict[dataset_name][task]: # for all task in the list
@@ -74,10 +77,9 @@ if __name__ == '__main__':
                         for t_path in all_pkl_paths_dict[dataset_name][task][subtask]:
                             max_all_t_action, min_all_t_action = compute_min_max_for_traj(t_path)
                             check_if_min_max(min_all_t_action, max_all_t_action, min_max_actions_per_dataset)
-  
     
     
-    with open("min_max_delta_datasets_2.json", "w") as outfile: 
+    with open("min_max_delta_sim_no_conv.json", "w") as outfile: 
         json.dump(min_max_actions_per_dataset,outfile,indent=2) 
     
     print(min_max_actions_per_dataset)

@@ -10,8 +10,8 @@ save_freq: 1
 cosine_annealing: False
 save_optim:     True
 resume:         False
-resume_path:    'RT1__pick_place__sim__90_epochs__5e-4_lr__bs_16__fixed_orig_range-Batch32'
-resume_step:    178200
+resume_path:    'RT1__pick_place__sim__90_epochs__5e-4_lr__bs_64-Batch32'
+resume_step:    40500
 device:         0
 exp_name:       -1
 epochs:         10
@@ -24,6 +24,7 @@ action_sequence: 1
 task_names: null
 rollout: False
 dataset_target: 'multi_task_il.datasets.command_encoder.finetuning_paired_dataset.FinetuningPairedDataset'
+couple_paths_json: ''
 # loss multipliers
 inv_mul:        0
 bc_mul:         0
@@ -91,15 +92,16 @@ dataset_cfg:
   _target_: ${dataset_target}
   dataset_samples_spec: ${finetuning_cfgs}
   mode: 'train'
-  jsons_folder: '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/traj_couples'
+  jsons_folder: ${couple_paths_json}
   demo_T: 4
+  obs_T: 6
   width: 180
   height: 100
   aug_twice: True
   aux_pose: True
   use_strong_augs: target_update_freq
   data_augs: ${augs}
-  black_list: ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'real_new_ur5e_pick_place_converted', 'panda_pick_place']
+  black_list: ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'droid_converted_2909_to_4645', 'droid_converted_0_to_2909', 'real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'panda_pick_place', 'ur5e_pick_place']
   select_random_frames: True # the 4 frames: [first, random, random, last]
   convert_action: False # this is because we already converted them
   take_first_frame: False # if True the agent trajectory in the training starts with the first frame
@@ -115,7 +117,7 @@ dataset_cfg:
   normalize_action: False
 
 # black_list: ['taco_play_converted', 'droid_converted', 'droid_converted_old']
-# black_list: ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'panda_pick_place']
+# black_list: ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'panda_pick_place', 'ur5e_pick_place']
 # black_list: ['taco_play_converted', 'droid_converted', 'droid_converted_old']
 
 augs:
@@ -204,25 +206,75 @@ rt1_video_cond:
     #   high_theta: 0.001934595697093755
     #   high_psi: 0.21899563074111938 
     ###### END REAL DATASET RANGE
-    ###### SIM DATASET RANGE
+    ###### SIM CONVERTED DATASET RANGE
+    # world_vector:
+    #   low_x: -0.022396106330059812
+    #   low_y: -0.012810371375099994
+    #   low_z: -0.022224188537053435
+    #   high_x: 0.023765907425059823
+    #   high_y: 0.026371781277360895
+    #   high_z: 0.023476719384129763
+    # rotation_delta:
+    #   low_phi: -0.025511089955465138
+    #   low_theta: -0.02048192172869181
+    #   low_psi: 0.0
+    #   high_phi: 0.06495165824890137
+    #   high_theta: 0.03541510179890125
+    #   high_psi: 0.3452828499066527
+    ###### END SIM CONVERTED DATASET RANGE
+    ##### SIM DATASET NO CONVERTED RANGE
     world_vector:
-      low_x: -0.022396106330059812
-      low_y: -0.012810371375099994
-      low_z: -0.022224188537053435
-      high_x: 0.023765907425059823
-      high_y: 0.026371781277360895
-      high_z: 0.023476719384129763
+      low_x: -0.01
+      low_y: -0.02
+      low_z: -0.02
+      high_x: 0.03
+      high_y: 0.02
+      high_z: 0.02
     rotation_delta:
-      low_phi: -0.025511089955465138
-      low_theta: -0.02048192172869181
-      low_psi: 0.0
-      high_phi: 0.06495165824890137
-      high_theta: 0.03541510179890125
-      high_psi: 0.3452828499066527
-    ###### END SIM DATASET RANGE
+      low_phi: -0.01
+      low_theta: 0.0
+      low_psi: -0.03
+      high_phi: 0.07
+      high_theta: 0.54
+      high_psi: 0.1
+    ##### END SIM DATASET NO CONVERTED RANGE
+    ###### ABSOLUTE SIM DATASET RANGE
+    # world_vector:
+    #   low_x: -0.2991050279729472
+    #   low_y: -0.2547217409191404
+    #   low_z: 0.7669709548372152
+    #   high_x: 0.1751919019387346
+    #   high_y: 0.25665321065321595
+    #   high_z: 0.9679392853634305
+    # rotation_delta:
+    #   low_phi: 2.9719783748562003
+    #   low_theta: -0.8788783222641199
+    #   low_psi: -0.206084351326795
+    #   high_phi: 3.149117662528825
+    #   high_theta: 0.00015700318000869817
+    #   high_psi: 0.08398651853635786
+    ###### END ABSOLUTE SIM DATASET RANGE
+    ###### ABSOLUTE SIM DATASET RANGE
+    # world_vector:
+    #   low_x: -1
+    #   low_y: -1
+    #   low_z: -1
+    #   high_x: 1
+    #   high_y: 1
+    #   high_z: 1
+    # rotation_delta:
+    #   low_phi: -1
+    #   low_theta: -1
+    #   low_psi: -1
+    #   high_phi: 1
+    #   high_theta: 1
+    #   high_psi: 1
+    ###### END ABSOLUTE SIM DATASET RANGE
     gripper_closedness_action:
-      low: 0.0 # 0.0 chiuso
-      high: 1.0 # 1.0 aperto
+      # low: 0.0 # 0.0 chiuso
+      # high: 1.0 # 1.0 aperto
+      low: -1.0 # -1.0 aperto (nel dataset originale)
+      high: 1.0 # 1.0 chiuso
       shape: [1]
       dtype: numpy.float32
   train_step_counter: 0
@@ -233,7 +285,7 @@ rt1_video_cond:
   num_heads: 8
   feed_forward_size: 512
   dropout_rate: 0.1
-  time_sequence_length: 7 #6 # 7
+  time_sequence_length: 6 # 7
   crop_size: 236
   use_token_learner: True
   return_attention_scores: False

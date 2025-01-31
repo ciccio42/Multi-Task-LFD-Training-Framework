@@ -8,6 +8,10 @@ from collections import OrderedDict
 from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.tokenizers.utils import *
 import cv2
 
+
+# y = 0
+# embedding_task_dict = {}
+
 #TODO implement RT1 + cond_module (video conditioned)
 class RT1_video_cond(nn.Module):
     def __init__(
@@ -134,8 +138,19 @@ class RT1_video_cond(nn.Module):
         with torch.no_grad():
             cond_embedding = self.cond_module(demo) # 15GB for the computation graph -> 4GB with torch no grad
         
+        # global y
+        # global embedding_task_dict
+        # print('hello')
         
-        # batch_embedding_folder = 'batch_embedding_save_val'
+        # emb_list = cond_embedding[0].cpu().tolist()
+        # task_idx = y % 16
+        # try:
+        #     embedding_task_dict[task_idx].append(emb_list)
+        # except Exception:
+        #     embedding_task_dict[task_idx] = []
+        #     embedding_task_dict[task_idx].append(emb_list)
+        
+        # batch_embedding_folder = 'batch_embedding_save_test'
         # import time
         # with open(f'{batch_embedding_folder}/cond_embedding_val_{time.time()}.npy', 'wb') as f:
         #     np.save(f, cond_embedding.cpu().numpy())
@@ -176,7 +191,7 @@ class RT1_video_cond(nn.Module):
         
         
         # import os
-        # task_dir = 'task_debug_no_subsample'
+        # task_dir = 'task_debug_test_inf_2'
         # os.mkdir(task_dir)
         # for task_id, task_imgs in enumerate(images):
         #     os.mkdir(f'{task_dir}/task_{task_id:02d}')
@@ -186,7 +201,7 @@ class RT1_video_cond(nn.Module):
                 
             
             
-        # demo_dir = 'demo_debug_val'
+        # demo_dir = 'demo_debug_test_inf_2'
         # os.mkdir(demo_dir)
         # for task_id, task_imgs in enumerate(demo):
         #     os.mkdir(f'{demo_dir}/task_{task_id:02d}')
@@ -225,9 +240,9 @@ class RT1_video_cond(nn.Module):
                 "natural_language_embedding": cond_embedding
             }
             
-            if debug:
+            if True:
                 img_debug = np.moveaxis(rt1_obs['image'][0].detach().cpu().numpy()*255, 0, -1)
-                # cv2.imwrite(f"debug_rt1_obs.png", img_debug) #images are already rgb
+                cv2.imwrite(f"debug_rt1_obs.png", img_debug) #images are already rgb
             # cv2.imwrite(f"debug_rt1.png", img_tensor[:, :, ::-1]) #BGR -> RGB
             
             if self.rt1_memory == None: # if this is the initial step

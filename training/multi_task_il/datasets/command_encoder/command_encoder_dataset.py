@@ -120,6 +120,14 @@ class CommandEncoderFinetuningDataset(Dataset):
         #     img_debug = np.moveaxis(frame.detach().cpu().numpy()*255, 0, -1)
         #     cv2.imwrite(f"video_cond_debug_demo_{t}.png", img_debug)
         
+        # from PIL import Image
+        # for t,frame in enumerate(demo_data['demo']):
+        #     img_debug = np.moveaxis(frame.detach().cpu().numpy()*255, 0, -1).astype(np.uint8)
+        #     im = Image.fromarray(
+        #     img_debug
+        #     )
+        #     im.save(f'pil_video_cond_{t}.png')
+        
         embedding_data = pkl.load(open(embedding_path, 'rb'))
     
         return {'demo_data': demo_data, 'embedding_data': torch.from_numpy(embedding_data), 'task_name': 'finetuning', 'sentence': demo_traj[1]} # task_name key is for the collate_fn, loss grouping...

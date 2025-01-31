@@ -162,6 +162,12 @@ def rollout_imitation(model, config, ctr,
             assert 'multi' in config.train_cfg.dataset._target_, config.train_cfg.dataset._target_
             T_context = config.train_cfg.dataset.demo_T
 
+        # ottengo:
+        # 1) env: ambiente
+        # 2) context: i 4 frame della dimostrazione
+        # 3) variation_id: id della variazione del task
+        # 4) expert_traj: la traiettoria eseguita dall'esperto (pick_place controller)
+        # 5) gt_env: ambiente di gt (?)
         env, context, variation_id, expert_traj, gt_env = build_env_context(img_formatter,
                                                                             T_context=T_context,
                                                                             ctr=ctr,
@@ -176,10 +182,9 @@ def rollout_imitation(model, config, ctr,
                                                                             controller_path=controller_path,
                                                                             ret_gt_env=True,
                                                                             seed=seed)
-
         build_task = TASK_MAP.get(env_name, None)
         assert build_task, 'Got unsupported task '+env_name
-        eval_fn = get_eval_fn(env_name=env_name)
+        eval_fn = get_eval_fn(env_name=env_name) # pick_place_eval
         traj, info = eval_fn(model, #TODO: solve errors
                              env,
                              gt_env,
@@ -341,6 +346,7 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                 json.dump(res_dict, open(
                     results_dir+'/traj{}.json'.format(n), 'w'))
     del model
+    # exit()
     return task_success_flags
 
 
@@ -554,7 +560,7 @@ if __name__ == '__main__':
         color = args.color
         variation = args.variation
         seed = args.seed
-        max_T = 95
+        max_T = 200
 
         dataset = None
         if args.test_gt:

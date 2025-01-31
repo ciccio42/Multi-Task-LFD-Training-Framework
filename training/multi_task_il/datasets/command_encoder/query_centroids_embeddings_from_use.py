@@ -49,31 +49,34 @@ if __name__ == '__main__':
     #  3)OPPURE creare un file separato in cui c'è corrispondenza con i task
     #------------------------------------------------------------------------
     
+    black_list = ['real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'droid_converted_2909_to_4645', 'droid_converted_0_to_2909', 'droid_converted']
+    
     embeddings_data = {}
     for dataset_name in data.keys():
-        embeddings_data[dataset_name] = {}
-        for task in data[dataset_name].keys():
-            if type(data[dataset_name][task]) == list:
-                embeddings_data[dataset_name][task] = []
-                # USE for the embedding and save into embeddings_data
-                istances_list = data[dataset_name][task]
-                traj_path = istances_list[0] # take only one traj, the command string is the same for all elements in the folder
-                # if traj_path == '/user/frosa/multi_task_lfd/datasets/taco_play_converted/stack_yellow_on_/taco_play_03201.pkl':
-                #     continue
-                save_path_command_emb = create_emb_and_save_pickle(traj_path, model_torch, tokenize)
-                embeddings_data[dataset_name][task].append(save_path_command_emb)
-                
-            elif type(data[dataset_name][task]) == dict:
-                embeddings_data[dataset_name][task] = {}
-                for subtask in data[dataset_name][task].keys():
-                    assert type(data[dataset_name][task][subtask]), f'error, data is of type {type(data[dataset_name][task][subtask])}'
-                    embeddings_data[dataset_name][task][subtask] = []
-                    istances_list = data[dataset_name][task][subtask]
-                    traj_path = istances_list[0] # take only one traj
+        if dataset_name not in black_list:
+            embeddings_data[dataset_name] = {}
+            for task in data[dataset_name].keys():
+                if type(data[dataset_name][task]) == list:
+                    embeddings_data[dataset_name][task] = []
+                    # USE for the embedding and save into embeddings_data
+                    istances_list = data[dataset_name][task]
+                    traj_path = istances_list[0] # take only one traj, the command string is the same for all elements in the folder
+                    # if traj_path == '/user/frosa/multi_task_lfd/datasets/taco_play_converted/stack_yellow_on_/taco_play_03201.pkl':
+                    #     continue
                     save_path_command_emb = create_emb_and_save_pickle(traj_path, model_torch, tokenize)
-                    embeddings_data[dataset_name][task][subtask].append(save_path_command_emb)
+                    embeddings_data[dataset_name][task].append(save_path_command_emb)
                     
-                    # USE for the embedding and save into embeddings_data  
+                elif type(data[dataset_name][task]) == dict:
+                    embeddings_data[dataset_name][task] = {}
+                    for subtask in data[dataset_name][task].keys():
+                        assert type(data[dataset_name][task][subtask]), f'error, data is of type {type(data[dataset_name][task][subtask])}'
+                        embeddings_data[dataset_name][task][subtask] = []
+                        istances_list = data[dataset_name][task][subtask]
+                        traj_path = istances_list[0] # take only one traj
+                        save_path_command_emb = create_emb_and_save_pickle(traj_path, model_torch, tokenize)
+                        embeddings_data[dataset_name][task][subtask].append(save_path_command_emb)
+                        
+                        # USE for the embedding and save into embeddings_data  
                 
     #----------------------- TODO ---------------------------
     #  visualizzare nello spazio gli embedding

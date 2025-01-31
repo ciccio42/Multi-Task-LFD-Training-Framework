@@ -48,5 +48,17 @@ panda_pick_place:
   image_channel_format:             'RGB'
   subsample:                        False
 
+ur5e_pick_place:
+  name:                             'ur5e_pick_place'
+  crop:                             [20, 25, 80, 75]
+  image_channel_format:             'RGB'
+  subsample:                        False
+
+sim_new_ur5e_pick_place_deltas_no_converted_rounded:
+  name:                             'sim_new_ur5e_pick_place_deltas_no_converted_rounded'
+  crop:                             [20, 25, 80, 75]
+  image_channel_format:             'RGB' #TODO: check
+  subsample:                        False 
+
 
 # this conf works also when working with couples when training RT1

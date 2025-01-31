@@ -29,13 +29,13 @@ SAVE_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder
 POLICY='${rt1_video_cond}'
 TARGET='multi_task_il.models.mt_rep.VideoImitation'
 # COND_MODULE_PATH='/user/frosa/multi_task_lfd/checkpoint_save_folder/1Task-pick_place-cond_module_no_lr_1e-4-Batch32/model_save-96.pt'
-COND_MODULE_PATH='/user/frosa/multi_task_lfd/checkpoint_save_folder/cond_module__pick_place__ASU_BERK_IAMLAB_TACO_PANDAPP__10_epochs__1e-4_lr_BGR-Batch32/model_save-1265.pt'
+COND_MODULE_PATH='/user/frosa/multi_task_lfd/checkpoint_save_folder/condmodule_ASU_BERK_IAMLAB_TACO_PANDAPP__20_epochs__1e-4_lr_RGB-Batch32/model_save-5060.pt'
 
 SAVE_FREQ=-1
 LOG_FREQ=10
 VAL_FREQ=-1
 # DEVICE=0    # cuda gpu selection
-DEVICE=2   # cuda gpu selection
+DEVICE=2  # cuda gpu selection
 DEBUG=false
 WANDB_LOG=true
 ROLLOUT=false
@@ -43,41 +43,26 @@ EPOCH=90
 LOADER_WORKERS=16
 CONFIG_PATH=../experiments
 CONFIG_NAME=config_RT1_finetuning.yaml
-CONCAT_IMG_EMB=true 
-CONCAT_DEMO_EMB=true
-
-LOAD_TARGET_OBJ_DETECTOR=false
-CONCAT_BB=false
-
-CHANGE_COMMAND_EPOCH=true
-SPLIT_PICK_PLACE=false
-
-LOAD_CONTRASTIVE=true
-LOAD_INV=true
-
-CONCAT_STATE=true
 
 RESUME=false
-BSIZE=32 # cercare di mettere sempre il numero autentico
+BSIZE=48
 # Policy 1: At each slot is assigned a RandomSampler
-SET_SAME_N=2
+SET_SAME_N=-1
 
-EARLY_STOPPING_PATIECE=-1
+# path where to find jsons for the couples
+# COUPLE_PATHS_JSON='/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/traj_couples_only_sim'
+COUPLE_PATHS_JSON='/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/traj_couples'
+
 OPTIMIZER='AdamW'
-# LR=0.0005
-LR=0.0005 # not used
-WEIGHT_DECAY=0.0
-SCHEDULER=None
 
-DROP_DIM=4      # 2    # 3
 HEIGHT=100
 WIDTH=180
 
 TASK_str="pick_place" #[pick_place,nut_assembly,stack_block,button]
-EXP_NAME="RT1__pick_place__sim__90_epochs__5e-4_lr__bs_64"
+EXP_NAME='rt1_deltas_no_converted_orig_range' #"rt1_sim_RGB_-1_1_range_test_2"
 PROJECT_NAME=${EXP_NAME}
 
-TIME_SEQUENCE_LENGHT=7 #6
+# TIME_SEQUENCE_LENGHT=6 #6
 
 # srun --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME}
 python -u ../training/train_scripts/train_any.py \
@@ -101,6 +86,7 @@ python -u ../training/train_scripts/train_any.py \
     loader_workers=${LOADER_WORKERS} \
     save_path=${SAVE_PATH} \
     optimizer=${OPTIMIZER} \
-    cond_module_path=${COND_MODULE_PATH}
+    cond_module_path=${COND_MODULE_PATH} \
+    couple_paths_json=${COUPLE_PATHS_JSON}
     # width=${WIDTH} \
     # height=${HEIGHT}

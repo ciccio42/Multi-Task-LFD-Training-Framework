@@ -553,38 +553,58 @@ def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, ima
                     temp_action_list.append(temp_action)
                     
                 action = torch.cat(temp_action_list).cpu().numpy()
-
+                
+    CHANGE_FROM_BL_TO_WORLD = False
+    DELTA_NO_CONV = True
     if 'RT1_video_cond' in str(model.__class__):
         
-        # get current pos and RPY of the eef wrt to WF
-        pos_t = deepcopy(obs['eef_pos'])
-        # TODO capire chi genera eef_quat
-        rot_t  =  (R_ws_x @ quat2mat(deepcopy(obs['eef_quat'])))
-        
-        
-        # in this case the output of this model are deltas (dxdydz, drolldpitchdyaw), which have to be summed to the current observation.
-        delta_pos = action[:3]
-        delta_rot = action[3:-1]
-        rot_t = mat2quat(rot_t @ euler2mat(delta_rot))
-        
-        # 1) 
-        action[:3] = pos_t + T_w_sim_to_bl_sim[:3,:3] @ delta_pos
-        action[3:-1] = quat2axisangle(rot_t)
-        
-        action[-1] = 1.0 if action[-1] == 0.0 else 0.0  # rt1 outputs 0.0 for closed and 1.0 for open gripper
-        
-        # global PICKED
-        # if not PICKED:
-        #     global _TIME_COUNTER_
-        #     if action[-1] == 1.0 and _TIME_COUNTER_ < 5:
-        #         _TIME_COUNTER_ += 1
-        #         action[-1] = 0.0
-        #     elif action[-1] == 1.0 and _TIME_COUNTER_ == 5:
-        #         _TIME_COUNTER_ = 0
-        #         PICKED = True
+        if CHANGE_FROM_BL_TO_WORLD: 
+            # get current pos and RPY of the eef wrt to WF
+            pos_t = deepcopy(obs['eef_pos'])
+            # TODO capire chi genera eef_quat
+            rot_t  = (R_ws_x @ quat2mat(deepcopy(obs['eef_quat'])))
+            
+            # in this case the output of this model are deltas (dxdydz, drolldpitchdyaw), which have to be summed to the current observation.
+            delta_pos = action[:3]
+            delta_rot = action[3:-1]
+            
+            # rot_t = mat2quat(rot_t @ euler2mat(delta_rot))
+            
+            # 1) 
+            action[:3] = pos_t + T_w_sim_to_bl_sim[:3,:3] @ delta_pos
+            
+            action[3:-1] = quat2axisangle(mat2quat(rot_t))
+            # action[3:-1] = quat2axisangle(rot_t)
+            
+            action[-1] = 1.0 if action[-1] == 0.0 else 0.0  # rt1 outputs 0.0 for closed and 1.0 for open gripper
+            
+            # global PICKED
+            # if not PICKED:
+            #     global _TIME_COUNTER_
+            #     if action[-1] == 1.0 and _TIME_COUNTER_ < 5:
+            #         _TIME_COUNTER_ += 1
+            #         action[-1] = 0.0
+            #     elif action[-1] == 1.0 and _TIME_COUNTER_ == 5:
+            #         _TIME_COUNTER_ = 0    
+            #         PICKED = True
+        elif DELTA_NO_CONV:
+            
+            pos_t = deepcopy(obs['eef_pos'])
+            rot_t  = (R_ws_x @ quat2mat(deepcopy(obs['eef_quat'])))
+            
+            delta_pos = action[:3]
+            delta_rot = action[3:-1]
+            
+            rot_t = mat2quat(rot_t @ quat2mat(axisangle2quat(delta_rot)))
+            
+            action[:3] = pos_t + delta_pos
+            action[3:-1] = quat2axisangle(rot_t)
+            
+        else:
+            rot_t  =  (R_ws_x @ quat2mat(deepcopy(obs['eef_quat'])))
+            action[3:-1] = quat2axisangle(mat2quat(rot_t))
         
         return action, None, None, None, None, None
-        
     else:               
         # action[3:7] = [1.0, 1.0, 0.0, 0.0]
         if len(action.shape) != 1:
@@ -1725,8 +1745,8 @@ def build_env_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights
         teacher_expert_rollout, T_context, sample_sides=True, random_frames=random_frames)
     # convert BGR context image to RGB and scale to 0-1
     for i, img in enumerate(context):
-        cv2.imwrite(f"context_{i}.png", np.array(img[:, :, ::-1]))
-    context = [img_formatter(i[:, :, ::-1])[None] for i in context]
+        cv2.imwrite(f"context_{i}.png", np.array(img))
+    context = [img_formatter(i)[None] for i in context] ################################################
     # assert len(context ) == 6
     if isinstance(context[0], np.ndarray):
         context = torch.from_numpy(np.concatenate(context, 0))[None]
@@ -1833,13 +1853,12 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
         [.0, .0, .0, .0]).to(
         device=gpu_id).float())
 
-    # convert observation from RGB to BGR
     if config.augs.get("old_aug", True):
         images.append(img_formatter(
-            obs['camera_front_image'][:, :, ::-1])[None])
+            obs['camera_front_image'])[None]) # RGB
     else:
         img_aug, bb_t_aug = img_formatter(
-            obs['camera_front_image'][:, :, ::-1], bb_t) # it's BGR
+            obs['camera_front_image'], bb_t) # RGB
         images.append(img_aug[None])
         # debug_img = np.array(np.moveaxis(
         #     img_aug[:, :, :].cpu().numpy()*255, 0, -1), dtype=np.uint8)
@@ -2018,7 +2037,28 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
         else:
             image = np.array(obs['camera_front_image'][:, :, ::-1])
 
-        # debug for steps
+        # debug for 
+              
+        font                   = cv2.FONT_HERSHEY_SIMPLEX
+        fontScale              = 0.3
+        fontColor              = (0,100,255)
+        thickness              = 1
+        lineType               = 2
+
+
+        change = (0,10,20,30,40,50)
+        labels = ['x', 'y', 'z', 'theta', 'phi', 'psi']
+        for offset, label, a in zip(change, labels, action):
+            action_str = f'{label}:{a}'
+            bottomLeftCornerOfText = (20,20+offset)
+            cv2.putText(image, action_str, 
+                bottomLeftCornerOfText, 
+                font, 
+                fontScale,
+                fontColor,
+                thickness,
+                lineType)
+            
         cv2.imwrite(
             f"step_test_prova.png",  image)
         

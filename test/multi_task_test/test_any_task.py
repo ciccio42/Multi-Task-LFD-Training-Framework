@@ -560,7 +560,7 @@ if __name__ == '__main__':
         color = args.color
         variation = args.variation
         seed = args.seed
-        max_T = 200
+        max_T = 100
 
         dataset = None
         if args.test_gt:

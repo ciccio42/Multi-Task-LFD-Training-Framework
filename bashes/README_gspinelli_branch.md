@@ -95,3 +95,8 @@ complete black list:
   black_list: ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'droid_converted_2909_to_4645', 'droid_converted_0_to_2909', 'real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_deltas_no_converted_rounded', 'panda_pick_place', 'ur5e_pick_place']
 
   BLACK_LIST = ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'droid_converted_2909_to_4645', 'droid_converted_0_to_2909', 'real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_deltas_no_converted_rounded', 'panda_pick_place', 'ur5e_pick_place']
+
+
+# TEMP CHANGES
+line 1569 and 1673 of command_encoder/utils
+

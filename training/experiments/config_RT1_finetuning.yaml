@@ -101,7 +101,7 @@ dataset_cfg:
   aux_pose: True
   use_strong_augs: target_update_freq
   data_augs: ${augs}
-  black_list: ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'droid_converted_2909_to_4645', 'droid_converted_0_to_2909', 'real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'panda_pick_place', 'ur5e_pick_place']
+  black_list: ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'droid_converted_2909_to_4645', 'droid_converted_0_to_2909', 'real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_deltas_no_converted_rounded', 'panda_pick_place']
   select_random_frames: True # the 4 frames: [first, random, random, last]
   convert_action: False # this is because we already converted them
   take_first_frame: False # if True the agent trajectory in the training starts with the first frame
@@ -223,20 +223,20 @@ rt1_video_cond:
     #   high_psi: 0.3452828499066527
     ###### END SIM CONVERTED DATASET RANGE
     ##### SIM DATASET NO CONVERTED RANGE
-    world_vector:
-      low_x: -0.01
-      low_y: -0.02
-      low_z: -0.02
-      high_x: 0.03
-      high_y: 0.02
-      high_z: 0.02
-    rotation_delta:
-      low_phi: -0.01
-      low_theta: 0.0
-      low_psi: -0.03
-      high_phi: 0.07
-      high_theta: 0.54
-      high_psi: 0.1
+    # world_vector:
+    #   low_x: -0.01
+    #   low_y: -0.02
+    #   low_z: -0.02
+    #   high_x: 0.03
+    #   high_y: 0.02
+    #   high_z: 0.02
+    # rotation_delta:
+    #   low_phi: -0.01
+    #   low_theta: 0.0
+    #   low_psi: -0.03
+    #   high_phi: 0.07
+    #   high_theta: 0.54
+    #   high_psi: 0.1
     ##### END SIM DATASET NO CONVERTED RANGE
     ###### ABSOLUTE SIM DATASET RANGE
     # world_vector:
@@ -255,20 +255,20 @@ rt1_video_cond:
     #   high_psi: 0.08398651853635786
     ###### END ABSOLUTE SIM DATASET RANGE
     ###### ABSOLUTE SIM DATASET RANGE
-    # world_vector:
-    #   low_x: -1
-    #   low_y: -1
-    #   low_z: -1
-    #   high_x: 1
-    #   high_y: 1
-    #   high_z: 1
-    # rotation_delta:
-    #   low_phi: -1
-    #   low_theta: -1
-    #   low_psi: -1
-    #   high_phi: 1
-    #   high_theta: 1
-    #   high_psi: 1
+    world_vector:
+      low_x: -1
+      low_y: -1
+      low_z: -1
+      high_x: 1
+      high_y: 1
+      high_z: 1
+    rotation_delta:
+      low_phi: -3.14
+      low_theta: -3.14
+      low_psi: -3.14
+      high_phi: 3.14
+      high_theta: 3.14
+      high_psi: 3.14
     ###### END ABSOLUTE SIM DATASET RANGE
     gripper_closedness_action:
       # low: 0.0 # 0.0 chiuso

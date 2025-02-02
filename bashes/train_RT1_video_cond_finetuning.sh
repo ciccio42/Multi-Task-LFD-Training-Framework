@@ -59,7 +59,7 @@ HEIGHT=100
 WIDTH=180
 
 TASK_str="pick_place" #[pick_place,nut_assembly,stack_block,button]
-EXP_NAME='rt1_deltas_no_converted_orig_range' #"rt1_sim_RGB_-1_1_range_test_2"
+EXP_NAME='rt1_deltas_no_conv_absolute_actions_2' #"rt1_sim_RGB_-1_1_range_test_2"
 PROJECT_NAME=${EXP_NAME}
 
 # TIME_SEQUENCE_LENGHT=6 #6

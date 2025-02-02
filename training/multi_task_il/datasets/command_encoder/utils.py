@@ -1566,6 +1566,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                 cv2.imwrite("adjusted_point.png", cv2.UMat(image))
             logger.debug(f"EEF point: {time.time()-eef_point_time}")
 
+        # if load_action and j >= 1 or ("real" in dataset_loader.agent_name and not dataset_loader.pick_next):
         if load_action and ('FinetuningPairedDataset' in str(type(dataset_loader)) or j >= 1 or ("real" in dataset_loader.agent_name and not dataset_loader.pick_next)):
             action_time = time.time()
             # Load action
@@ -1670,6 +1671,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
     end_time_sample = time.time()
     logger.debug(f"Sample time {end_time_sample-time_sample}")
     return images, images_cp, bb, obj_classes, actions, states, points
+    # return images[:-1], images_cp, bb, obj_classes, actions, states, points
 
 
 class DIYBatchSampler(Sampler):

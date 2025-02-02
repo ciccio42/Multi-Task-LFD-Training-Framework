@@ -149,7 +149,7 @@ class FinetuningPairedDataset(Dataset):
         demo_path = couple_path[0]
         traj_path = couple_path[1]
         
-        if traj_dataset_name == 'real_new_ur5e_pick_place_converted' or 'sim_new_ur5e_pick_place_converted':
+        if traj_dataset_name == 'real_new_ur5e_pick_place_converted' or 'sim_new_ur5e_pick_place_converted' or 'ur5e_pick_place' or 'sim_new_ur5e_pick_place_deltas_no_converted_rounded':
             demo_dataset_name = 'panda_pick_place' # the demos in this came from this dataset
         else:
             demo_dataset_name = traj_dataset_name
@@ -166,11 +166,11 @@ class FinetuningPairedDataset(Dataset):
         
         # for t,frame in enumerate(demo_data['demo']):
         #     img_debug = np.moveaxis(frame.detach().cpu().numpy()*255, 0, -1)
-        #     cv2.imwrite(f"y_debug_demo_{t}.png", img_debug)
+        #     cv2.imwrite(f"abs_debug_demo_{t}.png", img_debug)
         
         # for t,frame in enumerate(traj['images']):
         #     img_debug = np.moveaxis(frame.detach().cpu().numpy()*255, 0, -1)
-        #     cv2.imwrite(f"y_debug_traj_{t}.png", img_debug)
+        #     cv2.imwrite(f"abs_debug_traj_{t}.png", img_debug)
     
         return {'demo_data': demo_data, 'traj': traj, 'task_name': 'finetuning'} # task_name key is for the collate_fn, loss grouping...
     

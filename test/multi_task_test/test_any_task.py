@@ -318,6 +318,106 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
         if "vima" not in model_name:
             rollout, task_success_flags, expert_traj, context = return_rollout
             if save:
+                
+                # SAVE COND_EMBEDDING_PLOT CLUSTERS
+                if 'RT1_video_cond' in str(type(model)):
+                    gt_variation = return_rollout[1]['variation_id']
+                    
+                    # get embedding from demonstration prediction
+                    with torch.no_grad():
+                        predicted_tensor = model.cond_module(context.to(next(model.parameters()).device)) # 15GB for the computation graph -> 4GB with torch no grad
+                    
+                    # load numpy arrays
+                    centroids_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/embeddings_cond_module_validation_set/centroids.npy'
+                    
+                    with open(centroids_path, 'rb') as f:
+                        centroids_numpy = np.load(f)
+                        
+                    centroids_tensor = torch.from_numpy(centroids_numpy).to(next(model.parameters()).device)
+                    
+                    from sklearn.manifold import TSNE
+                    import seaborn as sns
+                    #----------create TSNE object
+                    num_classes = centroids_tensor.shape[0]
+                    # all_tensor = torch.cat((embeddings_tensor, centroids_tensor), 0)
+                    all_tensor = torch.cat((centroids_tensor, predicted_tensor), 0)
+                    time_start = time.time()
+                    tsne = TSNE(n_components=2, perplexity=5, n_iter=600) # vedere se cambiare parametri
+                    tsne_results = tsne.fit_transform(all_tensor.cpu().numpy())
+                    # print('t-SNE done! Time elapsed: {} seconds'.format(time.time()-time_start))
+
+                    #----------add columns to df
+                    # df['tsne-2d-one'] = tsne_results[:-num_classes,0]
+                    # df['tsne-2d-two'] = tsne_results[:-num_classes,1]
+                    
+                    import pandas as pd
+                    y_centr_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/embeddings_cond_module_validation_set'
+                    
+                    with open(f'{y_centr_path}/labels.txt', "r") as f:
+                        y_centr = f.read().split('\n')[:num_classes]
+                        
+                    y_centr.append('Predicted label')
+
+                    feat_cols = [ 'e'+str(i) for i in range(centroids_tensor.shape[1]) ]
+                    df_centr = pd.DataFrame(all_tensor.cpu().numpy(),columns=feat_cols)
+                    df_centr['y'] = y_centr # label numerica
+                    
+                    df_centr['tsne-2d-one'] = tsne_results[:,0]
+                    df_centr['tsne-2d-two'] = tsne_results[:,1]
+
+                    #----------plotting
+                    import colorcet as cc
+                    palette = sns.color_palette(cc.glasbey, n_colors=(num_classes+1))
+                    palette[0] = (0.0, 0.37, 0.0)
+                    palette[1] = (0.0, 0.5, 0.0)
+                    palette[2] = (0.0, 0.75, 0.0)
+                    palette[3] = (0.0, 1.0, 0.0)
+                    
+                    palette[4] = (0.37, 0.37, 0.0)
+                    palette[5] = (0.5, 0.5, 0.0)
+                    palette[6] = (0.75, 0.75, 0.0)
+                    palette[7] = (1.0, 1.0, 0.0)
+                    
+                    palette[8] = (0.0, 0.0, 0.37)
+                    palette[9] = (0.0, 0.0, 0.5)
+                    palette[10] = (0.0, 0.0, 0.75)
+                    palette[11] = (0.0, 0.0, 1.0)
+                    
+                    palette[12] = (0.37, 0.0, 0.0)
+                    palette[13] = (0.5, 0.0, 0.0)
+                    palette[14] = (0.75, 0.0, 0.0)
+                    palette[15] = (1.0, 0.0, 0.0)
+                    
+                    palette[16] = (0.0, 0.0, 0.0)
+
+                    plt.figure(figsize=(10,5))
+                    # ax = sns.scatterplot(
+                    #     x="tsne-2d-one", y="tsne-2d-two",
+                    #     hue="y", # per ora non la uso visto che ogni campione è a se
+                    #     palette=palette,
+                    #     data=df,
+                    #     legend=False,
+                    #     # alpha=0.3
+                    # )
+                    
+                    ax = sns.scatterplot(
+                        x="tsne-2d-one", y="tsne-2d-two",
+                        hue="y",
+                        palette=palette,
+                        data=df_centr,
+                        marker="*",
+                        s=400,
+                        legend="full"
+                    )
+                    
+                    box = ax.get_position()
+                    ax.set_position([box.x0, box.y0, box.width * 0.6, box.height])
+                    
+                    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+                    
+                    # save
+                    plt.savefig(f"{results_dir}/embedding_{n}.png")
+                    
                 pkl.dump(rollout, open(
                     results_dir+'/traj{}.pkl'.format(n), 'wb'))
                 pkl.dump(expert_traj, open(

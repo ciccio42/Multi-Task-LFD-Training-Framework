@@ -83,6 +83,14 @@ heatmap
 ## come sono fatti batch sampler
 
 
+
+# create plots from checkpoints
+bashes/plot_results_checkpoint.sh
+# create real dataset number of frame distribution (for variation and for phase)
+bashes/real_dataset_frame_distribution.sh
+
+
+
 # Trajectories workflow
 Convert: ./convert_real_sim_delta.sh
 Generate paths: ./generate_train_val_paths_finetuning.sh
@@ -92,11 +100,19 @@ find min max: ./find_min_max_actions.sh
 
 complete black list:
 
-  black_list: ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'droid_converted_2909_to_4645', 'droid_converted_0_to_2909', 'real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_deltas_no_converted_rounded', 'panda_pick_place', 'ur5e_pick_place']
 
-  BLACK_LIST = ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'droid_converted_2909_to_4645', 'droid_converted_0_to_2909', 'real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_deltas_no_converted_rounded', 'panda_pick_place', 'ur5e_pick_place']
+<!-- asu_table_top_converted_absolute_pose
+berkeley_autolab_ur5_converted_absolute_pose
+sim_ur5e_pick_place_shifted_converted_absolute
+real_new_ur5e_pick_place_converted_absolute
+panda_pick_place -->
 
+  black_list: ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'panda_pick_place']
 
-# TEMP CHANGES
-line 1569 and 1673 of command_encoder/utils
+  BLACK_LIST = ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'panda_pick_place']
+
+  <!-- black_list: ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'sim_ur5e_pick_place_shifted_converted_absolute', 'panda_pick_place'] -->
+
+<!-- # TEMP CHANGES
+line 1569 and 1673 of command_encoder/utils -->
 

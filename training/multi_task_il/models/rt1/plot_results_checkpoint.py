@@ -1,0 +1,127 @@
+import numpy as np
+import time
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.manifold import TSNE
+import pandas as pd
+import debugpy
+import os
+import json
+import matplotlib as plt
+from matplotlib import gridspec
+
+
+
+if __name__ == '__main__':
+    
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--debug", action='store_true', help="whether or not attach the debugger")
+    parser.add_argument("--exp_name", default=None)
+    parser.add_argument("--checkpoint_save_path", default=None)
+    parser.add_argument("--steps", default=None)
+    parser.add_argument("--task_name", default='pick_place')
+    parser.add_argument("--batch", default=None)
+    parser.add_argument("--run", default=None)
+    parser.add_argument("--num_traj_test", default=None)
+    
+    args = parser.parse_args()
+    
+    if args.debug:
+        import debugpy
+        debugpy.listen(('0.0.0.0', 5678))
+        print("Waiting for debugger attach")
+        debugpy.wait_for_client()
+        
+    EXCLUDE_KEYS = ['variation_id', 'avg_pred', 'N']
+        
+    save_path = args.checkpoint_save_path
+    project_name = args.exp_name + '-Batch' + args.batch
+    task_rusults_folder = 'results_' + args.task_name
+    run_str = f'run_{args.run}'
+    
+    root_path = '/'.join([save_path, project_name, task_rusults_folder, run_str])
+    
+    steps_folder = os.listdir(root_path)
+    
+    
+    results_per_steps_dict ={}
+    
+    for t, step in enumerate(steps_folder):
+        json_path = '/'.join([root_path, step, f'test_across_{args.num_traj_test}trajs.json'])
+        try:
+            with open(json_path, 'r') as file:
+                step_results_json = json.load(file)
+               
+            step_idx = int(step.split('-')[-1])
+            results_per_steps_dict[step_idx] = {}
+            for k,v in step_results_json.items():
+                if k not in EXCLUDE_KEYS:
+                    results_per_steps_dict[step_idx][k] = v
+    
+        except json.decoder.JSONDecodeError:
+            print(f'ERROR, check for typos in {json_path}')  
+            
+            
+    table = pd.DataFrame.from_dict(results_per_steps_dict, orient='index')
+    
+    success_table = table.filter(items=['success'])
+    pick_table = table.filter(items=['picked'])
+    reach_table = table.filter(items=['reached'])
+    wrong_table = table.filter(regex='wrong')
+    task_table = table.filter(regex='task#*')
+    
+    
+    save_folder = f'plot_results_{args.exp_name}'
+    if not os.path.exists(save_folder):
+        os.mkdir(save_folder)
+    
+    
+    # diagnostics plot saving
+    # success_table.plot(title='success rate').get_figure().savefig(f'{save_folder}/success_rate.png')
+    # pick_table.plot(title='picking rate').get_figure().savefig(f'{save_folder}/picking_rate.png')
+    # reach_table.plot(title='reach rate').get_figure().savefig(f'{save_folder}/reaching_rate.png')
+    # wrong_table.plot(title='failure cases').get_figure().savefig(f'{save_folder}/failure_cases.png')
+    # task_table.plot(kind='bar', title='task rate').get_figure().savefig(f'{save_folder}/task_rate.png')
+    
+    
+    fig = plt.figure()
+    fig.set_figheight(14)
+    fig.set_figwidth(18)
+    fig.suptitle(f'model: {args.exp_name}')
+    gs0 = gridspec.GridSpec(3,2,figure=fig)
+    
+    
+    ax00 = fig.add_subplot(gs0[0,0])
+    ax01 = fig.add_subplot(gs0[0,1])
+    ax02 = fig.add_subplot(gs0[1,0])
+    ax03 = fig.add_subplot(gs0[1,1])
+    ax04 = fig.add_subplot(gs0[2,:])   
+    
+    success_table.plot(title='success rate', ax=ax00)
+    pick_table.plot(title='picking rate', ax=ax01)
+    reach_table.plot(title='reach rate', ax=ax02)
+    wrong_table.plot(title='failure cases', ax=ax03)
+    task_table.plot(kind='bar', title='task rate', ax=ax04)
+
+    plt.savefig(f'{save_folder}/all.png')
+    
+    
+    
+    
+    
+    
+            
+        
+        
+        
+        
+    
+    
+    
+    
+    
+        
+        
+    
+

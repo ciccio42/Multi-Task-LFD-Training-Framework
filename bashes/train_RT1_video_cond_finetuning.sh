@@ -29,7 +29,7 @@ SAVE_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder
 POLICY='${rt1_video_cond}'
 TARGET='multi_task_il.models.mt_rep.VideoImitation'
 # COND_MODULE_PATH='/user/frosa/multi_task_lfd/checkpoint_save_folder/1Task-pick_place-cond_module_no_lr_1e-4-Batch32/model_save-96.pt'
-COND_MODULE_PATH='/user/frosa/multi_task_lfd/checkpoint_save_folder/condmodule_ASU_BERK_IAMLAB_TACO_PANDAPP__20_epochs__1e-4_lr_RGB-Batch32/model_save-5060.pt'
+COND_MODULE_PATH='/user/frosa/multi_task_lfd/checkpoint_save_folder/cond_module_ALLBUTDROID_20epochs_RGB_weak_aug-Batch32/model_save-1012.pt'
 
 SAVE_FREQ=-1
 LOG_FREQ=10
@@ -39,12 +39,12 @@ DEVICE=2  # cuda gpu selection
 DEBUG=false
 WANDB_LOG=true
 ROLLOUT=false
-EPOCH=90
+EPOCH=40
 LOADER_WORKERS=16
 CONFIG_PATH=../experiments
 CONFIG_NAME=config_RT1_finetuning.yaml
 
-RESUME=false
+RESUME=true
 BSIZE=48
 # Policy 1: At each slot is assigned a RandomSampler
 SET_SAME_N=-1
@@ -59,7 +59,7 @@ HEIGHT=100
 WIDTH=180
 
 TASK_str="pick_place" #[pick_place,nut_assembly,stack_block,button]
-EXP_NAME='rt1_deltas_no_conv_absolute_actions_2' #"rt1_sim_RGB_-1_1_range_test_2"
+EXP_NAME='rt1_sim_abs_new_condmodule' #'rt1_sim_abs_aa_weakaug_-1_1' #'rt1_real_absolute_aa_no_subsample' #'rt1_deltas_no_conv_absolute_actions_2' #"rt1_sim_RGB_-1_1_range_test_2"
 PROJECT_NAME=${EXP_NAME}
 
 # TIME_SEQUENCE_LENGHT=6 #6

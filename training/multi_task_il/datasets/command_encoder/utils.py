@@ -30,6 +30,7 @@ import time
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 import itertools
+from multi_task_il.datasets.command_encoder.cond_module import CondModule
 
 logging.basicConfig(
     level=logging.INFO,
@@ -641,6 +642,59 @@ def make_demo_finetuning(dataset, traj, task_name):
     return ret_dict
 
 
+def init_freezed_cond_module(
+        height=120,
+        width=160,
+        demo_T=4,
+        model_name="r2plus1d_18",
+        pretrained=True,
+        cond_video=True,
+        n_layers=3,
+        demo_W=7,
+        demo_H=7,
+        demo_ff_dim=[128, 64, 32],
+        demo_linear_dim=[512, 512, 512],
+        conv_drop_dim=3,
+        cond_module_model_path=None,
+        device=None
+        ):
+    ## loading model
+    # cond_module = CondModule(model_name='r2plus1d_18', demo_linear_dim=[512, 512, 512], pretrained=True).to(device)
+    cond_module = CondModule(
+        height=height,
+        width=width,
+        demo_T=demo_T,
+        model_name=model_name,
+        pretrained=pretrained,
+        cond_video=cond_video,
+        n_layers=n_layers,
+        demo_W=demo_W,
+        demo_H=demo_H,
+        demo_ff_dim=demo_ff_dim,
+        demo_linear_dim=demo_linear_dim,
+        conv_drop_dim=conv_drop_dim,
+        )
+    weights = torch.load(cond_module_model_path, weights_only=True)
+
+    cond_module.load_state_dict(weights)
+    cond_module.eval()
+
+    model_parameters = filter(lambda p: p.requires_grad, cond_module.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    # print(cond_module)
+    print('Total params in cond module before freezing:', params)
+
+    # freeze cond module
+    for p in cond_module.parameters():
+        p.requires_grad = False
+        
+    model_parameters = filter(lambda p: p.requires_grad, cond_module.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    # print(cond_module)
+    print('Total params in cond module after freezing:', params)
+    
+    return cond_module.to(device)
+
 
 def make_demo(dataset, traj, task_name):
     """
@@ -1019,7 +1073,11 @@ def create_data_aug(dataset_loader=object):
                     augmented.numpy()*255, 0, -1))
         else:
             if perform_aug:
-                augmented = dataset_loader.transforms(obs)
+                aug_prob = dataset_loader.data_augs.get('p', 0.1)
+                if np.random.choice([0,1], p=[1-aug_prob,aug_prob]):
+                    augmented = dataset_loader.transforms(obs)
+                else:
+                    augmented = obs
             else:
                 augmented = obs
             if DEBUG:
@@ -1027,7 +1085,7 @@ def create_data_aug(dataset_loader=object):
                     cv2.imwrite("weak_augmented.png", np.moveaxis(
                         augmented.numpy()*255, 0, -1))
             if DEBUG:
-                cv2.imwrite(f"debug_crop_2/{task_name}_prova_resized_augmented_{frame_number}.png", np.moveaxis(
+                cv2.imwrite(f"debug_crop_weak_aug/{task_name}_prova_resized_augmented_{frame_number}.png", np.moveaxis(
                     augmented.numpy()*255, 0, -1))
         assert augmented.shape == obs.shape
 

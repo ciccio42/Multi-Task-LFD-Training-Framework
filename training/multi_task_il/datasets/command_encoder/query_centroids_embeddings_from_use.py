@@ -49,7 +49,7 @@ if __name__ == '__main__':
     #  3)OPPURE creare un file separato in cui c'è corrispondenza con i task
     #------------------------------------------------------------------------
     
-    black_list = ['real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'droid_converted_2909_to_4645', 'droid_converted_0_to_2909', 'droid_converted']
+    black_list = ['sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute']
     
     embeddings_data = {}
     for dataset_name in data.keys():

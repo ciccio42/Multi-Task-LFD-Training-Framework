@@ -103,13 +103,21 @@ complete black list:
 
 <!-- asu_table_top_converted_absolute_pose
 berkeley_autolab_ur5_converted_absolute_pose
+iamlab_cmu_pickup_insert_converted_absolute_pose
+taco_play_converted_absolute_pose
+droid_converted_absolute_pose
 sim_ur5e_pick_place_shifted_converted_absolute
 real_new_ur5e_pick_place_converted_absolute
 panda_pick_place -->
 
-  black_list: ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'panda_pick_place']
+  black_list: ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'iamlab_cmu_pickup_insert_converted_absolute_pose','taco_play_converted_absolute_pose','droid_converted_absolute_pose','sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'panda_pick_place']
 
-  BLACK_LIST = ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'panda_pick_place']
+  BLACK_LIST = ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'iamlab_cmu_pickup_insert_converted_absolute_pose','taco_play_converted_absolute_pose','droid_converted_absolute_pose','sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'panda_pick_place']
+
+<!-- 
+
+
+  BLACK_LIST=asu_table_top_converted_absolute_pose,berkeley_autolab_ur5_converted_absolute_pose,sim_ur5e_pick_place_shifted_converted_absolute, real_new_ur5e_pick_place_converted_absolute,panda_pick_place -->
 
   <!-- black_list: ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'sim_ur5e_pick_place_shifted_converted_absolute', 'panda_pick_place'] -->
 

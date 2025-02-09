@@ -269,6 +269,29 @@ def pick_place_eval_demo_cond(model, env, context, gpu_id, variation_id, img_for
         tasks["place_wrong_wrong_obj"] = 0.0
         tasks["place_correct_bin_wrong_obj"] = 0.0
         elapsed_time = 0.0
+        
+        # istantiante cond_module_instance
+        if 'RT1_video_cond' in str(type(model)):
+            from multi_task_il.datasets.command_encoder.utils import init_freezed_cond_module
+            cond_module_cfg = config.cond_module
+            cond_module_instance = init_freezed_cond_module(
+                                        height=cond_module_cfg.height,
+                                        width=cond_module_cfg.width,
+                                        demo_T=cond_module_cfg.demo_T,
+                                        model_name=cond_module_cfg.model_name,
+                                        pretrained=cond_module_cfg.pretrained,
+                                        cond_video=cond_module_cfg.cond_video,
+                                        n_layers=cond_module_cfg.n_layers,
+                                        demo_W=cond_module_cfg.demo_W,
+                                        demo_H=cond_module_cfg.demo_H,
+                                        demo_ff_dim=cond_module_cfg.demo_ff_dim,
+                                        demo_linear_dim=cond_module_cfg.demo_linear_dim,
+                                        conv_drop_dim=cond_module_cfg.conv_drop_dim,
+                                        cond_module_model_path=cond_module_cfg.cond_module_model_path,
+                                        device=next(model.parameters()).device
+                                        )
+            
+        
         while not done:
 
             tasks['reached'] = check_reach(threshold=0.03,
@@ -335,7 +358,10 @@ def pick_place_eval_demo_cond(model, env, context, gpu_id, variation_id, img_for
                 controller=controller,
                 target_obj_emb=target_obj_emb,
                 place=place,
-                convert_action=convert_action
+                convert_action=convert_action,
+                current_step=n_steps,
+                variation_id=variation_id,
+                cond_module_instance=cond_module_instance
             )
 
             traj.append(obs, reward, done, info, action)
@@ -392,6 +418,7 @@ def pick_place_eval_demo_cond(model, env, context, gpu_id, variation_id, img_for
         del states
         del images
         del model
+        del cond_module_instance
 
         return traj, tasks
     else:

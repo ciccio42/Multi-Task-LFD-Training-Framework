@@ -1,6 +1,6 @@
 import pickle
 import os
-from robosuite.utils.transform_utils import quat2axisangle, axisangle2quat, quat2mat, mat2quat, mat2euler
+from robosuite.utils.transform_utils import quat2axisangle, axisangle2quat, quat2mat, mat2quat, mat2euler, euler2mat
 from copy import deepcopy
 import numpy as np
 from multi_task_il.datasets.savers import Trajectory
@@ -154,13 +154,28 @@ def convert_quat_RPY(traj_data):
         
         change_action(traj_data['traj'], t, action_t)
         
+        
+def convert_quat_aa(traj_data):
+    for t in range(traj_data['len']):
+        step_t = traj_data['traj'].get(t)
+        action_t = step_t['action']
+        
+        # TCP position wrt BL, TCP quat wrt BL, gripper
+        pos_t, quat_t, gripper_t = deepcopy(action_t[0:3]), deepcopy(action_t[3:-1]), deepcopy(action_t[-1])
+        step_t_aa = quat2axisangle(quat_t)  # TCP aa wrt BL
+        gripper_t = np.array([0.0]) if gripper_t == 1.0 else np.array([1.0]) # invert to 1.0 open, 0.0 closed
+        
+        action_t = np.concatenate([pos_t, step_t_aa, gripper_t])
+        
+        change_action(traj_data['traj'], t, action_t)
+        
 def apply_transf_ur5e_sim(action_t):
     action_t_conv = trasform_from_world_to_bl(action_t)
     # from axisangle to rpy
-    axis_angle_rot = action_t_conv[3:6]
-    euler_rot = mat2euler(quat2mat(axisangle2quat(axis_angle_rot)))
-    action_t_conv[3:6] = euler_rot
-    action_t_conv[-1] = 1.0 if action_t_conv[-1] == 0.0 else 0.0
+    # axis_angle_rot = action_t_conv[3:6]
+    # euler_rot = mat2euler(quat2mat(axisangle2quat(axis_angle_rot)))
+    # action_t_conv[3:6] = euler_rot
+    action_t_conv[-1] = 1.0 if action_t_conv[-1] == 0.0 else 0.0  # 0.0 closed, 1.0 open
     return action_t_conv
 
 def change_action(trajectory, t, new_action):
@@ -244,6 +259,9 @@ if __name__ == '__main__':
     # root_save_sim_ur5_conv_dataset_path = '/user/frosa/multi_task_lfd/datasets/sim_new_ur5e_pick_place_deltas_no_converted_rounded'
     
     root_save_sim_ur5_shift_conv_abs_path = '/user/frosa/multi_task_lfd/datasets/sim_ur5e_pick_place_shifted_converted_absolute'
+
+    root_save_real_ur5_shift_conv_abs_path = '/user/frosa/multi_task_lfd/datasets/real_new_ur5e_pick_place_converted_absolute'
+    
     
     # if not os.path.exists(root_save_real_ur5_conv_dataset_path):
     #     os.mkdir(root_save_real_ur5_conv_dataset_path)
@@ -253,6 +271,9 @@ if __name__ == '__main__':
     
     if not os.path.exists(root_save_sim_ur5_shift_conv_abs_path):
         os.mkdir(root_save_sim_ur5_shift_conv_abs_path)
+        
+    if not os.path.exists(root_save_real_ur5_shift_conv_abs_path):
+        os.mkdir(root_save_real_ur5_shift_conv_abs_path)
     
     # with open('/user/frosa/multi_task_lfd/ur_multitask_dataset/opt_dataset/pick_place/ur5e_pick_place/task_13/traj034.pkl', "rb") as f:
     #     a = pickle.load(f)
@@ -266,70 +287,73 @@ if __name__ == '__main__':
     # save this for plotting
     
     
+    print('\n Converting real dataset...')
     
-    # print('\n Converting real dataset...')
+    saved_orig_traj = False
+    saved_conv_traj = False
+    saved_conv_delta_traj = False    
+    orig_traj = None
+    conv_traj = None
+    conv_delta_traj = None
     
-    # saved_orig_traj = False
-    # saved_conv_traj = False
-    # saved_conv_delta_traj = False    
-    # orig_traj = None
-    # conv_traj = None
-    # conv_delta_traj = None
-    
-    # for task_dir in sorted(os.listdir(real_ur5_dataset_path)):
-    #     if 'task_' in task_dir:
-    #         root_dir = real_ur5_dataset_path + '/' + task_dir
-    #         for root, dirs, files in os.walk(root_dir):
-    #             for f in tqdm(sorted(files), desc=f'converting {task_dir}'):
+    for task_dir in sorted(os.listdir(real_ur5_dataset_path)):
+        if 'task_' in task_dir:
+            root_dir = real_ur5_dataset_path + '/' + task_dir
+            for root, dirs, files in os.walk(root_dir):
+                if task_dir == 'task_00':
+                    files = sorted(files)[:40]
+                for f in tqdm(sorted(files), desc=f'converting {task_dir}'):
                     
-    #                 # create the new trajectory object
-    #                 # sub_traj = Trajectory()
+                    # create the new trajectory object
+                    # sub_traj = Trajectory()
                     
-    #                 traj_path = root + '/' + f
-    #                 with open(traj_path, "rb") as f:
-    #                     traj_data = pickle.load(f)
+                    traj_path = root + '/' + f
+                    with open(traj_path, "rb") as f:
+                        traj_data = pickle.load(f)
                         
-    #                 if not saved_orig_traj:
-    #                     orig_traj = deepcopy(traj_data) # pass by value
-    #                     plot_action(orig_traj['traj'], 'original traj real', 'delta_script_original_traj_real')
-    #                     saved_orig_traj = True
+                    if not saved_orig_traj:
+                        orig_traj = deepcopy(traj_data) # pass by value
+                        plot_action(orig_traj['traj'], 'original traj real', 'delta_script_original_traj_real')
+                        saved_orig_traj = True
                         
-    #                 ## convert quat -> RPY
-    #                 convert_quat_RPY(traj_data)
+                    ## convert quat -> aa
+                    convert_quat_aa(traj_data)
                         
-    #                 if not saved_conv_traj:
-    #                     conv_traj = deepcopy(traj_data)
-    #                     plot_action(conv_traj['traj'], 'conv traj real', 'delta_script_conv_traj_real')
-    #                     saved_conv_traj = True
+                    if not saved_conv_traj:
+                        conv_traj = deepcopy(traj_data)
+                        plot_action(conv_traj['traj'], 'conv traj real', 'delta_script_conv_traj_real')
+                        saved_conv_traj = True
                         
-    #                 ## convert to deltas
-    #                 traj_data = convert_to_delta(traj_data, is_sim=False)
+                    # ## convert to deltas
+                    # traj_data = convert_to_delta(traj_data, is_sim=False)
                         
-    #                 if not saved_conv_delta_traj:
-    #                     conv_delta_traj = deepcopy(traj_data)
-    #                     plot_action(conv_delta_traj['traj'], 'conv traj delta real', 'delta_script_conv_traj_delta_real')
-    #                     saved_conv_delta_traj = True
+                    # if not saved_conv_delta_traj:
+                    #     conv_delta_traj = deepcopy(traj_data)
+                    #     plot_action(conv_delta_traj['traj'], 'conv traj delta real', 'delta_script_conv_traj_delta_real')
+                    #     saved_conv_delta_traj = True
                         
-    #                 # exit()
+                    exit()
                           
-    #                 # save the converted trajectory
-    #                 traj_pkl_save_path = root_save_real_ur5_conv_dataset_path + '/' + task_dir + '/' + traj_path.split('/')[-1]
+                    # save the converted trajectory
+                    traj_pkl_save_path = root_save_real_ur5_shift_conv_abs_path + '/' + task_dir + '/' + traj_path.split('/')[-1]
                     
-    #                 try:
-    #                     pickle.dump({
-    #                         'traj': traj_data['traj'],
-    #                         'len': len(traj_data['traj']),
-    #                         'env_type': traj_data['env_type'],
-    #                         'task_id': traj_data['task_id']}, open(traj_pkl_save_path, 'wb'))
-    #                 except Exception:
-    #                     task_path_dir = root_save_real_ur5_conv_dataset_path + '/' + task_dir 
-    #                     if not os.path.exists(task_path_dir):
-    #                         os.mkdir(task_path_dir)
-    #                     pickle.dump({
-    #                         'traj': traj_data['traj'],
-    #                         'len': len(traj_data['traj']),
-    #                         'env_type': traj_data['env_type'],
-    #                         'task_id': traj_data['task_id']}, open(traj_pkl_save_path, 'wb'))
+                    
+                    
+                    # try:
+                    #     pickle.dump({
+                    #         'traj': traj_data['traj'],
+                    #         'len': len(traj_data['traj']),
+                    #         'env_type': traj_data['env_type'],
+                    #         'task_id': traj_data['task_id']}, open(traj_pkl_save_path, 'wb'))
+                    # except Exception:
+                    #     task_path_dir = root_save_real_ur5_shift_conv_abs_path + '/' + task_dir 
+                    #     if not os.path.exists(task_path_dir):
+                    #         os.mkdir(task_path_dir)
+                    #     pickle.dump({
+                    #         'traj': traj_data['traj'],
+                    #         'len': len(traj_data['traj']),
+                    #         'env_type': traj_data['env_type'],
+                    #         'task_id': traj_data['task_id']}, open(traj_pkl_save_path, 'wb'))
           
           
     ##----------- CONVERT SIM DATASET
@@ -403,7 +427,7 @@ if __name__ == '__main__':
                         plot_action(conv_traj['traj'], 'conv traj sim', 'delta_script_conv_traj_sim')
                         saved_conv_traj = True 
                         
-                    ####----- convert to deltas
+                    ###----- convert to deltas
                     # traj_data = convert_to_delta(traj_data) # in sim we excludes obs0 cause the objects and gripper are in a different place at obs0
                         
                     # if not saved_conv_delta_traj:
@@ -416,21 +440,21 @@ if __name__ == '__main__':
                     # save the converted trajectory
                     traj_pkl_save_path = root_save_sim_ur5_shift_conv_abs_path + '/' + task_dir + '/' + traj_path.split('/')[-1]
                     
-                    try:
-                        pickle.dump({
-                            'traj': traj_data['traj'],
-                            'len': len(traj_data['traj']),
-                            'env_type': traj_data['env_type'],
-                            'task_id': traj_data['task_id']}, open(traj_pkl_save_path, 'wb'))
-                    except Exception:
-                        task_path_dir = root_save_sim_ur5_shift_conv_abs_path + '/' + task_dir 
-                        if not os.path.exists(task_path_dir):
-                            os.mkdir(task_path_dir)
-                        pickle.dump({
-                            'traj': traj_data['traj'],
-                            'len': len(traj_data['traj']),
-                            'env_type': traj_data['env_type'],
-                            'task_id': traj_data['task_id']}, open(traj_pkl_save_path, 'wb'))
+                    # try:
+                    #     pickle.dump({
+                    #         'traj': traj_data['traj'],
+                    #         'len': len(traj_data['traj']),
+                    #         'env_type': traj_data['env_type'],
+                    #         'task_id': traj_data['task_id']}, open(traj_pkl_save_path, 'wb'))
+                    # except Exception:
+                    #     task_path_dir = root_save_sim_ur5_shift_conv_abs_path + '/' + task_dir 
+                    #     if not os.path.exists(task_path_dir):
+                    #         os.mkdir(task_path_dir)
+                    #     pickle.dump({
+                    #         'traj': traj_data['traj'],
+                    #         'len': len(traj_data['traj']),
+                    #         'env_type': traj_data['env_type'],
+                    #         'task_id': traj_data['task_id']}, open(traj_pkl_save_path, 'wb'))
     
     
     

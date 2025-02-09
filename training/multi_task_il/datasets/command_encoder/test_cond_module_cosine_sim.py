@@ -15,6 +15,8 @@ from sklearn.manifold import TSNE
 import time
 import seaborn as sns
 from multi_task_il.datasets.command_encoder.multi_task_command_encoder import CommandEncoderSampler, CosineLossCalculator
+from tqdm import tqdm
+import pickle as pkl
 
 DATA_AUGS = {
             "old_aug": False,
@@ -103,6 +105,32 @@ def create_val_loader(tasks_spec, black_list, data_augs):
     
     return val_loader
 
+def create_train_loader(tasks_spec, black_list, data_augs):
+    train_dataset = CommandEncoderFinetuningDataset(mode='train',
+                                                tasks_spec=tasks_spec,
+                                                dataset_samples_spec=dataset_samples_spec,
+                                                jsons_folder='/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes',
+                                                black_list=black_list,
+                                                data_augs=DATA_AUGS)
+
+    samplerClass = FinetuningCommandEncoderSampler
+    train_sampler = samplerClass(train_dataset,
+                                shuffle=False)
+
+    train_loader = DataLoader(
+        train_dataset,
+        batch_sampler=train_sampler,
+        num_workers=20,
+        worker_init_fn=lambda w: np.random.seed(
+            np.random.randint(2 ** 29) + w),
+        collate_fn=collate_by_task,
+        pin_memory=False,
+        prefetch_factor=2,
+        persistent_workers=True
+    )
+    
+    return train_loader
+
 def list_of_strings(arg):
     return arg.split(',')
 
@@ -120,31 +148,8 @@ def make_centroids(embedding_dict):
             
     return centroids_per_task
 
-def create_embedding_plot(embedding_dict, centroids_per_task, se_embeddings):
-    # create the dataframe
 
-    # for _idx, _subtask in enumerate(centroids_subtasks['pick_place'].keys()):
-    #     emb_centr = centroids_subtasks['pick_place'][_subtask]['centroid_embedding'].unsqueeze(0)
-    #     embeddings_tensor = torch.cat((embeddings_tensor, emb_centr), 0)
-    #     if _idx == 0:
-    #         emb_centroids = emb_centr
-    #     else:
-    #         emb_centroids = torch.cat((emb_centroids, emb_centr), 0)
 
-    # y = list(embedding_dict.keys())
-    # y_centr = list(centroids_per_task.keys())
-    
-    #----------df embeddings
-    y = []
-    for k_idx, k in enumerate(embedding_dict.keys()):
-        arrays_list = embedding_dict[k]
-        for el_idx, el in enumerate(arrays_list):
-            if k_idx == 0 and el_idx == 0:
-                embeddings_tensor = torch.from_numpy(el).unsqueeze(0)
-            else:
-                embeddings_tensor = torch.cat((embeddings_tensor, torch.from_numpy(el).unsqueeze(0)))
-            y.append(k)  
-            
             
             
     # task_bsize = 160
@@ -181,9 +186,6 @@ def create_embedding_plot(embedding_dict, centroids_per_task, se_embeddings):
     # mse(a,b)
     # mse(b,c)
     
-    
-    
-    
     # a = torch.tensor([[3.,3.,3.], [3.,3.,3.]])
     # b = torch.tensor([[7.,7.,7.], [8.,8.,8.]])
     
@@ -192,71 +194,7 @@ def create_embedding_plot(embedding_dict, centroids_per_task, se_embeddings):
             
     # [(torch.from_numpy(i) - se_embeddings[0]).sum() for i in embedding_dict['Pick the green box and place it into the first bin']]          
 
-    embeddings_numpy = embeddings_tensor.numpy()
-    feat_cols = [ 'e'+str(i) for i in range(embeddings_tensor.shape[1]) ]
-    df = pd.DataFrame(embeddings_numpy,columns=feat_cols)
-    df['y'] = y # label numerica
-    # df['label'] = df['y'].apply(lambda i: str(i)) # label di tipo stringa
-    
-    #----------df centroids
-    y_centr = []
-    for k_idx, k in enumerate(centroids_per_task.keys()):
-        centroid = centroids_per_task[k]
-        if k_idx == 0:
-            centroids_tensor = centroid.unsqueeze(0)
-        else:
-            centroids_tensor = torch.cat((centroids_tensor, centroid.unsqueeze(0)))
-        y_centr.append(k)
-        
-    #-------- df sentence encoder embeddings       
-
-    centroids_numpy = centroids_tensor.numpy()
-    df_centr = pd.DataFrame(centroids_numpy,columns=feat_cols)
-    df_centr['y'] = y_centr # label numerica
-    # df_centr['label'] = df_centr['y'].apply(lambda i: str(i)) # label di tipo stringa
-
-
-    df_se_emb = pd.DataFrame(se_embeddings, columns=feat_cols)
-    df_se_emb['y'] = y_centr
-
-    # y_centr_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/embeddings_cond_module_validation_set'
-    # with open(f'{y_centr_path}/labels.txt', 'w') as f:
-    #     for line in y_centr:
-    #         f.write(f"{line}\n")
-
-
-    # /raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/embeddings_cond_module_validation_set
-    ####### saving
-    # np.save('/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/embeddings_cond_module_validation_set/embeddings_new', embeddings_numpy)
-    # np.save('/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/embeddings_cond_module_validation_set/centroids_new', centroids_numpy)
-    
-    # exit()
-    
-    # with open('/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/embeddings_cond_module_validation_set/centroids.npy', 'rb') as f:
-    #     a = np.load(f)
-
-    #----------create TSNE object
-    num_classes = len(list(centroids_per_task.keys()))
-    all_tensor = torch.cat((embeddings_tensor, centroids_tensor, se_embeddings), 0)
-    
-    
-    
-    time_start = time.time()
-    tsne = TSNE(n_components=2, verbose=1, perplexity=5, n_iter=500) # vedere se cambiare parametri
-    tsne_results = tsne.fit_transform(all_tensor)
-    print('t-SNE done! Time elapsed: {} seconds'.format(time.time()-time_start))
-
-    #----------add columns to df
-    df['tsne-2d-one'] = tsne_results[:-2*num_classes,0]
-    df['tsne-2d-two'] = tsne_results[:-2*num_classes,1]
-    
-    df_centr['tsne-2d-one'] = tsne_results[-2*num_classes:-num_classes,0]
-    df_centr['tsne-2d-two'] = tsne_results[-2*num_classes:-num_classes,1]
-    
-    df_se_emb['tsne-2d-one'] = tsne_results[-num_classes:,0]
-    df_se_emb['tsne-2d-two'] = tsne_results[-num_classes:,1]
-
-    #----------plotting
+def get_palette(num_classes):
     import colorcet as cc
     palette = sns.color_palette(cc.glasbey, n_colors=num_classes)
     palette[0] = (0.0, 0.37, 0.0)
@@ -279,37 +217,89 @@ def create_embedding_plot(embedding_dict, centroids_per_task, se_embeddings):
     palette[14] = (0.75, 0.0, 0.0)
     palette[15] = (1.0, 0.0, 0.0)
 
-    plt.figure(figsize=(15,10))
-    # ax = sns.scatterplot(
-    #     x="tsne-2d-one", y="tsne-2d-two",
-    #     hue="y", # per ora non la uso visto che ogni campione è a se
-    #     palette=palette,
-    #     data=df,
-    #     legend=False,
-    #     # alpha=0.3
-    # )
+
+def create_embedding_plot(train_preds, val_preds, test_preds, se_embeddings, y):
+
+    train_preds_np, val_preds_np, test_preds_np, se_embeddings_np = \
+        train_preds.cpu().numpy(), val_preds.cpu().numpy(), test_preds.cpu().numpy(), se_embeddings.cpu().numpy()
+
+    feat_cols = [ 'e'+str(i) for i in range(train_preds_np.shape[1]) ]
     
-    # ax = sns.scatterplot(
-    #     x="tsne-2d-one", y="tsne-2d-two",
-    #     hue="y",
-    #     palette=palette,
-    #     data=df_centr,
-    #     marker="*",
-    #     s=400,
-    #     legend="full",
-    #     ax=ax
-    # )
+    df_train, df_val, df_test, df_se = \
+        pd.DataFrame(train_preds_np,columns=feat_cols), \
+            pd.DataFrame(val_preds_np,columns=feat_cols), \
+                pd.DataFrame(test_preds_np,columns=feat_cols), \
+                    pd.DataFrame(se_embeddings_np,columns=feat_cols)
+            
+    df_train['y'] = y * 90
+    df_val['y'] = y * 10
+    df_test['y'] = y * 10
+    df_se['y'] = y
+    
+    #----------create TSNE object
+    num_classes = 16
+    all_tensor = torch.cat((train_preds, val_preds, test_preds, se_embeddings)).cpu().numpy()
+    
+    time_start = time.time()
+    tsne = TSNE(n_components=2, verbose=1, perplexity=50, n_iter=500) # vedere se cambiare parametri
+    tsne_results = tsne.fit_transform(all_tensor)
+    print('t-SNE done! Time elapsed: {} seconds'.format(time.time()-time_start))
+
+    #----------add columns to df
+    df_train['tsne-2d-one'] = tsne_results[:90*num_classes,0]
+    df_train['tsne-2d-two'] = tsne_results[:90*num_classes,1]
+    
+    df_val['tsne-2d-one'] = tsne_results[90*num_classes:100*num_classes,0]
+    df_val['tsne-2d-two'] = tsne_results[90*num_classes:100*num_classes,1]
+    
+    df_test['tsne-2d-one'] = tsne_results[100*num_classes:110*num_classes, 0]
+    df_test['tsne-2d-two'] = tsne_results[100*num_classes:110*num_classes, 1]
+    
+    df_se['tsne-2d-one'] = tsne_results[110*num_classes:, 0]
+    df_se['tsne-2d-two'] = tsne_results[110*num_classes:, 1]
+
+    #----------plotting
+    palette = get_palette(num_classes)
+
+    plt.figure(figsize=(15,10))
+    ax = sns.scatterplot(
+        x="tsne-2d-one", y="tsne-2d-two",
+        hue="y", # per ora non la uso visto che ogni campione è a se
+        palette=palette,
+        data=df_train,
+        legend="full",
+        # alpha=0.3
+    )
     
     ax = sns.scatterplot(
         x="tsne-2d-one", y="tsne-2d-two",
         hue="y",
         palette=palette,
-        data=df_se_emb,
-        marker="X",
-        s=400,
-        legend="full"
+        data=df_val,
+        marker="*",
+        legend=False,
+        ax=ax
     )
     
+    ax = sns.scatterplot(
+        x="tsne-2d-one", y="tsne-2d-two",
+        hue="y",
+        palette=palette,
+        data=df_test,
+        marker="X",
+        legend=False,
+        ax=ax
+    )
+    
+    ax = sns.scatterplot(
+        x="tsne-2d-one", y="tsne-2d-two",
+        hue="y",
+        palette=palette,
+        data=df_se,
+        marker="s",
+        legend=False,
+        ax=ax
+    )
     
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.6, box.height])
@@ -325,6 +315,30 @@ def create_embedding_plot(embedding_dict, centroids_per_task, se_embeddings):
         os.mkdir("finetuning_centroid_figures/")
         plt.savefig(f"finetuning_centroid_figures/embeddings_clusters_{ts}.png")
             
+def init_cond_module():
+    ## loading model
+    # cond_module = CondModule(model_name='r2plus1d_18', demo_linear_dim=[512, 512, 512], pretrained=True).to(device)
+    cond_module = CondModule(model_name='r2plus1d_18', demo_linear_dim=[512, 512, 512], pretrained=True)
+    weights = torch.load('/user/frosa/multi_task_lfd/checkpoint_save_folder/cond_module_ALLBUTDROID_20epochs_RGB_weak_aug-Batch32/model_save-1012.pt', weights_only=True)
+
+    cond_module.load_state_dict(weights)
+    cond_module.eval()
+
+    model_parameters = filter(lambda p: p.requires_grad, cond_module.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    # print(cond_module)
+    print('Total params in cond module before freezing:', params)
+
+    # freeze cond module
+    for p in cond_module.parameters():
+        p.requires_grad = False
+        
+    model_parameters = filter(lambda p: p.requires_grad, cond_module.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    # print(cond_module)
+    print('Total params in cond module after freezing:', params)
+    
+    return  cond_module 
 
 
 if __name__ == '__main__':
@@ -367,94 +381,55 @@ if __name__ == '__main__':
         }
     ]
 
+    train_loader = create_train_loader(tasks_spec, args.black_list, DATA_AUGS)
     val_loader = create_val_loader(tasks_spec, args.black_list, DATA_AUGS)
     
-    ## loading model
-    cond_module = CondModule(model_name='r2plus1d_18', demo_linear_dim=[512, 512, 512], pretrained=True).to(device)
-    weights = torch.load(args.weights_path, weights_only=True)
-
-    cond_module.load_state_dict(weights)
-    cond_module.eval()
-
-    model_parameters = filter(lambda p: p.requires_grad, cond_module.parameters())
-    params = sum([np.prod(p.size()) for p in model_parameters])
-    # print(cond_module)
-    print('Total params in cond module before freezing:', params)
-
-    # freeze cond module
-    for p in cond_module.parameters():
-        p.requires_grad = False
-        
-    model_parameters = filter(lambda p: p.requires_grad, cond_module.parameters())
-    params = sum([np.prod(p.size()) for p in model_parameters])
-    # print(cond_module)
-    print('Total params in cond module after freezing:', params)
+    cond_module = init_cond_module()
 
     embedding_dict = {} # store embeddings for each task
     # batch_count = 0
     with torch.no_grad():
-        for batch_idx, inputs in enumerate(val_loader):
-            # folder_path = f'test_cond_module_example_batch_{batch_count}_cond_module'
-            # for k in range(inputs['finetuning']['demo_data']['demo'].shape[0]):
-            #     for i in range(4):
-            #         image = inputs['finetuning']['demo_data']['demo'][k][i]
-            #         sentence = inputs['finetuning']['sentence'][k]
-            #         if not os.path.exists(folder_path):
-            #             os.mkdir(folder_path)
-            #         image = cv2.putText(np.ascontiguousarray(np.moveaxis(image.numpy()*255, 0, -1)),
-            #                             sentence,
-            #                             (2,10),
-            #                             cv2.FONT_HERSHEY_SIMPLEX,
-            #                             0.3,
-            #                             (255,0,0),
-            #                             1,
-            #                             cv2.LINE_AA)
-            #         cv2.imwrite(f"{folder_path}/{k}_{i}.png", image)
+        
+        ## train preds
+        for batch_idx, inputs in tqdm(enumerate(train_loader)):
             
-            # batch_count+=1
-            demos = inputs['finetuning']['demo_data']['demo'].to(device)
-            batch_sentences = inputs['finetuning']['sentence']
-            se_embeddings = inputs['finetuning']['embedding_data']
-            batch_output = cond_module(demos)
+            demos_sorted = inputs['finetuning']['demo_data']['demo'].to(device)
             if batch_idx == 0:
-                # all_output = batch_output
-                # all_sentences = batch_sentences 
-                
-                # Pick up pink block.
-                # Pick up pink flower.
-                        
-                for sentence_idx, sentence in enumerate(batch_sentences):
-                    embedding_dict[sentence] = [] # create the list to store embeddings
-                    embedding_dict[sentence].append(batch_output[sentence_idx].detach().cpu().numpy())
-                    
-                    if sentence == 'Pick up pink block.' or sentence == 'Pick up pink flower.':
-                        print(f'sentence: {sentence}')
-                        pink_sentence = sentence
+                train_preds = cond_module(demos_sorted)
+                se_embeddings = inputs['finetuning']['embedding_data']
+                y = inputs['finetuning']['sentence']
             else:
-                # all_output = torch.cat((all_output, batch_output), 0)
-                # all_sentences.extend(batch_sentences)
-                for sentence_idx, sentence in enumerate(batch_sentences):
-                    if sentence == 'Pick up pink block.' or sentence == 'Pick up pink flower.':
-                        sentence = pink_sentence
-                    
-                    embedding_dict[sentence].append(batch_output[sentence_idx].detach().cpu().numpy())
-                    
-                    
-                
-            # with open('test_sentences.txt', 'a') as f:
-            #     for line in batch_sentences:
-            #         f.write(f"{line}\n")
-            #     f.write(f"\n\n***")
+                train_preds = torch.cat((train_preds, cond_module(demos_sorted)))
             
+        ## val preds
+        for batch_idx, inputs in tqdm(enumerate(val_loader)):
             
-            # print(inputs['sentence'])
+            demos_sorted = inputs['finetuning']['demo_data']['demo'].to(device)
+            if batch_idx == 0:
+                val_preds = cond_module(demos_sorted)
+            else:
+                val_preds = torch.cat((val_preds, cond_module(demos_sorted)))
+            
+        ## test preds
+        test_contexts_path = '/user/frosa/multi_task_lfd/checkpoint_save_folder/rt1_sim_abs_aa_weakaug_-1_1-Batch48/results_pick_place/run_1/step-16200_nocorr'
+        test_demos = [f'context{i}.pkl' for i in range(160)]
+        test_demos = [f'{test_contexts_path}/{i}' for i in test_demos]
+        
+        for idx, test_demo_path in tqdm(enumerate(test_demos)):
+            with open(test_demo_path, "rb") as f:
+                test_demo = pkl.load(f).to(device)
+            
+            if idx == 0:    
+                test_preds = cond_module(test_demo)
+            else:
+                test_preds = torch.cat((test_preds, cond_module(test_demo)))
         
         print('end')
     
     
-    centroids_per_task = make_centroids(embedding_dict)
+    # centroids_per_task = make_centroids(embedding_dict)
 
     
-    create_embedding_plot(embedding_dict, centroids_per_task, se_embeddings)
+    create_embedding_plot(train_preds, val_preds, test_preds, se_embeddings.to(device), y)
     
     

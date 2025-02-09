@@ -57,7 +57,7 @@ if __name__ == '__main__':
     # real_ur5e -> (panda_dem, real_ur5e_traj)
     # sim_ur5e -> (panda_dem, sim_ur5e_traj)
     exclude_droid_list = ['droid_converted', 'droid_converted_0_to_2909', 'droid_converted_2909_to_4645']
-    non_reflexive_combination_datasets = ['real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_deltas_no_converted_rounded', 'panda_pick_place', 'ur5e_pick_place']
+    non_reflexive_combination_datasets = ['sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'panda_pick_place', 'ur5e_pick_place']
     
     couples_dataset_counter = {}
     couples_dataset = {}
@@ -92,52 +92,50 @@ if __name__ == '__main__':
                     
     ##### for real and sim ur5e, couple with panda demonstration
     pick_place_demos_traj = data['panda_pick_place']
-    real_ur5e_traj = data['real_new_ur5e_pick_place_converted']
-    sim_ur5e_traj = data['sim_new_ur5e_pick_place_converted']
-    sim_ur5e_no_conv_traj = data['sim_new_ur5e_pick_place_deltas_no_converted_rounded']
+    real_ur5e_traj = data['real_new_ur5e_pick_place_converted_absolute']
+    sim_ur5e_traj = data['sim_ur5e_pick_place_shifted_converted_absolute']
+
     
-    couples_dataset['real_new_ur5e_pick_place_converted'] = {}
-    couples_dataset['sim_new_ur5e_pick_place_converted'] = {}
-    couples_dataset['sim_new_ur5e_pick_place_deltas_no_converted_rounded'] = {}
-    couples_dataset_counter['real_new_ur5e_pick_place_converted'] = {}
-    couples_dataset_counter['sim_new_ur5e_pick_place_converted'] = {}
-    couples_dataset_counter['sim_new_ur5e_pick_place_deltas_no_converted_rounded'] = {}
+    couples_dataset['real_new_ur5e_pick_place_converted_absolute'] = {}
+    couples_dataset['sim_ur5e_pick_place_shifted_converted_absolute'] = {}
+
+    couples_dataset_counter['real_new_ur5e_pick_place_converted_absolute'] = {}
+    couples_dataset_counter['sim_ur5e_pick_place_shifted_converted_absolute'] = {}
+
     
     for task in pick_place_demos_traj.keys():
-        couples_dataset['real_new_ur5e_pick_place_converted'][task] = []
-        couples_dataset['sim_new_ur5e_pick_place_converted'][task] = []
-        couples_dataset['sim_new_ur5e_pick_place_deltas_no_converted_rounded'][task] = []
+        couples_dataset['real_new_ur5e_pick_place_converted_absolute'][task] = []
+        couples_dataset['sim_ur5e_pick_place_shifted_converted_absolute'][task] = []
+
         task_panda_demos = pick_place_demos_traj[task]
         for demo in task_panda_demos:
             for traj in real_ur5e_traj[task]:
-                couples_dataset['real_new_ur5e_pick_place_converted'][task].append((demo, traj))
+                couples_dataset['real_new_ur5e_pick_place_converted_absolute'][task].append((demo, traj))
                 
             for traj in sim_ur5e_traj[task]:
-                couples_dataset['sim_new_ur5e_pick_place_converted'][task].append((demo, traj))
-                
-            for traj in sim_ur5e_no_conv_traj[task]:
-                couples_dataset['sim_new_ur5e_pick_place_deltas_no_converted_rounded'][task].append((demo, traj))
-    
-            couples_dataset_counter['real_new_ur5e_pick_place_converted'][task] = len(couples_dataset['real_new_ur5e_pick_place_converted'][task])
-            couples_dataset_counter['sim_new_ur5e_pick_place_converted'][task] = len(couples_dataset['sim_new_ur5e_pick_place_converted'][task])
-            couples_dataset_counter['sim_new_ur5e_pick_place_deltas_no_converted_rounded'][task] = len(couples_dataset['sim_new_ur5e_pick_place_deltas_no_converted_rounded'][task])
+                couples_dataset['sim_ur5e_pick_place_shifted_converted_absolute'][task].append((demo, traj))
+
+
+            couples_dataset_counter['real_new_ur5e_pick_place_converted_absolute'][task] = len(couples_dataset['real_new_ur5e_pick_place_converted_absolute'][task])
+            couples_dataset_counter['sim_ur5e_pick_place_shifted_converted_absolute'][task] = len(couples_dataset['sim_ur5e_pick_place_shifted_converted_absolute'][task])
+
     
     
     #### only for ur5e_pick_place sim
-    pick_place_demos_traj = data['panda_pick_place']
-    sim_ur5e_traj = data['ur5e_pick_place']
+    # pick_place_demos_traj = data['panda_pick_place']
+    # sim_ur5e_traj = data['ur5e_pick_place']
     
-    couples_dataset['ur5e_pick_place'] = {}
-    couples_dataset_counter['ur5e_pick_place'] = {}
+    # couples_dataset['ur5e_pick_place'] = {}
+    # couples_dataset_counter['ur5e_pick_place'] = {}
     
-    for task in pick_place_demos_traj.keys():
-        couples_dataset['ur5e_pick_place'][task] = []
-        task_panda_demos = pick_place_demos_traj[task]
-        for demo in task_panda_demos:
-            for traj in sim_ur5e_traj[task]:
-                couples_dataset['ur5e_pick_place'][task].append((demo, traj))
+    # for task in pick_place_demos_traj.keys():
+    #     couples_dataset['ur5e_pick_place'][task] = []
+    #     task_panda_demos = pick_place_demos_traj[task]
+    #     for demo in task_panda_demos:
+    #         for traj in sim_ur5e_traj[task]:
+    #             couples_dataset['ur5e_pick_place'][task].append((demo, traj))
     
-            couples_dataset_counter['ur5e_pick_place'][task] = len(couples_dataset['ur5e_pick_place'][task])
+    #         couples_dataset_counter['ur5e_pick_place'][task] = len(couples_dataset['ur5e_pick_place'][task])
     
     
     # dir_name_save = 'traj_couples'

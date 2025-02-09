@@ -38,6 +38,7 @@ from multi_task_il.datasets.command_encoder.multi_task_command_encoder import Co
 from multi_task_il.datasets.command_encoder.command_encoder_dataset import FinetuningCommandEncoderSampler
 from multi_task_il.datasets.command_encoder.finetuning_paired_dataset import FinetuningPairedDatasetSampler
 import cv2
+from multi_task_il.datasets.command_encoder.utils import init_freezed_cond_module
 
 torch.autograd.set_detect_anomaly(True)
 # for visualization
@@ -624,7 +625,7 @@ def loss_function_vima(config, train_cfg, device, model, task_inputs, mode='trai
     return task_losses
 
 
-def calculate_task_loss(config, train_cfg, device, model, task_inputs, val=False, optimizer=None):
+def calculate_task_loss(config, train_cfg, device, model, task_inputs, val=False, optimizer=None, cond_module_instance=None):
     """Assumes inputs are collated by task names already, organize things properly before feeding into the model s.t.
         for each batch input, the model does only one forward pass."""
 
@@ -726,11 +727,16 @@ def calculate_task_loss(config, train_cfg, device, model, task_inputs, val=False
             #         for t, img in enumerate(ep):
             #             cv2.imwrite(f'{ep_idx}_{t}.png', (img*255).type(torch.IntTensor).permute(1,2,0).cpu().numpy())
             
+            
+            # compute embedding with freezed cond_module
+            
+            
+            cond_embedding = cond_module_instance(copy.deepcopy(model_inputs['demo']))
 
             out, ce_loss, bin_acc, bin_acc_interval = model(  # 1550MB
                 images=copy.deepcopy(model_inputs['images']), # sono obs_T step perché la traiettoria viene tagliata
                 states=copy.deepcopy(model_inputs['states']),
-                demo=copy.deepcopy(model_inputs['demo']),
+                cond_embedding=cond_embedding,
                 actions=copy.deepcopy(model_inputs['actions']),
                 bsize=config.bsize
             )
@@ -1246,6 +1252,26 @@ class Trainer:
         except:
             pass
         alpha = 0.16
+        
+        if "RT1_video_cond" in self.config.policy._target_:
+            # if we use RT1 video-cond we want a freezed, pretrained cond_module from a specified checkpoint
+            cond_module_cfg = self.config.cond_module
+            cond_module_instance = init_freezed_cond_module(
+                height=cond_module_cfg.height,
+                width=cond_module_cfg.width,
+                demo_T=cond_module_cfg.demo_T,
+                model_name=cond_module_cfg.model_name,
+                pretrained=cond_module_cfg.pretrained,
+                cond_video=cond_module_cfg.cond_video,
+                n_layers=cond_module_cfg.n_layers,
+                demo_W=cond_module_cfg.demo_W,
+                demo_H=cond_module_cfg.demo_H,
+                demo_ff_dim=cond_module_cfg.demo_ff_dim,
+                demo_linear_dim=cond_module_cfg.demo_linear_dim,
+                conv_drop_dim=cond_module_cfg.conv_drop_dim,
+                cond_module_model_path=cond_module_cfg.cond_module_model_path,
+                device=next(model.parameters()).device
+            )
 
         for e in range(epochs):
             frac = e / epochs
@@ -1276,12 +1302,12 @@ class Trainer:
                 # for k in range(num_samples):
                 #     for t in range(demo_steps):
                 #         image = inputs['finetuning']['demo_data']['demo'][k][t]
-                #         cv2.imwrite(f"test_batch_rt1/demo_{k}_{t}.png", np.moveaxis(
+                #         cv2.imwrite(f"test_batch_rt1_sim/demo_{k}_{t}.png", np.moveaxis(
                 #                         image.numpy()*255, 0, -1))                        
                     
                 #     for t in range(traj_steps):
                 #         image = inputs['finetuning']['traj']['images'][k][t]
-                #         cv2.imwrite(f"test_batch_rt1/traj_{k}_{t}.png", np.moveaxis(
+                #         cv2.imwrite(f"test_batch_rt1_sim/traj_{k}_{t}.png", np.moveaxis(
                 #                         image.numpy()*255, 0, -1))
                 
                 
@@ -1305,7 +1331,7 @@ class Trainer:
                     
                     if 'finetuning_paired_dataset' in self.config.dataset_cfg._target_:
                         task_losses, bin_acc, bin_acc_interval = loss_function(
-                            self.config, self.train_cfg, self._device, model, inputs)
+                            self.config, self.train_cfg, self._device, model, inputs, cond_module_instance=cond_module_instance)
                     else:
                         task_losses, bin_acc = loss_function(
                             self.config, self.train_cfg, self._device, model, inputs)
@@ -1464,7 +1490,8 @@ class Trainer:
                                             self._device,
                                             model,
                                             val_inputs,
-                                            val=True)
+                                            val=True,
+                                            cond_module_instance=cond_module_instance)
                                     else:
                                         val_task_losses, val_bin_acc = loss_function(
                                             self.config,

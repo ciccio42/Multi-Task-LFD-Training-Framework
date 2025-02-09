@@ -7,6 +7,7 @@ from gym import spaces
 from collections import OrderedDict
 from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.tokenizers.utils import *
 import cv2
+from copy import deepcopy
 
 
 # y = 0
@@ -35,24 +36,7 @@ class RT1_video_cond(nn.Module):
             return_attention_scores: bool = False,
             img_height: int = 224,
             img_width: int = 224,
-            concat_target_obj_embedding: bool = False,
-            
-            ### cond_module parameters
-            height=120,
-            width=160,
-            demo_T=4,
-            model_name="slow_r50",
-            pretrained=False,
-            cond_video=True,
-            n_layers=3,
-            demo_W=7,
-            demo_H=7,
-            demo_ff_dim=[128, 64, 32],
-            demo_linear_dim=[512, 256, 128],
-            conv_drop_dim=3,
-            
-            cond_module_model_path = None
-        
+            concat_target_obj_embedding: bool = False,        
         ) -> None:
         super().__init__()
         self.rt1 = TransformerNetwork(
@@ -74,49 +58,58 @@ class RT1_video_cond(nn.Module):
             img_width=img_width,
             concat_target_obj_embedding=concat_target_obj_embedding
         )
-        self.cond_module = CondModule(
-            height=height,
-            width=width,
-            demo_T=demo_T,
-            model_name=model_name,
-            pretrained=pretrained,
-            cond_video=cond_video,
-            n_layers=n_layers,
-            demo_W=demo_W,
-            demo_H=demo_H,
-            demo_ff_dim=demo_ff_dim,
-            demo_linear_dim=demo_linear_dim,
-            conv_drop_dim= conv_drop_dim      
-        ) # in evaluation because already training and for memory consumption purposes
+        # self.cond_module = CondModule(
+        #     height=height,
+        #     width=width,
+        #     demo_T=demo_T,
+        #     model_name=model_name,
+        #     pretrained=pretrained,
+        #     cond_video=cond_video,
+        #     n_layers=n_layers,
+        #     demo_W=demo_W,
+        #     demo_H=demo_H,
+        #     demo_ff_dim=demo_ff_dim,
+        #     demo_linear_dim=demo_linear_dim,
+        #     conv_drop_dim= conv_drop_dim      
+        # ) # in evaluation because already training and for memory consumption purposes
         
         # load pretrained weights of cond_module
         # self.cond_module = CondModule(model_name='r2plus1d_18', demo_linear_dim=[512, 512, 512], pretrained=True)
-        try:
-            weights = torch.load(cond_module_model_path, weights_only=True)
-        except Exception:
-            weights = torch.load(cond_module_model_path, map_location='cuda:0') # this is when you load the cond module on your pc when testing
-        self.cond_module.load_state_dict(weights)
-        self.cond_module.eval()
+        # self.cond_module_model_path = cond_module_model_path
+        # try:
+        #     weights = torch.load(cond_module_model_path, weights_only=True)
+        # except Exception:
+        #     weights = torch.load(cond_module_model_path, map_location='cuda:0') # this is when you load the cond module on your pc when testing
+        # self.cond_module.load_state_dict(weights)
+        # self.cond_module.eval()
         # used to store network_state
         # this is used for inference in order to remember the previous tokens up to _time_sequence_length steps
         
-        model_parameters = filter(lambda p: p.requires_grad, self.cond_module.parameters())
-        params = sum([np.prod(p.size()) for p in model_parameters])
-        print(self.cond_module)
-        print('Total params in cond module before freezing:', params)
+        # model_parameters = filter(lambda p: p.requires_grad, self.cond_module.parameters())
+        # params = sum([np.prod(p.size()) for p in model_parameters])
+        # # print(self.cond_module)
+        # print('Total params in cond module before freezing:', params)
 
-        # freeze cond module
-        for p in self.cond_module.parameters():
-            p.requires_grad = False
+        # # freeze cond module
+        # for p in self.cond_module.parameters():
+        #     p.requires_grad = False
             
-        model_parameters = filter(lambda p: p.requires_grad, self.cond_module.parameters())
-        params = sum([np.prod(p.size()) for p in model_parameters])
-        print(self.cond_module)
-        print('Total params in cond module after freezing:', params)
+        # model_parameters = filter(lambda p: p.requires_grad, self.cond_module.parameters())
+        # params = sum([np.prod(p.size()) for p in model_parameters])
+        # # print(self.cond_module)
+        # print('Total params in cond module after freezing:', params)
 
         self.rt1_memory = None
         self.base_net_state_sampler = RT1_SpaceSampler() # random sampler class
         self.inference_first_state_sampler = FirstStep_RT1_SpaceSampler(self.base_net_state_sampler) # sampler for first state at inference
+
+        # test
+        # input = torch.randn((1,4,3,100,180))
+        
+        
+        # device = next(self.cond_module.parameters()).device
+        
+        # self.cond_module(input)
         
     def compute_bin_accuracy(self, actor_bin, gt_bin):
         
@@ -126,17 +119,31 @@ class RT1_video_cond(nn.Module):
     def forward(self,
                 images,
                 states,
-                demo,
+                cond_embedding,
                 actions, # actions are normalized in [-1.0, 1.0] with normalizations ranges defined in .yaml
-                bsize):
+                bsize,
+                oracle_embedding=False,
+                variation=None):
         
         # create embedding from video demonstration that will be use to condition
         # conv function activations via film layers
         debug = False
         
         # TODO: load the weights of pretrained cond_module
-        with torch.no_grad():
-            cond_embedding = self.cond_module(demo) # 15GB for the computation graph -> 4GB with torch no grad
+        # if not oracle_embedding:
+        #     self.cond_module.eval()
+        #     with torch.no_grad():
+        #         cond_embedding = self.cond_module(demo) # 15GB for the computation graph -> 4GB with torch no grad
+        #         # np.save('/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/embeddings_cond_module_train_set/embeddings', self.cond_module(demo[:16]).cpu().numpy())
+        # else:
+        #     # load numpy arrays
+        #     centroids_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/embeddings_cond_module_train_set/embeddings.npy'
+        #     with open(centroids_path, 'rb') as f:
+        #         centroids_numpy = np.load(f)
+        #     centroids_tensor = torch.from_numpy(centroids_numpy).to(next(self.parameters()).device)
+        #     cond_embedding = centroids_tensor[variation].unsqueeze(0)
+            
+            
         
         # global y
         # global embedding_task_dict
@@ -191,7 +198,7 @@ class RT1_video_cond(nn.Module):
         
         
         # import os
-        # task_dir = 'task_debug_test_inf_2'
+        # task_dir = 'task_debug_test_inf_3'
         # os.mkdir(task_dir)
         # for task_id, task_imgs in enumerate(images):
         #     os.mkdir(f'{task_dir}/task_{task_id:02d}')
@@ -201,7 +208,7 @@ class RT1_video_cond(nn.Module):
                 
             
             
-        # demo_dir = 'demo_debug_test_inf_2'
+        # demo_dir = 'demo_debug_test_inf_3'
         # os.mkdir(demo_dir)
         # for task_id, task_imgs in enumerate(demo):
         #     os.mkdir(f'{demo_dir}/task_{task_id:02d}')
@@ -231,7 +238,7 @@ class RT1_video_cond(nn.Module):
             # rt1_network_state = batched_space_sampler(self.rt1._state_space, bsize) # campionamento a caso
             rt1_network_state = self.base_net_state_sampler.batched_space_sampler(self.rt1._state_space, bsize) # campionamento a caso
             rt1_network_state = np_to_tensor(rt1_network_state)
-            rt1_network_state = tensor_from_cpu_to_cuda(rt1_network_state, next(self.cond_module.parameters()).device)
+            rt1_network_state = tensor_from_cpu_to_cuda(rt1_network_state, next(self.parameters()).device)
         
         else:
             # we are in inference, the model expects (b,c,h,w) observations
@@ -240,15 +247,15 @@ class RT1_video_cond(nn.Module):
                 "natural_language_embedding": cond_embedding
             }
             
-            if True:
-                img_debug = np.moveaxis(rt1_obs['image'][0].detach().cpu().numpy()*255, 0, -1)
-                cv2.imwrite(f"debug_rt1_obs.png", img_debug) #images are already rgb
+            # if True:
+            #     img_debug = np.moveaxis(rt1_obs['image'][0].detach().cpu().numpy()*255, 0, -1)
+            #     cv2.imwrite(f"debug_rt1_obs.png", img_debug) #images are already rgb
             # cv2.imwrite(f"debug_rt1.png", img_tensor[:, :, ::-1]) #BGR -> RGB
             
             if self.rt1_memory == None: # if this is the initial step
                 rt1_network_state = self.inference_first_state_sampler.batched_space_sampler(self.rt1._state_space, bsize)
                 rt1_network_state = np_to_tensor(rt1_network_state)
-                rt1_network_state = tensor_from_cpu_to_cuda(rt1_network_state, next(self.cond_module.parameters()).device)
+                rt1_network_state = tensor_from_cpu_to_cuda(rt1_network_state, next(self.parameters()).device)
             else: # if at least one step has been executed
                 rt1_network_state = self.rt1_memory # retrieve the network state of the previous timestep
                

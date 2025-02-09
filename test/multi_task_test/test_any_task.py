@@ -324,25 +324,49 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                     gt_variation = return_rollout[1]['variation_id']
                     
                     # get embedding from demonstration prediction
-                    with torch.no_grad():
-                        predicted_tensor = model.cond_module(context.to(next(model.parameters()).device)) # 15GB for the computation graph -> 4GB with torch no grad
+                    from multi_task_il.datasets.command_encoder.utils import init_freezed_cond_module
+                    cond_module_cfg = config.cond_module
+                    cond_module_instance = init_freezed_cond_module(
+                                                height=cond_module_cfg.height,
+                                                width=cond_module_cfg.width,
+                                                demo_T=cond_module_cfg.demo_T,
+                                                model_name=cond_module_cfg.model_name,
+                                                pretrained=cond_module_cfg.pretrained,
+                                                cond_video=cond_module_cfg.cond_video,
+                                                n_layers=cond_module_cfg.n_layers,
+                                                demo_W=cond_module_cfg.demo_W,
+                                                demo_H=cond_module_cfg.demo_H,
+                                                demo_ff_dim=cond_module_cfg.demo_ff_dim,
+                                                demo_linear_dim=cond_module_cfg.demo_linear_dim,
+                                                conv_drop_dim=cond_module_cfg.conv_drop_dim,
+                                                cond_module_model_path=cond_module_cfg.cond_module_model_path,
+                                                device=next(model.parameters()).device
+                                                )
+
+                    predicted_tensor = cond_module_instance(context.to(next(model.parameters()).device))
                     
                     # load numpy arrays
                     centroids_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/embeddings_cond_module_validation_set/centroids.npy'
+                    embeddings_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/embeddings_cond_module_validation_set/embeddings_new.npy'
                     
                     with open(centroids_path, 'rb') as f:
                         centroids_numpy = np.load(f)
                         
+                    with open(embeddings_path, 'rb') as f:
+                        embeddings_numpy = np.load(f)
+                        
                     centroids_tensor = torch.from_numpy(centroids_numpy).to(next(model.parameters()).device)
+                    embeddings_tensor = torch.from_numpy(embeddings_numpy).to(next(model.parameters()).device)
                     
                     from sklearn.manifold import TSNE
                     import seaborn as sns
                     #----------create TSNE object
                     num_classes = centroids_tensor.shape[0]
                     # all_tensor = torch.cat((embeddings_tensor, centroids_tensor), 0)
-                    all_tensor = torch.cat((centroids_tensor, predicted_tensor), 0)
+                    # all_tensor = torch.cat((centroids_tensor, predicted_tensor), 0)
+                    all_tensor = torch.cat((embeddings_tensor, predicted_tensor), 0)
                     time_start = time.time()
-                    tsne = TSNE(n_components=2, perplexity=5, n_iter=600) # vedere se cambiare parametri
+                    tsne = TSNE(n_components=2, perplexity=40, n_iter=1000) # vedere se cambiare parametri
                     tsne_results = tsne.fit_transform(all_tensor.cpu().numpy())
                     # print('t-SNE done! Time elapsed: {} seconds'.format(time.time()-time_start))
 
@@ -356,6 +380,8 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                     with open(f'{y_centr_path}/labels.txt', "r") as f:
                         y_centr = f.read().split('\n')[:num_classes]
                         
+                    
+                    y_centr = np.repeat(np.array(y_centr), 10).tolist()
                     y_centr.append('Predicted label')
 
                     feat_cols = [ 'e'+str(i) for i in range(centroids_tensor.shape[1]) ]
@@ -446,6 +472,7 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                 json.dump(res_dict, open(
                     results_dir+'/traj{}.json'.format(n), 'w'))
     del model
+    del cond_module_instance
     # exit()
     return task_success_flags
 
@@ -496,7 +523,7 @@ if __name__ == '__main__':
         print("Waiting for debugger attach")
         debugpy.wait_for_client()
 
-    # seed_everything(seed=42)
+    seed_everything(seed=42)
 
     try_path = args.model
     real = True if "Real" in try_path else False
@@ -661,7 +688,7 @@ if __name__ == '__main__':
         variation = args.variation
         seed = args.seed
         max_T = 100
-
+        
         dataset = None
         if args.test_gt:
             from hydra.utils import instantiate

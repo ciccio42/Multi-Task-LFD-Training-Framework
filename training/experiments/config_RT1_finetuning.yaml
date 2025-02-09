@@ -10,8 +10,8 @@ save_freq: 1
 cosine_annealing: False
 save_optim:     True
 resume:         False
-resume_path:    'RT1__pick_place__sim__90_epochs__5e-4_lr__bs_64-Batch32'
-resume_step:    40500
+resume_path:    'rt1_sim_abs_new_condmodule-Batch48'
+resume_step:    18900
 device:         0
 exp_name:       -1
 epochs:         10
@@ -97,11 +97,11 @@ dataset_cfg:
   obs_T: 6
   width: 180
   height: 100
-  aug_twice: True
+  aug_twice: False
   aux_pose: True
-  use_strong_augs: target_update_freq
+  use_strong_augs: False
   data_augs: ${augs}
-  black_list: ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'droid_converted_2909_to_4645', 'droid_converted_0_to_2909', 'real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_deltas_no_converted_rounded', 'panda_pick_place']
+  black_list: ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'real_new_ur5e_pick_place_converted_absolute', 'panda_pick_place']
   select_random_frames: True # the 4 frames: [first, random, random, last]
   convert_action: False # this is because we already converted them
   take_first_frame: False # if True the agent trajectory in the training starts with the first frame
@@ -170,6 +170,22 @@ policy: ???  # set to any set of configs via command line, e.g. policy='${tosil}
 #   _target_:
 
 cond_module_path: ''
+
+cond_module:
+  height: 120 # not used
+  width: 160 # not used
+  demo_T: 4
+  model_name: "r2plus1d_18"
+  pretrained: True
+  cond_video: True
+  n_layers: 3
+  demo_W: 7
+  demo_H: 7
+  demo_ff_dim: [128, 64, 32]
+  demo_linear_dim: [512, 512, 512]
+  conv_drop_dim: 3
+  cond_module_model_path: ${cond_module_path}
+
 
 rt1_video_cond:
   _target_: multi_task_il.models.rt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
@@ -294,19 +310,19 @@ rt1_video_cond:
   # action_order: Optional[List[str]] = None
   concat_target_obj_embedding: False
   ### cond_module paramams
-  height: 120 # not used
-  width: 160 # not used
-  demo_T: 4
-  model_name: "r2plus1d_18"
-  pretrained: True
-  cond_video: True
-  n_layers: 3
-  demo_W: 7
-  demo_H: 7
-  demo_ff_dim: [128, 64, 32]
-  demo_linear_dim: [512, 512, 512]
-  conv_drop_dim: 3
-  cond_module_model_path: ${cond_module_path}
+  # height: 120 # not used
+  # width: 160 # not used
+  # demo_T: 4
+  # model_name: "r2plus1d_18"
+  # pretrained: True
+  # cond_video: True
+  # n_layers: 3
+  # demo_W: 7
+  # demo_H: 7
+  # demo_ff_dim: [128, 64, 32]
+  # demo_linear_dim: [512, 512, 512]
+  # conv_drop_dim: 3
+  # cond_module_model_path: ${cond_module_path}
   #'/user/frosa/multi_task_lfd/checkpoint_save_folder/1Task-pick_place-cond_module_no_lr_1e-4-Batch32/model_save-24.pt'
   # cond_module_model_path: '/user/frosa/multi_task_lfd/checkpoint_save_folder/1Task-pick_place-cond_module_v2-Batch32/model_save-24.pt'
   # cond_module_model_path: '/user/frosa/multi_task_lfd/checkpoint_save_folder/1Task-pick_place-cond_module-Batch32/model_save-72.pt'

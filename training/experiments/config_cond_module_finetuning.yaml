@@ -10,8 +10,8 @@ save_freq: 1
 cosine_annealing: False
 save_optim:     True
 resume:         False
-resume_path:    null
-resume_step:    -1
+resume_path:    '/user/frosa/multi_task_lfd/checkpoint_save_folder/cond_module_ALLBUTDROID_20epochs_RGB_weak_aug-Batch32'
+resume_step:    1265
 device:         0
 exp_name:       -1
 epochs:         10
@@ -101,20 +101,20 @@ dataset_cfg:
   demo_T: 4
   width: 180
   height: 100
-  aug_twice: True
+  aug_twice: False
   aux_pose: True
   use_strong_augs: False
   data_augs: ${augs}
-  black_list: ['droid_converted', 'droid_converted_old', 'real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted']
+  black_list: ['sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'droid_converted_absolute_pose']
   select_random_frames: True
 
 augs:
-  old_aug: false
-  brightness: [0.875, 1.125]
-  contrast: [0.5, 1.5]
-  saturation: [0.5, 1.5]
-  hue: [-0.05, 0.05]
-  p: 0.5
+  old_aug: False
+  brightness: [0.9, 1.1]
+  contrast: [0.9, 1.1]
+  saturation: [0.9, 1.1]
+  hue: [0.0, 0.0]
+  p: 0.1
   horizontal_flip_p: 0.5
   brightness_strong: [0.875, 1.125]
   contrast_strong: [0.5, 1.5]

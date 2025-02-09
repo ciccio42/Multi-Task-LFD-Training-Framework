@@ -30,17 +30,17 @@ POLICY='${cond_module}'
 
 SAVE_FREQ=-1
 LOG_FREQ=10
-VAL_FREQ=-1
-DEVICE=3 # cuda gpu selection
-DEBUG=true
-WANDB_LOG=false
+VAL_FREQ=-1p
+DEVICE=2 # cuda gpu selection
+DEBUG=false
+WANDB_LOG=true
 ROLLOUT=false
-EPOCH=10
+EPOCH=20
 LOADER_WORKERS=16
 CONFIG_PATH=../experiments
 CONFIG_NAME=config_cond_module_finetuning.yaml
 
-RESUME=false
+RESUME=true
 
 BSIZE=32 #32 #128 #64 #32
 # Policy 1: At each slot is assigned a RandomSampler
@@ -54,7 +54,7 @@ WIDTH=180 # not used
 
 TASK_str="pick_place" #[pick_place,nut_assembly,stack_block,button]
     # EXP_NAME=1Task-${TASK_str}-cond_module_no_lr_1e-4   #1Task-${TASK_str}-Panda_dem_sim_agent_ur5e_sim_2      #1Task-${TASK_str}-MOSAIC-Rollout
-EXP_NAME=cond_module__pick_place__ASU_BERK_IAMLAB_TACO_PANDAPP__10_epochs__1e-4_lr   #1Task-${TASK_str}-Panda_dem_sim_agent_ur5e_sim_2      #1Task-${TASK_str}-MOSAIC-Rollout
+EXP_NAME='cond_module_ALLBUTDROID_20epochs_RGB_weak_aug' #'condmodule_PANDA_test' #'condmodule_ASU_BERK_IAMLAB_TACO_PANDAPP__20_epochs__1e-4_lr_RGB'   #1Task-${TASK_str}-Panda_dem_sim_agent_ur5e_sim_2      #1Task-${TASK_str}-MOSAIC-Rollout
 
 # srun --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME}
 python -u ../training/train_scripts/train_any.py \

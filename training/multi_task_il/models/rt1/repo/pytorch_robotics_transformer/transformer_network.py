@@ -366,7 +366,7 @@ class TransformerNetwork(nn.Module):
         b, t = self._get_batch_size_and_seq_len(network_state)
         # network_state is used when inference.
         # b: batch size
-        # t: time_sequence_length of this model
+        # t: time_sequence_length of this model  
 
         # context_image_tokens: (b, t, num_tokens, embedding_dim)
         # action_tokens: (b, t, self._tokens_per_action) # if self._actions is not set, all zeros
@@ -425,13 +425,17 @@ class TransformerNetwork(nn.Module):
             predicted_tokens_for_output = torch.concat(current_action_tokens, 1) # [1, self._tokens_per_action]
             one_state_action_tokens = predicted_tokens_for_output.unsqueeze(1) # [1, 1, self._tokens_per_action]
 
-            # Add predicted action tokens to network_state['action_tokens']
-            state_action_tokens = network_state['action_tokens'] # (1, time_sequence_length, self._tokens_per_action)
-            # replace state_action_tokens[:, action_t, ...] with the predicted tokens. Note that this is not insert.
-            network_state['action_tokens'] = torch.concat([
-                state_action_tokens[:, :action_t, ...], one_state_action_tokens,
-                state_action_tokens[:, action_t + 1:, ...]
-            ], dim=1)
+            # # Add predicted action tokens to network_state['action_tokens']
+            ### WRONG IMPLEMENTATION
+            # state_action_tokens = network_state['action_tokens'] # (1, time_sequence_length, self._tokens_per_action)
+            # # replace state_action_tokens[:, action_t, ...] with the predicted tokens. Note that this is not insert.
+            # network_state['action_tokens'] = torch.concat([
+            #     state_action_tokens[:, :action_t, ...], one_state_action_tokens,
+            #     state_action_tokens[:, action_t + 1:, ...]
+            # ], dim=1)
+            ### MY CORRECTION
+            network_state['action_tokens'] = action_tokens
+            
 
             # Increment the time_step for the next inference call.
             # network_state['seq_idx'] never exceed time_sequence_length.

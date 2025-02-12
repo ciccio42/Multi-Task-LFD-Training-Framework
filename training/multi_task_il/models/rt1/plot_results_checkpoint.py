@@ -7,7 +7,6 @@ import pandas as pd
 import debugpy
 import os
 import json
-import matplotlib as plt
 from matplotlib import gridspec
 
 
@@ -42,12 +41,20 @@ if __name__ == '__main__':
     
     root_path = '/'.join([save_path, project_name, task_rusults_folder, run_str])
     
+    import re
     steps_folder = os.listdir(root_path)
+    pattern = r'^step-\d+$'
+    steps_folder = [e for e in steps_folder if re.match(pattern, e)]
     
+    def return_number(str):
+        int(str.split('-')[-1])
+        
+    steps_folder = sorted(steps_folder, key=lambda x : int(x.split('-')[-1]))
     
     results_per_steps_dict ={}
     
     for t, step in enumerate(steps_folder):
+        
         json_path = '/'.join([root_path, step, f'test_across_{args.num_traj_test}trajs.json'])
         try:
             with open(json_path, 'r') as file:
@@ -60,7 +67,9 @@ if __name__ == '__main__':
                     results_per_steps_dict[step_idx][k] = v
     
         except json.decoder.JSONDecodeError:
-            print(f'ERROR, check for typos in {json_path}')  
+            print(f'ERROR, check for typos in {json_path}')
+        except FileNotFoundError:
+            pass
             
             
     table = pd.DataFrame.from_dict(results_per_steps_dict, orient='index')
@@ -72,7 +81,7 @@ if __name__ == '__main__':
     task_table = table.filter(regex='task#*')
     
     
-    save_folder = f'plot_results_{args.exp_name}'
+    save_folder = f'plot_results_{args.exp_name}_ntraj_{args.num_traj_test}'
     if not os.path.exists(save_folder):
         os.mkdir(save_folder)
     

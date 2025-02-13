@@ -208,6 +208,8 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
 
     # remove data not of interest for training
     start_pick_t = 0
+    start_frame_t = 0
+    
     # end_pick_t = 0
     if 'press_button' in task_name:
         # I have to get the last frame to identify the final placing position
@@ -500,15 +502,50 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
             gripper = sample['traj'].get(t)['action'][-1]
             if start_pick_t == 0 and gripper == 1.0:
                 start_pick_t = t
+                # delete
+                # if 'task_10' in pkl_file_path:
+                #     print('hey')
+                    
+                # cv2.imwrite('prova_step_before_grip.png', sample['traj'].get()['obs']['camera_front_image'])
+                # cv2.imwrite('prova_step_grip.png', sample['traj'].get(start_pick_t)['obs']['camera_front_image'])
+                
+            if t < (len(sample['traj']) - 1) and start_frame_t == 0:
+                diff = abs(sample['traj'].get(t)['action'] - sample['traj'].get(t+1)['action'])
+                
+                if (diff > 0.007).any():
+                    start_frame_t = t  # choose this as the next one the eef is moving
+    
 
-    if ("real" in pkl_file_path or args.real) and "task_00" in pkl_file_path:
+    # print(f'start_frame_t: {start_frame_t}')
+    
+    # if ("real" in pkl_file_path or args.real) and "task_00" not in pkl_file_path:
+    
+    if ("real" in pkl_file_path or args.real):
+        if 'task_00' in pkl_file_path:
+            subsample_factor = 1 # task 00 is already subsampled
+        else:
+            subsample_factor = 4
         sampled_trj = list()
-        sampled_trj.extend(sample['traj']._data[:1])
-        sampled_trj.extend(sample['traj']._data[1:start_pick_t:5])
-        sampled_trj.extend(sample['traj']._data[start_pick_t:-1:5])
-        sampled_trj.extend(sample['traj']._data[-1:])
+        # sampled_trj.extend(sample['traj']._data[:1])
+        sampled_trj.extend(sample['traj']._data[start_frame_t:start_pick_t:subsample_factor])
+        sampled_trj.extend(sample['traj']._data[start_pick_t:-1:subsample_factor])
+        sampled_trj.extend(sample['traj']._data[-1:]) # last step is important for gripper opening
         sample['traj']._data = sampled_trj
         sample['len'] = len(sampled_trj)
+
+    # for t in range(len(sample)-1):
+    #     diff = abs(sample['traj'].get(t)['action'] - sample['traj'].get(t+1)['action'])
+    #     if (diff < 0.007).all():
+    #         print(f"t (della nuova traiettoria): {t} - {start_pick_t}")
+    #         print(f"A_t: {sample['traj'].get(t)['action']}")
+    #         print(f"A_t+1: {sample['traj'].get(t+1)['action']}")
+    #         print(f'value: {diff[:3]}')
+    #         print(f'task_path: {pkl_file_path}')
+    #         cv2.imwrite('test_diff.png', np.concatenate((sample['traj'].get(t)['obs']['camera_front_image'], sample['traj'].get(t+1)['obs']['camera_front_image']), axis=1))
+    #         print('udigcsiuc')
+            
+    
+    # cv2.imwrite('all_traj.png', np.concatenate([sample['traj'].get(t)['obs']['camera_front_image'] for t in range(len(sample))], axis=1))            
 
     if False:  # "real" in pkl_file_path or args.real:
         # perform reshape a priori
@@ -545,13 +582,13 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
 
     trj_name = pkl_file_path.split('/')[-1]
     out_pkl_file_path = os.path.join(out_path, trj_name)
-    with open(out_pkl_file_path, "wb") as f:
-        print(out_pkl_file_path)
-        pickle.dump(sample, f)
+    # with open(out_pkl_file_path, "wb") as f:
+    #     print(out_pkl_file_path)
+    #     pickle.dump(sample, f)
 
 
 if __name__ == '__main__':
-    import debugpy
+    # import debugpy
     # debugpy.listen(('0.0.0.0', 5678))
     # print("Waiting for debugger attach")
     # debugpy.wait_for_client()
@@ -574,17 +611,23 @@ if __name__ == '__main__':
         debugpy.wait_for_client()
 
     # 1. Load the dataset
-    folder_path = os.path.join(
-        args.dataset_path, args.task_name, f"{args.robot_name}_{args.task_name}")
+    # folder_path = os.path.join(
+    #     args.dataset_path, args.task_name, f"{args.robot_name}_{args.task_name}")
+    
+    folder_path = "/raid/home/frosa_Loc/opt_dataset/pick_place/real_new_ur5e_pick_place"
+
     # folder_path = "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_ur5e_pick_place/reduced_space/"
-    if args.out_path is None:
-        out_path = os.path.join(args.dataset_path,
-                                f"{args.task_name}_opt",
-                                f"{args.robot_name}_{args.task_name}")
-    else:
-        out_path = os.path.join(args.out_path,
-                                f"{args.task_name}_opt",
-                                f"{args.robot_name}_{args.task_name}")
+    
+    # if args.out_path is None:
+    #     out_path = os.path.join(args.dataset_path,
+    #                             f"{args.task_name}_opt",
+    #                             f"{args.robot_name}_{args.task_name}")
+    # else:
+    #     out_path = os.path.join(args.out_path,
+    #                             f"{args.task_name}_opt",
+    #                             f"{args.robot_name}_{args.task_name}")
+    
+    out_path = "/user/frosa/multi_task_lfd/backup_datasets/real_new_ur5e_pick_place_subsampled"
 
     os.makedirs(name=out_path, exist_ok=True)
 

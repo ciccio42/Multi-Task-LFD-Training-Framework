@@ -27,7 +27,10 @@ from torch.optim.lr_scheduler import ExponentialLR, CosineAnnealingLR
 import wandb
 from torchsummary import summary
 from tqdm import tqdm
-from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
+# try:
+# from cosine_annealing_warmup import CosineAnnealingWarmupRestarts
+# except:
+#     print("CosineAnnealingWarmupRestarts not found")
 import learn2learn as l2l
 from torchvision.ops import box_iou
 from multi_task_il.models.cond_target_obj_detector.utils import project_bboxes
@@ -973,7 +976,9 @@ class Trainer:
             #     print(k, dict(self.config.get(k)))
             #     print('-'*20)
             wandb_config = {k: self.config.get(k) for k in config_keys}
-            wandb.login(key='227ed2fded06f63748a7a29dae55acdda7d131ff', relogin=True)
+            key = os.getenv("WANDB_KEY")
+            assert key != None, "Please set the WANDB_KEY environment variable"
+            wandb.login(key=key, relogin=True)
             print(f"Exp name: {self.config.exp_name}")
             self.config.project_name = self.config.exp_name.split('-Batch')[0]
             run = wandb.init(project=self.config.project_name,

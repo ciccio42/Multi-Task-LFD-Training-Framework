@@ -2,6 +2,7 @@
 
 # export MUJOCO_PY_MUJOCO_PATH=/user/frosa/.mujoco/mujoco210
 # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/frosa/.mujoco/mujoco210/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/lvicidomini/.mujoco/mujoco210/bin
 # # export MUJOCO_PY_MUJOCO_PATH="/home/frosa_Loc/.mujoco/mujoco210"
 # # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/frosa_Loc/.mujoco/mujoco210/bin
 # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/frosa/miniconda3/envs/multi_task_lfd/lib
@@ -15,11 +16,21 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
 
+export PYTHONPATH=$PYTHONPATH:/user/lvicidomini/video_conditioned/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/training/
+export PYTHONPATH=$PYTHONPATH:/user/lvicidomini/video_conditioned/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/test/
+
 export HYDRA_FULL_ERROR=1
-EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder
+# root path for dataset
+EXPERT_DATA=/mnt/localstorage/lvicidomini/datasets
+# root path for saving models
+SAVE_PATH=/mnt/localstorage/lvicidomini/checkpoint_save_folder
+
 POLICY='${cond_target_obj_detector}'
 DATASET_TARGET=multi_task_il.datasets.multi_task_keypoint_dataset.MultiTaskPairedKeypointDetectionDataset
+
+# dataset names
+AGENT_NAME='sim_ur5e'
+DEMO_NAME='human_rgb'
 
 echo $1
 TASK_NAME="$1"
@@ -30,7 +41,7 @@ VAL_FREQ=-1
 PRINT_FREQ=20
 DEVICE=0
 DEBUG=false
-WANDB_LOG=false
+WANDB_LOG=true
 
 EPOCH=90 # start from 16
 BSIZE=80 #16 #32
@@ -56,7 +67,7 @@ NON_SEQUENTIAL=true
 DROP_DIM=4      # 2    # 3
 OUT_FEATURE=128 # 512 # 256
 DIM_H=13        #14        # 7 (100 DROP_DIM 3)        #8         # 4         # 7
-DIM_W=23        #14        # 12 (180 DROP_DIM 3)        #8         # 6         # 12
+DIM_W=23
 HEIGHT=100
 WIDTH=180
 N_CLASSES=4
@@ -91,12 +102,12 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     TASK_str="pick_place"
-    EXP_NAME=1Task-${TASK_str}-CTOD-KP_NO_0_5_10_15
+    EXP_NAME=Simulated-Agent-Human-Demonstration-KP
     PROJECT_NAME=${EXP_NAME}
     SET_SAME_N=7
-    RESUME_PATH=/home/rsofnc000/checkpoint_save_folder/1Task-pick_place-CTOD-KP_NO_0_5_10_15-Batch84
+    RESUME_PATH=/mnt/localstorage/lvicidomini/checkpoint_save_folder/${EXP_NAME}-Batch112
     RESUME_STEP=10410
-    RESUME=true
+    RESUME=false
 elif [ "$TASK_NAME" == 'multi' ]; then
     echo "Multi Task"
     TASK_str=["pick_place","nut_assembly","stack_block","press_button_close_after_reaching"]
@@ -108,7 +119,8 @@ elif [ "$TASK_NAME" == 'multi' ]; then
     RESUME=false
 fi
 
-srun --output=training_${TASK_NAME}.txt --job-name=training_${TASK_NAME} -w "gnode03" python -u ../training/train_scripts/train_any.py \
+# srun --output=training_${TASK_NAME}.txt --job-name=training_${TASK_NAME} -w "gnode03" 
+python -u ../training/train_scripts/train_any.py \
     --config-path ${CONFIG_PATH} \
     --config-name ${CONFIG_NAME} \
     policy=${POLICY} \
@@ -133,6 +145,8 @@ srun --output=training_${TASK_NAME}.txt --job-name=training_${TASK_NAME} -w "gno
     dataset_cfg.height=${HEIGHT} \
     dataset_cfg.width=${WIDTH} \
     dataset_cfg.perform_augs=${PERFORM_AUGS} \
+    dataset_cfg.agent_name=${AGENT_NAME} \
+    dataset_cfg.demo_name=${DEMO_NAME} \
     samplers.balancing_policy=${BALANCING_POLICY} \
     early_stopping_cfg.patience=${EARLY_STOPPING_PATIECE} \
     cond_target_obj_detector_cfg.height=${HEIGHT} \

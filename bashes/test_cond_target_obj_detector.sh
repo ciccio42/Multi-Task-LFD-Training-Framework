@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # export MUJOCO_PY_MUJOCO_PATH=/user/frosa/.mujoco/mujoco210
 # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/frosa/.mujoco/mujoco210/bin
 # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/frosa/miniconda3/envs/multi_task_lfd/lib
@@ -13,32 +13,48 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=16
 
-export MUJOCO_PY_MUJOCO_PATH="/home/rsofnc000/.mujoco/mujoco210"
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
+export MUJOCO_PY_MUJOCO_PATH="/home/frosa_Loc/.mujoco/mujoco210"
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/frosa_Loc/.mujoco/mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 export CUDA_VISIBLE_DEVICES=0
 
 echo $1
 TASK_NAME="$1"
-NUM_WORKERS=1
+NUM_WORKERS=10
 GPU_ID=0
 
-BASE_PATH=/home/rsofnc000/Multi-Task-LFD-Framework
-CKP_FOLDER=/home/rsofnc000/checkpoint_save_folder
+# root path for dataset
+EXPERT_DATA='/user/frosa/multi_task_lfd/ur_multitask_dataset'
 
-if [ "$TASK_NAME" == 'pick_place' ]; then
-    PROJECT_NAME=1Task-Pick-Place-Cond-Target-Obj-Detector-separate-demo-agent
-    BATCH=80 #32
+BASE_PATH='/raid/home/frosa_Loc/Multi-Task-LFD-Framework'
+CKP_FOLDER='/user/frosa/multi_task_lfd/checkpoint_save_folder/LUIGI_CHECKPOINT'
+# DEMO_NAME='human_rgb'
+
+if [ "$TASK_NAME" == "pick_place" ]; then
+    PROJECT_NAME=1Task-pick_place-CTOD_NO_0_5_10_15
+    BATCH=112
     MODEL_PATH=${CKP_FOLDER}/${PROJECT_NAME}-Batch${BATCH}
     CONTROLLER_PATH=$BASE_PATH/repo/Multi-Task-LFD-Training-Framework/tasks/multi_task_robosuite_env/controllers/config/osc_pose.json
     for MODEL in ${MODEL_PATH}; do
-        for S in 272595; do #81000 89100; do
+        for S in 26290; do #81000 89100; do
             for TASK in pick_place; do
                 for COUNT in 1; do
                     if [ $COUNT -eq 1 ]; then
                         SAVE_PATH=${MODEL_PATH}/results_${TASK}/run_${COUNT}
                         # srun --output=test_${TASK_NAME}_ctod.txt --job-name=test_${TASK_NAME}
-                        python -u $BASE_PATH/repo/Multi-Task-LFD-Training-Framework/test/multi_task_test/test_any_task.py $MODEL --env $TASK --saved_step $S --eval_each_task 10 --num_workers ${NUM_WORKERS} --project_name ${PROJECT_NAME} --controller_path ${CONTROLLER_PATH} --gpu_id ${GPU_ID} --save_path ${SAVE_PATH} --save_files --wandb_log
+                        python -u $BASE_PATH/repo/Multi-Task-LFD-Training-Framework/test/multi_task_test/test_any_task.py $MODEL \
+                        --env $TASK \
+                        --saved_step $S \
+                        --eval_each_task 10 \
+                        --num_workers ${NUM_WORKERS} \
+                        --project_name ${PROJECT_NAME} \
+                        --controller_path ${CONTROLLER_PATH} \
+                        --gpu_id ${GPU_ID} \
+                        --save_path ${SAVE_PATH} \
+                        --save_files \
+                        --human_demo \
+                        --wandb_log
+                        # --debug
                         #--save_files #--wandb_log #--save_path ${SAVE_PATH} --save_files
                     else
                         SAVE_PATH=${MODEL_PATH}/results_${TASK}/run_${COUNT}

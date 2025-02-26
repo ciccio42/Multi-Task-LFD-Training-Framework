@@ -14,13 +14,22 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
 
+export PYTHONPATH=$PYTHONPATH:/user/lvicidomini/video_conditioned/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/training/
+export PYTHONPATH=$PYTHONPATH:/user/lvicidomini/video_conditioned/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/test/
 export HYDRA_FULL_ERROR=1
-EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder
+
+# root path for dataset
+EXPERT_DATA=/mnt/localstorage/lvicidomini/datasets
+# root path for saving models
+SAVE_PATH=/mnt/localstorage/lvicidomini/checkpoint_save_folder
+
 POLICY='${cond_target_obj_detector}'
 DATASET_TARGET=multi_task_il.datasets.multi_task_cond_target_obj_dataset.CondTargetObjDetectorDataset
 TASKS_CONFIG=7_tasks_real
-AGENT_NAME=real_new_ur5e
+
+# dataset names
+AGENT_NAME=real_ur5e_rgb
+DEMO_NAME='human_rgb'
 
 echo $1
 TASK_NAME="$1"
@@ -92,11 +101,11 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     TASK_str="pick_place"
-    EXP_NAME=Real-1Task-${TASK_str}-CTOD-Finetune
+    EXP_NAME=Real-Agent-Human-Demonstration-Finetune-CTOD
     PROJECT_NAME=${EXP_NAME}
     SET_SAME_N=7
-    RESUME_PATH=/home/rsofnc000/checkpoint_save_folder/1Task-Pick-Place-Cond-Target-Obj-Detector-separate-demo-agent-Batch80
-    RESUME_STEP=64152
+    RESUME_PATH=/mnt/localstorage/lvicidomini/checkpoint_save_folder/1Task-pick_place-CTOD_NO_0_5_10_15-Batch112
+    RESUME_STEP=26290
     RESUME=false
     FINETUNE=true
 elif [ "$TASK_NAME" == 'multi' ]; then
@@ -136,6 +145,8 @@ python -u ../training/train_scripts/train_any.py \
     dataset_cfg.height=${HEIGHT} \
     dataset_cfg.width=${WIDTH} \
     dataset_cfg.perform_augs=${PERFORM_AUGS} \
+    dataset_cfg.agent_name=${AGENT_NAME} \
+    dataset_cfg.demo_name=${DEMO_NAME} \
     samplers.balancing_policy=${BALANCING_POLICY} \
     early_stopping_cfg.patience=${EARLY_STOPPING_PATIECE} \
     cond_target_obj_detector_cfg.height=${HEIGHT} \

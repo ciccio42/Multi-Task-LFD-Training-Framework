@@ -25,9 +25,15 @@ from torchvision.transforms import ToTensor
 from robosuite import load_controller_config
 from multi_task_test import ENV_OBJECTS, TASK_MAP
 from collections import OrderedDict
-from robosuite.utils.transform_utils import quat2axisangle, axisangle2quat, quat2mat, mat2quat 
+from robosuite.utils.transform_utils import quat2axisangle, axisangle2quat, quat2mat, mat2quat, mat2euler, euler2mat
 import time
-import torch.nn.functional as F
+from copy import deepcopy
+from PIL import Image
+
+
+_TIME_COUNTER_ = 0
+PICKED = False
+
 
 DEBUG = False
 set_start_method('forkserver', force=True)
@@ -54,6 +60,23 @@ T_g_robot_to_g_sim = np.array([[0, 1, 0, 0],
                               [-1, 0, 0, 0],
                               [0, 0, 1, 0],
                                [0, 0, 0, 1]])
+R_g_sim_to_g_robot = np.array([[0, -1, 0], 
+                              [1, 0, 0],
+                              [0, 0, 1]])
+R_ws_x = np.array([[0.9104503, -0.4136117, -0.0023614],
+                   [-0.4135816, -0.9104307,  0.0081400],
+                   [-0.0055167, -0.0064344, -0.9999641]]) @ np.array([[-0.4304586, -0.9014726, -0.0453046],
+                                                                      [-0.9026073,  0.4300453,  0.0190052],
+                                                                      [0.0023503,  0.0490732, -0.9987924] ])
+p_ws_x = np.array([0.00809527, 0.00107287, 0.00358016])
+
+# >>> obs_t1 - action_t
+# array([-0.00809527, -0.00107287, -0.00358016])
+
+# >>> action - obs_t1 
+# array([0.00809527, 0.00107287, 0.00358016])
+
+         
 
 def make_prompt(env: object, obs: object, command: str, task_name: str):
     ret_dict = {'states': [],
@@ -108,7 +131,7 @@ def _create_prompt_assets(obs, task_name, views, modalities):
                 target_obj_id = obs['target-object']
                 target_obj_name = ENV_OBJECTS[task_name]['obj_names'][target_obj_id]
                 # assign prompt assets
-                prompt_assets['pick_object'][modality][view] = obs['camera_front_image'][:, :, ::-1]
+                prompt_assets['pick_object'][modality][view] = obs['camera_front_image']
                 prompt_assets['pick_object']['segm']['obj_info']['obj_id'] = target_obj_id
                 prompt_assets['pick_object']['segm']['obj_info']['obj_name'] = ENV_OBJECTS[task_name]['splitted_obj_names'][target_obj_id]
                 prompt_assets['pick_object']['segm']['obj_info']['obj_color'] = ENV_OBJECTS[task_name]['splitted_obj_names'][target_obj_id].split(" ")[
@@ -295,7 +318,7 @@ def prepare_obs(env, obs, views, task_name):
     for view in views:
         # get observation at timestamp t
         obs_t = obs
-        rgb_this_view = obs_t['camera_front_image'][:, :, ::-1]
+        rgb_this_view = obs_t['camera_front_image']
         # cv2.imwrite("rgb_this_view.png", np.array(rgb_this_view))
         bboxes = []
         cropped_imgs = []
@@ -398,6 +421,83 @@ def adjust_bb(bb, crop_params=[20, 25, 80, 75]):
     y2 = int((y2_old/y_scale)+top)
     return [x1, y1, x2, y2]
 
+# def transform_action_from_robot_to_world_RT1(action):
+#     aa_gripper = action[3:-1]
+#     # convert axes-angle into rotation matrix
+#     R_bl_sim_to_gripper_r = euler2mat(aa_gripper)
+    
+#     gripper_pos = action[0:3]
+    
+#     T_bl_sim_gripper_r = np.zeros((4,4))
+#     T_bl_sim_gripper_r[3,3] = 1
+    
+#     # position
+#     T_bl_sim_gripper_r[0,3] = gripper_pos[0]
+#     T_bl_sim_gripper_r[1,3] = gripper_pos[1]
+#     T_bl_sim_gripper_r[2,3] = gripper_pos[2]
+#     # orientation
+#     T_bl_sim_gripper_r[0:3, 0:3] = R_bl_sim_to_gripper_r
+    
+#     T_bl_sim_gripper_sim = T_bl_sim_gripper_r @ T_g_robot_to_g_sim
+    
+#     T_wl_sim_gripper_sim = T_w_sim_to_bl_sim @ T_bl_sim_gripper_sim
+    
+#     R_wl_sim_gripper_sim = T_wl_sim_gripper_sim[0:3, 0:3]
+    
+#     action_wl_sim = np.zeros((7))
+#     action_wl_sim[0:3] = T_wl_sim_gripper_sim[0:3, 3]
+#     action_wl_sim[3:6] = quat2axisangle(mat2quat(R_wl_sim_gripper_sim))
+#     if action[-1] < 0.8:
+#         action_wl_sim[6] = 1
+#     else:
+#         action_wl_sim[6] = -1
+    
+#     return action_wl_sim
+
+
+T_bl_sim_to_w_sim = np.array([[0, -1, 0, 0], 
+                              [1, 0, 0, 0.612],
+                              [0, 0, 1, -0.860],
+                              [0, 0, 0, 1]])
+
+
+def trasform_from_world_to_bl(action):
+    aa_gripper = action[3:-1]
+    # convert axes-angle into rotation matrix
+    R_w_sim_to_gripper_sim = quat2mat(axisangle2quat(aa_gripper))
+    
+    gripper_pos = action[0:3]
+    
+    T_w_sim_gripper_sim = np.zeros((4,4))
+    T_w_sim_gripper_sim[3,3] = 1
+    
+    # position
+    T_w_sim_gripper_sim[0,3] = gripper_pos[0]
+    T_w_sim_gripper_sim[1,3] = gripper_pos[1]
+    T_w_sim_gripper_sim[2,3] = gripper_pos[2]
+    # orientation
+    T_w_sim_gripper_sim[0:3, 0:3] = R_w_sim_to_gripper_sim
+    
+    T_bl_sim_gripper_sim = T_bl_sim_to_w_sim @ T_w_sim_gripper_sim
+    
+    # print(f"Transformation from world to bl:\n{T_bl_sim_gripper_sim}")
+    
+    R_bl_to_gripper_sim = T_bl_sim_gripper_sim[0:3, 0:3]
+    
+    R_bl_to_gripper_real = R_bl_to_gripper_sim @ R_g_sim_to_g_robot
+    
+    action_bl = np.zeros((7))
+    action_bl[0:3] = T_bl_sim_gripper_sim[0:3, 3]
+    action_bl[3:6] = quat2axisangle(mat2quat(R_bl_to_gripper_real))
+    if action[-1] == -1:
+        # action_bl[6] = 0
+        action_bl[6] = 1 # aperto
+    else:
+        # action_bl[6] = 1
+        action_bl[6] = 0 # chiuso
+    
+    return action_bl
+
 def transform_action_from_robot_to_world(action):
     aa_gripper = action[3:-1]
     # convert axes-angle into rotation matrix
@@ -425,15 +525,23 @@ def transform_action_from_robot_to_world(action):
     action_wl_sim[0:3] = T_wl_sim_gripper_sim[0:3, 3]
     action_wl_sim[3:6] = quat2axisangle(mat2quat(R_wl_sim_gripper_sim))
     if action[-1] < 0.8:
-        action_wl_sim[6] = -1
-    else:
         action_wl_sim[6] = 1
+    else:
+        action_wl_sim[6] = -1
     
     return action_wl_sim
 
 
+def null_step(env):
+    current_gripper_position = env.sim.data.site_xpos[env.robots[0].eef_site_id]
+    current_gripper_orientation = T.quat2axisangle(T.mat2quat(np.reshape(
+        env.sim.data.site_xmat[env.robots[0].eef_site_id], (3, 3))))
+    current_gripper_pose = np.concatenate(
+        (current_gripper_position, current_gripper_orientation, np.array([-1])), axis=-1)
+    return current_gripper_pose
 
-def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, images, context, gpu_id, n_steps, max_T=80, baseline=None, action_ranges=[], target_obj_embedding=None, t=-1, real=False, convert_action=False):
+
+def get_action(model, env, target_obj_dec, bb, predict_gt_bb, gt_classes, states, images, context, gpu_id, n_steps, max_T=80, baseline=None, action_ranges=[], target_obj_embedding=None, t=-1, real=False, convert_action=False, obs=None, variation_id=None, cond_module_instance=None):
     
     s_t = torch.from_numpy(np.concatenate(states, 0).astype(np.float32))[None]
     if isinstance(images[-1], np.ndarray):
@@ -461,55 +569,217 @@ def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, ima
         action = out['action_dist'].sample()[-1].cpu().detach().numpy()
     else:
         with torch.no_grad():
-            out = model(states=s_t,
-                        images=i_t,
-                        context=context,
-                        bb=bb,
-                        gt_classes=gt_classes,
-                        predict_gt_bb=predict_gt_bb,
-                        eval=True,
-                        target_obj_embedding=target_obj_embedding,
-                        compute_activation_map=True,
-                        t=t)  # to avoid computing ATC loss
+            if not 'RT1' in str(model.__class__):
+                out = model(states=s_t,
+                            images=i_t,
+                            context=context,
+                            bb=bb,
+                            gt_classes=gt_classes,
+                            predict_gt_bb=predict_gt_bb,
+                            eval=True,
+                            target_obj_embedding=target_obj_embedding,
+                            compute_activation_map=True,
+                            t=t)  # to avoid computing ATC loss
+                
+                target_obj_embedding = out.get('target_obj_embedding', None)
 
-            target_obj_embedding = out.get('target_obj_embedding', None)
-
-            action = out['bc_distrib'].sample()[0, -1].cpu().numpy()
-            if target_obj_dec is not None:
-                target_obj_position = target_obj_dec(i_t, context, eval=True)
-                predicted_prob = torch.nn.Softmax(dim=2)(
-                    target_obj_position['target_obj_pred']).to('cpu').tolist()
+                action = out['bc_distrib'].sample()[0, -1].cpu().numpy()
+                if target_obj_dec is not None:
+                    target_obj_position = target_obj_dec(i_t, context, eval=True)
+                    predicted_prob = torch.nn.Softmax(dim=2)(
+                        target_obj_position['target_obj_pred']).to('cpu').tolist()
+                else:
+                    predicted_prob = None
+                
             else:
-                predicted_prob = None
-    # action[3:7] = [1.0, 1.0, 0.0, 0.0]
-    if len(action.shape) != 1:
-        action_list = list()
-        for t in range(action.shape[0]):
-            action_list.append(denormalize_action(action[t], action_ranges))
-        action = action_list
-    else:
-        action = denormalize_action(action, action_ranges)
+                
+                if t == 0:
+                    # reset memory at the start of every subtask
+                    model.rt1_memory = None
+                
+                # RT1 inference (states is not used)
+                # pil_image = Image.fromarray(np.array(np.moveaxis(
+                #             images[0][0][:, :, :].cpu().numpy()*255, 0, -1), dtype=np.uint8))
+                # pil_image.save('debug_before_inferene.png')
+                # model.eval()
+                embedding = cond_module_instance(context)
+                
+                out, _ = model(images=i_t,
+                                states=s_t,
+                                cond_embedding=embedding,
+                                actions=None,
+                                bsize=1
+                                )
+                
+                # demo_dir = 'test_demo_sim_inference'
+                # os.mkdir(demo_dir)
+                # for t,step_img in enumerate(context[0].cpu().detach().numpy()):
+                #     cv2.imwrite(f'{demo_dir}/step_{t}.png', np.moveaxis(
+                #                 step_img*255, 0, -1))
+                
+            
+                # test_i_t = i_t[0][0].cpu().numpy()
+                # cv2.imwrite("i_t_2.png", np.moveaxis(
+                #     test_i_t*255, 0, -1)[:,:,::-1])
+                
+                
+                # if t == 0: # only at first step
+                #     with torch.no_grad():
+                #         cond_embedding = model.cond_module(context) # 15GB for the computation graph -> 4GB with torch no grad
+                  
+                temp_action_dict = out
+                temp_action_list = []
+                for k in temp_action_dict.keys():
+                    # print(temp_action_dict[k].shape)
+                    if temp_action_dict[k].shape[1] != 1:
+                        temp_action = temp_action_dict[k].squeeze()
+                    else:
+                        temp_action = temp_action_dict[k].squeeze(1)
+                    temp_action_list.append(temp_action)
+                    
+                action = torch.cat(temp_action_list).cpu().numpy()
+                
+    
+    CHANGE_FROM_BL_TO_WORLD = True
+    DELTA_NO_CONV = False
+    FIX_ROT = False
+    ROUND = False
+    if 'RT1_video_cond' in str(model.__class__):
+                    
+        # if t < 6:
+        #     action = null_step(env)
+        #     # convert to bl frame
+        #     action_null = trasform_from_world_to_bl(deepcopy(action))
+        #     action_null = torch.from_numpy(action_null).to(next(model.parameters()).device)
+            
+        #     action_null_dict = {'world_vector': action_null[:3], 'rotation_delta': action_null[3:-1], 'gripper_closedness_action': action_null[-1]}
+            
+        #     should_be = model.rt1._action_tokenizer.tokenize(action_null_dict)
+
+        #     # print('should_be')
+        #     # print(should_be)
+        #     # print('it is:')
+        #     # print(model.rt1_memory['action_tokens'][0][t])
+        #     model.rt1_memory['action_tokens'][0][t] = deepcopy(should_be)
         
-        if convert_action:
+        
+        # elif t>=6 and CHANGE_FROM_BL_TO_WORLD: 
+        if CHANGE_FROM_BL_TO_WORLD: 
+            # # get current pos and RPY of the eef wrt to WF
+            # pos_t = deepcopy(obs['eef_pos'])
+            # # TODO capire chi genera eef_quat
+            # rot_t  = (R_ws_x @ quat2mat(deepcopy(obs['eef_quat'])))
+            
+            # # in this case the output of this model are deltas (dxdydz, drolldpitchdyaw), which have to be summed to the current observation.
+            # delta_pos = action[:3]
+            # delta_rot = action[3:-1]
+            
+            # # rot_t = mat2quat(rot_t @ euler2mat(delta_rot))
+            
+            # # 1) 
+            # action[:3] = pos_t + T_w_sim_to_bl_sim[:3,:3] @ delta_pos
+            
+            # action[3:-1] = quat2axisangle(mat2quat(rot_t))
+            # # action[3:-1] = quat2axisangle(rot_t)
+            
+            # action[-1] = 1.0 if action[-1] == 0.0 else 0.0  # rt1 outputs 0.0 for closed and 1.0 for open gripper
+            
+            # # global PICKED
+            # # if not PICKED:
+            # #     global _TIME_COUNTER_
+            # #     if action[-1] == 1.0 and _TIME_COUNTER_ < 5:
+            # #         _TIME_COUNTER_ += 1
+            # #         action[-1] = 0.0
+            # #     elif action[-1] == 1.0 and _TIME_COUNTER_ == 5:
+            # #         _TIME_COUNTER_ = 0    
+            # #         PICKED = True
+           
+           
+           
+            # nope 
+            # action[:3] = T_w_sim_to_bl_sim[:3,:3] @ deepcopy(action[:3])
+            # action[3:-1] = T_w_sim_to_bl_sim[:3,:3] @ deepcopy(action[3:-1])
+            # action[-1] = 1.0 if action[-1] == 0.0 else -1.0  # rt1 outputs 0.0 for closed and 1.0 for open gripper
+            # print('\t -------------')
+            # print(action)
+            
+            # print('\t---------')
+            # print(f'bl: {action}')
+            
+            
+            ### if action in euler angles
+            # action = transform_action_from_robot_to_world_RT1(action) 
+            ### if action in axis angle
             action = transform_action_from_robot_to_world(action)
+            # print(f'wf: {action}')
+            
+        elif DELTA_NO_CONV:
+            
+            pos_t = deepcopy(obs['eef_pos'])
+            rot_t  = (R_ws_x @ quat2mat(deepcopy(obs['eef_quat'])))
+            
+            if ROUND:
+                delta_pos = np.round(deepcopy(action[:3]), 2)
+                # if (delta_pos == np.array([-0.0,-0.0,-0.0])).all():
+                #     print('delta 0')
+            else:
+                delta_pos = deepcopy(action[:3])
+            delta_rot = deepcopy(action[3:-1])
+            
+            if not FIX_ROT:
+                rot_t = mat2quat(rot_t @ quat2mat(axisangle2quat(delta_rot)))
+            
+            action[:3] = pos_t + delta_pos
+            
+            if not FIX_ROT:
+                action[3:-1] = quat2axisangle(rot_t)
+            else:
+                action[3:-1] = quat2axisangle(mat2quat(rot_t))
+            
+            # array([-0.14132614,  0.13795022,  0.86179454])
+            # array([-0.14132614,  0.13795021,  0.86179453], dtype=np.float32) ACTION
+            # array([-0.14942141,  0.13687734,  0.85821437]) # OBS
+            
+        # else:
+            # rot_t  = (R_ws_x @ quat2mat(deepcopy(obs['eef_quat'])))
+            # action[3:-1] = quat2axisangle(mat2quat(rot_t))
+           
+        # print('axis angle') 
+        # print(action)
+        return action, None, None, None, None, None
+    else:               
+        # action[3:7] = [1.0, 1.0, 0.0, 0.0]
+        if len(action.shape) != 1:
+            action_list = list()
+            for t in range(action.shape[0]):
+                action_list.append(denormalize_action(action[t], action_ranges))
+            action = action_list
+        else:
+            action = denormalize_action(action, action_ranges)
+            
+            if convert_action:
+                action = transform_action_from_robot_to_world(action)
+            
+            # print(f"Model first_phase {model.first_phase}")
+
+            if not real:
+                action[-1] = 1 if action[-1] > 0 and n_steps < max_T - 1 else -1
+                if hasattr(model, 'last_gripper'):
+                    model.last_gripper = action[-1] 
         
-        # print(f"Model first_phase {model.first_phase}")
-        if not real:
-            action[-1] = 1 if action[-1] > 0 and n_steps < max_T - 1 else -1
-            if hasattr(model, 'last_gripper'):
-                model.last_gripper = action[-1] 
-        if getattr(model, 'first_phase', None) is not None:
-            # if model.first_phase and action[-1] == 1:
-            #     print("Delay picking")
-            #     global t_delay
-            #     if t_delay < DELAY:
-            #         action[-1] = -1
-            #         t_delay += 1
-            #     else:
-            #         t_delay = 0
-            model.first_phase = action[-1] != 1.
-            # if not model.first_phase:
-            #     print("changed phase")
+            if getattr(model, 'first_phase', None) is not None:
+                # if model.first_phase and action[-1] == 1:
+                #     print("Delay picking")
+                #     global t_delay
+                #     if t_delay < DELAY:
+                #         action[-1] = -1
+                #         t_delay += 1
+                #     else:
+                #         t_delay = 0
+                model.first_phase = action[-1] != 1.
+                # if not model.first_phase:
+                #     print("changed phase")
+                
     return action, predicted_prob, target_obj_embedding, out.get('activation_map', None), out.get('target_obj_prediction', None), out.get('predicted_bb', None)
 
 
@@ -746,31 +1016,6 @@ def get_gt_bb(env=None, traj=None, obs=None, task_name=None, t=0, real=True, pla
     return bb_t, np.array(gt_t, dtype=np.int16)
 
 
-def visualize_attention(input_image, feature_map, save_path="attention_overlay.png"):
-    # Step 1: Get the feature map
-    # Assuming feature_map is of shape [batch_size, channels, height, width]
-    # For visualization, you can take the mean across the channel dimension
-    attention_map = torch.mean(feature_map, dim=1).squeeze()  # [height, width]
-
-    # Step 2: Rescale attention map to the input image size
-    attention_map_resized = F.interpolate(attention_map.unsqueeze(0).unsqueeze(0),
-                                        size=(input_image.shape[-3], input_image.shape[-2]),
-                                        mode='bilinear', align_corners=False).squeeze().cpu().detach().numpy()
-
-    # Normalize the attention map between 0 and 1
-    attention_map_resized = (attention_map_resized - np.min(attention_map_resized)) / (np.max(attention_map_resized) - np.min(attention_map_resized))
-
-    # Step 3: Convert the input image to numpy
-    input_image_np = input_image
-    # Step 4: Apply colormap to the attention map
-    heatmap = cv2.applyColorMap(np.uint8(255 * attention_map_resized), cv2.COLORMAP_JET)
-
-    # Step 5: Overlay the heatmap on the input image
-    overlay = 0.6 * input_image_np + 0.4 * heatmap  # Weighted sum for overlay
-
-    # Step 6: Save the result
-    cv2.imwrite(save_path, overlay)
-
 def get_predicted_bb(prediction, pred_flags, perform_augs, model, formatted_img, gt_bb, gpu_id, pick=True):
     # 2. Get the confidence scores for the target predictions and the the max
     max_score = torch.argmax(
@@ -805,9 +1050,6 @@ def get_predicted_bb(prediction, pred_flags, perform_augs, model, formatted_img,
             #                     (0, 0, 255),
             #                     1,
             #                     cv2.LINE_AA)
-            
-        visualize_attention(input_image=image,
-                                feature_map=prediction['feature_map'])
         for indx, bb in enumerate(gt_bb):
             image = cv2.rectangle(np.ascontiguousarray(image),
                                   (int(gt_bb[indx][0]),
@@ -815,7 +1057,7 @@ def get_predicted_bb(prediction, pred_flags, perform_augs, model, formatted_img,
                                   (int(gt_bb[indx][2]),
                                    int(gt_bb[indx][3])),
                                   color=(0, 255, 0), thickness=1)
-            
+
         if pick:
             cv2.imwrite("predicted_bb_pick.png", image)
         elif not pick:
@@ -855,7 +1097,48 @@ def compute_activation_map(model, agent_obs, prediction):
 
     return activation_map
 
-def compute_bb_prediction(prediction, place_bb_flag, perform_augs, model, formatted_img, bb_t, gpu_id, obs, tp_array, fp_array, fn_array, iou_array):
+
+def plot_activation_map(activation_map, agent_obs, save_path="activation_map.png"):
+    """
+    Compute and plot the activation map overlaid on the original image.
+
+    Parameters:
+    - model: The pre-trained model.
+    - agent_obs: The input tensor to the model. Expected shape is [B, C, H, W].
+    - target_class: The target class for which the activation map should be computed.
+    - save_path: Path to save the overlaid image.
+
+    Returns:
+    - None. The function saves the overlaid image to the specified path.
+    """
+
+    # Get the first image from the batch
+    input_image = np.array((agent_obs[0, :, :, :].cpu(
+    ).numpy() * 255).transpose((1, 2, 0)), dtype=np.uint8)
+
+    # Resize the activation map to match the input image size
+    heatmap_resized = cv2.resize(
+        activation_map, (input_image.shape[1], input_image.shape[0]))
+
+    # Convert the heatmap values between 0 and 255 for visualization
+    heatmap_np = np.uint8(255 * heatmap_resized)
+
+    # Convert the heatmap into a colormap
+    heatmap_colormap = cv2.applyColorMap(heatmap_np, cv2.COLORMAP_JET)
+
+    # Overlay the colormap on the original image
+    overlaid_image = cv2.addWeighted(
+        input_image, 0.5, heatmap_colormap, 0.5, 0)
+
+    # Display the image using matplotlib
+    plt.imshow(cv2.cvtColor(overlaid_image, cv2.COLOR_BGR2RGB))
+    plt.axis('off')
+    plt.title("Activation Map Overlaid on Image")
+    plt.savefig(save_path)
+    plt.show()
+
+
+def  compute_bb_prediction(prediction, place_bb_flag, perform_augs, model, formatted_img, bb_t, gpu_id, obs, tp_array, fp_array, fn_array, iou_array):
     
     tp_array_t = np.zeros(2)
     fp_array_t = np.zeros(2)
@@ -867,7 +1150,7 @@ def compute_bb_prediction(prediction, place_bb_flag, perform_augs, model, format
     # (prediction['classes_final'][0] == 1 or prediction['classes_final'][0] == 2)
     target_indx_flags = prediction['classes_final'][0] == 1
     cnt_target = torch.sum((target_indx_flags == True).int())
-    obs['gt_bb'] = bb_t
+
     cnt_place = 0
     if place_bb_flag:
         place_indx_flags = prediction['classes_final'][0] == 2
@@ -1095,10 +1378,10 @@ def object_detection_inference(model, env, context, gpu_id, variation_id, img_fo
             # convert observation from BGR to RGB
             if perform_augs:
                 formatted_img, bb_t = img_formatter(
-                    obs['camera_front_image'][:, :, ::-1], bb_t)
+                    obs['camera_front_image'], bb_t)
             else:
                 formatted_img = torch.from_numpy(
-                    np.array(obs['camera_front_image'][:, :, ::-1]))
+                    np.array(obs['camera_front_image']))
 
             model_input = dict()
             model_input['demo'] = context.to(device=gpu_id)
@@ -1137,7 +1420,7 @@ def object_detection_inference(model, env, context, gpu_id, variation_id, img_fo
             else:
                 bc_distrib = prediction['bc_distrib']
                 bb_queue = prediction['prediction_target_obj_detector']['proposals']
-                prediction = prediction['prediction_target_obj_detector']                            
+                prediction = prediction['prediction_target_obj_detector']
 
             if activation_map:
                 pass
@@ -1147,6 +1430,8 @@ def object_detection_inference(model, env, context, gpu_id, variation_id, img_fo
                 # actvation_map = compute_activation_map(model=model,
                 #                                        agent_obs=model_input,
                 #                                        prediction=prediction)
+
+            obs['gt_bb'] = bb_t
 
             compute_bb_prediction(prediction=prediction,
                                   place_bb_flag=place_bb_flag,
@@ -1160,6 +1445,8 @@ def object_detection_inference(model, env, context, gpu_id, variation_id, img_fo
                                   fp_array=fp_array,
                                   fn_array=fn_array,
                                   iou_array=iou_array)
+            
+            traj.append(obs)
 
             if controller is not None:
                 # compute the action for the current state
@@ -1181,7 +1468,7 @@ def object_detection_inference(model, env, context, gpu_id, variation_id, img_fo
                 # action = clip_action(action)
             obs, reward, env_done, info = env.step(action)
             cv2.imwrite(
-                f"step_test.png", obs['camera_front_image'][:, :, ::-1])
+                f"step_test.png", obs['camera_front_image'])
 
             n_steps += 1
             tasks['success'] = reward or tasks['success']
@@ -1229,7 +1516,7 @@ def object_detection_inference(model, env, context, gpu_id, variation_id, img_fo
                 if perform_augs:
                     if not real:
                         formatted_img, bb_t = img_formatter(
-                            agent_obs[:, :, ::-1], bb_t, agent=True)
+                            agent_obs, bb_t, agent=True)
                     else:
                         formatted_img, bb_t = img_formatter(
                             agent_obs, bb_t, agent=True)
@@ -1549,7 +1836,7 @@ def build_env(ctr=0, env_name='nut', heights=100, widths=200, size=False, shape=
     return agent_env, variation
 
 
-def build_env_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights=100, widths=200, size=False, shape=False, color=False, gpu_id=0, variation=None, random_frames=True, controller_path=None, ret_gt_env=False, seed=42):
+def build_env_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights=100, widths=200, size=False, shape=False, color=False, gpu_id=0, variation=None, random_frames=True, controller_path=None, ret_gt_env=False, seed=42, skip_teacher=False, demo_file=None):
 
     print(f"Seed: {seed}")
     if controller_path == None:
@@ -1570,12 +1857,19 @@ def build_env_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights
     else:
         variation = variation
 
-    teacher_expert_rollout = env_fn(teacher_name,
-                                    controller_type=controller,
-                                    task=variation,
-                                    seed=seed,
-                                    gpu_id=gpu_id,
-                                    object_set=TASK_MAP[env_name]['object_set'])
+    if demo_file is not None:
+        # load demo from pickle file
+        import pickle as pkl
+        with open(demo_file, "rb") as f:
+            teacher_expert_rollout = pkl.load(f)['traj']
+    else:
+        if not skip_teacher:
+            teacher_expert_rollout = env_fn(teacher_name,
+                                            controller_type=controller,
+                                            task=variation,
+                                            seed=seed,
+                                            gpu_id=gpu_id,
+                                            object_set=TASK_MAP[env_name]['object_set'])
 
     agent_env = env_fn(agent_name,
                        controller_type=controller,
@@ -1594,13 +1888,25 @@ def build_env_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights
                         gpu_id=gpu_id,
                         object_set=TASK_MAP[env_name]['object_set'])
 
-    assert isinstance(teacher_expert_rollout, Trajectory)
-    context = select_random_frames(
-        teacher_expert_rollout, T_context, sample_sides=True, random_frames=random_frames)
+
+    if not skip_teacher:
+        assert isinstance(teacher_expert_rollout, Trajectory)
+        context = select_random_frames(  # 4 frames
+            teacher_expert_rollout, T_context, sample_sides=True, random_frames=random_frames)
+    else:
+        import pickle as pkl
+        panda_pick_place_single_demo_dataset_path = '/user/frosa/multi_task_lfd/datasets/panda_pick_place_1_demo'
+        load_demo_path = f'{panda_pick_place_single_demo_dataset_path}/task_{variation:02d}/traj000.pkl'
+        print(f'[SKIP TEACHER] loading demo from {load_demo_path}')
+        with open(load_demo_path, "rb") as f:
+            teacher_expert_rollout = pkl.load(f)['traj']
+        context = select_random_frames( # 4 frames
+            teacher_expert_rollout, T_context, sample_sides=True, random_frames=random_frames)
+        
     # convert BGR context image to RGB and scale to 0-1
-    # for i, img in enumerate(context):
-    #     cv2.imwrite(f"context_{i}.png", np.array(img[:, :, ::-1]))
-    context = [img_formatter(i[:, :, ::-1])[None] for i in context]
+    for i, img in enumerate(context):
+        cv2.imwrite(f"context_{i}.png", np.array(img))
+    context = [img_formatter(i)[None] for i in context]
     # assert len(context ) == 6
     if isinstance(context[0], np.ndarray):
         context = torch.from_numpy(np.concatenate(context, 0))[None]
@@ -1657,8 +1963,8 @@ def build_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights=100
         teacher_expert_rollout, T_context, sample_sides=True, random_frames=random_frames)
     # convert BGR context image to RGB and scale to 0-1
     for i, img in enumerate(context):
-        cv2.imwrite(f"context_{i}.png", np.array(img[:, :, ::-1]))
-    context = [img_formatter(i[:, :, ::-1])[None] for i in context]
+        cv2.imwrite(f"context_{i}.png", np.array(img))
+    context = [img_formatter(i)[None] for i in context]
     # assert len(context ) == 6
     if isinstance(context[0], np.ndarray):
         context = torch.from_numpy(np.concatenate(context, 0))[None]
@@ -1692,7 +1998,7 @@ def compute_error(action_t, gt_action):
 
 def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img_formatter,
                     model, predict_gt_bb, bb, gt_classes, concat_bb, states, context, n_steps,
-                    max_T, baseline, action_ranges, sub_action, gt_action, controller, target_obj_emb, place, expert_traj=None, convert_action=False):
+                    max_T, baseline, action_ranges, sub_action, gt_action, controller, target_obj_emb, place, expert_traj=None, convert_action=False, current_step=-1,variation_id=0,cond_module_instance=None):
     # Get GT BB
     # if concat_bb:
     bb_t, gt_t = get_gt_bb(traj=traj,
@@ -1707,13 +2013,12 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
         [.0, .0, .0, .0]).to(
         device=gpu_id).float())
 
-    # convert observation from BGR to RGB
     if config.augs.get("old_aug", True):
         images.append(img_formatter(
-            obs['camera_front_image'][:, :, ::-1])[None])
+            obs['camera_front_image'])[None]) # RGB
     else:
         img_aug, bb_t_aug = img_formatter(
-            obs['camera_front_image'][:, :, ::-1], bb_t)
+            obs['camera_front_image'], bb_t) # RGB
         images.append(img_aug[None])
         # debug_img = np.array(np.moveaxis(
         #     img_aug[:, :, :].cpu().numpy()*255, 0, -1), dtype=np.uint8)
@@ -1742,11 +2047,14 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
             action_ranges=action_ranges,
             target_obj_embedding=target_obj_emb,
             t=n_steps,
-            convert_action=convert_action
+            convert_action=convert_action,
+            obs=obs
         )
     else:
         action, target_pred, target_obj_emb, activation_map, prediction_internal_obj, predicted_bb = get_action(
             model=model,
+            env=env,
+            t=current_step,
             target_obj_dec=None,
             states=states,
             bb=None,
@@ -1760,7 +2068,10 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
             baseline=baseline,
             action_ranges=action_ranges,
             target_obj_embedding=target_obj_emb,
-            convert_action=convert_action
+            convert_action=convert_action,
+            obs=obs,
+            variation_id=variation_id,
+            cond_module_instance=cond_module_instance
         )
 
     end = time.time()
@@ -1856,8 +2167,8 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
                 pass
             else:
                 obs['gt_bb'] = bb_t_aug
-                image = np.array(obs['camera_front_image'][:, :, ::-1])
-            image = np.array(obs['camera_front_image'][:, :, ::-1])
+                image = np.array(obs['camera_front_image'])
+            image = np.array(obs['camera_front_image'])
             for bb in predicted_bb_list:
                 # adjust bb
                 adj_predicted_bb = adjust_bb(bb=bb,
@@ -1870,7 +2181,7 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
                      int(adj_predicted_bb[3])),
                     (0, 255, 0), 1)
         elif concat_bb and predict_gt_bb:
-            image = np.array(obs['camera_front_image'][:, :, ::-1])
+            image = np.array(obs['camera_front_image'])
             for indx, bb in enumerate(bb_t_aug):
                 # adjust bb
                 adj_predicted_bb = adjust_bb(bb=bb,
@@ -1886,8 +2197,36 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
             obs['gt_bb'] = bb_t_aug
             obs['predicted_bb'] = bb_t_aug
         else:
-            image = np.array(obs['camera_front_image'][:, :, ::-1])
+            image = np.array(obs['camera_front_image'])
 
+        # debug for 
+              
+        font                   = cv2.FONT_HERSHEY_SIMPLEX
+        fontScale              = 0.3
+        fontColor              = (0,100,255)
+        thickness              = 1
+        lineType               = 2
+
+
+        # change = (0,10,20,30,40,50)
+        # labels = ['x', 'y', 'z', 'theta', 'phi', 'psi']
+        # for offset, label, a in zip(change, labels, action):
+        #     action_str = f'{label}:{a:.4f}'
+        #     bottomLeftCornerOfText = (20,20+offset)
+        #     cv2.putText(image, action_str, 
+        #         bottomLeftCornerOfText, 
+        #         font, 
+        #         fontScale,
+        #         fontColor,
+        #         thickness,
+        #         lineType)
+            
+        # center_coordinates = obs['eef_point']
+        # radius = 2
+        # color = (0,0,255)
+        # thickness = 2
+        # image = cv2.circle(image, center_coordinates, radius, color, thickness) 
+            
         cv2.imwrite(
             f"step_test_prova.png",  image)
         # if controller is not None and gt_env is not None:
@@ -1895,7 +2234,7 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
         #     gt_obs, gt_reward, gt_env_done, gt_info = gt_env.step(
         #         gt_action)
         #     cv2.imwrite(
-        #         f"gt_step_test.png", gt_obs['camera_front_image'][:, :, ::-1])
+        #         f"gt_step_test.png", gt_obs['camera_front_image'])
     except Exception as e:
         print(f"Exception during step {e}")
         return obs, 0, None, action, False, elapsed_time

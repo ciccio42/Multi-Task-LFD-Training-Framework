@@ -9,7 +9,10 @@ from torchvision import transforms
 from torchvision.transforms import RandomAffine, ToTensor, Normalize, \
     RandomGrayscale, ColorJitter, RandomApply, RandomHorizontalFlip, GaussianBlur, RandomResizedCrop
 from torchvision.transforms.functional import resized_crop
-from robosuite.utils.transform_utils import quat2axisangle, axisangle2quat, quat2mat, mat2quat 
+try:
+    from robosuite.utils.transform_utils import quat2axisangle, axisangle2quat, quat2mat, mat2quat
+except:
+    print("Robosuite not installed") 
 
 import pickle as pkl
 from collections import defaultdict, OrderedDict
@@ -233,7 +236,7 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
 
             demo_files = sorted(glob.glob(task_dir))
 
-            subtask_size = spec.get('demo_per_subtask', 100)
+            subtask_size = spec.get('demo_per_subtask', 40)
             assert len(
                 demo_files) >= subtask_size, "Doesn't have enough data "+str(len(demo_files))
             demo_files = demo_files[:subtask_size]
@@ -439,7 +442,7 @@ def make_demo(dataset, traj, task_name):
             # frames.append(_make_frame(n))
             # convert from BGR to RGB and scale to 0-1 range
             obs = copy.copy(
-                traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
+                traj.get(n)['obs']['camera_front_image']) # [:, :, ::-1])
             processed = dataset.frame_aug(
                 task_name,
                 obs,
@@ -490,7 +493,7 @@ def make_demo(dataset, traj, task_name):
 
             # convert from BGR to RGB and scale to 0-1 range
             obs = copy.copy(
-                traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
+                traj.get(n)['obs']['camera_front_image']) # [:, :, ::-1])
 
             processed = dataset.frame_aug(task_name,
                                           obs,
@@ -920,7 +923,7 @@ def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, comm
             if i == 0 or i == 2:
                 color = (0, 255, 0)
                 image = np.array(
-                    step_t['obs']['camera_front_image'][:, :, ::-1])
+                    step_t['obs']['camera_front_image']) # [:, :, ::-1])
             else:
                 color = (255, 0, 0)
             image = cv2.rectangle(image,
@@ -952,7 +955,7 @@ def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, comm
 
     if DEBUG:
         image = np.array(
-            step_t['obs']['camera_front_image'][:, :, ::-1])
+            step_t['obs']['camera_front_image']) # [:, :, ::-1])
         for i, single_bb in enumerate(bb):
             if i == 0 or i == 2:
                 color = (0, 255, 0) # green no-targ
@@ -1078,7 +1081,7 @@ def create_gt_bb_all_obj(dataset_loader, traj, step_t, task_name, distractor=Fal
             if i == 0 or i == 2:
                 color = (0, 255, 0)
                 image = np.array(
-                    step_t['obs']['camera_front_image'][:, :, ::-1])
+                    step_t['obs']['camera_front_image']) # [:, :, ::-1])
             else:
                 color = (255, 0, 0)
             image = cv2.rectangle(image,
@@ -1196,7 +1199,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
         if not getattr(dataset_loader, "real", False) or (getattr(dataset_loader, "real", False) and sim_crop):
             # cv2.imwrite("prova.png", step_t['obs']['camera_front_image'])
             image = copy.copy(
-                step_t['obs']['camera_front_image'][:, :, ::-1])
+                step_t['obs']['camera_front_image']) # [:, :, ::-1])
         else:
             if step_t['obs'].get('camera_front_image_full_size', None) is not None:
                 image = copy.copy(
@@ -1273,7 +1276,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
             eef_point_time = time.time()
             if DEBUG:
                 image_point = np.array(
-                    step_t['obs']['camera_front_image'][:, :, ::-1], dtype=np.uint8)
+                    step_t['obs']['camera_front_image'], dtype=np.uint8) # [:, :, ::-1], dtype=np.uint8)
                 image_point = cv2.circle(cv2.UMat(image_point), (step_t['obs']['eef_point'][1], step_t['obs']['eef_point'][0]), radius=1, color=(
                     0, 0, 255), thickness=1)
                 cv2.imwrite("gt_point.png", cv2.UMat(image_point))

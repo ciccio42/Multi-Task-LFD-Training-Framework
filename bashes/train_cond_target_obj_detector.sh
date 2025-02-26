@@ -1,6 +1,7 @@
 #!/bin/bash
 # export MUJOCO_PY_MUJOCO_PATH=/user/frosa/.mujoco/mujoco210
 # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/frosa/.mujoco/mujoco210/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/lvicidomini/.mujoco/mujoco210/bin
 # export MUJOCO_PY_MUJOCO_PATH="/home/frosa_Loc/.mujoco/mujoco210"
 # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/frosa_Loc/.mujoco/mujoco210/bin
 # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/frosa/miniconda3/envs/multi_task_lfd/lib
@@ -16,10 +17,23 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
 
+export PYTHONPATH=$PYTHONPATH:/user/lvicidomini/video_conditioned/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/training/
+export PYTHONPATH=$PYTHONPATH:/user/lvicidomini/video_conditioned/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/test/
+
+
 export HYDRA_FULL_ERROR=1
-EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder
+# EXPERT_DATA= /home/rsofnc000/dataset/opt_dataset
+EXPERT_DATA=/mnt/localstorage/lvicidomini/datasets
+# SAVE_PATH=/home/rsofnc000/checkpoint_save_folder
+SAVE_PATH=/mnt/localstorage/lvicidomini/checkpoint_save_folder
 POLICY='${cond_target_obj_detector}'
+
+# AGENT_NAME='sim_shifted_converted_absolute_ur5e'
+AGENT_NAME='sim_ur5e'
+# DEMO_NAME='human_video'
+DEMO_NAME='human_rgb'
+
+DEMO_PER_SUBTASK=40
 
 echo $1
 TASK_NAME="$1"
@@ -38,10 +52,9 @@ BSIZE=80 #16 #32
 COMPUTE_OBJ_DISTRIBUTION=false
 CONFIG_PATH=../experiments/
 CONFIG_NAME=config_cond_target_obj_detector.yaml
-LOADER_WORKERS=32
+LOADER_WORKERS=16
 BALANCING_POLICY=0
 OBS_T=7
-
 EARLY_STOPPING_PATIECE=10
 OPTIMIZER='AdamW'
 LR=0.00001
@@ -49,7 +62,7 @@ WEIGHT_DECAY=5
 SCHEDULER='ReduceLROnPlateau'
 FIRST_FRAMES=true
 ONLY_FIRST_FRAMES=false
-ROLLOUT=true
+ROLLOUT=false
 PERFORM_AUGS=true
 NON_SEQUENTIAL=true
 
@@ -91,10 +104,11 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     TASK_str="pick_place"
-    EXP_NAME=1Task-${TASK_str}-CTOD_NO_0_5_10_15
+    # EXP_NAME=1Task-${TASK_str}-CTOD_NO_0_5_10_15
+    EXP_NAME=Simulated-Agent-Human-Demonstration-CTOD
     PROJECT_NAME=${EXP_NAME}
     SET_SAME_N=7
-    RESUME_PATH=/home/rsofnc000/checkpoint_save_folder/${EXP_NAME}-Batch84
+    RESUME_PATH=/mnt/localstorage/lvicidomini/checkpoint_save_folder/${EXP_NAME}-Batch112
     RESUME_STEP=27456
     RESUME=false
 elif [ "$TASK_NAME" == 'multi' ]; then
@@ -108,8 +122,8 @@ elif [ "$TASK_NAME" == 'multi' ]; then
     RESUME=false
 fi
 
-#
-srun --output=training_${EXP_NAME}_ctdo.txt --job-name=training_${EXP_NAME}_ctdo python -u ../training/train_scripts/train_any.py \
+# srun --output=training_${EXP_NAME}_ctdo.txt --job-name=training_${EXP_NAME}_ctdo 
+python -u ../training/train_scripts/train_any.py \
     --config-path ${CONFIG_PATH} \
     --config-name ${CONFIG_NAME} \
     policy=${POLICY} \
@@ -133,6 +147,8 @@ srun --output=training_${EXP_NAME}_ctdo.txt --job-name=training_${EXP_NAME}_ctdo
     dataset_cfg.height=${HEIGHT} \
     dataset_cfg.width=${WIDTH} \
     dataset_cfg.perform_augs=${PERFORM_AUGS} \
+    dataset_cfg.agent_name=${AGENT_NAME} \
+    dataset_cfg.demo_name=${DEMO_NAME} \
     samplers.balancing_policy=${BALANCING_POLICY} \
     early_stopping_cfg.patience=${EARLY_STOPPING_PATIECE} \
     cond_target_obj_detector_cfg.height=${HEIGHT} \

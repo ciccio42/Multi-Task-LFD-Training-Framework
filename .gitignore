@@ -138,6 +138,7 @@ dmypy.json
 /bashes/outputs/*
 /bashes/wandb/*
 /bashes/wandb/nohup.out
+/bashes/training_logs/*
 
 wandb/*
 *.pth

@@ -113,7 +113,7 @@ if __name__ == '__main__':
     wrong_table.plot(title='failure cases', ax=ax03)
     task_table.plot(kind='bar', title='task rate', ax=ax04)
 
-    plt.savefig(f'{save_folder}/all.png')
+    plt.savefig(f'{save_folder}/plot_results_sim_80_trajs.png')
     
     
     

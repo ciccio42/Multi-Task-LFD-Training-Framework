@@ -350,13 +350,13 @@ class EfficientNet(nn.Module):
     ##########################################################################################
     ##########################################################################################
     ##########################################################################################
-    def forward(self, inputs, context=None): ######## QUI VA L'EMBEDDING PRODOTTO DAL COND MODULE
+    def forward(self, inputs, context=None):
         # stem
         outputs = self.convNormAct0(inputs)
 
         # Blocks
         if self.include_film:
-            for block, film in zip(self.blocks, self.films):  # TODO: problema memoria
+            for block, film in zip(self.blocks, self.films):  # TODO: memory problem
                 outputs = block(outputs) # MBConv
                 outputs = film(outputs, context) # FiLM
 

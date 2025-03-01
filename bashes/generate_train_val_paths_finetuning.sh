@@ -10,7 +10,7 @@ UR5E_SIM_PICK_PLACE_DATASET='/raid/home/frosa_Loc/opt_dataset/pick_place/ur5e_pi
 GENERATE_PATHS_TO_PKLS=true #executes the 1st script
 
 # 1st script parameters
-SPLIT='0.9,0.1'
+SPLIT='1.0,0.0'
 
 
 if [ $GENERATE_PATHS_TO_PKLS == true ]; then 
@@ -20,7 +20,6 @@ python -u ../training/multi_task_il/datasets/command_encoder/generate_train_val_
         --ur5e_sim_pick_place_folder=${UR5E_SIM_PICK_PLACE_DATASET} \
         --write_train_pkl_path \
         --write_val_pkl_path \
-        --write_all_pkl_path \
         --split=${SPLIT} \
         --panda_sim_dataset
 fi

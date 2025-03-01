@@ -506,8 +506,8 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
                 # if 'task_10' in pkl_file_path:
                 #     print('hey')
                     
-                # cv2.imwrite('prova_step_before_grip.png', sample['traj'].get()['obs']['camera_front_image'])
-                # cv2.imwrite('prova_step_grip.png', sample['traj'].get(start_pick_t)['obs']['camera_front_image'])
+                # cv2.imwrite('prova_step_before_grip_test.png', sample['traj'].get(start_pick_t - 1)['obs']['camera_front_image'])
+                # cv2.imwrite('prova_step_grip_test.png', sample['traj'].get(start_pick_t)['obs']['camera_front_image'])
                 
             if t < (len(sample['traj']) - 1) and start_frame_t == 0:
                 diff = abs(sample['traj'].get(t)['action'] - sample['traj'].get(t+1)['action'])
@@ -524,7 +524,7 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
         if 'task_00' in pkl_file_path:
             subsample_factor = 1 # task 00 is already subsampled
         else:
-            subsample_factor = 4
+            subsample_factor = 2
         sampled_trj = list()
         # sampled_trj.extend(sample['traj']._data[:1])
         sampled_trj.extend(sample['traj']._data[start_frame_t:start_pick_t:subsample_factor])
@@ -582,9 +582,9 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
 
     trj_name = pkl_file_path.split('/')[-1]
     out_pkl_file_path = os.path.join(out_path, trj_name)
-    # with open(out_pkl_file_path, "wb") as f:
-    #     print(out_pkl_file_path)
-    #     pickle.dump(sample, f)
+    with open(out_pkl_file_path, "wb") as f:
+        print(out_pkl_file_path)
+        pickle.dump(sample, f)
 
 
 if __name__ == '__main__':
@@ -627,7 +627,7 @@ if __name__ == '__main__':
     #                             f"{args.task_name}_opt",
     #                             f"{args.robot_name}_{args.task_name}")
     
-    out_path = "/user/frosa/multi_task_lfd/backup_datasets/real_new_ur5e_pick_place_subsampled"
+    out_path = "/user/frosa/multi_task_lfd/backup_datasets/real_new_ur5e_pick_place_subsampling_2"
 
     os.makedirs(name=out_path, exist_ok=True)
 

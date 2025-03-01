@@ -170,7 +170,7 @@ if __name__ == '__main__':
         
     # min_max_traj_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_datasets.json'
     # min_max_traj_path_2 = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_datasets_2.json'
-    min_max_traj_path_abs = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_datasets_abs.json'
+    min_max_traj_path_abs = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_sim_no_conv.json'
     
     # with open(min_max_traj_path, 'r') as file:
     #     min_max_dict = json.load(file)
@@ -204,13 +204,13 @@ if __name__ == '__main__':
     
     # for now: for dx, dy, dz, dphi, dtheha, dpsi
     ACTIONS_ELS = ['dx', 'dy', 'dz', 'dphi', 'dtheta', 'dpsi']
-    BLACK_LIST = ['asu_table_top_converted',
-                'berkeley_autolab_ur5_converted',
-                'iamlab_cmu_pickup_insert_converted',
-                'taco_play_converted',
-                'droid_converted_old',
-                'droid_converted',
-                'panda_pick_place']
+    BLACK_LIST = ['asu_table_top_converted_absolute_pose',
+                'berkeley_autolab_ur5_converted_absolute_pose',
+                'iamlab_cmu_pickup_insert_converted_absolute_pose',
+                'taco_play_converted_absolute_pose',
+                'droid_converted_absolute_pose',
+                'panda_pick_place'
+                ]
     only_axes = False
     
     
@@ -302,9 +302,11 @@ if __name__ == '__main__':
                 
                 plot_hist(tokens_actions_per_dataset, tokenizer_instance.vocabsize, dataset_str, min_old, max_old, action_el_str, hist_dataset_axes[act_id], tokenizer_instance)
             
-            if not os.path.exists('test_hists_dx_dy_dz_with_angles_absolute_ranges'):
-                    os.mkdir('test_hists_dx_dy_dz_with_angles_absolute_ranges')
-            plt.savefig(f'test_hists_dx_dy_dz_with_angles_absolute_ranges/bin_freq_{dataset_str}.png')
+            
+            save_path = 'test_hists_subsampling'
+            if not os.path.exists(f'{save_path}'):
+                    os.mkdir(f'{save_path}')
+            plt.savefig(f'{save_path}/bin_freq_{dataset_str}.png')
             
             # exit() # to plot all traj for first dataset     
     

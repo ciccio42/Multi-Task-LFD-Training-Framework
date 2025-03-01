@@ -143,10 +143,40 @@ def collate_by_task(batch):
     logger.debug(f"Batch time {time.time()-start_batch}")
 
     collate_time = time.time()
+    
+    
     for name, data in per_task_data.items():
+    ###############################################################    
+        # for d in data:
+        #     if d['traj']['actions'].shape[-1] > 7:
+        #         print('a')
+        #         cv2.imwrite(f"test_collate_8.png", np.moveaxis(
+        #             d['traj']['images'][-1].numpy()*255, 0, -1))
+        #     else:
+        #         print('b')
+        #         cv2.imwrite(f"test_collate_7.png", np.moveaxis(
+        #             d['traj']['images'][-1].numpy()*255, 0, -1))
+        
+        for d in data:
+            action_vector = d['traj']['actions']
+            if action_vector[-1].shape[-1] > 7:
+                new_action_vector = np.zeros((action_vector.shape[0], action_vector.shape[1], 7))
+                for idx, act_t in enumerate(action_vector):
+                    new_act_t = np.zeros((1, 7))
+                    new_act_t[0][:3] = act_t[0][:3]
+                    new_act_t[0][3:-1] = quat2axisangle(act_t[0][3:-1])
+                    new_act_t[0][-1] = act_t[0][-1]
+                    new_action_vector[idx] = new_act_t
+                d['traj']['actions'] = new_action_vector
+                
+    #############################################################
+            
         per_task_data[name] = default_collate(data)
+    
     logger.debug(f"Collate time {time.time()-collate_time}")
     return per_task_data
+
+
 
 
 def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_name: str = "panda", root_dir: str = "", task_spec=None, split: list = [0.9, 0.1], allow_train_skip: bool = False, allow_val_skip: bool = False, mix_variations: bool = False, mode='train', mix_sim_real=False):
@@ -204,9 +234,9 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
             task_dir = expanduser(join(agent_dir,  task_id, '*.pkl'))
             agent_files = sorted(glob.glob(task_dir))
             
-            if 'real' in task_dir and dataset_loader._mix_sim_real:
-                task_dir_sim = task_dir.replace(agent_name, agent_name.replace('real_new_', ''))
-                agent_files.extend(sorted(glob.glob(task_dir_sim)))
+            # if 'real' in task_dir and dataset_loader._mix_sim_real:
+            #     task_dir_sim = task_dir.replace(agent_name, agent_name.replace('real_new_', ''))
+            #     agent_files.extend(sorted(glob.glob(task_dir_sim)))
                 
             if len(agent_files) < 100:
                 agent_files = list(itertools.chain.from_iterable((e, e) for e in agent_files))

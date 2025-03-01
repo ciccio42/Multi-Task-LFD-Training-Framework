@@ -131,7 +131,7 @@ def _create_prompt_assets(obs, task_name, views, modalities):
                 target_obj_id = obs['target-object']
                 target_obj_name = ENV_OBJECTS[task_name]['obj_names'][target_obj_id]
                 # assign prompt assets
-                prompt_assets['pick_object'][modality][view] = obs['camera_front_image'][:, :, ::-1]
+                prompt_assets['pick_object'][modality][view] = obs['camera_front_image']
                 prompt_assets['pick_object']['segm']['obj_info']['obj_id'] = target_obj_id
                 prompt_assets['pick_object']['segm']['obj_info']['obj_name'] = ENV_OBJECTS[task_name]['splitted_obj_names'][target_obj_id]
                 prompt_assets['pick_object']['segm']['obj_info']['obj_color'] = ENV_OBJECTS[task_name]['splitted_obj_names'][target_obj_id].split(" ")[
@@ -318,7 +318,7 @@ def prepare_obs(env, obs, views, task_name):
     for view in views:
         # get observation at timestamp t
         obs_t = obs
-        rgb_this_view = obs_t['camera_front_image'][:, :, ::-1]
+        rgb_this_view = obs_t['camera_front_image']
         # cv2.imwrite("rgb_this_view.png", np.array(rgb_this_view))
         bboxes = []
         cropped_imgs = []
@@ -610,6 +610,13 @@ def get_action(model, env, target_obj_dec, bb, predict_gt_bb, gt_classes, states
                                 actions=None,
                                 bsize=1
                                 )
+                
+                # demo_dir = 'test_demo_sim_inference'
+                # os.mkdir(demo_dir)
+                # for t,step_img in enumerate(context[0].cpu().detach().numpy()):
+                #     cv2.imwrite(f'{demo_dir}/step_{t}.png', np.moveaxis(
+                #                 step_img*255, 0, -1))
+                
             
                 # test_i_t = i_t[0][0].cpu().numpy()
                 # cv2.imwrite("i_t_2.png", np.moveaxis(
@@ -1131,7 +1138,7 @@ def plot_activation_map(activation_map, agent_obs, save_path="activation_map.png
     plt.show()
 
 
-def compute_bb_prediction(prediction, place_bb_flag, perform_augs, model, formatted_img, bb_t, gpu_id, obs, tp_array, fp_array, fn_array, iou_array):
+def  compute_bb_prediction(prediction, place_bb_flag, perform_augs, model, formatted_img, bb_t, gpu_id, obs, tp_array, fp_array, fn_array, iou_array):
     
     tp_array_t = np.zeros(2)
     fp_array_t = np.zeros(2)
@@ -1371,10 +1378,10 @@ def object_detection_inference(model, env, context, gpu_id, variation_id, img_fo
             # convert observation from BGR to RGB
             if perform_augs:
                 formatted_img, bb_t = img_formatter(
-                    obs['camera_front_image'][:, :, ::-1], bb_t)
+                    obs['camera_front_image'], bb_t)
             else:
                 formatted_img = torch.from_numpy(
-                    np.array(obs['camera_front_image'][:, :, ::-1]))
+                    np.array(obs['camera_front_image']))
 
             model_input = dict()
             model_input['demo'] = context.to(device=gpu_id)
@@ -1462,7 +1469,7 @@ def object_detection_inference(model, env, context, gpu_id, variation_id, img_fo
                 # action = clip_action(action)
             obs, reward, env_done, info = env.step(action)
             cv2.imwrite(
-                f"step_test.png", obs['camera_front_image'][:, :, ::-1])
+                f"step_test.png", obs['camera_front_image'])
 
             n_steps += 1
             tasks['success'] = reward or tasks['success']
@@ -1510,7 +1517,7 @@ def object_detection_inference(model, env, context, gpu_id, variation_id, img_fo
                 if perform_augs:
                     if not real:
                         formatted_img, bb_t = img_formatter(
-                            agent_obs[:, :, ::-1], bb_t, agent=True)
+                            agent_obs, bb_t, agent=True)
                     else:
                         formatted_img, bb_t = img_formatter(
                             agent_obs, bb_t, agent=True)
@@ -1830,7 +1837,7 @@ def build_env(ctr=0, env_name='nut', heights=100, widths=200, size=False, shape=
     return agent_env, variation
 
 
-def build_env_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights=100, widths=200, size=False, shape=False, color=False, gpu_id=0, variation=None, random_frames=True, controller_path=None, ret_gt_env=False, seed=42):
+def build_env_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights=100, widths=200, size=False, shape=False, color=False, gpu_id=0, variation=None, random_frames=True, controller_path=None, ret_gt_env=False, seed=42, skip_teacher=False, demo_file=None):
 
     print(f"Seed: {seed}")
     if controller_path == None:
@@ -1851,12 +1858,19 @@ def build_env_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights
     else:
         variation = variation
 
-    teacher_expert_rollout = env_fn(teacher_name,
-                                    controller_type=controller, #TODO:
-                                    task=variation,
-                                    seed=seed,
-                                    gpu_id=gpu_id,
-                                    object_set=TASK_MAP[env_name]['object_set'])
+    if demo_file is not None:
+        # load demo from pickle file
+        import pickle as pkl
+        with open(demo_file, "rb") as f:
+            teacher_expert_rollout = pkl.load(f)['traj']
+    else:
+        if not skip_teacher:
+            teacher_expert_rollout = env_fn(teacher_name,
+                                            controller_type=controller, #TODO:
+                                            task=variation,
+                                            seed=seed,
+                                            gpu_id=gpu_id,
+                                            object_set=TASK_MAP[env_name]['object_set'])
 
     agent_env = env_fn(agent_name,
                        controller_type=controller,
@@ -1875,9 +1889,21 @@ def build_env_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights
                         gpu_id=gpu_id,
                         object_set=TASK_MAP[env_name]['object_set'])
 
-    assert isinstance(teacher_expert_rollout, Trajectory)
-    context = select_random_frames(  # 4 frames
-        teacher_expert_rollout, T_context, sample_sides=True, random_frames=random_frames)
+
+    if not skip_teacher:
+        assert isinstance(teacher_expert_rollout, Trajectory)
+        context = select_random_frames(  # 4 frames
+            teacher_expert_rollout, T_context, sample_sides=True, random_frames=random_frames)
+    else:
+        import pickle as pkl
+        panda_pick_place_single_demo_dataset_path = '/user/frosa/multi_task_lfd/datasets/panda_pick_place_1_demo'
+        load_demo_path = f'{panda_pick_place_single_demo_dataset_path}/task_{variation:02d}/traj000.pkl'
+        print(f'[SKIP TEACHER] loading demo from {load_demo_path}')
+        with open(load_demo_path, "rb") as f:
+            teacher_expert_rollout = pkl.load(f)['traj']
+        context = select_random_frames( # 4 frames
+            teacher_expert_rollout, T_context, sample_sides=True, random_frames=random_frames)
+        
     # convert BGR context image to RGB and scale to 0-1
     for i, img in enumerate(context):
         cv2.imwrite(f"context_{i}.png", np.array(img))
@@ -1938,8 +1964,8 @@ def build_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights=100
         teacher_expert_rollout, T_context, sample_sides=True, random_frames=random_frames)
     # convert BGR context image to RGB and scale to 0-1
     for i, img in enumerate(context):
-        cv2.imwrite(f"context_{i}.png", np.array(img[:, :, ::-1]))
-    context = [img_formatter(i[:, :, ::-1])[None] for i in context]
+        cv2.imwrite(f"context_{i}.png", np.array(img))
+    context = [img_formatter(i)[None] for i in context]
     # assert len(context ) == 6
     if isinstance(context[0], np.ndarray):
         context = torch.from_numpy(np.concatenate(context, 0))[None]
@@ -2149,8 +2175,8 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
                 pass
             else:
                 obs['gt_bb'] = bb_t_aug
-                image = np.array(obs['camera_front_image'][:, :, ::-1])
-            image = np.array(obs['camera_front_image'][:, :, ::-1])
+                image = np.array(obs['camera_front_image'])
+            image = np.array(obs['camera_front_image'])
             for bb in predicted_bb_list:
                 # adjust bb
                 adj_predicted_bb = adjust_bb(bb=bb,
@@ -2163,7 +2189,7 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
                      int(adj_predicted_bb[3])),
                     (0, 255, 0), 1)
         elif concat_bb and predict_gt_bb:
-            image = np.array(obs['camera_front_image'][:, :, ::-1])
+            image = np.array(obs['camera_front_image'])
             for indx, bb in enumerate(bb_t_aug):
                 # adjust bb
                 adj_predicted_bb = adjust_bb(bb=bb,
@@ -2179,7 +2205,7 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
             obs['gt_bb'] = bb_t_aug
             obs['predicted_bb'] = bb_t_aug
         else:
-            image = np.array(obs['camera_front_image'][:, :, ::-1])
+            image = np.array(obs['camera_front_image'])
 
         # debug for 
               
@@ -2220,7 +2246,7 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
         #     gt_obs, gt_reward, gt_env_done, gt_info = gt_env.step(
         #         gt_action)
         #     cv2.imwrite(
-        #         f"gt_step_test.png", gt_obs['camera_front_image'][:, :, ::-1])
+        #         f"gt_step_test.png", gt_obs['camera_front_image'])
     except Exception as e:
         print(f"Exception during step {e}")
         return obs, 0, None, action, False, elapsed_time

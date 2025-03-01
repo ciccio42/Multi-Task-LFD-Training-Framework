@@ -50,9 +50,9 @@ if __name__ == '__main__':
         debugpy.wait_for_client()
         
         
-    BLACK_LIST = ['asu_table_top_converted', 'berkeley_autolab_ur5_converted', 'iamlab_cmu_pickup_insert_converted', 'taco_play_converted', 'droid_converted_old', 'droid_converted', 'droid_converted_2909_to_4645', 'droid_converted_0_to_2909', 'real_new_ur5e_pick_place_converted', 'sim_new_ur5e_pick_place_converted', 'panda_pick_place', 'ur5e_pick_place']    
+    BLACK_LIST = ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'iamlab_cmu_pickup_insert_converted_absolute_pose','taco_play_converted_absolute_pose','droid_converted_absolute_pose','panda_pick_place']
     min_max_actions_per_dataset = {}
-        
+            
     all_traj_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/all_pkl_paths.json'
     
     with open(all_traj_path, 'r') as file:

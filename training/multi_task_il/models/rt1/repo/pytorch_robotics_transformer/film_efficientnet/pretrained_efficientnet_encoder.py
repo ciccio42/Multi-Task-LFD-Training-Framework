@@ -65,7 +65,7 @@ class EfficientNetEncoder(nn.Module):
     def forward(self, image: torch.Tensor, context: torch.Tensor) -> torch.Tensor:
         features = self._encode(image, context) # (b*t, ch, h, w), (b*t, 512)
         features = self.conv1x1(features)  # (b*t, 1536, 8, 10) -> (16, 512, 8, 10)
-        features = self.film_layer(features, context) # features.shape (16,512,8,10) # ma perché lo fa di nuovo
+        features = self.film_layer(features, context) # features.shape (16,512,8,10) # di nuovo per transformare l'output di questa convoluzionale
 
         if not self._pooling:
             return features

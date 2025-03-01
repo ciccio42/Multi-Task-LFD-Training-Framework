@@ -84,19 +84,25 @@ heatmap
 
 
 
-# create plots from checkpoints
+# create plots from checkpoints (sim models)!!!
 bashes/plot_results_checkpoint.sh
 # create real dataset number of frame distribution (for variation and for phase)
 bashes/real_dataset_frame_distribution.sh
 
 
+# Subsampling
+training/multi_task_il/datasets/optimize_dataset.sh
+# visualize mean and std dev of number of frames for task
+bashes/real_dataset_frame_distribution.sh
+
 
 # Trajectories workflow
+Optimize: ./optimize_dataset.sh
 Convert: ./convert_real_sim_delta.sh
 Generate paths: ./generate_train_val_paths_finetuning.sh
 Generate couples (video + traj): ./generate_traj_demo_couples_from_json.sh
-Plot histograms: ./plot_bin_histogram.sh
 find min max: ./find_min_max_actions.sh
+Plot histograms: ./plot_bin_histogram.sh
 
 complete black list:
 

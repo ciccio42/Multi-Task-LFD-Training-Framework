@@ -46,7 +46,7 @@ def extract_last_number(path):
     return int(check_point_number)
 
 
-def object_detection_inference(model, config, ctr, heights=100, widths=200, size=0, shape=0, color=0, max_T=150, env_name='place', gpu_id=-1, baseline=None, variation=None, controller_path=None, seed=None, action_ranges=[], model_name=None, gt_file=None, gt_bb=False, real=False, place_bb_flag=True):
+def object_detection_inference(model, config, ctr, heights=100, widths=200, size=0, shape=0, color=0, max_T=150, env_name='place', gpu_id=-1, baseline=None, variation=None, controller_path=None, seed=None, action_ranges=[], model_name=None, gt_file=None, gt_bb=False, demo_file=None, real=False, place_bb_flag=True):
 
     if gpu_id == -1:
         gpu_id = int(ctr % torch.cuda.device_count())
@@ -77,7 +77,8 @@ def object_detection_inference(model, config, ctr, heights=100, widths=200, size
                                                                     gpu_id=gpu_id,
                                                                     variation=variation, random_frames=random_frames,
                                                                     controller_path=controller_path,
-                                                                    seed=seed)
+                                                                    seed=seed,
+                                                                    demo_file=demo_file)
     else:
         env = None
         variation_id = None
@@ -168,6 +169,11 @@ def rollout_imitation(model, config, ctr,
         # 3) variation_id: id della variazione del task
         # 4) expert_traj: la traiettoria eseguita dall'esperto (pick_place controller)
         # 5) gt_env: ambiente di gt (?)
+        
+        # True: carica traiettorie presenti al path specificato
+        # False: chiede al dimostratore di eseguire una traiettoria
+        skip_teacher = True
+        
         env, context, variation_id, expert_traj, gt_env = build_env_context(img_formatter,
                                                                             T_context=T_context,
                                                                             ctr=ctr,
@@ -181,7 +187,8 @@ def rollout_imitation(model, config, ctr,
                                                                             variation=variation, random_frames=random_frames,
                                                                             controller_path=controller_path,
                                                                             ret_gt_env=True,
-                                                                            seed=seed)
+                                                                            seed=seed,
+                                                                            skip_teacher=skip_teacher)
         build_task = TASK_MAP.get(env_name, None)
         assert build_task, 'Got unsupported task '+env_name
         eval_fn = get_eval_fn(env_name=env_name) # pick_place_eval
@@ -246,10 +253,10 @@ def rollout_imitation(model, config, ctr,
         return traj, info
 
 
-def _proc(model, config, results_dir, heights, widths, size, shape, color, env_name, baseline, variation, max_T, controller_path, model_name, gpu_id, save, gt_bb, sub_action, gt_action, real, place, seed, n, gt_file):
+def _proc(model, config, results_dir, heights, widths, size, shape, color, env_name, baseline, variation, max_T, controller_path, model_name, gpu_id, save, gt_bb, sub_action, gt_action, real, place, seed, n, gt_file, demo_file=None):
     json_name = results_dir + '/traj{}.json'.format(n)
     pkl_name = results_dir + '/traj{}.pkl'.format(n)
-    if os.path.exists(json_name) and os.path.exists(pkl_name):
+    if os.path.exists(json_name) and os.path.exists(pkl_name): # TODO: remove False
         f = open(json_name)
         task_success_flags = json.load(f)
         print("Using previous results at {}. Loaded eval traj #{}, task#{}, reached? {} picked? {} success? {} ".format(
@@ -312,6 +319,7 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                                                         model_name=model_name,
                                                         gpu_id=gpu_id,
                                                         gt_file=gt_file,
+                                                        demo_file=demo_file,
                                                         real=real,
                                                         place_bb_flag=place)
 
@@ -472,7 +480,6 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                 json.dump(res_dict, open(
                     results_dir+'/traj{}.json'.format(n), 'w'))
     del model
-    del cond_module_instance
     # exit()
     return task_success_flags
 
@@ -514,6 +521,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--sub_action', action='store_true')
     parser.add_argument('--gt_action', default=4, type=int)
+    parser.add_argument('--human_demo', action='store_true')
 
     args = parser.parse_args()
 
@@ -527,7 +535,7 @@ if __name__ == '__main__':
 
     try_path = args.model
     real = True if "Real" in try_path else False
-    place = True if ("KP" in try_path or "Double" in try_path) else False
+    place = True if ("COD" in try_path or "-KP" in try_path or "Double" in try_path) else False
     # if 'log' not in args.model and 'mosaic' not in args.model:
     #     print("Appending dir to given exp_name: ", args.model)
     #     try_path = join(LOG_PATH, args.model)
@@ -606,9 +614,9 @@ if __name__ == '__main__':
 
         if args.wandb_log:
             model_name = model_path.split("/")[-2]
-            wandb.login(key='1d9590e10967b8af6602ddae665dbcc77f88fbd5')
+            wandb.login(key='d8ae96268267edd589283209c8b725caadcd4645') # '1d9590e10967b8af6602ddae665dbcc77f88fbd5')
             run = wandb.init(
-                entity="francescorosa97",
+                entity="l-vicidomini11", # "francescorosa97",
                 project=args.project_name,
                 job_type='test',
                 reinit=True)
@@ -687,8 +695,8 @@ if __name__ == '__main__':
         color = args.color
         variation = args.variation
         seed = args.seed
-        max_T = 100
-        
+        max_T = 200
+
         dataset = None
         if args.test_gt:
             from hydra.utils import instantiate
@@ -704,6 +712,40 @@ if __name__ == '__main__':
                 for task_id in pkl_file_dict[task_name].keys():
                     for pkl_file in pkl_file_dict[task_name][task_id]:
                         pkl_file_list.append(pkl_file)
+            args.N = len(pkl_file_list)
+
+        # if human_demo, load the dataset and generate the seeds for demo files
+        if args.human_demo:
+            from hydra.utils import instantiate
+            config.EXPERT_DATA = "/user/frosa/multi_task_lfd/ur_multitask_dataset"
+            config.dataset_cfg.mode = "val"
+            config.dataset_cfg.agent_name="ur5e"
+            config.dataset_cfg.demo_name="human_rgb"
+            
+            dataset = instantiate(config.get('dataset_cfg', None))
+            
+            # creates a list of tuples structured in the following way: ()
+            # variation = list()
+            # file_pairs = dataset.demo_files
+            # pkl_file_list = []
+            # for pkl_file in file_pairs.values():
+            #     pkl_file_list.append((pkl_file[3], pkl_file[2]))
+            #     variation_id = pkl_file[3].split(
+            #         '/')[-2].split('task_')[-1].lstrip("0")
+            #     if variation_id == "":
+            #         variation.append(0)
+            #     else:
+            #         variation.append(int(variation_id))
+            
+            variation = list()
+            demo_files = dataset.demo_files['pick_place']
+            pkl_file_list = []
+            for task_id in demo_files.keys():
+                for pkl_file in demo_files[task_id]:
+                    for i in range(10): # 10 test for each demo
+                        variation.append(task_id)
+                        pkl_file_list.append(pkl_file)
+            
             args.N = len(pkl_file_list)
 
         parallel = args.num_workers > 1
@@ -736,13 +778,21 @@ if __name__ == '__main__':
 
         random.seed(42)
         np.random.seed(42)
+                
         seeds = []
         if args.test_gt:
             for i in range(args.N):
                 seeds.append((random.getrandbits(32), i,
                               pkl_file_list[i % len(pkl_file_list)], -1))
-        else:
-            seeds = [(random.getrandbits(32), i, None) for i in range(args.N)]
+        else: # numero di dimostrazioni dell'umano * 10
+            if args.human_demo:
+                for i in range(args.N):
+                    seeds.append((random.getrandbits(32),
+                                i, 
+                                None, # agent path
+                                pkl_file_list[i % len(pkl_file_list)])) # demo path
+            else:
+                seeds = [(random.getrandbits(32), i, None) for i in range(args.N)]
 
         if parallel:
             with Pool(args.num_workers) as p:
@@ -752,8 +802,12 @@ if __name__ == '__main__':
                 task_success_flags = [f(seeds[i][0], seeds[i][1], seeds[i][2])
                                       for i, _ in enumerate(seeds)]
             else:
-                task_success_flags = [f(seeds[i][0], seeds[i][1], seeds[i][2])
-                                      for i, n in enumerate(range(args.N))]
+                if args.human_demo:
+                    task_success_flags = [f(seeds[i][0], seeds[i][1], seeds[i][2], seeds[i][3])
+                                        for i, _ in enumerate(range(args.N))]
+                else:
+                    task_success_flags = [f(seeds[i][0], seeds[i][1], seeds[i][2])
+                                        for i, n in enumerate(range(args.N))]
 
         if "cond_target_obj_detector" not in model_name:
             final_results = dict()

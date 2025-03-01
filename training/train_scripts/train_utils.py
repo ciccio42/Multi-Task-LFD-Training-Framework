@@ -39,6 +39,7 @@ from multi_task_il.datasets.command_encoder.command_encoder_dataset import Finet
 from multi_task_il.datasets.command_encoder.finetuning_paired_dataset import FinetuningPairedDatasetSampler
 import cv2
 from multi_task_il.datasets.command_encoder.utils import init_freezed_cond_module
+import math
 
 torch.autograd.set_detect_anomaly(True)
 # for visualization
@@ -150,6 +151,7 @@ def make_data_loaders(config, dataset_cfg):
     except AttributeError:
         split_var = 0.1
         
+    split_var = 0.0 ####################################
     if split_var > 0.0:
         dataset_cfg.mode = 'val'
         val_dataset = instantiate(dataset_cfg)
@@ -729,17 +731,36 @@ def calculate_task_loss(config, train_cfg, device, model, task_inputs, val=False
             
             
             # compute embedding with freezed cond_module
-            
-            
             cond_embedding = cond_module_instance(copy.deepcopy(model_inputs['demo']))
+            
+            apply_minibatch = model_inputs['images'].shape[0] != config.bsize
 
-            out, ce_loss, bin_acc, bin_acc_interval = model(  # 1550MB
-                images=copy.deepcopy(model_inputs['images']), # sono obs_T step perché la traiettoria viene tagliata
-                states=copy.deepcopy(model_inputs['states']),
-                cond_embedding=cond_embedding,
-                actions=copy.deepcopy(model_inputs['actions']),
-                bsize=config.bsize
-            )
+            if not apply_minibatch:
+                out, ce_loss, bin_acc, bin_acc_interval = model(  # 1550MB
+                    images=copy.deepcopy(model_inputs['images']), # sono obs_T step perché la traiettoria viene tagliata
+                    states=copy.deepcopy(model_inputs['states']),
+                    cond_embedding=cond_embedding,
+                    actions=copy.deepcopy(model_inputs['actions']),
+                    bsize=config.bsize
+                )
+            else: # apply minibatch
+                total_steps = math.ceil(model_inputs['images'].shape[0] / config.bsize)
+                ce_loss_minibatches = torch.zeros(total_steps)
+                for minibatch_steps in range(total_steps):
+                    out, ce_loss, bin_acc, bin_acc_interval = model(  # 1550MB
+                        images=copy.deepcopy(model_inputs['images'][minibatch_steps*config.bsize:(minibatch_steps+1)*config.bsize]), # sono obs_T step perché la traiettoria viene tagliata
+                        states=copy.deepcopy(model_inputs['states'][minibatch_steps*config.bsize:(minibatch_steps+1)*config.bsize]),
+                        cond_embedding=cond_embedding[minibatch_steps*config.bsize:(minibatch_steps+1)*config.bsize],
+                        actions=copy.deepcopy(model_inputs['actions'][minibatch_steps*config.bsize:(minibatch_steps+1)*config.bsize]),
+                        bsize=model_inputs['actions'][minibatch_steps*config.bsize:(minibatch_steps+1)*config.bsize].shape[0]
+                    )
+                    # https://stackoverflow.com/questions/62067400/understanding-accumulated-gradients-in-pytorch
+                    ce_loss_rescaled = ce_loss / total_steps # the loss is an average
+                    ce_loss_rescaled.backward()
+                    ce_loss_minibatches[minibatch_steps] = copy.deepcopy(ce_loss.detach())
+               
+                 
+                
         elif "CondModule" in config.policy._target_:
             
             # debug_cond = False
@@ -875,7 +896,10 @@ def calculate_task_loss(config, train_cfg, device, model, task_inputs, val=False
                 
                 if 'finetuning_paired_dataset' in config.dataset_cfg._target_: # if we're doing pretraining on large dataset
                     # task_losses[task_name]['l_ce'] = torch.mean(torch.stack(ce_loss_avg_per_minibatch))
-                    task_losses[task_name]['l_ce'] = ce_loss
+                    if apply_minibatch:
+                        task_losses[task_name]['l_ce'] = torch.mean(ce_loss_minibatches)
+                    else:
+                        task_losses[task_name]['l_ce'] = ce_loss
                     task_losses[task_name]['loss_sum'] = task_losses[task_name]['l_ce']
                     return task_losses, bin_acc, bin_acc_interval
                 else:
@@ -1340,73 +1364,77 @@ class Trainer:
                         self.config, self.train_cfg, self._device, model, inputs)
                     
                 task_names = sorted(task_losses.keys())
-                if "grad_norm" not in self.config.get("loss", ""):
-                    # TODO: minibatch implementation
-                    # if not 'finetuning_paired_dataset' in self.config.dataset_cfg._target_:
-                    optimizer.zero_grad()
-                    if 'finetuning' in task_names:
-                        weighted_task_loss = task_losses['finetuning']['loss_sum']
+                if self.config.bsize == inputs['finetuning']['traj']['images'].shape[0]:
+                    if "grad_norm" not in self.config.get("loss", ""):
+                        # TODO: minibatch implementation
+                        # if not 'finetuning_paired_dataset' in self.config.dataset_cfg._target_:
+                        optimizer.zero_grad()
+                        if 'finetuning' in task_names:
+                            weighted_task_loss = task_losses['finetuning']['loss_sum']
+                        else:
+                            weighted_task_loss = sum(
+                                [l["loss_sum"] * task_loss_muls.get(name) for name, l in task_losses.items()])
+                        weighted_task_loss.backward()
+                        optimizer.step()
+                        # else:
+                        #     optimizer.step()
+                        #     optimizer.zero_grad()
                     else:
-                        weighted_task_loss = sum(
-                            [l["loss_sum"] * task_loss_muls.get(name) for name, l in task_losses.items()])
-                    weighted_task_loss.backward()
-                    optimizer.step()
-                    # else:
-                    #     optimizer.step()
-                    #     optimizer.zero_grad()
-                else:
-                    task_loss = torch.stack([l["loss_sum"]
-                                            for name, l in task_losses.items()])
-                    if self._step == 0 or self.config.get('resume', False):
-                        # init weights
-                        weights_loss = torch.ones_like(task_loss)
+                        task_loss = torch.stack([l["loss_sum"]
+                                                for name, l in task_losses.items()])
+                        if self._step == 0 or self.config.get('resume', False):
+                            # init weights
+                            weights_loss = torch.ones_like(task_loss)
+                            weights_loss = torch.nn.Parameter(weights_loss)
+                            T = weights_loss.sum().detach()  # sum of weights
+                            # set optimizer for weights
+                            optimizer_grad_norm = torch.optim.Adam(
+                                [weights_loss], lr=0.0005)
+                            # set L(0)
+                            l0 = task_loss.detach()
+
+                        # compute the weighted loss
+                        weighted_loss = weights_loss @ task_loss
+                        # clear gradients of network
+                        optimizer.zero_grad()
+                        # backward pass for weigthted task loss
+                        weighted_loss.backward(retain_graph=True)
+
+                        # compute the L2 norm of the gradients for each task
+                        gw = []
+                        for i in range(task_loss.shape[0]):
+                            dl = torch.autograd.grad(
+                                weights_loss[i]*task_loss[i], model_parameters, retain_graph=True, create_graph=True)[0]
+                            gw.append(torch.norm(dl))
+                        gw = torch.stack(gw)
+                        # compute loss ratio per task
+                        loss_ratio = weighted_loss.detach() / l0
+                        # compute the relative inverse training rate per task
+                        rt = loss_ratio / loss_ratio.mean()
+                        # compute the average gradient norm
+                        gw_avg = gw.mean().detach()
+                        # compute the GradNorm loss
+                        constant = (gw_avg * rt ** alpha).detach()
+                        gradnorm_loss = torch.abs(gw - constant).sum()
+                        # clear gradients of weights
+                        optimizer_grad_norm.zero_grad()
+                        # backward pass for GradNorm
+                        gradnorm_loss.backward()
+
+                        # update model weights
+                        optimizer.step()
+                        # update loss weights
+                        optimizer_grad_norm.step()
+                        # renormalize weights
+                        weights_loss = (
+                            weights_loss / weights_loss.sum() * T).detach()
                         weights_loss = torch.nn.Parameter(weights_loss)
-                        T = weights_loss.sum().detach()  # sum of weights
-                        # set optimizer for weights
                         optimizer_grad_norm = torch.optim.Adam(
                             [weights_loss], lr=0.0005)
-                        # set L(0)
-                        l0 = task_loss.detach()
-
-                    # compute the weighted loss
-                    weighted_loss = weights_loss @ task_loss
-                    # clear gradients of network
-                    optimizer.zero_grad()
-                    # backward pass for weigthted task loss
-                    weighted_loss.backward(retain_graph=True)
-
-                    # compute the L2 norm of the gradients for each task
-                    gw = []
-                    for i in range(task_loss.shape[0]):
-                        dl = torch.autograd.grad(
-                            weights_loss[i]*task_loss[i], model_parameters, retain_graph=True, create_graph=True)[0]
-                        gw.append(torch.norm(dl))
-                    gw = torch.stack(gw)
-                    # compute loss ratio per task
-                    loss_ratio = weighted_loss.detach() / l0
-                    # compute the relative inverse training rate per task
-                    rt = loss_ratio / loss_ratio.mean()
-                    # compute the average gradient norm
-                    gw_avg = gw.mean().detach()
-                    # compute the GradNorm loss
-                    constant = (gw_avg * rt ** alpha).detach()
-                    gradnorm_loss = torch.abs(gw - constant).sum()
-                    # clear gradients of weights
-                    optimizer_grad_norm.zero_grad()
-                    # backward pass for GradNorm
-                    gradnorm_loss.backward()
-
-                    # update model weights
+                else:
+                    # we already applied minibatch tecnique, we must first compute optimizer.step() and then reset gradients
                     optimizer.step()
-                    # update loss weights
-                    optimizer_grad_norm.step()
-                    # renormalize weights
-                    weights_loss = (
-                        weights_loss / weights_loss.sum() * T).detach()
-                    weights_loss = torch.nn.Parameter(weights_loss)
-                    optimizer_grad_norm = torch.optim.Adam(
-                        [weights_loss], lr=0.0005)
-
+                    optimizer.zero_grad()
                 ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
                 # calculate train iter stats
                 if self._step % log_freq == 0:
@@ -1464,6 +1492,7 @@ class Trainer:
             else:
                 if (((e % 10 == 0) or (e == epochs-1)) and (self._step % val_freq == 0) and not self.config.get("use_daml", False)) and self._val_loader is not None:
                     validate= True
+            validate = False
             if validate:
                 print("Validation")
                 rollout = self.config.get("rollout", False)

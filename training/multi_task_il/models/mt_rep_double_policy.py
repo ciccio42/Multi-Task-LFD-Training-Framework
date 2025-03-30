@@ -14,7 +14,9 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 from torchsummary import summary
 from multi_task_il.models.cond_target_obj_detector.utils import project_bboxes
-
+import cv2
+from PIL import Image
+from torchvision.transforms import ToPILImage
 
 class _StackedAttnLayers(nn.Module):
     """
@@ -633,6 +635,7 @@ class VideoImitation(nn.Module):
         print("Concat-ing embedded demo to action head? {}, to distribution head? {}".format(
             concat_demo_act, concat_demo_head))
 
+        print(f"Concat state: {concat_state} - State dim {sdim}")
         if "KP" not in target_obj_detector_path:
             ac_in_dim = int(latent_dim + float(concat_demo_act)
                             * latent_dim + float(concat_bb) * 4 * self._bb_sequence + float(concat_state) * sdim)
@@ -1049,7 +1052,7 @@ class VideoImitation(nn.Module):
             model_input['gt_bb'] = bb
             model_input['gt_classes'] = gt_classes
             self._object_detector.eval()
-            prediction = self._object_detector(model_input,
+            prediction = self._object_detector(inputs=[context, images, bb, gt_classes],
                                                inference=True)
             if len(prediction['classes_final']) == B*obs_T:
                 predicted_bb_list = list()
@@ -1074,6 +1077,14 @@ class VideoImitation(nn.Module):
                                                       width_scale_factor=scale_factor[0],
                                                       height_scale_factor=scale_factor[1],
                                                       mode='a2p')[0][target_indx_flags][target_max_score_indx][None, :]
+                        
+                        # # plot predicted bb
+                        # img = np.moveaxis(images[indx, 0].cpu().numpy()*255, 0, -1).astype(np.uint8)
+                        # img = np.ascontiguousarray(img)
+                        # img = cv2.rectangle(img, (int(predicted_bb[0][0].item()), int(predicted_bb[0][1].item())), (int(predicted_bb[0][2].item()), int(predicted_bb[0][3].item())), (0, 255, 0), 2)
+                        # pil_image = Image.fromarray(img)
+                        # pil_image.save(f"predicted_bb_{t}.png")
+                        
                     else:
                         # print("No bb target")
                         # Get index for target object

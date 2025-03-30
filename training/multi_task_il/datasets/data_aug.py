@@ -8,7 +8,7 @@ from collections import OrderedDict
 import numpy as np
 import cv2
 from multi_task_il.datasets.utils import adjust_bb
-
+from PIL import Image
 DEBUG = False
 
 JITTER_FACTORS = {'brightness': 0.4,
@@ -80,6 +80,9 @@ class DataAugmentation:
                 # self.normalize,
             ])
         else:
+            # Imagenet-v1 normalization
+            self.normalize = Normalize(
+                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             self.transforms = transforms.Compose([
                 transforms.ColorJitter(
                     brightness=list(self.data_augs.get(
@@ -152,7 +155,19 @@ class DataAugmentation:
             box_h, box_w = img_height - top - \
                 crop_params[1], img_width - left - crop_params[3]
 
+            
+            # cv2.imwrite('obs_before_tensore.png', obs)
+            # obs_pil = Image.fromarray(obs)
+            # obs_pil.save(f"prova_resized_pil_{frame_number}.png")
+            
+            # obs = obs[:,:,::-1].copy()
+            obs = obs.copy()
+            
+            # obs_pil = Image.fromarray(obs)
+            # obs_pil.save(f"obs_before_tensor_{frame_number}.png")
+            
             obs = self.toTensor(obs)
+            
             # ---- Resized crop ----#
             obs = resized_crop(obs, top=top, left=left, height=box_h,
                                width=box_w, size=(self.height, self.width))
@@ -227,7 +242,7 @@ class DataAugmentation:
         assert augmented.shape == obs.shape
 
         if bb is not None:
-            if DEBUG:
+            if False:
                 image = np.ascontiguousarray(np.array(np.moveaxis(
                     augmented.numpy()*255, 0, -1), dtype=np.uint8))
                 for single_bb in bb:
@@ -242,6 +257,20 @@ class DataAugmentation:
                     except:
                         print("Exception")
                 cv2.imwrite("bb_cropped_after_aug.png", image)
+            
+            #augmented = self.normalize(augmented)
+            
+            # obs_pil = np.moveaxis(augmented.numpy()*255, 0, -1).astype(np.uint8)
+            # obs_pil = Image.fromarray(obs_pil)
+            # obs_pil.save(f"agent_augmented.png")
+            
             return augmented, bb, class_frame
         else:
+            
+            # augmented = self.normalize(augmented)
+            
+            # obs_pil = np.moveaxis(augmented.numpy()*255, 0, -1).astype(np.uint8)
+            # obs_pil = Image.fromarray(obs_pil)
+            # obs_pil.save(f"augmented.png")
+            
             return augmented

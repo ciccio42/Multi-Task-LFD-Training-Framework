@@ -184,13 +184,20 @@ class MultiTaskPairedKeypointDetectionDataset(Dataset):
             agent_task_id = int(agent_task_id)
 
         # start_demo = time.time()
-        demo_data = make_demo(self, demo_traj[0], task_name)
+        
+        demo_data = make_demo(self, demo_traj[0], task_name, human_demo='human' in demo_file)
         # end_demo = time.time()
         # print(f"Demo-time {end_demo-start_demo}")
 
         # start_trj = time.time()
         traj = self._make_traj(
-            agent_traj[0], demo_traj[1], task_name, sub_task_id, agent_task_id, sim_crop)
+            agent_traj[0], 
+            demo_traj[1], 
+            task_name, 
+            sub_task_id, 
+            agent_task_id,
+            sim_crop, 
+            human_demo='human' in demo_file)
         # end_trj = time.time()
         # print(f"Trj-time {end_trj-start_trj}")
 
@@ -199,7 +206,7 @@ class MultiTaskPairedKeypointDetectionDataset(Dataset):
         # print("Elapsed time: ", elapsed_time)
         return {'demo_data': demo_data, 'traj': traj, 'task_name': task_name, 'task_id': sub_task_id}
 
-    def _make_traj(self, traj, command, task_name, sub_task_id, agent_task_id, sim_crop):
+    def _make_traj(self, traj, command, task_name, sub_task_id, agent_task_id, sim_crop, human_demo=False):
         # get the first frame from the trajectory
         ret_dict = {}
         # print(f"Command {command}")
@@ -252,7 +259,8 @@ class MultiTaskPairedKeypointDetectionDataset(Dataset):
             subtask_id=sub_task_id,
             agent_task_id=agent_task_id,
             take_place_loc=True,
-            sim_crop=sim_crop)
+            sim_crop=sim_crop,
+            human_demo=human_demo)
         # end_create_sample = time.time()
         # print(f"Create sample time {end_create_sample-start_create_sample}")
 

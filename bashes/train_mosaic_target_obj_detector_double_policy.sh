@@ -1,10 +1,13 @@
 #!/bin/bash
 
+#SBATCH --exclude=tnode[01-17]
 #SBATCH --partition=gpuq
-#SBATCH --gres=gpu:1   # Request 1 GPU
+#SBATCH -w gnode09
+#SBATCH --gres=gpu:2
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=32
+#SBATCH --export=ALL
 
 export MUJOCO_PY_MUJOCO_PATH="/home/rsofnc000/.mujoco/mujoco210"
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
@@ -16,7 +19,7 @@ echo $1
 TASK_NAME="$1"
 
 EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset/
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder
+SAVE_PATH=/home/rsofnc000/checkpoint_save_folder/luigi_models
 POLICY='${mosaic}'
 TARGET='multi_task_il.models.mt_rep_double_policy.VideoImitation'
 
@@ -33,8 +36,9 @@ CONFIG_PATH=../experiments
 CONFIG_NAME=config.yaml
 CONCAT_IMG_EMB=true
 CONCAT_DEMO_EMB=true
-CONCAT_STATE=true
-CONVERT_ACTION=false
+CONCAT_STATE=false
+CONVERT_ACTION=true
+DEMO_NAME=human_rgb
 
 CONCAT_BB=true
 LOAD_TARGET_OBJ_DETECTOR=true
@@ -222,12 +226,12 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     ### Pick-Place ###
-    RESUME_PATH=1Task-pick_place-Double-Policy-Contrastive-false-Inverse-false-CONCAT_IMG_EMB-false-CONCAT_DEMO_EMB-true-Batch32
-    RESUME_STEP=99417
-    RESUME=false
+    RESUME_PATH=1Task-pick_place-Double-Policy-State_false_Convert_Action_true_Human_Demo-Batch32
+    RESUME_STEP=45
+    RESUME=true
 
-    TARGET_OBJ_DETECTOR_STEP=37476 #68526 #129762 #198900 #65250
-    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/1Task-Pick-Place-KP-Batch112
+    TARGET_OBJ_DETECTOR_STEP=20554 #68526 #129762 #198900 #65250
+    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/Simulated-Agent-Human-Demonstration-COD-KP-Batch112
 
     BSIZE=32 #32 #128 #64 #32
     COMPUTE_OBJ_DISTRIBUTION=false
@@ -278,7 +282,7 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     COSINE_ANNEALING=false
 
     TASK_str="pick_place" #[pick_place,nut_assembly,stack_block,button]
-    EXP_NAME=1Task-${TASK_str}-Double-Policy-Convert_action_State_${CONCAT_STATE}_Convert_${CONVERT_ACTION}
+    EXP_NAME=1Task-${TASK_str}-Double-Policy-State_${CONCAT_STATE}_Convert_Action_${CONVERT_ACTION}_Human_Demo
     PROJECT_NAME=${EXP_NAME}
 elif [ "$TASK_NAME" == 'multi' ]; then
     echo "Multi Task"
@@ -367,6 +371,7 @@ srun --output=training_${EXP_NAME}.txt --job-name=training_${TASK_NAME} python -
     dataset_cfg.width=${WIDTH} \
     dataset_cfg.split_pick_place=${SPLIT_PICK_PLACE} \
     dataset_cfg.convert_action=${CONVERT_ACTION} \
+    dataset_cfg.demo_name=${DEMO_NAME} \
     samplers.balancing_policy=${BALANCING_POLICY} \
     mosaic._target_=${TARGET} \
     mosaic.load_target_obj_detector=${LOAD_TARGET_OBJ_DETECTOR} \

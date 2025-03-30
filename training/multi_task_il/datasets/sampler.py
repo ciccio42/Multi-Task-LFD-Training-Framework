@@ -201,22 +201,29 @@ class DIYBatchSampler(DistributedSampler):
         return self.max_len
 
 
-class TrajectoryBatchSampler(Sampler):
+class TrajectoryBatchSampler(DistributedSampler):
 
     def __init__(
         self,
-        agent_task_to_idx,
-        agent_subtask_to_idx,
+        dataset,
+        agent_files,
+        task_to_idx,
+        subtask_to_idx,
         demo_task_to_idx,
         demo_subtask_to_idx,
+        object_distribution_to_indx,
         sampler_spec=dict(),
         tasks_spec=dict(),
         n_step=0,
-        epoch_steps=0
+        epoch_steps=0,
+        num_replicas: Optional[int] = None,
+        rank: Optional[int] = None,
+        seed: int = 42, 
     ):
 
         batch_size = sampler_spec.get('batch_size', 30)
         drop_last = sampler_spec.get('drop_last', False)
+        self.rank = rank
 
         if not isinstance(batch_size, int) or isinstance(batch_size, bool) or \
                 batch_size <= 0:
@@ -236,104 +243,107 @@ class TrajectoryBatchSampler(Sampler):
             raise ValueError("drop_last should be a boolean value, but got "
                              "drop_last={}".format(drop_last))
 
-        self.task_info = OrderedDict()
         self.balancing_policy = sampler_spec.get('balancing_policy', 0)
         self.num_step = n_step
 
-        # Create sampler for agent trajectories
-        self.agent_task_samplers = OrderedDict()
-        self.agent_task_iterators = OrderedDict()
-        self.agent_task_to_idx = agent_task_to_idx
-        self.agent_subtask_to_idx = agent_subtask_to_idx
-        for spec in tasks_spec:
-            task_name = spec.name
-            idxs = agent_task_to_idx.get(task_name)
-            self.agent_task_samplers[task_name] = OrderedDict(
-                {'all_sub_tasks': RandomSampler(data_source=idxs
-                                                )})  # uniformly draw from union of all sub-tasks
-            self.agent_task_iterators[task_name] = OrderedDict(
-                {'all_sub_tasks': iter(RandomSampler(data_source=idxs
-                                                     ))})
-            assert task_name in agent_subtask_to_idx.keys(), \
-                'Mismatch between {} task idxs and subtasks!'.format(
-                    task_name)
-            num_loaded_sub_tasks = len(agent_subtask_to_idx[task_name].keys())
-            first_id = list(agent_subtask_to_idx[task_name].keys())[0]
-
-            sub_task_size = len(agent_subtask_to_idx[task_name].get(first_id))
-            print("Task {} loaded {} subtasks, starting from {}, should all have sizes {}".format(
-                task_name, num_loaded_sub_tasks, first_id, sub_task_size))
-
-            for sub_task, sub_idxs in agent_subtask_to_idx[task_name].items():
-
-                if len(sub_idxs) == 10:
-                    self.train = False
-                else:
-                    self.train = True
-
-                self.agent_task_samplers[task_name][sub_task] = RandomSampler(
-                    data_source=sub_idxs)
-                # assert len(sub_idxs) == sub_task_size, \
-                #     'Got uneven data sizes for sub-{} under the task {}!'.format(
-                #         sub_task, task_name)
-                self.agent_task_iterators[task_name][sub_task] = iter(
-                    RandomSampler(data_source=sub_idxs))
-                # print('subtask indexs:', sub_task, max(sub_idxs))
-            curr_task_info = {
-                'size':         len(idxs),
-                'n_tasks':      len(agent_subtask_to_idx[task_name].keys()),
-                'sub_id_to_name': {i: name for i, name in enumerate(agent_subtask_to_idx[task_name].keys())},
-                'traj_per_subtask': sub_task_size,
-                'sampler_len': -1  # to be decided below
-            }
-            self.task_info[task_name] = curr_task_info
-
-        # Create sampler for demo trajectories
-        self.demo_task_samplers = OrderedDict()
-        self.demo_task_iterators = OrderedDict()
-        self.demo_task_to_idx = demo_task_to_idx
-        self.demo_subtask_to_idx = demo_subtask_to_idx
-        for spec in tasks_spec:
-            task_name = spec.name
-            idxs = demo_task_to_idx.get(task_name)
-            self.demo_task_samplers[task_name] = OrderedDict(
-                {'all_sub_tasks': RandomSampler(data_source=idxs)})  # uniformly draw from union of all sub-tasks
-            self.demo_task_iterators[task_name] = OrderedDict(
-                {'all_sub_tasks': iter(RandomSampler(data_source=idxs))})
-            assert task_name in demo_subtask_to_idx.keys(), \
-                'Mismatch between {} task idxs and subtasks!'.format(
-                    task_name)
-            num_loaded_sub_tasks = len(demo_subtask_to_idx[task_name].keys())
-            first_id = list(demo_subtask_to_idx[task_name].keys())[0]
-
-            sub_task_size = len(demo_subtask_to_idx[task_name].get(first_id))
-            print("Task {} loaded {} subtasks, starting from {}, should all have sizes {}".format(
-                task_name, num_loaded_sub_tasks, first_id, sub_task_size))
-
-            for sub_task, sub_idxs in demo_subtask_to_idx[task_name].items():
-
-                self.demo_task_samplers[task_name][sub_task] = RandomSampler(
-                    data_source=sub_idxs)
-                # assert len(sub_idxs) == sub_task_size, \
-                #     'Got uneven data sizes for sub-{} under the task {}!'.format(
-                #         sub_task, task_name)
-                self.demo_task_iterators[task_name][sub_task] = iter(
-                    RandomSampler(sub_idxs))
-                # print('subtask indexs:', sub_task, max(sub_idxs))
-
-        n_tasks = len(self.agent_task_samplers.keys())
-        n_total = sum([info['size'] for info in self.task_info.values()])
-
+        # key: process index
+        self.agent_sampler_per_process= OrderedDict()
+        self.demo_sampler_per_process = OrderedDict()
+        self.agent_iterator_per_process = OrderedDict()
+        self.demo_iterator_per_process = OrderedDict()
+        
+        self.task_info_per_process = OrderedDict()
+        self.frames_samplers_per_process = OrderedDict()
+        self.frames_iterators_per_process = OrderedDict()
         self.idx_map = OrderedDict()
+        for i in range(num_replicas):
+            # key: task name
+            self.agent_sampler_per_process[i] = OrderedDict()
+            self.demo_sampler_per_process[i] = OrderedDict()
+            self.agent_iterator_per_process[i] = OrderedDict()
+            self.demo_iterator_per_process[i] = OrderedDict()
+            
+            self.task_info_per_process[i] = OrderedDict()
+            self.frames_samplers_per_process[i] = OrderedDict()
+            self.frames_iterators_per_process[i] = OrderedDict()
+        
+        self.num_step = n_step
+        self.num_replicas = num_replicas
+        print(f"Num replicas: {num_replicas}")
+        super(TrajectoryBatchSampler, self).__init__(dataset, 
+                                              num_replicas, 
+                                              rank, 
+                                              self.shuffle,
+                                              seed, 
+                                              drop_last)
+        
+        
+        # Create sampler for agent trajectories
+        for spec in tasks_spec:
+            
+            task_name = spec.name
+            
+            # global number of indices for task_name
+            idxs = task_to_idx.get(task_name)
+            demo_idxs = demo_task_to_idx.get(task_name)
+            
+            self.agent_sampler_per_process[rank][task_name] = OrderedDict(
+                {'all_sub_tasks': SubsetRandomSampler(idxs[rank : len(idxs) : num_replicas])})
+            self.demo_sampler_per_process[rank][task_name] = OrderedDict(
+                {'all_sub_tasks': iter(SubsetRandomSampler(demo_idxs[rank : len(idxs) : num_replicas]))})    
+            
+            self.agent_iterator_per_process[rank][task_name] = OrderedDict(
+                {'all_sub_tasks': iter(SubsetRandomSampler(idxs[rank : len(idxs) : num_replicas]) )})
+            self.demo_iterator_per_process[rank][task_name] = OrderedDict(
+                {'all_sub_tasks': iter(SubsetRandomSampler(demo_idxs[rank : len(idxs) : num_replicas]))})
+            
+            
+            self.frames_samplers_per_process[rank][task_name] = OrderedDict()
+            self.frames_iterators_per_process[rank][task_name] = OrderedDict()
+                        
+            # for each sub-task compute the number of samples 
+            for sub_task, sub_idxs in subtask_to_idx[task_name].items():
+                demo_sub_idxs = demo_subtask_to_idx[task_name].get(sub_task)
+                
+                self.frames_samplers_per_process[rank][task_name][sub_task] = OrderedDict()
+                self.frames_iterators_per_process[rank][task_name][sub_task] = OrderedDict()
+                
+                if self.balancing_policy == 1 and self.object_distribution_to_indx != None:
+                    raise Exception("Balancing policy not implemented yet") 
+                else:
+                    self.agent_sampler_per_process[rank][task_name][sub_task] = SubsetRandomSampler(sub_idxs[rank : len(sub_idxs) : num_replicas]) # indx of sub-task trjs
+                    self.agent_iterator_per_process[rank][task_name][sub_task] = iter(SubsetRandomSampler(sub_idxs[rank : len(sub_idxs) : num_replicas]))
+                    
+                    self.demo_sampler_per_process[rank][task_name][sub_task] = SubsetRandomSampler(demo_sub_idxs[rank:len(demo_sub_idxs):num_replicas]) # indx of sub-task trjs
+                    self.demo_iterator_per_process[rank][task_name][sub_task] = iter(SubsetRandomSampler(demo_sub_idxs[rank:len(demo_sub_idxs):num_replicas]))
+                    
+                    
+                    for sub_indx in sub_idxs:
+                        self.frames_samplers_per_process[rank][task_name][sub_task][sub_indx] = RandomSampler(range(agent_files[sub_indx][-1])) # indx of frames
+                        self.frames_iterators_per_process[rank][task_name][sub_task][sub_indx] = iter(RandomSampler(range(agent_files[sub_indx][-1])))
+                    
+                    
+            curr_task_info = {
+                'size':         len(idxs), # size of the task
+                'n_tasks':      len(subtask_to_idx[task_name].keys()),
+                'sub_id_to_name': {i: name for i, name in enumerate(subtask_to_idx[task_name].keys())},
+                'traj_per_subtask': len(subtask_to_idx[task_name].get(list(subtask_to_idx[task_name].keys())[0]))/num_replicas,
+                'sampler_len': -1  # to be decided below
+                }            
+
+            self.task_info_per_process[rank][task_name] = curr_task_info
+            
+        self.n_tasks = len(self.agent_sampler_per_process[rank].keys())
+        n_total = sum([info['size'] for info in self.task_info_per_process[rank].values()])
         idx = 0
+        # assign the batch indices to the sub-tasks
         for spec in tasks_spec:
             name = spec.name
             _ids = spec.get('task_ids', None)
-            _skip_ids = spec.get('skip_ids', [])
             n = spec.get('n_per_task', None)
             assert (
                 _ids and n), 'Must specify which subtask ids to use and how many is contained in each batch'
-            info = self.task_info[name]
+            info = self.task_info_per_process[rank][name]
             subtask_names = info.get('sub_id_to_name')
             for subtask in subtask_names.values():
                 for _ in range(n):
@@ -341,19 +351,21 @@ class TrajectoryBatchSampler(Sampler):
                     self.idx_map[idx] = (name, subtask)
                     idx += 1
                 sub_length = int(info['traj_per_subtask'] / n)
-                self.task_info[name]['sampler_len'] = max(
-                    sub_length, self.task_info[name]['sampler_len'])
-        # print("Index map:", self.idx_map)
-
+                self.task_info_per_process[rank][name]['sampler_len'] = max(
+                    sub_length, self.task_info_per_process[rank][name]['sampler_len'])
+        
+        # # print("Index map:", self.idx_map)
+        # # number of steps that I need for covering all the couple (demo, agent)
         self.max_len = epoch_steps
+        #max([info['sampler_len']
+                        #     for info in self.task_info.values()])
         print('Max length for sampler iterator:', self.max_len)
-        self.n_tasks = n_tasks
-        self.epoch_steps = epoch_steps
+        
 
         assert idx == batch_size, "The constructed batch size {} doesn't match desired {}".format(
             idx, batch_size)
         self.batch_size = idx
-        self.drop_last = drop_last
+        
         print("Shuffling to break the task ordering in each batch? ", self.shuffle)
 
     def __iter__(self):
@@ -361,57 +373,52 @@ class TrajectoryBatchSampler(Sampler):
         Fix a total self.batch_size, sample different numbers of datapoints from
         each task"""
         batch = []
-        print("Reset agent_demo_pair")
-        agent_demo_pair = dict()
+        
+        # In one epch I must to see all the frames of each trajectory
+        
+        
         for i in range(self.max_len):
             batch = []
-            if i % self.epoch_steps == 0:
-                print("Reset agent_demo_pair")
-                agent_demo_pair = dict()
-
+            
             # for each sample in the batch
             for idx in range(self.batch_size):
+                    
                 (name, sub_task) = self.idx_map[idx]
-
-                agent_sampler = self.agent_task_samplers[name][sub_task]
-                agent_iterator = self.agent_task_iterators[name][sub_task]
-
+                # sample indx of sub-task 
+                sampler = self.agent_sampler_per_process[self.rank][name][sub_task]
+                iterator = self.agent_iterator_per_process[self.rank][name][sub_task]
                 try:
-                    agent_indx = self.agent_subtask_to_idx[name][sub_task][next(
-                        agent_iterator)]
+                    sample_idx = next(iterator)
                 except StopIteration:  # print('early sstop:', i, name)
                     # re-start the smaller-sized tasks
-                    # if self.train:
-                    #     print("Stop iteration for Agent Train")
-                    # else:
-                    #     print("Stop iteration for Agent Val")
-                    agent_iterator = iter(agent_sampler)
-                    agent_indx = self.agent_subtask_to_idx[name][sub_task][next(
-                        agent_iterator)]
-                    self.agent_task_iterators[name][sub_task] = agent_iterator
-
-                # check if the agent_indx has already sampled
-                # if agent_demo_pair.get(agent_indx, None) is None:
-                demo_sampler = self.demo_task_samplers[name][sub_task]
-                demo_iterator = self.demo_task_iterators[name][sub_task]
-                # new agent_indx in epoch
-                # sample demo for current
+                    # print("Stop Iteration")
+                    iterator = iter(sampler)
+                    sample_idx = next(iterator)
+                    self.agent_iterator_per_process[self.rank][name][sub_task] = iterator
+                
+                # sample indx of demo
+                demo_sampler = self.demo_sampler_per_process[self.rank][name][sub_task]
+                demo_iterator = self.demo_iterator_per_process[self.rank][name][sub_task]
                 try:
-                    demo_indx = self.demo_subtask_to_idx[name][sub_task][next(
-                        demo_iterator)]
-                except StopIteration:  # print('early sstop:', i, name)
-                    # re-start the smaller-sized tasks
-                    # if self.train:
-                    #     print("Stop iteration for Demo Train")
-                    # else:
-                    #     print("Stop iteration for Demo Val")
+                    demo_idx = next(demo_iterator)
+                except StopIteration:
+                    # print("Stop Iteration")
                     demo_iterator = iter(demo_sampler)
-                    demo_indx = self.demo_subtask_to_idx[name][sub_task][next(
-                        demo_iterator)]
-                    self.demo_task_iterators[name][sub_task] = demo_iterator
-                agent_demo_pair[agent_indx] = demo_indx
-
-                batch.append([agent_indx, agent_demo_pair[agent_indx]])
+                    demo_idx = next(demo_iterator)
+                    self.demo_iterator_per_process[self.rank][name][sub_task] = demo_iterator
+                       
+                # sample indx of frames
+                frames_sampler = self.frames_samplers_per_process[self.rank][name][sub_task][sample_idx]
+                frames_iterator = self.frames_iterators_per_process[self.rank][name][sub_task][sample_idx]
+                try:
+                    frame_idx = next(frames_iterator)
+                except StopIteration:
+                    print("Reset iterator for frames")
+                    frames_iterator = iter(frames_sampler)
+                    frame_idx = next(frames_iterator)
+                    self.frames_iterators_per_process[self.rank][name][sub_task][sample_idx] = frames_iterator
+                                
+                batch.append([demo_idx, sample_idx, frame_idx])
 
             if len(batch) == self.batch_size:
                 if self.shuffle:

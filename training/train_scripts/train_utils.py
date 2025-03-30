@@ -18,16 +18,16 @@ from multi_task_il.datasets.utils import collate_by_task
 from  multi_task_il.datasets.loss_functions import *
 from omegaconf import OmegaConf
 from ignite.handlers.param_scheduler import create_lr_scheduler_with_warmup
-from multi_task_il.utils.lr_scheduler import build_scheduler
+from multi_task_il.utils.lr_scheduler import build_scheduler, BaseScheduler
 from multi_task_il.utils.early_stopping import EarlyStopping
 import wandb
 from torchsummary import summary
 from tqdm import tqdm
-
 import learn2learn as l2l
 import gc
 from colorama import Fore, Back
 import torch.distributed as dist
+import time
 
 
 
@@ -175,7 +175,9 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
     dataset_cfg.mode = 'train'
     dataset = instantiate(dataset_cfg)
     train_step = int(config.get('epochs') *
-                     int(len(dataset)/config.get('bsize')))
+                     int(len(dataset)/(num_replicas*config.get('bsize'))))
+    epoch_step = int(len(dataset)/(num_replicas*config.get('bsize')))
+    
     if not dataset_cfg.change_command_epoch:
         train_sampler = DIYBatchSampler(
             task_to_idx=dataset.task_to_idx,
@@ -189,14 +191,19 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
             rank=global_rank)
     else:
         train_sampler = TrajectoryBatchSampler(
-            agent_task_to_idx=dataset.task_to_idx,
-            agent_subtask_to_idx=dataset.subtask_to_idx,
+            dataset,
+            agent_files=dataset.all_agent_files,
+            task_to_idx=dataset.task_to_idx,
+            subtask_to_idx=dataset.subtask_to_idx,
             demo_task_to_idx=dataset.demo_task_to_idx,
             demo_subtask_to_idx=dataset.demo_subtask_to_idx,
             tasks_spec=dataset_cfg.tasks_spec,
+            object_distribution_to_indx=dataset.object_distribution_to_indx,
             sampler_spec=config.samplers,
             n_step=train_step,
-            epoch_steps=int(len(dataset)/config.get('bsize'))
+            epoch_steps=epoch_step,
+            num_replicas=num_replicas,
+            rank=global_rank,
         )
 
     train_loader = DataLoader(
@@ -231,14 +238,19 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
                 rank=global_rank)
         else:
             val_sampler = TrajectoryBatchSampler(
-                agent_task_to_idx=val_dataset.task_to_idx,
-                agent_subtask_to_idx=val_dataset.subtask_to_idx,
+                val_dataset,
+                agent_files=val_dataset.all_agent_files,
+                task_to_idx=val_dataset.task_to_idx,
+                subtask_to_idx=val_dataset.subtask_to_idx,
                 demo_task_to_idx=val_dataset.demo_task_to_idx,
                 demo_subtask_to_idx=val_dataset.demo_subtask_to_idx,
                 tasks_spec=dataset_cfg.tasks_spec,
+                object_distribution_to_indx=val_dataset.object_distribution_to_indx,
                 sampler_spec=config.samplers,
-                n_step=val_step,
-                epoch_steps=int(len(val_dataset)/config.get('bsize'))
+                n_step=train_step,
+                epoch_steps=int(len(val_dataset)/(num_replicas*config.get('bsize'))),
+                num_replicas=num_replicas,
+                rank=global_rank,
             )
 
         val_loader = DataLoader(
@@ -413,13 +425,28 @@ class Trainer:
         
         #### ---- Train loop ----####
         model = model.train()
-        for inputs in train_loader:
+        
+    
+        if hasattr(model.module, '_object_detector') :
+            print(f"Object detector is set to eval mode")
+            if model.module._object_detector is not None: 
+                model.module._object_detector.eval()
+                print(f"Object detector mode {model.module._object_detector.training}")    
+            
+        train_step = len(train_loader)
+        print(f"Training for {train_step} steps")
+        epoch_steps = 0
+        for inputs in tqdm(train_loader):
             torch.cuda.empty_cache()
             
             # calculate loss here:
+            # if global_rank == 0:
+            #     start_inference = time.time()
             task_losses = loss_function(
                 self.config, self.train_cfg, self._device_list[local_rank], model, inputs)
-            
+            # if global_rank == 0:
+            #     end_inference = time.time()
+            #     print("Inference time: ", end_inference - start_inference)
             
             if "grad_norm" not in self.config.get("loss", ""):
                 optimizer.zero_grad()
@@ -461,6 +488,8 @@ class Trainer:
                             i += 1
 
                     if self._step % print_freq == 0:
+                        epoch_steps += 1
+                        print(f"Epoch perc {epoch_steps / train_step}")
                         print(
                             'Training epoch {1}/{2}, step {0}: \t '.format(self._step, epoch, self.config.epochs))
                         print(train_print)
@@ -478,7 +507,7 @@ class Trainer:
 
     def val_loop(self, val_loader, scheduler, loss_function, global_rank, local_rank, model, optimizer, task_loss_muls, task_names, raw_stats: dict = dict(), epoch: int = 0,):
              
-        validate = False
+        validate = True
         tolog = dict()
         model = model.eval()
         
@@ -502,7 +531,7 @@ class Trainer:
                 
                 # val_iter = iter(val_loader)
                 # for i, val_inputs in tqdm(enumerate(val_loader), total=len(val_loader)):
-                for val_inputs in val_loader:
+                for i, val_inputs in tqdm(enumerate(val_loader), total=len(val_loader)):
                     use_daml = self.config.get("use_daml", False)
                     if use_daml:  # allow grad!
                         val_task_losses = loss_function(
@@ -550,7 +579,9 @@ class Trainer:
                             for loss_name, loss_val in losses.items():
                                 tolog[f'val/{loss_name}/{task_name}'] = loss_val
                                 tolog[f'val/{task_name}/{loss_name}'] = loss_val
-                        tolog['learning_rate'] = scheduler._schedule.optimizer.param_groups[0]['lr']
+                                
+                        if not(isinstance(scheduler, BaseScheduler)):
+                            tolog['learning_rate'] = scheduler._schedule.optimizer.param_groups[0]['lr']
                         wandb.log(tolog)
                                     
                 return weighted_task_loss_val
@@ -710,7 +741,9 @@ class Trainer:
         print('Model on device: {}'.format("cuda:" + str(local_rank) if torch.cuda.is_available() else "cpu"))
         device = torch.device("cuda:" + str(local_rank) if torch.cuda.is_available() else "cpu")
         model = model.to(device)
-        model = nn.parallel.DistributedDataParallel(model, device_ids=[local_rank])
+        model = nn.parallel.DistributedDataParallel(model, 
+                                                    device_ids=[local_rank],
+                                                    find_unused_parameters=True)
         dist.barrier()
 
         # initialize constants:
@@ -723,7 +756,7 @@ class Trainer:
             # print(f"\n----Starting step {self._step} ----\n")
             
             # remaining epochs
-            epochs = self.config.epochs
+            epochs = self.config.epochs #- (self.config.resume_step + 1)
             self._step = len(train_loader) * (self.config.resume_step +1)
             print(f"\n---- Remaining epochs {self.config.epochs - (self.config.resume_step+1)} ----\n")
             print(f"\n----Starting step {self._step} ----\n")
@@ -785,8 +818,8 @@ class Trainer:
         
         
         # save model
-        if global_rank == 0:
-            self.save_checkpoint(model, optimizer, weights_fn, save_fn)
+        # if global_rank == 0:
+        #     self.save_checkpoint(model, optimizer, weights_fn, save_fn)
         
         for e in range(self.config.resume_step+1, epochs):
             self._epoch = e
@@ -811,36 +844,40 @@ class Trainer:
             dist.barrier()
             
             #### ---- Validation step ----####
-            val_metric = self.val_loop(val_loader=val_loader,
-                                       scheduler=lr_scheduler, 
-                                       loss_function=loss_function, 
-                                       global_rank=global_rank, 
-                                       local_rank=local_rank, 
-                                       model=model, 
-                                       optimizer=optimizer, 
-                                       task_loss_muls=task_loss_muls, 
-                                       task_names=self.task_names, 
-                                       raw_stats=raw_stats, 
-                                       epoch= e,)
-            
-            torch.distributed.all_reduce(val_metric, op=dist.ReduceOp.AVG)
-            
-            if global_rank == 0:
-                print(f"Val metric {val_metric}")
-            
-            
-            if self.config.train_cfg.lr_schedule != 'None':
-                # perform lr-scheduling step
-                lr_scheduler.step(val_loss=val_metric)
+            if val_loader is not None:
+                val_metric = self.val_loop(val_loader=val_loader,
+                                        scheduler=lr_scheduler, 
+                                        loss_function=loss_function, 
+                                        global_rank=global_rank, 
+                                        local_rank=local_rank, 
+                                        model=model, 
+                                        optimizer=optimizer, 
+                                        task_loss_muls=task_loss_muls, 
+                                        task_names=self.task_names, 
+                                        raw_stats=raw_stats, 
+                                        epoch= e,)
                 
-            
-            # check for early stopping
-            if self.train_cfg.early_stopping.patience != -1:
-                self._early_stopping(val_metric, 
-                                     model, 
-                                     self._epoch, 
-                                     optimizer,
-                                     rank=global_rank)
+                if not isinstance(val_metric, torch.Tensor):
+                    val_metric = torch.tensor(val_metric)
+                
+                torch.distributed.all_reduce(val_metric, op=dist.ReduceOp.AVG)
+                
+                if global_rank == 0:
+                    print(f"Val metric {val_metric}")
+                
+                
+                if self.config.train_cfg.lr_schedule != 'None':
+                    # perform lr-scheduling step
+                    lr_scheduler.step(val_loss=val_metric)
+                    
+                
+                # check for early stopping
+                if self.train_cfg.early_stopping.patience != -1:
+                    self._early_stopping(val_metric, 
+                                        model, 
+                                        self._epoch, 
+                                        optimizer,
+                                        rank=global_rank)
             dist.barrier()
             
             # save model

@@ -46,7 +46,7 @@ def extract_last_number(path):
     return int(check_point_number)
 
 
-def object_detection_inference(model, config, ctr, heights=100, widths=200, size=0, shape=0, color=0, max_T=150, env_name='place', gpu_id=-1, baseline=None, variation=None, controller_path=None, seed=None, action_ranges=[], model_name=None, gt_file=None, gt_bb=False, real=False, place_bb_flag=True):
+def object_detection_inference(model, config, ctr, heights=100, widths=200, size=0, shape=0, color=0, max_T=150, env_name='place', gpu_id=-1, baseline=None, variation=None, controller_path=None, seed=None, action_ranges=[], model_name=None, gt_file=None, gt_bb=False, demo_file=None, real=False, place_bb_flag=True):
 
     if gpu_id == -1:
         gpu_id = int(ctr % torch.cuda.device_count())
@@ -77,7 +77,8 @@ def object_detection_inference(model, config, ctr, heights=100, widths=200, size
                                                                     gpu_id=gpu_id,
                                                                     variation=variation, random_frames=random_frames,
                                                                     controller_path=controller_path,
-                                                                    seed=seed)
+                                                                    seed=seed,
+                                                                    demo_file=demo_file)
     else:
         env = None
         variation_id = None
@@ -140,7 +141,7 @@ def object_detection_inference(model, config, ctr, heights=100, widths=200, size
 
 
 def rollout_imitation(model, config, ctr,
-                      heights=100, widths=200, size=0, shape=0, color=0, max_T=150, env_name='place', gpu_id=-1, baseline=None, variation=None, controller_path=None, seed=None, action_ranges=[], model_name=None, gt_bb=False, sub_action=False, gt_action=4, real=True, gt_file=None, place=False):
+                      heights=100, widths=200, size=0, shape=0, color=0, max_T=150, env_name='place', gpu_id=-1, baseline=None, variation=None, controller_path=None, seed=None, action_ranges=[], model_name=None, gt_bb=False, sub_action=False, gt_action=4, real=True, gt_file=None, demo_file=None, place=False):
     if gpu_id == -1:
         gpu_id = int(ctr % torch.cuda.device_count())
     print(f"Model GPU id {gpu_id}")
@@ -162,6 +163,14 @@ def rollout_imitation(model, config, ctr,
             assert 'multi' in config.train_cfg.dataset._target_, config.train_cfg.dataset._target_
             T_context = config.train_cfg.dataset.demo_T
 
+        # ottengo:
+        # 1) env: ambiente
+        # 2) context: i 4 frame della dimostrazione
+        # 3) variation_id: id della variazione del task
+        # 4) expert_traj: la traiettoria eseguita dall'esperto (pick_place controller)
+        # 5) gt_env: ambiente di gt (?)
+        # skip_teacher = True
+        
         env, context, variation_id, expert_traj, gt_env = build_env_context(img_formatter,
                                                                             T_context=T_context,
                                                                             ctr=ctr,
@@ -175,8 +184,9 @@ def rollout_imitation(model, config, ctr,
                                                                             variation=variation, random_frames=random_frames,
                                                                             controller_path=controller_path,
                                                                             ret_gt_env=True,
-                                                                            seed=seed)
-
+                                                                            seed=seed,
+                                                                            demo_file=demo_file,
+                                                                           )
         build_task = TASK_MAP.get(env_name, None)
         assert build_task, 'Got unsupported task '+env_name
         eval_fn = get_eval_fn(env_name=env_name)
@@ -241,7 +251,8 @@ def rollout_imitation(model, config, ctr,
         return traj, info
 
 
-def _proc(model, config, results_dir, heights, widths, size, shape, color, env_name, baseline, variation, max_T, controller_path, model_name, gpu_id, save, gt_bb, sub_action, gt_action, real, place, seed, n, gt_file):
+def _proc(model, config, results_dir, heights, widths, size, shape, color, env_name, baseline, variation, max_T, controller_path, model_name, gpu_id, save, gt_bb, sub_action, gt_action, real, place, seed, n, gt_file, demo_file=None):
+    
     json_name = results_dir + '/traj{}.json'.format(n)
     pkl_name = results_dir + '/traj{}.pkl'.format(n)
     if os.path.exists(json_name) and os.path.exists(pkl_name):
@@ -281,6 +292,7 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                                                gt_action=gt_action,
                                                real=real,
                                                gt_file=gt_file,
+                                               demo_file=demo_file,
                                                place=place)
         else:
             if variation is not None:
@@ -307,6 +319,7 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                                                         model_name=model_name,
                                                         gpu_id=gpu_id,
                                                         gt_file=gt_file,
+                                                        demo_file=demo_file,
                                                         real=real,
                                                         place_bb_flag=place)
 
@@ -381,6 +394,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--sub_action', action='store_true')
     parser.add_argument('--gt_action', default=4, type=int)
+    parser.add_argument('--human_demo', action='store_true')
 
     args = parser.parse_args()
 
@@ -390,11 +404,11 @@ if __name__ == '__main__':
         print("Waiting for debugger attach")
         debugpy.wait_for_client()
 
-    # seed_everything(seed=42)
+    seed_everything(seed=42)
 
     try_path = args.model
     real = True if "Real" in try_path else False
-    place = True if ("KP" in try_path or "Double" in try_path) else False
+    place = True if ("-KP" in try_path or "Double" in try_path) else False
     # if 'log' not in args.model and 'mosaic' not in args.model:
     #     print("Appending dir to given exp_name: ", args.model)
     #     try_path = join(LOG_PATH, args.model)
@@ -473,7 +487,11 @@ if __name__ == '__main__':
 
         if args.wandb_log:
             model_name = model_path.split("/")[-2]
-            wandb.login(key='1d9590e10967b8af6602ddae665dbcc77f88fbd5')
+
+            # key = os.getenv("WANDB_KEY")
+            # assert key != None, "Please set the WANDB_KEY environment variable"
+            # wandb.login(key=key)
+            wandb.login(key='227ed2fded06f63748a7a29dae55acdda7d131ff', relogin=True)
             run = wandb.init(
                 entity="francescorosa97",
                 project=args.project_name,
@@ -554,7 +572,7 @@ if __name__ == '__main__':
         color = args.color
         variation = args.variation
         seed = args.seed
-        max_T = 95
+        max_T = 130
 
         dataset = None
         if args.test_gt:
@@ -571,6 +589,27 @@ if __name__ == '__main__':
                 for task_id in pkl_file_dict[task_name].keys():
                     for pkl_file in pkl_file_dict[task_name][task_id]:
                         pkl_file_list.append(pkl_file)
+            args.N = len(pkl_file_list)
+
+        # if human_demo, load the dataset and generate the seeds for demo files
+        if args.human_demo:
+            from hydra.utils import instantiate
+            config.EXPERT_DATA = "/home/rsofnc000/dataset/opt_dataset"
+            config.dataset_cfg.mode = "val"
+            config.dataset_cfg.agent_name="ur5e"
+            config.dataset_cfg.demo_name="human_rgb"
+            
+            dataset = instantiate(config.get('dataset_cfg', None))
+            
+            variation = list()
+            demo_files = dataset.demo_files['pick_place']
+            pkl_file_list = []
+            for task_id in demo_files.keys():
+                for pkl_file in demo_files[task_id]:
+                    for i in range(10): # 10 test for each demo
+                        variation.append(task_id)
+                        pkl_file_list.append(pkl_file)
+            
             args.N = len(pkl_file_list)
 
         parallel = args.num_workers > 1
@@ -603,13 +642,21 @@ if __name__ == '__main__':
 
         random.seed(42)
         np.random.seed(42)
+                
         seeds = []
         if args.test_gt:
             for i in range(args.N):
                 seeds.append((random.getrandbits(32), i,
                               pkl_file_list[i % len(pkl_file_list)], -1))
         else:
-            seeds = [(random.getrandbits(32), i, None) for i in range(args.N)]
+            if args.human_demo:
+                for i in range(args.N):
+                    seeds.append((random.getrandbits(32),
+                                i,
+                                None, # agent path, not used
+                                pkl_file_list[i % len(pkl_file_list)])) # demo path
+            else:
+                seeds = [(random.getrandbits(32), i, None) for i in range(args.N)]
 
         if parallel:
             with Pool(args.num_workers) as p:
@@ -619,8 +666,12 @@ if __name__ == '__main__':
                 task_success_flags = [f(seeds[i][0], seeds[i][1], seeds[i][2])
                                       for i, _ in enumerate(seeds)]
             else:
-                task_success_flags = [f(seeds[i][0], seeds[i][1], seeds[i][2])
-                                      for i, n in enumerate(range(args.N))]
+                if args.human_demo:
+                    task_success_flags = [f(seeds[i][0], seeds[i][1], seeds[i][2], seeds[i][3])
+                                        for i, _ in enumerate(range(args.N))]
+                else:
+                    task_success_flags = [f(seeds[i][0], seeds[i][1], seeds[i][2])
+                                        for i, n in enumerate(range(args.N))]
 
         if "cond_target_obj_detector" not in model_name:
             final_results = dict()

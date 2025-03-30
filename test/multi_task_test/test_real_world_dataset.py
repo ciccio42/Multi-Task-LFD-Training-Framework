@@ -24,7 +24,7 @@ from hydra.utils import instantiate
 from multi_task_test import TASK_MAP
 from multi_task_test.utils import *
 import pickle
-
+from torchvision.transforms import ToPILImage
 
 set_start_method('forkserver', force=True)
 LOG_PATH = None
@@ -97,10 +97,11 @@ def object_detection_inference(model, config, ctr, heights=100, widths=200, size
         assert isinstance(context_data_trj, Trajectory)
         context = select_random_frames(
             context_data_trj, T_context, sample_sides=True, random_frames=random_frames)
-        # convert BGR context image to RGB and scale to 0-1
-        for i, img in enumerate(context):
-            cv2.imwrite(f"context_{i}.png", np.array(img[:, :, ::-1]))
-        context = [img_formatter(i[:, :, ::-1])[None] for i in context]
+        
+        # for i, img in enumerate(context):
+        #     cv2.imwrite(f"context_{i}.png", np.array(img[:, :, ::-1]))
+        # context = [img_formatter(i[:, :, ::-1])[None] for i in context]
+        context = [img_formatter(i)[None] for i in context]
         # assert len(context ) == 6
         if isinstance(context[0], np.ndarray):
             context = torch.from_numpy(np.concatenate(context, 0))[None]
@@ -569,9 +570,17 @@ if __name__ == '__main__':
                         pkl_file_list.append(pkl_file)
         else:
             variation = list()
+            if (len(dataset.all_file_pairs)==0):
+                for task_name in dataset.agent_files.keys():
+                    dataset.all_file_pairs = list()
+                    for variation_indx, variation_id in enumerate(dataset.agent_files[task_name].keys()):
+                        for agent_indx, agent_file in enumerate(dataset.agent_files[task_name][variation_id]):
+                            for demo_indx, demo_file in enumerate(dataset.demo_files[task_name][variation_id]):
+                                dataset.all_file_pairs.append((task_name, variation_id, demo_file, agent_file))
+                        
             file_pairs = dataset.all_file_pairs
             pkl_file_list = []
-            for pkl_file in file_pairs.values():
+            for pkl_file in file_pairs:
                 pkl_file_list.append((pkl_file[3], pkl_file[2]))
                 variation_id = pkl_file[3].split(
                     '/')[-2].split('task_')[-1].lstrip("0")

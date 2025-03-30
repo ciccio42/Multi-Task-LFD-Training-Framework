@@ -71,6 +71,11 @@ def loss_func_bb(config, train_cfg, device, model, inputs, w_conf=1, w_reg=5, va
         # GT-Target
         # 1 -> target
         # 0 -> no-target
+        
+        # compute sofmax on cls_scores and get the class with the highest probability
+        # cls_cnt =  torch.sum(((torch.argmax(F.softmax(cls_scores, dim=-1), dim=-1) == 2) == True).int())
+        
+        
         cls_loss = F.cross_entropy(cls_scores, gt_cls.type(torch.int64))
         return cls_loss
 

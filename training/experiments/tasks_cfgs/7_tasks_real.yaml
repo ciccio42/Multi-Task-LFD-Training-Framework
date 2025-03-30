@@ -45,16 +45,16 @@ button:
 pick_place:
   name:              'pick_place'
   n_tasks:           16
-  demo_crop:         [20, 25, 80, 75]
-  agent_crop:        [0, 30, 120, 120] # Render: top, distance_bottom, left, distance_right
+  demo_crop:         [20, 25, 80, 75] #[0, 30, 140, 120] # [20, 25, 80, 75]
+  agent_crop:        [0, 30, 140, 120] # Render: top, distance_bottom, left, distance_right
   agent_sim_crop:        [20, 25, 80, 75]
   n_per_task:        2
   task_ids:          [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15] #[0,1,2,3] #[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
-  skip_ids:          []
+  skip_ids:         [] #[0,1,2,4,5,6,8,9,10,12,13,14] 
   loss_mul:          1
   task_per_batch:    16
   traj_per_subtask:  40
-  demo_per_subtask:  100
+  demo_per_subtask:  40
 
 stack_block:  
   name:             'stack_block'

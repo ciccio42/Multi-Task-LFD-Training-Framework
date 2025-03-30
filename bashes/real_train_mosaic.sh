@@ -1,38 +1,41 @@
 #!/bin/sh
+
+#SBATCH --exclude=tnode[01-17]
 #SBATCH --partition=gpuq
-#SBATCH --gres=gpu:1   # Request 1 GPU
+#SBATCH --gres=gpu:2
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=32
+#SBATCH --export=ALL
 
-# export MUJOCO_PY_MUJOCO_PATH="/home/rsofnc000/.mujoco/mujoco210"
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
+export MUJOCO_PY_MUJOCO_PATH="/home/rsofnc000/.mujoco/mujoco210"
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
-# export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=0
 
 export HYDRA_FULL_ERROR=1
 echo $1
 TASK_NAME="$1"
 
-EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset/
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder
+EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
+SAVE_PATH=/home/rsofnc000/checkpoint_save_folder/luigi_models
 POLICY='${mosaic}'
 
 SAVE_FREQ=-1
-LOG_FREQ=100
+LOG_FREQ=10
 VAL_FREQ=-1
 DEVICE=0
 DEBUG=false
 WANDB_LOG=true
 
-EXP_NAME=Real-1Task-pick_place-MOSAIC-No_State_finetuned_No_val_0_1_4_5_8_9-Batch18
+EXP_NAME=Real-1Task-pick_place-MOSAIC-Finetuned-State-False-Human-Video
 PROJECT_NAME=${EXP_NAME}
 TASK_str=pick_place #[pick_place,nut_assembly]
 
-RESUME_PATH="1Task-pick_place-MOSAIC-Convert_action_State_false_Convert_true-Batch32"
-RESUME_STEP="288630"
-RESUME=false
-FINETUNE=true
+RESUME_PATH="Real-1Task-pick_place-MOSAIC-Finetuned-State-False-Human-Video-Batch48"
+RESUME_STEP="36"
+RESUME=true
+FINETUNE=false
 
 LOAD_TARGET_OBJ_DETECTOR=false
 TARGET_OBJ_DETECTOR_STEP=36000
@@ -40,6 +43,7 @@ TARGET_OBJ_DETECTOR_PATH=""
 CONCAT_BB=false
 
 AGENT_NAME=real_new_ur5e
+DEMO_NAME=human_rgb
 
 ROLLOUT=false
 EPOCH=90
@@ -78,7 +82,7 @@ NULL_BB=false
 
 EARLY_STOPPING_PATIECE=-1
 OPTIMIZER='AdamW'
-LR=0.0005
+LR=0.00005
 WEIGHT_DECAY=0.0
 SCHEDULER=None
 
@@ -106,6 +110,7 @@ srun --output=train_${PROJECT_NAME}.txt --job-name=${PROJECT_NAME} python ../tra
     vsize=${BSIZE} \
     epochs=${EPOCH} \
     dataset_cfg.agent_name=${AGENT_NAME} \
+    dataset_cfg.demo_name=${DEMO_NAME} \
     rollout=${ROLLOUT} \
     dataset_cfg.normalize_action=${NORMALIZE_ACTION} \
     dataset_cfg.compute_obj_distribution=${COMPUTE_OBJ_DISTRIBUTION} \

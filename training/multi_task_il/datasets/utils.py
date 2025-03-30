@@ -17,9 +17,11 @@ from operator import concat
 from multi_task_il.utils import normalize_action
 import time
 import math
+from PIL import Image
 from tqdm import tqdm
 import logging
 import itertools
+from torchvision.transforms import ToPILImage
 
 logging.basicConfig(
     level=logging.INFO,
@@ -140,12 +142,15 @@ def collate_by_task(batch):
 
 def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_name: str = "panda", root_dir: str = "", task_spec=None, split: list = [0.9, 0.1], allow_train_skip: bool = False, allow_val_skip: bool = False, mix_variations: bool = False, mode='train', mix_sim_real=False):
 
-    count = 0
+    sample_indx = 0
     agent_file_cnt = 0
     demo_file_cnt = 0
+    count = 0
+    pair_cnt = 0
     validation_on_skipped_task = False
 
     for spec in task_spec:
+        
         if mode == 'val' and len(spec.get('skip_ids', [])) != 0:
             validation_on_skipped_task = False
 
@@ -172,6 +177,8 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
                 root_dir, name, '{}_{}_{}'.format(date, demo_name, name))
         dataset_loader.subtask_to_idx[name] = defaultdict(list)
         dataset_loader.demo_subtask_to_idx[name] = defaultdict(list)
+        
+       
         for _id in range(spec.get('n_tasks')):
 
             # take demo file from no-skipped tasks
@@ -233,88 +240,36 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
 
             dataset_loader.agent_files[name][_id] = deepcopy(agent_files)
             dataset_loader.demo_files[name][_id] = deepcopy(demo_files)
-
-            dataset_loader.object_distribution[name][task_id] = OrderedDict()
-
-            if dataset_loader.compute_obj_distribution:
-                dataset_loader.object_distribution_to_indx[name][task_id] = [
-                    [] for i in range(len(ENV_OBJECTS[name]['ranges']))]
-                # for each subtask, create a dict with the object name
-                # assign the slot at each file
-                for agent in agent_files:
-                    # compute object distribution if requested
-                    if dataset_loader.compute_obj_distribution:
-                        # load pickle file
-                        with open(agent, "rb") as f:
-                            agent_file_data = pkl.load(f)
-                        # take trj
-                        trj = agent_file_data['traj']
-                        # take target object id
-                        target_obj_id = trj[1]['obs']['target-object']
-                        for id, obj_name in enumerate(ENV_OBJECTS[name]['obj_names']):
-                            if id == target_obj_id:
-                                if obj_name not in dataset_loader.object_distribution[name][task_id]:
-                                    dataset_loader.object_distribution[name][task_id][obj_name] = OrderedDict(
-                                    )
-                                # get object position
-                                if name == 'nut_assembly':
-                                    if id == 0:
-                                        pos = trj[1]['obs']['round-nut_pos']
-                                    else:
-                                        pos = trj[1]['obs'][f'round-nut-{id+1}_pos']
-                                else:
-                                    pos = trj[1]['obs'][f'{obj_name}_pos']
-                                for i, pos_range in enumerate(ENV_OBJECTS[name]["ranges"]):
-                                    if pos[1] >= pos_range[0] and pos[1] <= pos_range[1]:
-                                        dataset_loader.object_distribution[name][task_id][obj_name][agent] = i
-                                        break
-                                break
-
-            if not dataset_loader._mix_demo_agent and not dataset_loader._change_command_epoch:
-                for demo in demo_files:
-                    for agent in agent_files:
-                        dataset_loader.all_file_pairs[count] = (
-                            name, _id, demo, agent)
-                        dataset_loader.task_to_idx[name].append(count)
-                        dataset_loader.subtask_to_idx[name][task_id].append(
-                            count)
-                        if dataset_loader.compute_obj_distribution:
-                            # take objs for the current task_id
-                            for obj in dataset_loader.object_distribution[name][task_id].keys():
-                                # take the slot for the given agent file
-                                if agent in dataset_loader.object_distribution[name][task_id][obj]:
-                                    slot_indx = dataset_loader.object_distribution[name][task_id][obj][agent]
-                                    # assign the slot for the given agent file
-                                    dataset_loader.object_distribution_to_indx[name][task_id][slot_indx].append(
-                                        count)
-                                    dataset_loader.index_to_slot[count] = slot_indx
-                        count += 1
-            elif not dataset_loader._mix_demo_agent and dataset_loader._change_command_epoch:
-                print(f"Loading task {name} - sub-task {_id}")
-                for agent in tqdm(agent_files):
+            
+            if not dataset_loader._mix_demo_agent:
+                print(f"Loading {name} - {task_id}")
+                for indx_demo, demo in enumerate(demo_files):
+                    dataset_loader.all_demo_files[demo_file_cnt] = (name, _id, demo)
+                    dataset_loader.demo_task_to_idx[name].append(demo_file_cnt)
+                    dataset_loader.demo_subtask_to_idx[name][task_id].append(demo_file_cnt)
+                    demo_file_cnt += 1
+                    
+                for indx_agent, agent in enumerate(agent_files):
                     # open file and check trajectory lenght
                     with open(agent, "rb") as f:
                         agent_data = pkl.load(f)
                         trj_len = agent_data['len']
-                    # for t in range(trj_len):
-                    dataset_loader.all_agent_files[agent_file_cnt] = (
-                        name, _id, agent, trj_len)
-                    dataset_loader.task_to_idx[name].append(agent_file_cnt)
-                    dataset_loader.subtask_to_idx[name][task_id].append(
-                        agent_file_cnt)
-                    count += trj_len
-                    agent_file_cnt += 1
+                        
+                        dataset_loader.all_agent_files[agent_file_cnt] = (name, _id, agent, trj_len)
+                        agent_file_cnt += 1
+                        
+                        
+                        # dataset_loader.all_file_pairs[sample_indx] = (name, _id, demo, agent, trj_len)
+                        dataset_loader.task_to_idx[name].append(sample_indx)
+                        dataset_loader.subtask_to_idx[name][task_id].append(sample_indx)
+                        sample_indx += 1
+                        count += trj_len
+                        # pair_cnt += 1
+                    
 
-                for demo_indx, demo in enumerate(demo_files):
-                    dataset_loader.all_demo_files[demo_file_cnt] = (
-                        name, _id, demo)
-                    dataset_loader.demo_task_to_idx[name].append(
-                        demo_file_cnt)
-                    dataset_loader.demo_subtask_to_idx[name][task_id].append(
-                        demo_file_cnt)
-                    demo_file_cnt += 1
-
+        # for C(T)OD                    
         if dataset_loader._mix_demo_agent:
+            count = 0
             num_variation_per_object = NUM_VARIATION_PER_OBEJECT[name][0]
             num_objects = NUM_VARIATION_PER_OBEJECT[name][1]
 
@@ -386,8 +341,9 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
                         dataset_loader.subtask_to_idx[name][_id].append(
                             count)
                         count += 1
+                        pair_cnt += 1
 
-        print('Done loading Task {}, agent/demo trajctores pairs reach a count of: {}'.format(name, count))
+        print(f"Task {name} has\n\tDemo files: {demo_file_cnt}\n\tAgent files: {agent_file_cnt}\n\tTotal pairs: {pair_cnt}\n\tTotal samples: {count}")
 
         if spec.get('demo_crop', None) is not None:
             dataset_loader.demo_crop[name] = spec.get(
@@ -404,10 +360,10 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
             dataset_loader.task_crops[name] = spec.get(
                 'crop', [0, 0, 0, 0])
 
-    return count
+    return count, pair_cnt
 
 
-def make_demo(dataset, traj, task_name):
+def make_demo(dataset, traj, task_name, human_demo=False):
     """
     Do a near-uniform sampling of the demonstration trajectory
     """
@@ -426,9 +382,14 @@ def make_demo(dataset, traj, task_name):
                 n = clip(np.random.randint(
                     int(i * per_bracket), int((i + 1) * per_bracket)))
             # frames.append(_make_frame(n))
-            # convert from BGR to RGB and scale to 0-1 range
-            obs = copy.copy(
-                traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
+
+            if not human_demo:
+                obs = copy.copy(
+                    traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
+            else:
+                obs = copy.copy(
+                    traj.get(n)['obs']['camera_front_image'])
+            
             processed = dataset.frame_aug(
                 task_name,
                 obs,
@@ -526,6 +487,24 @@ def adjust_bb(dataset_loader, bb, obs, img_width=360, img_height=200, top=0, lef
         y1 = int((y1_old - top) * y_scale)
         y2 = int((y2_old - top) * y_scale)
 
+        if x1 <= 0:
+            x1 = 0
+        if x2 <= 0:
+            x2 = 0
+        if y1 <= 0:
+            y1 = 0
+        if y2 <= 0:
+            y2 = 0
+
+        if x1 >= dataset_loader.width:
+            x1 = dataset_loader.width-1
+        if x2 >= dataset_loader.width:
+            x2 = dataset_loader.width-1
+        if y1 >= dataset_loader.height:
+            y1 = dataset_loader.height-1
+        if y2 >= dataset_loader.height:
+            y2 = dataset_loader.height-1
+
         if DEBUG:
             image = cv2.rectangle(np.ascontiguousarray(np.array(np.moveaxis(
                 obs.numpy()*255, 0, -1), dtype=np.uint8)),
@@ -535,24 +514,8 @@ def adjust_bb(dataset_loader, bb, obs, img_width=360, img_height=200, top=0, lef
                     y2),
                 color=(0, 0, 255),
                 thickness=1)
-            if x1 < 0:
-                x1 = 0
-            if x2 < 0:
-                x2 = 0
-            if y1 < 0:
-                y1 = 0
-            if y2 < 0:
-                y2 = 0
-
-            if x1 > dataset_loader.width:
-                x1 = dataset_loader.width
-            if x2 > dataset_loader.width:
-                x2 = dataset_loader.width
-            if y1 > dataset_loader.height:
-                y1 = dataset_loader.height
-            if y2 > dataset_loader.height:
-                y2 = dataset_loader.height
-            cv2.imwrite("bb_cropped.png", image)
+            
+            cv2.imwrite("bb_cropped.png", image)    
 
         # replace with new bb
         bb[obj_indx] = np.array([[x1, y1, x2, y2]])
@@ -707,7 +670,7 @@ def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, comm
 
         # 1 Target
         # 0 No-target
-        # 2 Target-plase
+        # 2 Target-place
         # 3 No-Target-place
 
         if i == 0:
@@ -723,7 +686,7 @@ def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, comm
         image = np.array(
             step_t['obs']['camera_front_image'][:, :, ::-1])
         for i, single_bb in enumerate(bb):
-            if i == 0 or i == 2:
+            if i == 0 or i == 3:
                 color = (0, 255, 0) # green no-targ
             else:
                 color = (255, 0, 0) # blue target
@@ -946,7 +909,7 @@ def trasform_from_world_to_bl(action):
     
     return action_bl
 
-def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_action=False, load_state=False, load_eef_point=False, distractor=False, subtask_id=-1, agent_task_id=-1, bb_sequence=False, take_place_loc=False, sim_crop=True, convert_action=True):
+def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_action=False, load_state=False, load_eef_point=False, distractor=False, subtask_id=-1, agent_task_id=-1, bb_sequence=False, take_place_loc=False, sim_crop=True, convert_action=True, human_demo=False):
 
     images = []
     images_cp = []
@@ -959,20 +922,30 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
     time_sample = time.time()
     crop_params = dataset_loader.task_crops.get(task_name, [0, 0, 0, 0])
     for j, t in enumerate(chosen_t):
-        t = t.item()
+        try:
+            t = t.item()
+        except:
+            pass
         step_t = traj.get(t)
 
         if not getattr(dataset_loader, "real", False) or (getattr(dataset_loader, "real", False) and sim_crop):
-            # cv2.imwrite("prova.png", step_t['obs']['camera_front_image'])
-            image = copy.copy(
-                step_t['obs']['camera_front_image'][:, :, ::-1])
+            if not human_demo:
+                image = copy.copy(
+                    step_t['obs']['camera_front_image'][:, :, ::-1])
+            else:
+                image = copy.copy(
+                    step_t['obs']['camera_front_image'])
         else:
             if step_t['obs'].get('camera_front_image_full_size', None) is not None:
                 image = copy.copy(
                 cv2.imdecode(step_t['obs']['camera_front_image_full_size'], cv2.IMREAD_COLOR))
             else:
-                image = copy.copy(
-                    step_t['obs']['camera_front_image'])
+                if not human_demo:
+                    image = copy.copy(
+                        step_t['obs']['camera_front_image'])
+                else:
+                    image = copy.copy(
+                        step_t['obs']['camera_front_image'][:,:,::-1])
 
         if DEBUG:
             cv2.imwrite("original_image.png", image)
@@ -1018,8 +991,11 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
             end_aug = time.time()
             logger.debug(f"Aug time: {end_aug-aug_time}")
             images.append(processed)
-            # cv2.imwrite("augmented_obs.png", np.array(np.moveaxis(
-            #     copy.deepcopy(processed).cpu().numpy()*255, 0, -1), dtype=np.uint8))
+            
+            # pil_image = ToPILImage()(copy.deepcopy(processed).cpu())
+            # pil_image.save("augmented_image.png")
+            
+            
         else:
             bb_aug = bb_frame
 
@@ -1123,8 +1099,11 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                     norm_end = time.time()
                     # print(f"Norm time {norm_end-norm_start}")
                 elif k == 'gripper_state':
-                    state_component = np.array(
-                        [step_t['action'][-1]], dtype=np.float32)
+                    try:
+                        state_component = np.array(
+                            [step_t['action'][-1]], dtype=np.float32)
+                    except:
+                        print("Error on gripper state")
                 else:                        
                     if step_t['obs'].get(k, None) is not None and isinstance(step_t['obs'][k], int):
                         state_component = np.array(

@@ -18,9 +18,8 @@ from torchvision.models.video import r2plus1d_18, R2Plus1D_18_Weights
 import cv2
 import matplotlib.pyplot as plt
 import time
+
 DEBUG = False
-
-
 def get_backbone(backbone_name="slow_r50", video_backbone=True, pretrained=False, conv_drop_dim=3):
     if video_backbone:
         print(f"Loading video backbone {backbone_name}.....")
@@ -395,7 +394,6 @@ class AgentModule(nn.Module):
             self.n_anc_boxes = len(self.anc_scales) * len(self.anc_ratios)
 
             # IoU thresholds for +ve and -ve anchors
-
             self.pos_thresh = 0.4
             self.neg_thresh = 0.3
             self.conf_thresh = 0.7
@@ -511,7 +509,7 @@ class AgentModule(nn.Module):
                                                   (int(anc_box[2]),
                                                    int(anc_box[3])),
                                                   color=(0, 0, 255), thickness=1)
-                        cv2.imwrite("prova_anch_box.png", image)
+                cv2.imwrite("prova_anch_box.png", image)
 
             if not inference:
                 # if the model is training
@@ -538,15 +536,18 @@ class AgentModule(nn.Module):
 
                 # get separate proposals for each sample
                 pos_proposals_list = []
-                class_positive_list = []
+                # class_positive_list = []
                 batch_size = B
-                for idx in range(batch_size):
-                    proposal_idxs = torch.where(positive_anc_ind_sep == idx)[0]
-                    proposals_sep = proposals[proposal_idxs].detach().clone()
-                    class_sep = GT_class_pos[proposal_idxs].detach().clone()
-                    pos_proposals_list.append(proposals_sep)
-                    class_positive_list.append(class_sep)
 
+                # Create a mask for each index in the batch
+                batch_indices = torch.arange(batch_size, device=positive_anc_ind_sep.device).unsqueeze(1)
+                mask = positive_anc_ind_sep.unsqueeze(0) == batch_indices
+
+                # Use the mask to gather proposals and classes
+                pos_proposals_list = [proposals[torch.where(mask[i])[0]].detach().clone() for i in range(batch_size)]
+                # class_positive_list = [GT_class_pos[torch.where(mask[i])[0]].detach().clone() for i in range(batch_size)]
+                # print(f"Time to separate proposals {time.time()-start_time}")
+                
                 cls_scores = self.classifier(
                     feature_map, pos_proposals_list, GT_class_pos)
 
@@ -679,6 +680,7 @@ class AgentModule(nn.Module):
                     # get classes with highest probability
                     classes_all = torch.argmax(cls_probs, dim=-1)
 
+                  
                     classes_final = []
                     # slice classes to map to their corresponding image
                     c = 0

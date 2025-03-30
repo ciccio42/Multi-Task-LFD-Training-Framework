@@ -1,11 +1,12 @@
 #!/bin/bash
 
-# export CUDA_VISIBLE_DEVICES=0,1,2,3
+#SBATCH --exclude=tnode[01-17]
 #SBATCH --partition=gpuq
-#SBATCH --gres=gpu:1   # Request 1 GPU
+#SBATCH --gres=gpu:2
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=32
+#SBATCH --export=ALL
 
 export MUJOCO_PY_MUJOCO_PATH="/home/rsofnc000/.mujoco/mujoco210"
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
@@ -16,7 +17,7 @@ echo $1
 TASK_NAME="$1"
 
 EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset/
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder
+SAVE_PATH=/home/rsofnc000/checkpoint_save_folder/luigi_models
 POLICY='${mosaic}'
 TARGET='multi_task_il.models.mt_rep.VideoImitation'
 
@@ -33,6 +34,7 @@ CONFIG_PATH=../experiments
 CONFIG_NAME=config.yaml
 CONCAT_IMG_EMB=true
 CONCAT_DEMO_EMB=true
+DEMO_NAME=human_rgb
 
 LOAD_TARGET_OBJ_DETECTOR=false
 CONCAT_BB=false
@@ -217,9 +219,9 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     ### Pick-Place ###
-    RESUME_PATH=""
-    RESUME_STEP=""
-    RESUME=false
+    RESUME_PATH=1Task-pick_place-MOSAIC-Human-Video_Covert_action_true-Batch32
+    RESUME_STEP=24
+    RESUME=true
     FINETUNE=false
 
     TARGET_OBJ_DETECTOR_STEP="" #68526 #129762 #198900 #65250
@@ -251,7 +253,7 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     HIDDEN_DIM=512     #256 MT #128 2Task, Nut, button, stack #512 Pick-place
     CONCAT_DEMO_HEAD=false
     CONCAT_DEMO_ACT=true
-    PRETRAINED=false
+    PRETRAINED=true
     NULL_BB=false
 
     EARLY_STOPPING_PATIECE=-1
@@ -269,9 +271,10 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
 
     COSINE_ANNEALING=false
 
-    TASK_str="pick_place"                                                    #[pick_place,nut_assembly,stack_block,button]
-    EXP_NAME=1Task-pick_place-MOSAIC-Convert_action_State_false_Convert_true #1Task-${TASK_str}-MOSAIC-Rollout
+    TASK_str="pick_place"                                                        #[pick_place,nut_assembly,stack_block,button]
+    EXP_NAME=1Task-pick_place-MOSAIC-Human-Video_Covert_action_${CONVERT_ACTION} #1Task-${TASK_str}-MOSAIC-Rollout
     PROJECT_NAME=${EXP_NAME}
+
 elif [ "$TASK_NAME" == 'multi' ]; then
     echo "Multi Task"
     ### Pick-Place ###
@@ -331,7 +334,6 @@ elif [ "$TASK_NAME" == 'multi' ]; then
     PROJECT_NAME=${EXP_NAME}
 fi
 
-#
 srun --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u ../training/train_scripts/train_any.py \
     --config-path ${CONFIG_PATH} \
     --config-name ${CONFIG_NAME} \
@@ -354,6 +356,7 @@ srun --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u
     dataset_cfg.width=${WIDTH} \
     dataset_cfg.split_pick_place=${SPLIT_PICK_PLACE} \
     dataset_cfg.convert_action=${CONVERT_ACTION} \
+    dataset_cfg.demo_name=${DEMO_NAME} \
     samplers.balancing_policy=${BALANCING_POLICY} \
     mosaic._target_=${TARGET} \
     mosaic.load_target_obj_detector=${LOAD_TARGET_OBJ_DETECTOR} \

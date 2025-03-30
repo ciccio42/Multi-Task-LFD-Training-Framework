@@ -55,10 +55,10 @@ in order to test
 * run python script `training/multi_task_il/datasets/command_encoder/visualize_actions.py`
 
 # visualization
-## visualize video + action for a single dataset
-`visualize_action_single_dataset.py`
-## visualize video + action for all the datasets
-`visualize_actions.py`
+<!-- ## visualize video + action for a single dataset
+`visualize_action_single_dataset.py` -->
+<!-- ## visualize video + action for all the datasets
+`visualize_actions.py` -->
 ## visualize action (no video) for all the datasets
 `visualize_actions_static.py`
 
@@ -74,8 +74,6 @@ in order to test
 explain
 image
 
-## heatmap
-heatmap
 
 ### embedding cond module in RT1 input
 /raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/plot_embedding_cond_module.py
@@ -104,8 +102,23 @@ Generate couples (video + traj): ./generate_traj_demo_couples_from_json.sh
 find min max: ./find_min_max_actions.sh
 Plot histograms: ./plot_bin_histogram.sh
 
-complete black list:
+## heatmap
+```bash
+/raid/home/frosa_Loc/Multi-Task-LFD-Framework/utils/action_distribution.sh
+```
 
+
+# RT-1 and mosaic-CTOD grad-CAM
+```bash
+bashes/RT1_inference_demo.sh
+```
+
+
+## failure analysis
+
+
+
+complete black list:
 
 <!-- asu_table_top_converted_absolute_pose
 berkeley_autolab_ur5_converted_absolute_pose
@@ -116,9 +129,9 @@ sim_ur5e_pick_place_shifted_converted_absolute
 real_new_ur5e_pick_place_converted_absolute
 panda_pick_place -->
 
-  black_list: ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'iamlab_cmu_pickup_insert_converted_absolute_pose','taco_play_converted_absolute_pose','droid_converted_absolute_pose','sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'panda_pick_place']
+  black_list: ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'iamlab_cmu_pickup_insert_converted_absolute_pose','taco_play_converted_absolute_pose','droid_converted_absolute_pose','sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute','sim_panda_pick_place_converted_absolute', 'panda_pick_place']
 
-  BLACK_LIST = ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'iamlab_cmu_pickup_insert_converted_absolute_pose','taco_play_converted_absolute_pose','droid_converted_absolute_pose','sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'panda_pick_place']
+  BLACK_LIST = ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'iamlab_cmu_pickup_insert_converted_absolute_pose','taco_play_converted_absolute_pose','droid_converted_absolute_pose','sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'sim_panda_pick_place_converted_absolute', 'panda_pick_place']
 
 <!-- 
 

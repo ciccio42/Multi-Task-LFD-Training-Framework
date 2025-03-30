@@ -57,7 +57,7 @@ if __name__ == '__main__':
     # real_ur5e -> (panda_dem, real_ur5e_traj)
     # sim_ur5e -> (panda_dem, sim_ur5e_traj)
     exclude_droid_list = ['droid_converted', 'droid_converted_0_to_2909', 'droid_converted_2909_to_4645']
-    non_reflexive_combination_datasets = ['sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'panda_pick_place', 'ur5e_pick_place']
+    non_reflexive_combination_datasets = ['sim_panda_pick_place_converted_absolute','sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'panda_pick_place', 'ur5e_pick_place']
     
     couples_dataset_counter = {}
     couples_dataset = {}
@@ -94,18 +94,22 @@ if __name__ == '__main__':
     pick_place_demos_traj = data['panda_pick_place']
     real_ur5e_traj = data['real_new_ur5e_pick_place_converted_absolute']
     sim_ur5e_traj = data['sim_ur5e_pick_place_shifted_converted_absolute']
+    sim_panda_traj = data['sim_panda_pick_place_converted_absolute']
 
     
     couples_dataset['real_new_ur5e_pick_place_converted_absolute'] = {}
     couples_dataset['sim_ur5e_pick_place_shifted_converted_absolute'] = {}
+    couples_dataset['sim_panda_pick_place_converted_absolute'] = {}
 
     couples_dataset_counter['real_new_ur5e_pick_place_converted_absolute'] = {}
     couples_dataset_counter['sim_ur5e_pick_place_shifted_converted_absolute'] = {}
+    couples_dataset_counter['sim_panda_pick_place_converted_absolute'] = {}
 
     
     for task in pick_place_demos_traj.keys():
         couples_dataset['real_new_ur5e_pick_place_converted_absolute'][task] = []
         couples_dataset['sim_ur5e_pick_place_shifted_converted_absolute'][task] = []
+        couples_dataset['sim_panda_pick_place_converted_absolute'][task] = []
 
         task_panda_demos = pick_place_demos_traj[task]
         for demo in task_panda_demos:
@@ -114,10 +118,14 @@ if __name__ == '__main__':
                 
             for traj in sim_ur5e_traj[task]:
                 couples_dataset['sim_ur5e_pick_place_shifted_converted_absolute'][task].append((demo, traj))
+            
+            for traj in sim_panda_traj[task]:
+                couples_dataset['sim_panda_pick_place_converted_absolute'][task].append((demo, traj))
 
 
             couples_dataset_counter['real_new_ur5e_pick_place_converted_absolute'][task] = len(couples_dataset['real_new_ur5e_pick_place_converted_absolute'][task])
             couples_dataset_counter['sim_ur5e_pick_place_shifted_converted_absolute'][task] = len(couples_dataset['sim_ur5e_pick_place_shifted_converted_absolute'][task])
+            couples_dataset_counter['sim_panda_pick_place_converted_absolute'][task] = len(couples_dataset['sim_panda_pick_place_converted_absolute'][task])
 
     
     

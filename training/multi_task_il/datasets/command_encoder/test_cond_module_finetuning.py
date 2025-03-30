@@ -34,38 +34,38 @@ DATA_AUGS = {
         }
 
 dataset_samples_spec = {
-    "asu_table_top_converted": {
-        "name": "asu_table_top_converted",
+    "asu_table_top_converted_absolute_pose": {
+        "name": "asu_table_top_converted_absolute_pose",
         "crop": [0, 35, 0, 0],
         "image_channel_format": "RGB",
     },
-    "berkeley_autolab_ur5_converted": {
-        "name": "berkeley_autolab_ur5_converted",
+    "berkeley_autolab_ur5_converted_absolute_pose": {
+        "name": "berkeley_autolab_ur5_converted_absolute_pose",
         "crop": [0, 0, 0, 0],
         "image_channel_format": "RGB",
     },
-    "iamlab_cmu_pickup_insert_converted": {
-        "name": "iamlab_cmu_pickup_insert_converted",
+    "iamlab_cmu_pickup_insert_converted_absolute_pose": {
+        "name": "iamlab_cmu_pickup_insert_converted_absolute_pose",
         "crop": [0, 0, 0, 0],
         "image_channel_format": "RGB",
     },
-    "taco_play_converted": {
-        "name": "taco_play_converted",
+    "taco_play_converted_absolute_pose": {
+        "name": "taco_play_converted_absolute_pose",
         "crop": [0, 0, 0, 0],
         "image_channel_format": "RGB",
     },
-    "droid_converted": {
-        "name": "droid_converted",
+    "droid_converted_absolute_pose": {
+        "name": "droid_converted_absolute_pose",
         "crop": [0, 0, 0, 0],
         "image_channel_format": "RGB",
     },
-    "sim_new_ur5e_pick_place_converted": {
-        "name": "sim_new_ur5e_pick_place_converted",
+    "sim_new_ur5e_pick_place_converted_absolute": {
+        "name": "sim_new_ur5e_pick_place_converted_absolute",
         "crop": [20, 25, 80, 75],
         "image_channel_format": "RGB",
     },
-    "real_new_ur5e_pick_place_converted": {
-        "name": "real_new_ur5e_pick_place_converted",
+    "real_new_ur5e_pick_place_converted_absolute": {
+        "name": "real_new_ur5e_pick_place_converted_absolute",
         "n_tasks": 16,
         "crop": [20, 25, 80, 75], ############################
         "image_channel_format": "BGR",
@@ -76,7 +76,6 @@ dataset_samples_spec = {
         "image_channel_format": "RGB",
     },
 }
-
 def create_val_loader(tasks_spec, black_list, data_augs):
     val_dataset = CommandEncoderFinetuningDataset(mode='val',
                                                 tasks_spec=tasks_spec,
@@ -240,7 +239,6 @@ def create_embedding_plot(embedding_dict, centroids_per_task, se_embeddings):
     all_tensor = torch.cat((embeddings_tensor, centroids_tensor, se_embeddings), 0)
     
     
-    
     time_start = time.time()
     tsne = TSNE(n_components=2, verbose=1, perplexity=5, n_iter=500) # vedere se cambiare parametri
     tsne_results = tsne.fit_transform(all_tensor)
@@ -279,42 +277,47 @@ def create_embedding_plot(embedding_dict, centroids_per_task, se_embeddings):
     palette[14] = (0.75, 0.0, 0.0)
     palette[15] = (1.0, 0.0, 0.0)
 
-    plt.figure(figsize=(15,10))
-    # ax = sns.scatterplot(
-    #     x="tsne-2d-one", y="tsne-2d-two",
-    #     hue="y", # per ora non la uso visto che ogni campione è a se
-    #     palette=palette,
-    #     data=df,
-    #     legend=False,
-    #     # alpha=0.3
-    # )
-    
-    # ax = sns.scatterplot(
-    #     x="tsne-2d-one", y="tsne-2d-two",
-    #     hue="y",
-    #     palette=palette,
-    #     data=df_centr,
-    #     marker="*",
-    #     s=400,
-    #     legend="full",
-    #     ax=ax
-    # )
+    plt.figure(figsize=(9,12))
+    ax = sns.scatterplot(
+        x="tsne-2d-one", y="tsne-2d-two",
+        hue="y", # per ora non la uso visto che ogni campione è a se
+        palette=palette,
+        data=df,
+        legend=False,
+        # alpha=0.3
+    )
     
     ax = sns.scatterplot(
         x="tsne-2d-one", y="tsne-2d-two",
         hue="y",
         palette=palette,
-        data=df_se_emb,
-        marker="X",
+        data=df_centr,
+        marker="*",
         s=400,
-        legend="full"
+        legend=False,
+        ax=ax
     )
     
+    # legend="full",
     
-    box = ax.get_position()
-    ax.set_position([box.x0, box.y0, box.width * 0.6, box.height])
+    # ax = sns.scatterplot(
+    #     x="tsne-2d-one", y="tsne-2d-two",
+    #     hue="y",
+    #     palette=palette,
+    #     data=df_se_emb,
+    #     marker="X",
+    #     s=200,
+    #     legend="full"
+    # )
     
-    ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    # box = ax.get_position()
+    # ax.set_position([box.x0, box.y0 + box.height * 0.4,
+    #                 box.width, box.height * 0.5])
+
+    # # Put a legend below current axis
+    # ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
+    #         fancybox=True, shadow=True, ncol=7)
+
     
     from datetime import datetime
     ts = datetime.now().strftime("%m-%d_%H:%M")

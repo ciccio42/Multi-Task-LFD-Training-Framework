@@ -50,6 +50,10 @@ if __name__ == '__main__':
     with open(args.trajectory_json_file_path, 'r') as file:
         data = json.load(file)
         
+    absolute_or_delta = args.trajectory_json_file_path.split('/')[-1].split('_')[-1].split('.')[0]
+    assert absolute_or_delta == 'delta' or absolute_or_delta == 'absolute', 'at the end the .json file must have \'absolute\' or \'delta\' '
+    print(f'Generating {absolute_or_delta} couples...')
+    assert absolute_or_delta == args.dir_name_save.split('_')[-1], 'dir save folder must end with the same word as the json file!'
     
     # the couples (demo, traj) generated with these datasets are not meant to be generated
     # with a demo and traj coming from the same folder/agent.
@@ -57,13 +61,13 @@ if __name__ == '__main__':
     # real_ur5e -> (panda_dem, real_ur5e_traj)
     # sim_ur5e -> (panda_dem, sim_ur5e_traj)
     exclude_droid_list = ['droid_converted', 'droid_converted_0_to_2909', 'droid_converted_2909_to_4645']
-    non_reflexive_combination_datasets = ['sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'panda_pick_place', 'ur5e_pick_place']
+    non_reflexive_combination_datasets = [f'sim_panda_pick_place_converted_{absolute_or_delta}', f'sim_ur5e_pick_place_shifted_converted_{absolute_or_delta}', f'real_new_ur5e_pick_place_converted_{absolute_or_delta}', 'panda_pick_place', 'ur5e_pick_place']
     
     couples_dataset_counter = {}
     couples_dataset = {}
     # for finetuning datasets
     for dataset_str in data.keys():
-        if dataset_str not in non_reflexive_combination_datasets and dataset_str not in exclude_droid_list:
+        if dataset_str not in non_reflexive_combination_datasets and dataset_str not in exclude_droid_list and 'droid' not in dataset_str:
             couples_dataset[dataset_str] = {}
             couples_dataset_counter[dataset_str] = {}
             for task_str in data[dataset_str].keys():
@@ -88,7 +92,7 @@ if __name__ == '__main__':
                     couples_dataset[dataset_str][task_str] = {}
                     couples_dataset_counter[dataset_str][task_str] = {}
                     for subtask_str in data[dataset_str][task_str].keys():
-                        if type(p[dataset_str][task_str][subtask_str]) == list: # if we found idxs
+                        if type(data[dataset_str][task_str][subtask_str]) == list: # if we found idxs
                             couples_dataset[dataset_str][task_str][subtask_str] = []
                             samples = data[dataset_str][task_str][subtask_str]
                             
@@ -109,32 +113,40 @@ if __name__ == '__main__':
                     
     ##### for real and sim ur5e, couple with panda demonstration
     pick_place_demos_traj = data['panda_pick_place']
-    real_ur5e_traj = data['real_new_ur5e_pick_place_converted_absolute']
-    sim_ur5e_traj = data['sim_ur5e_pick_place_shifted_converted_absolute']
+    real_ur5e_traj = data[f'real_new_ur5e_pick_place_converted_{absolute_or_delta}']
+    sim_ur5e_traj = data[f'sim_ur5e_pick_place_shifted_converted_{absolute_or_delta}']
+    sim_panda_traj = data[f'sim_panda_pick_place_converted_{absolute_or_delta}']
 
     
-    couples_dataset['real_new_ur5e_pick_place_converted_absolute'] = {}
-    couples_dataset['sim_ur5e_pick_place_shifted_converted_absolute'] = {}
+    couples_dataset[f'real_new_ur5e_pick_place_converted_{absolute_or_delta}'] = {}
+    couples_dataset[f'sim_ur5e_pick_place_shifted_converted_{absolute_or_delta}'] = {}
+    couples_dataset[f'sim_panda_pick_place_converted_{absolute_or_delta}'] = {}
 
-    couples_dataset_counter['real_new_ur5e_pick_place_converted_absolute'] = {}
-    couples_dataset_counter['sim_ur5e_pick_place_shifted_converted_absolute'] = {}
+    couples_dataset_counter[f'real_new_ur5e_pick_place_converted_{absolute_or_delta}'] = {}
+    couples_dataset_counter[f'sim_ur5e_pick_place_shifted_converted_{absolute_or_delta}'] = {}
+    couples_dataset_counter[f'sim_panda_pick_place_converted_{absolute_or_delta}'] = {}
 
     
     for task in pick_place_demos_traj.keys():
-        couples_dataset['real_new_ur5e_pick_place_converted_absolute'][task] = []
-        couples_dataset['sim_ur5e_pick_place_shifted_converted_absolute'][task] = []
+        couples_dataset[f'real_new_ur5e_pick_place_converted_{absolute_or_delta}'][task] = []
+        couples_dataset[f'sim_ur5e_pick_place_shifted_converted_{absolute_or_delta}'][task] = []
+        couples_dataset[f'sim_panda_pick_place_converted_{absolute_or_delta}'][task] = []
 
         task_panda_demos = pick_place_demos_traj[task]
         for demo in task_panda_demos:
             for traj in real_ur5e_traj[task]:
-                couples_dataset['real_new_ur5e_pick_place_converted_absolute'][task].append((demo, traj))
+                couples_dataset[f'real_new_ur5e_pick_place_converted_{absolute_or_delta}'][task].append((demo, traj))
                 
             for traj in sim_ur5e_traj[task]:
-                couples_dataset['sim_ur5e_pick_place_shifted_converted_absolute'][task].append((demo, traj))
+                couples_dataset[f'sim_ur5e_pick_place_shifted_converted_{absolute_or_delta}'][task].append((demo, traj))
+                
+            for traj in sim_panda_traj[task]:
+                couples_dataset[f'sim_panda_pick_place_converted_{absolute_or_delta}'][task].append((demo, traj))
 
 
-            couples_dataset_counter['real_new_ur5e_pick_place_converted_absolute'][task] = len(couples_dataset['real_new_ur5e_pick_place_converted_absolute'][task])
-            couples_dataset_counter['sim_ur5e_pick_place_shifted_converted_absolute'][task] = len(couples_dataset['sim_ur5e_pick_place_shifted_converted_absolute'][task])
+            couples_dataset_counter[f'real_new_ur5e_pick_place_converted_{absolute_or_delta}'][task] = len(couples_dataset[f'real_new_ur5e_pick_place_converted_{absolute_or_delta}'][task])
+            couples_dataset_counter[f'sim_ur5e_pick_place_shifted_converted_{absolute_or_delta}'][task] = len(couples_dataset[f'sim_ur5e_pick_place_shifted_converted_{absolute_or_delta}'][task])
+            couples_dataset_counter[f'sim_panda_pick_place_converted_{absolute_or_delta}'][task] = len(couples_dataset[f'sim_panda_pick_place_converted_{absolute_or_delta}'][task])
 
     
     

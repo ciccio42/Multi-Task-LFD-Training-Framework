@@ -148,9 +148,17 @@ class FinetuningPairedDataset(Dataset):
         # for convention, in the couple the first element is the demonstration, the second one is the trajectory
         demo_path = couple_path[0]
         traj_path = couple_path[1]
+        # if 'real' in traj_path:
+        #     print('huscud')
         
-        if traj_dataset_name == 'real_new_ur5e_pick_place_converted' or 'sim_ur5e_pick_place_shifted_converted_absolute' or 'ur5e_pick_place' or 'sim_new_ur5e_pick_place_deltas_no_converted_rounded':
-            demo_dataset_name = 'panda_pick_place' # the demos in this came from this dataset
+        ### BUG LETALE
+        # if traj_dataset_name == 'real_new_ur5e_pick_place_converted' or 'sim_ur5e_pick_place_shifted_converted_absolute' or 'ur5e_pick_place' or 'sim_new_ur5e_pick_place_deltas_no_converted_rounded':
+        #     demo_dataset_name = 'panda_pick_place' # the demos in this came from this dataset
+        # else:
+        #     demo_dataset_name = traj_dataset_name
+        
+        if 'panda_pick_place' in demo_path:
+            demo_dataset_name = 'panda_pick_place'
         else:
             demo_dataset_name = traj_dataset_name
         

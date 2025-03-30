@@ -35,6 +35,7 @@ def main():
     parser.add_argument("--skip_pretraining_datasets", action='store_true')
     parser.add_argument("--ur5e_sim_dataset", action='store_true')
     parser.add_argument("--panda_sim_dataset", action='store_true')
+    parser.add_argument("--delta_files", action='store_true', help="whether or not writing paths for delta datasets")
     # parser.add_argument("--ur5e_real", action='store_true')
     
     args = parser.parse_args()
@@ -53,16 +54,22 @@ def main():
     train_val_split = [float(i) for i in args.split.split(',')]
     # ur5e_sim_pick_place_path = '/user/frosa/multi_task_lfd/ur_multitask_dataset/opt_dataset/pick_place/panda_pick_place'
     
+    
+    if args.delta_files:
+        keyword = 'delta'
+    else:
+        keyword = 'absolute'
+    
     # this is the folder where we store the datasets for finetuning
     if not args.skip_pretraining_datasets:
         for root, dirs, files in os.walk(args.dataset_folder):
             
-            if 'converted' in root or root == args.dataset_folder:    
+            if (keyword in root and 'droid' not in root) or root == args.dataset_folder:    
                 
                 if root == args.dataset_folder:
                     root_depth = len(root.split('/')) #5
                     for dir in dirs:
-                        if 'converted' in dir:
+                        if keyword in dir:
                             for pkl_dict in pkl_files_paths:
                                 pkl_dict[dir] = {}
                 else:
@@ -203,14 +210,18 @@ def main():
                     elif _idx in idxs_val:
                         val_pkl_files_paths[dataset_name][task_name].append(f'{root}/{file}')
         
+    save_json_folder = f'datasets_paths_{keyword}'
+    if not os.path.exists(save_json_folder):
+        os.mkdir(save_json_folder)
+    
     if args.write_all_pkl_path:
-        with open("all_pkl_paths.json", "w") as outfile: 
+        with open(os.path.join(save_json_folder, f"all_pkl_paths_{keyword}.json") , "w") as outfile: 
             json.dump(all_pkl_files_paths,outfile,indent=2)
     if args.write_train_pkl_path:
-        with open("train_pkl_paths.json", "w") as outfile: 
+        with open(os.path.join(save_json_folder, f"train_pkl_paths_{keyword}.json"), "w") as outfile: 
             json.dump(train_pkl_files_paths,outfile,indent=2)
     if args.write_val_pkl_path:
-        with open("val_pkl_paths.json", "w") as outfile: 
+        with open(os.path.join(save_json_folder, f"val_pkl_paths_{keyword}.json"), "w") as outfile: 
             json.dump(val_pkl_files_paths,outfile,indent=2)        
 
 

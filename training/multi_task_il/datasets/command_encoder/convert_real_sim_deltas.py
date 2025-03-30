@@ -7,7 +7,7 @@ from multi_task_il.datasets.savers import Trajectory
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 from tqdm import tqdm
-from multi_task_il.datasets.utils import trasform_from_world_to_bl
+from multi_task_il.datasets.utils import trasform_from_world_to_bl, trasform_from_world_to_bl_panda_dataset
 import math
 import cv2
 
@@ -20,6 +20,10 @@ R_ws_x = np.array([[0.9104503, -0.4136117, -0.0023614],
                    [-0.0055167, -0.0064344, -0.9999641]]) @ np.array([[-0.4304586, -0.9014726, -0.0453046],
                                                                       [-0.9026073,  0.4300453,  0.0190052],
                                                                       [0.0023503,  0.0490732, -0.9987924] ])
+
+R_g_panda_g_ur5 = np.array([[0,-1,0],
+                            [1,0,0],
+                            [0,0,1]])
 
 def convert_to_delta(traj_data, is_sim=True):
     for t in range(traj_data['len']): 
@@ -83,33 +87,39 @@ def convert_to_delta(traj_data, is_sim=True):
 
         
         # check for angles for which value is > pi
-        for angle_idx, delta_angle in enumerate(delta_t[3:6]):
+        
+        
+        # we comment angle check as the policies trained with absolute action,
+        # when outputting -3.14 with obs 3.13 the gripper rotates according to
+        # the shortest angle
+        
+        # for angle_idx, delta_angle in enumerate(delta_t[3:6]):
             # this happens when for example an angle is 3,13 and the other -3,14
             # TODO: why at t=0 we have for example 9° degree of delta? -> only at first step
             # if (delta_angle > math.pi or delta_angle < -math.pi) and t != 0:
-            if delta_angle > math.pi or delta_angle < -math.pi:
-                ang_t_minus_1 = action_t_minus_1[angle_idx+3]
-                ang_t = action_t[angle_idx+3]
+            # if delta_angle > math.pi or delta_angle < -math.pi:
+            #     ang_t_minus_1 = action_t_minus_1[angle_idx+3]
+            #     ang_t = action_t[angle_idx+3]
                 
-                if ang_t > 0.0 and ang_t_minus_1 < 0.0:
-                    ang_t_minus_1 = 2*math.pi - abs(ang_t_minus_1)
-                elif ang_t < 0.0 and ang_t_minus_1 > 0.0:
-                    ang_t = 2*math.pi - abs(ang_t)
-                else:
-                    print(f'[WARNING] unexpected situation when computing angle:\nang_t:{ang_t}, ang_t_minus_1:{ang_t_minus_1}')
+            #     if ang_t > 0.0 and ang_t_minus_1 < 0.0:
+            #         ang_t_minus_1 = 2*math.pi - abs(ang_t_minus_1)
+            #     elif ang_t < 0.0 and ang_t_minus_1 > 0.0:
+            #         ang_t = 2*math.pi - abs(ang_t)
+            #     else:
+            #         print(f'[WARNING] unexpected situation when computing angle:\nang_t:{ang_t}, ang_t_minus_1:{ang_t_minus_1}')
                     
-                delta_angle = np.round(ang_t - ang_t_minus_1, 2)
-                delta_t[angle_idx+3] = delta_angle
+            #     delta_angle = np.round(ang_t - ang_t_minus_1, 2)
+            #     delta_t[angle_idx+3] = delta_angle
                 
             # elif delta_angle >= 0.2 or delta_angle <= -0.2:
                 
                 # print('boh')
                 
-            elif delta_angle >= 1.0 or delta_angle <= -1.0:
+            # if delta_angle >= 1.0 or delta_angle <= -1.0:
                 
                 # cv2.imwrite('test_convert_deltas.png', )
                 
-                print('[WARNING] delta_angle >= 1.0!!!!')
+                # print('[WARNING] delta_angle >= 1.0!!!!')
                 
                     
         action_t_minus_1 = action_t # save before overwrite it
@@ -213,6 +223,15 @@ def apply_transf_ur5e_sim(action_t):
     action_t_conv[-1] = 1.0 if action_t_conv[-1] == 0.0 else 0.0  # 0.0 closed, 1.0 open
     return action_t_conv
 
+def apply_transf_panda_sim(action_t):
+    action_t_conv = trasform_from_world_to_bl_panda_dataset(action_t)
+    # from axisangle to rpy
+    # axis_angle_rot = action_t_conv[3:6]
+    # euler_rot = mat2euler(quat2mat(axisangle2quat(axis_angle_rot)))
+    # action_t_conv[3:6] = euler_rot
+    action_t_conv[-1] = 1.0 if action_t_conv[-1] == 0.0 else 0.0  # 0.0 closed, 1.0 open
+    return action_t_conv
+
 def change_action(trajectory, t, new_action):
     obs_t, reward_t, done_t, info_t, action_t = trajectory._data[t]
     trajectory._data[t] = obs_t, reward_t, done_t, info_t, new_action
@@ -272,7 +291,7 @@ def plot_action(traj, title, save_name):
             ax.legend(['X', 'Y', 'Z'])
     
     plt.savefig(f'{save_name}.png')
-    
+
 
 if __name__ == '__main__':
     
@@ -282,6 +301,8 @@ if __name__ == '__main__':
     parser.add_argument("--ur5e_sim", action='store_true', help="whether or not convert ur5e sim dataset")
     parser.add_argument("--panda_sim", action='store_true', help="whether or not convert panda sim dataset")
     parser.add_argument("--ur5e_real", action='store_true', help="whether or not convert ur5e real dataset")
+    parser.add_argument("--convert_to_delta", action='store_true', help="whether or not convert convert to delta actions")
+
     args = parser.parse_args()
     
     if args.debug:
@@ -296,14 +317,21 @@ if __name__ == '__main__':
     # quat -> RPY -> deltas
     
     # save this for plotting
+    if args.convert_to_delta:
+        print('[INFO] Converting to delta actions')
+    else:
+        print('[INFO] Converting to absolute actions')
     
     if args.ur5e_real:
-        
         real_ur5_dataset_path = '/user/frosa/multi_task_lfd/backup_datasets/real_new_ur5e_pick_place_subsampling_2'
-        root_save_real_ur5_shift_conv_abs_path = '/user/frosa/multi_task_lfd/datasets/real_new_ur5e_pick_place_converted_absolute'
+        if args.convert_to_delta:
+            root_save_real_ur5_shift_conv_abs_path = '/user/frosa/multi_task_lfd/datasets/real_new_ur5e_pick_place_converted_delta'
+        else:
+            root_save_real_ur5_shift_conv_abs_path = '/user/frosa/multi_task_lfd/datasets/real_new_ur5e_pick_place_converted_absolute'
         if not os.path.exists(root_save_real_ur5_shift_conv_abs_path):
             os.mkdir(root_save_real_ur5_shift_conv_abs_path)
-        print('\n Converting real dataset...')
+        
+        print(f'\n Converting real dataset to {root_save_real_ur5_shift_conv_abs_path}')
         
         saved_orig_traj = False
         saved_conv_traj = False
@@ -353,6 +381,17 @@ if __name__ == '__main__':
                             plot_action(conv_traj['traj'], 'conv traj real', 'delta_script_conv_traj_real')
                             saved_conv_traj = True
                             
+                        ##----- convert to deltas
+                        if args.convert_to_delta:
+                            traj_data = convert_to_delta(traj_data, is_sim=False)
+                                
+                            if not saved_conv_delta_traj:
+                                conv_delta_traj = deepcopy(traj_data)
+                                plot_action(conv_delta_traj['traj'], 'conv traj delta sim', 'delta_script_NO_conv_traj_delta_sim')
+                                saved_conv_delta_traj = True
+                            
+                        # exit() # to apply the script only for 1 traj
+                            
                         # save the converted trajectory
                         traj_pkl_save_path = root_save_real_ur5_shift_conv_abs_path + '/' + task_dir + '/' + traj_path.split('/')[-1]
                         
@@ -374,10 +413,14 @@ if __name__ == '__main__':
           
     #-------------------------------- CONVERT UR5E SIM DATASET -------------------------------------
     
-    
     if args.ur5e_sim:
+        
         sim_ur5_dataset_path = '/user/frosa/multi_task_lfd/ur_multitask_dataset/opt_dataset/pick_place/ur5e_pick_place'
-        root_save_sim_ur5_shift_conv_abs_path = '/user/frosa/multi_task_lfd/datasets/sim_ur5e_pick_place_shifted_converted_absolute'
+        
+        if args.convert_to_delta:
+            root_save_sim_ur5_shift_conv_abs_path = '/user/frosa/multi_task_lfd/datasets/sim_ur5e_pick_place_shifted_converted_delta'
+        else:
+            root_save_sim_ur5_shift_conv_abs_path = '/user/frosa/multi_task_lfd/datasets/sim_ur5e_pick_place_shifted_converted_absolute'
         if not os.path.exists(root_save_sim_ur5_shift_conv_abs_path):
             os.mkdir(root_save_sim_ur5_shift_conv_abs_path) 
     # save this for plotting
@@ -388,7 +431,7 @@ if __name__ == '__main__':
         conv_traj = None
         conv_delta_traj = None
         
-        print('\n Converting sim dataset...')
+        print(f'\n Converting sim dataset to {root_save_sim_ur5_shift_conv_abs_path}')
         
         for task_dir in sorted(os.listdir(sim_ur5_dataset_path)):
             if 'task_' in task_dir:
@@ -449,13 +492,14 @@ if __name__ == '__main__':
                             saved_conv_traj = True 
                             
                         ###----- convert to deltas
-                        # traj_data = convert_to_delta(traj_data) # in sim we excludes obs0 cause the objects and gripper are in a different place at obs0
-                            
-                        # if not saved_conv_delta_traj:
-                        #     conv_delta_traj = deepcopy(traj_data)
-                        #     plot_action(conv_delta_traj['traj'], 'conv traj delta sim', 'delta_script_NO_conv_traj_delta_sim')
-                        #     saved_conv_delta_traj = True
-                            
+                        if args.convert_to_delta:
+                            traj_data = convert_to_delta(traj_data) # in sim we excludes obs0 cause the objects and gripper are in a different place at obs0
+                                
+                            if not saved_conv_delta_traj:
+                                conv_delta_traj = deepcopy(traj_data)
+                                plot_action(conv_delta_traj['traj'], 'conv traj delta sim', 'delta_script_NO_conv_traj_delta_sim_ur5')
+                                saved_conv_delta_traj = True
+                                
                         # exit() # to apply the script only for 1 traj
                         
                         # save the converted trajectory
@@ -483,7 +527,12 @@ if __name__ == '__main__':
     # save this for plotting
     if args.panda_sim:
         sim_panda_dataset_path = '/user/frosa/multi_task_lfd/ur_multitask_dataset/opt_dataset/pick_place/panda_pick_place'
-        root_save_real_panda_shift_conv_abs_path = '/user/frosa/multi_task_lfd/datasets/sim_panda_pick_place_converted_absolute'
+        
+        if args.convert_to_delta:
+            root_save_real_panda_shift_conv_abs_path = '/user/frosa/multi_task_lfd/datasets/sim_panda_pick_place_converted_delta'
+        else:
+            root_save_real_panda_shift_conv_abs_path = '/user/frosa/multi_task_lfd/datasets/sim_panda_pick_place_converted_absolute'
+            
         if not os.path.exists(root_save_real_panda_shift_conv_abs_path):
             os.mkdir(root_save_real_panda_shift_conv_abs_path)  
         saved_orig_traj = False
@@ -493,7 +542,7 @@ if __name__ == '__main__':
         conv_traj = None
         conv_delta_traj = None
         
-        print('\n Converting panda sim dataset...')
+        print(f'\n Converting panda sim dataset to {root_save_real_panda_shift_conv_abs_path}')
         
         for task_dir in sorted(os.listdir(sim_panda_dataset_path)):
             if 'task_' in task_dir:
@@ -544,7 +593,7 @@ if __name__ == '__main__':
                         for t in range(traj_data['len']):
                             action_t = traj_data['traj'].get(t)['action']
                             
-                            action_t_conv = apply_transf_ur5e_sim(action_t)
+                            action_t_conv = apply_transf_panda_sim(action_t)
                             
                             change_action(traj_data['traj'], t, action_t_conv)
                             
@@ -554,13 +603,14 @@ if __name__ == '__main__':
                             saved_conv_traj = True 
                             
                         ###----- convert to deltas
-                        # traj_data = convert_to_delta(traj_data) # in sim we excludes obs0 cause the objects and gripper are in a different place at obs0
-                            
-                        # if not saved_conv_delta_traj:
-                        #     conv_delta_traj = deepcopy(traj_data)
-                        #     plot_action(conv_delta_traj['traj'], 'conv traj delta sim', 'delta_script_NO_conv_traj_delta_sim')
-                        #     saved_conv_delta_traj = True
-                            
+                        if args.convert_to_delta:
+                            traj_data = convert_to_delta(traj_data) # in sim we excludes obs0 cause the objects and gripper are in a different place at obs0
+                                
+                            if not saved_conv_delta_traj:
+                                conv_delta_traj = deepcopy(traj_data)
+                                plot_action(conv_delta_traj['traj'], 'conv traj delta sim', 'delta_script_NO_conv_traj_delta_sim')
+                                saved_conv_delta_traj = True
+                                
                         # exit() # to apply the script only for 1 traj
                         
                         # save the converted trajectory

@@ -151,7 +151,7 @@ def make_data_loaders(config, dataset_cfg):
     except AttributeError:
         split_var = 0.1
         
-    split_var = 0.0 ####################################
+    split_var = 0.0 # skip validation ########################
     if split_var > 0.0:
         dataset_cfg.mode = 'val'
         val_dataset = instantiate(dataset_cfg)
@@ -1152,7 +1152,11 @@ class Trainer:
             #     print(k, dict(self.config.get(k)))
             #     print('-'*20)
             wandb_config = {k: self.config.get(k) for k in config_keys}
+            # luigi
+            # wandb.login(key='d8ae96268267edd589283209c8b725caadcd4645')
+            # gianluigi
             wandb.login(key='5f88790e20504ceec6cfa31a400ef37ed5255bea')
+            
             print(f"Exp name: {self.config.exp_name}")
             self.config.project_name = self.config.exp_name.split('-Batch')[0]
             run = wandb.init(project=self.config.project_name,
@@ -1206,11 +1210,11 @@ class Trainer:
 
         if self.config.cosine_annealing:
             scheduler = CosineAnnealingWarmupRestarts(optimizer,
-                                                      first_cycle_steps=10000,
+                                                      first_cycle_steps=281,
                                                       cycle_mult=1.0,
                                                       max_lr=0.0005,
                                                       min_lr=0.00001,
-                                                      warmup_steps=2500,
+                                                      warmup_steps=10,
                                                       gamma=1.0)
         # initialize constants:
         # compute epochs
@@ -1297,6 +1301,14 @@ class Trainer:
                 device=next(model.parameters()).device
             )
 
+        # ! only for policy training >>>
+        if hasattr(model, '_object_detector') :
+            print(f"Object detector is set to eval mode")
+            if model._object_detector is not None: 
+                model._object_detector.eval()
+                print(f"Object detector mode {model._object_detector.training}")
+        # ! only for policy training <<<
+
         for e in range(epochs):
             frac = e / epochs
             print(f"Training frac {frac}")
@@ -1306,10 +1318,14 @@ class Trainer:
             #### ---- Train loop ----####
             for inputs in tqdm(self._train_loader):
                 
+                #### FOR COND MODULE BATCH VISUAL DEBUG
+                # save_cond_mod_dir = f"example_batch_{batch_count}_cond_module"
+                # if not os.path.exists(save_cond_mod_dir):
+                #     os.mkdir(save_cond_mod_dir)
                 # for k in range(inputs['finetuning']['demo_data']['demo'].shape[0]):
                 #     for i in range(4):
                 #         image = inputs['finetuning']['demo_data']['demo'][k][i]
-                #         cv2.imwrite(f"example_batch_{batch_count}_cond_module/{k}_{i}.png", np.moveaxis(
+                #         cv2.imwrite(f"{save_cond_mod_dir}/{k}_{i}.png", np.moveaxis(
                 #             image.numpy()*255, 0, -1))
                 
                 # batch_count+=1
@@ -1319,20 +1335,30 @@ class Trainer:
                 # cv2.imwrite(f"prova_traj.png", np.moveaxis(
                 #                 image.numpy()*255, 0, -1))
                 
-                ### debug batch (demo, traj)
-                # num_samples = inputs['finetuning']['traj']['images'].shape[0]
-                # traj_steps = inputs['finetuning']['traj']['images'].shape[1]
-                # demo_steps = inputs['finetuning']['demo_data']['demo'].shape[1]
-                # for k in range(num_samples):
-                #     for t in range(demo_steps):
-                #         image = inputs['finetuning']['demo_data']['demo'][k][t]
-                #         cv2.imwrite(f"test_batch_rt1_sim/demo_{k}_{t}.png", np.moveaxis(
-                #                         image.numpy()*255, 0, -1))                        
+                ######## debug batch (demo, traj)
+                
+                # folder_test = 'test_batch_cotrain_panda_ur5e-sim_ur5e-real'
+                # folder_test = 'test_batch_cotrain_all_correction'
+                # folder_test = 'test_batch_MS-UR5_X-UR5'
+                # folder_test = 'test_batch_MS-UR5_MS-PANDA_X-UR5_X-PANDA'
+                # folder_test = 'test_batch_cotrain_all_delta'
+                
+                folder_test = 'test_batch_MS-UR5_finetune'
+                if not os.path.exists(folder_test):
+                    os.mkdir(folder_test)
+                num_samples = inputs['finetuning']['traj']['images'].shape[0]
+                traj_steps = inputs['finetuning']['traj']['images'].shape[1]
+                demo_steps = inputs['finetuning']['demo_data']['demo'].shape[1]
+                for k in range(num_samples):
+                    for t in range(demo_steps):
+                        image = inputs['finetuning']['demo_data']['demo'][k][t]
+                        cv2.imwrite(f"{folder_test}/demo_{k}_{t}.png", np.moveaxis(
+                                        image.numpy()*255, 0, -1))                        
                     
-                #     for t in range(traj_steps):
-                #         image = inputs['finetuning']['traj']['images'][k][t]
-                #         cv2.imwrite(f"test_batch_rt1_sim/traj_{k}_{t}.png", np.moveaxis(
-                #                         image.numpy()*255, 0, -1))
+                    for t in range(traj_steps):
+                        image = inputs['finetuning']['traj']['images'][k][t]
+                        cv2.imwrite(f"{folder_test}/traj_{k}_{t}.png", np.moveaxis(
+                                        image.numpy()*255, 0, -1))
                 
                 
                 tolog = {}
@@ -1364,7 +1390,12 @@ class Trainer:
                         self.config, self.train_cfg, self._device, model, inputs)
                     
                 task_names = sorted(task_losses.keys())
-                if self.config.bsize == inputs['finetuning']['traj']['images'].shape[0]:
+                
+                no_minibatch = True
+                if "rt1" in self.config.policy._target_:
+                    no_minibatch = self.config.bsize == inputs['finetuning']['traj']['images'].shape[0]
+                
+                if no_minibatch:
                     if "grad_norm" not in self.config.get("loss", ""):
                         # TODO: minibatch implementation
                         # if not 'finetuning_paired_dataset' in self.config.dataset_cfg._target_:
@@ -1468,6 +1499,7 @@ class Trainer:
                         tolog['Train Step'] = self._step
                         tolog['Epoch'] = e
                         tolog['learning_rate'] = scheduler.optimizer.param_groups[0]['lr']
+                    scheduler.step() #### only if validate is false!!!!!!!!
 
                 if self.config.wandb_log:
                     wandb.log(tolog)
@@ -1492,7 +1524,7 @@ class Trainer:
             else:
                 if (((e % 10 == 0) or (e == epochs-1)) and (self._step % val_freq == 0) and not self.config.get("use_daml", False)) and self._val_loader is not None:
                     validate= True
-            validate = False
+            validate = False ################### skip validation
             if validate:
                 print("Validation")
                 rollout = self.config.get("rollout", False)
@@ -1578,7 +1610,7 @@ class Trainer:
                     else:
                         weighted_task_loss_val = sum(
                             [l["loss_sum"] * task_loss_muls.get(name) for name, l in avg_losses.items()])
-                    if self.config.train_cfg.lr_schedule != None: # era segnato come 'None'
+                    if self.config.train_cfg.lr_schedule != 'None':
                         # perform lr-scheduling step
                         scheduler.step(val_loss=weighted_task_loss_val)
                         if self.config.wandb_log:

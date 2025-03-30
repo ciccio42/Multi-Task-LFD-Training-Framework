@@ -5,19 +5,13 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/frosa_Loc/.mujoco/mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 
 
-DEBUG=false
 ORIGINAL_RANGES=true
 
 if [ "$ORIGINAL_RANGES" = true ]; then
-    if [ "$DEBUG" = true ]; then
-    python3 ../training/multi_task_il/datasets/command_encoder/plot_bin_histogram_original_ranges.py --debug
-    elif [ "$DEBUG" = false ]; then
-        python3 ../training/multi_task_il/datasets/command_encoder/plot_bin_histogram_original_ranges.py
-    fi
+    python3 ../training/multi_task_il/datasets/command_encoder/plot_bin_histogram_original_ranges.py \
+            --single_plot \
+            --save_folder='/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/hist_deltas_-1_1'
+            # --save_folder='/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/hist_finetuning'
 elif [ "$ORIGINAL_RANGES" = false ]; then
-    if [ "$DEBUG" = true ]; then
-        python3 ../training/multi_task_il/datasets/command_encoder/plot_bin_histogram.py --debug
-    elif [ "$DEBUG" = false ]; then
-        python3 ../training/multi_task_il/datasets/command_encoder/plot_bin_histogram.py
-    fi
+    python3 ../training/multi_task_il/datasets/command_encoder/plot_bin_histogram.py
 fi

@@ -141,7 +141,7 @@ def object_detection_inference(model, config, ctr, heights=100, widths=200, size
 
 
 def rollout_imitation(model, config, ctr,
-                      heights=100, widths=200, size=0, shape=0, color=0, max_T=150, env_name='place', gpu_id=-1, baseline=None, variation=None, controller_path=None, seed=None, action_ranges=[], model_name=None, gt_bb=False, sub_action=False, gt_action=4, real=True, gt_file=None, place=False):
+                      heights=100, widths=200, size=0, shape=0, color=0, max_T=150, env_name='place', gpu_id=-1, baseline=None, variation=None, controller_path=None, seed=None, action_ranges=[], model_name=None, gt_bb=False, sub_action=False, gt_action=4, real=True, gt_file=None, place=False, demo_file=None):
     if gpu_id == -1:
         gpu_id = int(ctr % torch.cuda.device_count())
     print(f"Model GPU id {gpu_id}")
@@ -184,11 +184,13 @@ def rollout_imitation(model, config, ctr,
                                                                             shape=shape,
                                                                             color=color,
                                                                             gpu_id=gpu_id,
-                                                                            variation=variation, random_frames=random_frames,
+                                                                            variation=variation, 
+                                                                            random_frames=random_frames,
                                                                             controller_path=controller_path,
                                                                             ret_gt_env=True,
                                                                             seed=seed,
-                                                                            skip_teacher=skip_teacher)
+                                                                            skip_teacher=skip_teacher,
+                                                                            demo_file=demo_file)
         build_task = TASK_MAP.get(env_name, None)
         assert build_task, 'Got unsupported task '+env_name
         eval_fn = get_eval_fn(env_name=env_name) # pick_place_eval
@@ -256,7 +258,7 @@ def rollout_imitation(model, config, ctr,
 def _proc(model, config, results_dir, heights, widths, size, shape, color, env_name, baseline, variation, max_T, controller_path, model_name, gpu_id, save, gt_bb, sub_action, gt_action, real, place, seed, n, gt_file, demo_file=None):
     json_name = results_dir + '/traj{}.json'.format(n)
     pkl_name = results_dir + '/traj{}.pkl'.format(n)
-    if os.path.exists(json_name) and os.path.exists(pkl_name): # TODO: remove False
+    if os.path.exists(json_name) and os.path.exists(pkl_name):
         f = open(json_name)
         task_success_flags = json.load(f)
         print("Using previous results at {}. Loaded eval traj #{}, task#{}, reached? {} picked? {} success? {} ".format(
@@ -293,7 +295,8 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                                                gt_action=gt_action,
                                                real=real,
                                                gt_file=gt_file,
-                                               place=place)
+                                               place=place,
+                                               demo_file=demo_file)
         else:
             if variation is not None:
                 variation_id = variation[n % len(variation)]
@@ -465,7 +468,7 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                     else:
                         res_dict[k] = v
                 json.dump(res_dict, open(
-                    results_dir+'/traj{}.json'.format(n), 'w'))
+                    results_dir+'/traj{}.json'.format(n), 'w'), indent=4)
         else:
             rollout, task_success_flags = return_rollout
             if save:
@@ -478,7 +481,7 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                     else:
                         res_dict[k] = v
                 json.dump(res_dict, open(
-                    results_dir+'/traj{}.json'.format(n), 'w'))
+                    results_dir+'/traj{}.json'.format(n), 'w'), indent=4)
     del model
     # exit()
     return task_success_flags
@@ -527,7 +530,10 @@ if __name__ == '__main__':
 
     if args.debug:
         import debugpy
-        debugpy.listen(('0.0.0.0', 5678))
+        if args.human_demo:
+            debugpy.listen(('0.0.0.0', 5678))
+        else:
+            debugpy.listen(('0.0.0.0', 5679))
         print("Waiting for debugger attach")
         debugpy.wait_for_client()
 
@@ -695,7 +701,7 @@ if __name__ == '__main__':
         color = args.color
         variation = args.variation
         seed = args.seed
-        max_T = 200
+        max_T = 150
 
         dataset = None
         if args.test_gt:
@@ -717,9 +723,9 @@ if __name__ == '__main__':
         # if human_demo, load the dataset and generate the seeds for demo files
         if args.human_demo:
             from hydra.utils import instantiate
-            config.EXPERT_DATA = "/user/frosa/multi_task_lfd/ur_multitask_dataset"
+            config.EXPERT_DATA = "/user/frosa/multi_task_lfd/datasets" # "/user/frosa/multi_task_lfd/ur_multitask_dataset"
             config.dataset_cfg.mode = "val"
-            config.dataset_cfg.agent_name="ur5e"
+            config.dataset_cfg.agent_name="sim_ur5e"
             config.dataset_cfg.demo_name="human_rgb"
             
             dataset = instantiate(config.get('dataset_cfg', None))
@@ -742,7 +748,7 @@ if __name__ == '__main__':
             pkl_file_list = []
             for task_id in demo_files.keys():
                 for pkl_file in demo_files[task_id]:
-                    for i in range(10): # 10 test for each demo
+                    for i in range(args.eval_each_task): # 10 test for each demo
                         variation.append(task_id)
                         pkl_file_list.append(pkl_file)
             

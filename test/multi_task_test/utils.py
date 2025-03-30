@@ -33,6 +33,11 @@ from PIL import Image
 
 _TIME_COUNTER_ = 0
 PICKED = False
+STEP_START_PICK = 0
+GT_AFTER_PICK = True
+AFTER_PICK_CNT = 0
+START_EXPERT = False
+STOP_EXPERT = False
 
 
 DEBUG = False
@@ -531,6 +536,39 @@ def transform_action_from_robot_to_world(action):
     
     return action_wl_sim
 
+def transform_action_from_robot_to_world_human(action):
+    aa_gripper = action[3:-1]
+    # convert axes-angle into rotation matrix
+    R_bl_sim_to_gripper_r = quat2mat(axisangle2quat(aa_gripper))
+    
+    gripper_pos = action[0:3]
+    
+    T_bl_sim_gripper_r = np.zeros((4,4))
+    T_bl_sim_gripper_r[3,3] = 1
+    
+    # position
+    T_bl_sim_gripper_r[0,3] = gripper_pos[0]
+    T_bl_sim_gripper_r[1,3] = gripper_pos[1]
+    T_bl_sim_gripper_r[2,3] = gripper_pos[2]
+    # orientation
+    T_bl_sim_gripper_r[0:3, 0:3] = R_bl_sim_to_gripper_r
+    
+    T_bl_sim_gripper_sim = T_bl_sim_gripper_r @ T_g_robot_to_g_sim
+    
+    T_wl_sim_gripper_sim = T_w_sim_to_bl_sim @ T_bl_sim_gripper_sim
+    
+    R_wl_sim_gripper_sim = T_wl_sim_gripper_sim[0:3, 0:3]
+    
+    action_wl_sim = np.zeros((7))
+    action_wl_sim[0:3] = T_wl_sim_gripper_sim[0:3, 3]
+    action_wl_sim[3:6] = quat2axisangle(mat2quat(R_wl_sim_gripper_sim))
+    if action[-1] < 0.8:
+        action_wl_sim[6] = -1 # 1
+    else:
+        action_wl_sim[6] = 1 # -1
+    
+    return action_wl_sim
+
 
 def null_step(env):
     current_gripper_position = env.sim.data.site_xpos[env.robots[0].eef_site_id]
@@ -638,7 +676,6 @@ def get_action(model, env, target_obj_dec, bb, predict_gt_bb, gt_classes, states
                     temp_action_list.append(temp_action)
                     
                 action = torch.cat(temp_action_list).cpu().numpy()
-                
     
     CHANGE_FROM_BL_TO_WORLD = True
     DELTA_NO_CONV = False
@@ -758,7 +795,7 @@ def get_action(model, env, target_obj_dec, bb, predict_gt_bb, gt_classes, states
             action = denormalize_action(action, action_ranges)
             
             if convert_action:
-                action = transform_action_from_robot_to_world(action)
+                action = transform_action_from_robot_to_world_human(action)
             
             # print(f"Model first_phase {model.first_phase}")
 
@@ -1890,7 +1927,7 @@ def build_env_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights
                         object_set=TASK_MAP[env_name]['object_set'])
 
 
-    if not skip_teacher:
+    if not skip_teacher or demo_file is not None:
         assert isinstance(teacher_expert_rollout, Trajectory)
         context = select_random_frames(  # 4 frames
             teacher_expert_rollout, T_context, sample_sides=True, random_frames=random_frames)
@@ -1999,7 +2036,8 @@ def compute_error(action_t, gt_action):
 
 def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img_formatter,
                     model, predict_gt_bb, bb, gt_classes, concat_bb, states, context, n_steps,
-                    max_T, baseline, action_ranges, sub_action, gt_action, controller, target_obj_emb, place, expert_traj=None, convert_action=False, current_step=-1,variation_id=0,cond_module_instance=None):
+                    max_T, baseline, action_ranges, sub_action, gt_action, controller, target_obj_emb, place, expert_traj=None, convert_action=False, current_step=-1,variation_id=0, cond_module_instance=None,
+                    tasks=None):
     # Get GT BB
     # if concat_bb:
     bb_t, gt_t = get_gt_bb(traj=traj,
@@ -2036,6 +2074,7 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
     if concat_bb:
         action, target_pred, target_obj_emb, activation_map, prediction_internal_obj, predicted_bb = get_action(
             model=model,
+            env=env,
             target_obj_dec=None,
             states=states,
             bb=bb,
@@ -2074,7 +2113,8 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
             convert_action=convert_action,
             obs=obs,
             variation_id=variation_id,
-            cond_module_instance=cond_module_instance
+            cond_module_instance=cond_module_instance,
+            controller=controller
         )
 
     end = time.time()
@@ -2090,8 +2130,64 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
 
     try:
         if sub_action:
-            if n_steps < gt_action:
-                action, _ = controller.act(obs)
+            global GT_AFTER_PICK
+            if GT_AFTER_PICK:
+                global START_EXPERT
+                global AFTER_PICK_CNT
+                global STOP_EXPERT
+                if n_steps == 0:
+                    AFTER_PICK_CNT = 0
+                    STOP_EXPERT = False
+                if tasks['picked'] and not STOP_EXPERT: # if the object has been picked
+                    print(f'controller {n_steps}')
+                    if AFTER_PICK_CNT < gt_action:
+                        if AFTER_PICK_CNT == 0:
+                            controller._t = n_steps
+                            controller._start_grasp = 3
+                            controller._finish_grasp = True
+                            controller._target_quat = controller._calculate_quat(obs)
+                            controller._move_up = False
+                            controller._intermediate_reached = False
+                            
+                        action, _ = controller.act(obs)
+                        # action[-1] = 1. # close the gripper
+                        image = np.array(obs['camera_front_image'])
+                        AFTER_PICK_CNT += 1
+                    elif AFTER_PICK_CNT == gt_action:
+                        STOP_EXPERT = True
+            
+            
+            #### old: expert after reach a certain distance
+            # global GT_AFTER_PICK
+            # if GT_AFTER_PICK:
+            #     global START_EXPERT
+            #     global AFTER_PICK_CNT
+            #     if n_steps == 0:
+            #         AFTER_PICK_CNT = 0
+            #         START_EXPERT = False
+            #     if tasks['picked']: # if the object has been picked
+            #         if abs(obs['bin_box_2_pos'][0] - obs['eef_pos'][0]) < 0.25 and not START_EXPERT and AFTER_PICK_CNT == 0:
+            #             START_EXPERT = True
+            #         elif START_EXPERT:
+            #             print('controller')
+            #             if AFTER_PICK_CNT < gt_action:
+            #                 if AFTER_PICK_CNT == 0:
+            #                     controller._t = n_steps
+            #                     controller._start_grasp = 20
+            #                     controller._finish_grasp = True
+            #                     controller._target_quat = controller._calculate_quat(obs)
+            #                     controller._move_up = False
+            #                     controller._intermediate_reached = True
+            #                 action, _ = controller.act(obs)
+            #                 action[-1] = 1. # close the gripper
+            #                 image = np.array(obs['camera_front_image'])
+            #                 AFTER_PICK_CNT += 1
+            #             elif AFTER_PICK_CNT == gt_action:
+            #                 START_EXPERT = False
+            
+            else: # GT at the start
+                if n_steps < gt_action:
+                    action, _ = controller.act(obs)
         # action = clip_action(action, prev_action)
         # prev_action = action
         obs, reward, env_done, info = env.step(action) #TODO: study
@@ -2180,26 +2276,26 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
             for bb in predicted_bb_list:
                 # adjust bb
                 adj_predicted_bb = adjust_bb(bb=bb,
-                                             crop_params=config.get('tasks_cfgs').get(task_name).get('crop'))
+                                            crop_params=config.get('tasks_cfgs').get(task_name).get('crop'))
                 image = cv2.rectangle(
                     image,
                     (int(adj_predicted_bb[0]),
-                     int(adj_predicted_bb[1])),
+                    int(adj_predicted_bb[1])),
                     (int(adj_predicted_bb[2]),
-                     int(adj_predicted_bb[3])),
+                    int(adj_predicted_bb[3])),
                     (0, 255, 0), 1)
         elif concat_bb and predict_gt_bb:
             image = np.array(obs['camera_front_image'])
             for indx, bb in enumerate(bb_t_aug):
                 # adjust bb
                 adj_predicted_bb = adjust_bb(bb=bb,
-                                             crop_params=config.get('tasks_cfgs').get(task_name).get('crop'))
+                                            crop_params=config.get('tasks_cfgs').get(task_name).get('crop'))
                 image = cv2.rectangle(
                     image,
                     (int(adj_predicted_bb[0]),
-                     int(adj_predicted_bb[1])),
+                    int(adj_predicted_bb[1])),
                     (int(adj_predicted_bb[2]),
-                     int(adj_predicted_bb[3])),
+                    int(adj_predicted_bb[3])),
                     (0, 255, 0), 1)
 
             obs['gt_bb'] = bb_t_aug
@@ -2209,11 +2305,11 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
 
         # debug for 
               
-        font                   = cv2.FONT_HERSHEY_SIMPLEX
-        fontScale              = 0.3
-        fontColor              = (0,100,255)
-        thickness              = 1
-        lineType               = 2
+        # font                   = cv2.FONT_HERSHEY_SIMPLEX
+        # fontScale              = 0.3
+        # fontColor              = (0,100,255)
+        # thickness              = 1
+        # lineType               = 2
 
 
         # change = (0,10,20,30,40,50)
@@ -2228,15 +2324,15 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
         #         fontColor,
         #         thickness,
         #         lineType)
-            
+      
         # center_coordinates = obs['eef_point']
         # radius = 2
-        # color = (0,0,255)
+        # color = (255,0,0)
         # thickness = 2
         # image = cv2.circle(image, center_coordinates, radius, color, thickness) 
             
         cv2.imwrite(
-            f"step_test_prova.png",  image)
+            f"step_test_prova.png",  image[:, :, ::-1])
         
         # obs['eef_point']
         

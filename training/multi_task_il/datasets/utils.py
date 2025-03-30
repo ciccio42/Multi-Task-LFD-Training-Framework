@@ -44,6 +44,10 @@ T_bl_sim_to_w_sim = np.array([[0, -1, 0, 0],
 R_g_sim_to_g_robot = np.array([[0, -1, 0], 
                               [1, 0, 0],
                               [0, 0, 1]])
+R_g_panda_sim_to_g_ur5_sim = np.array([[0,-1,0],
+                                        [1 ,0 ,0],
+                                        [0 ,0 ,1]])
+
 
 
 DEBUG = False
@@ -462,7 +466,7 @@ def make_demo(dataset, traj, task_name):
             # frames.append(_make_frame(n))
             # convert from BGR to RGB and scale to 0-1 range
             obs = copy.copy(
-                traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
+                traj.get(n)['obs']['camera_front_image']) # [:, :, ::-1])
             processed = dataset.frame_aug(
                 task_name,
                 obs,
@@ -513,7 +517,7 @@ def make_demo(dataset, traj, task_name):
 
             # convert from BGR to RGB and scale to 0-1 range
             obs = copy.copy(
-                traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
+                traj.get(n)['obs']['camera_front_image']) # [:, :, ::-1])
 
             processed = dataset.frame_aug(task_name,
                                           obs,
@@ -535,6 +539,62 @@ def make_demo(dataset, traj, task_name):
         ret_dict['demo_cp'] = torch.stack(cp_frames)
     return ret_dict
 
+
+# def adjust_bb(dataset_loader, bb, obs, img_width=360, img_height=200, top=0, left=0, box_w=360, box_h=200):
+#     # For each bounding box
+#     bb = np.array(bb)
+#     if len(bb.shape) == 3:
+#         bb = bb[:, 0, :]
+#     for obj_indx, obj_bb in enumerate(bb):
+#         if len(obj_bb.shape) == 2:
+#             obj_bb = obj_bb[0]
+#         # Convert normalized bounding box coordinates to actual coordinates
+#         x1_old, y1_old, x2_old, y2_old = obj_bb
+#         x1_old = int(x1_old)
+#         y1_old = int(y1_old)
+#         x2_old = int(x2_old)
+#         y2_old = int(y2_old)
+# 
+#         # Modify bb based on computed resized-crop
+#         # 1. Take into account crop and resize
+#         x_scale = dataset_loader.width/box_w
+#         y_scale = dataset_loader.height/box_h
+#         x1 = int((x1_old - left) * x_scale)
+#         x2 = int((x2_old - left) * x_scale)
+#         y1 = int((y1_old - top) * y_scale)
+#         y2 = int((y2_old - top) * y_scale)
+# 
+#         if DEBUG:
+#             image = cv2.rectangle(np.ascontiguousarray(np.array(np.moveaxis(
+#                 obs.numpy()*255, 0, -1), dtype=np.uint8)),
+#                 (x1,
+#                     y1),
+#                 (x2,
+#                     y2),
+#                 color=(0, 0, 255),
+#                 thickness=1)
+#             if x1 < 0:
+#                 x1 = 0
+#             if x2 < 0:
+#                 x2 = 0
+#             if y1 < 0:
+#                 y1 = 0
+#             if y2 < 0:
+#                 y2 = 0
+# 
+#             if x1 > dataset_loader.width:
+#                 x1 = dataset_loader.width
+#             if x2 > dataset_loader.width:
+#                 x2 = dataset_loader.width
+#             if y1 > dataset_loader.height:
+#                 y1 = dataset_loader.height
+#             if y2 > dataset_loader.height:
+#                 y2 = dataset_loader.height
+#             cv2.imwrite("bb_cropped.png", image)
+# 
+#         # replace with new bb
+#         bb[obj_indx] = np.array([[x1, y1, x2, y2]])
+#     return bb
 
 def adjust_bb(dataset_loader, bb, obs, img_width=360, img_height=200, top=0, left=0, box_w=360, box_h=200):
     # For each bounding box
@@ -560,6 +620,24 @@ def adjust_bb(dataset_loader, bb, obs, img_width=360, img_height=200, top=0, lef
         y1 = int((y1_old - top) * y_scale)
         y2 = int((y2_old - top) * y_scale)
 
+        if x1 <= 0:
+            x1 = 0
+        if x2 <= 0:
+            x2 = 0
+        if y1 <= 0:
+            y1 = 0
+        if y2 <= 0:
+            y2 = 0
+
+        if x1 >= dataset_loader.width:
+            x1 = dataset_loader.width-1
+        if x2 >= dataset_loader.width:
+            x2 = dataset_loader.width-1
+        if y1 >= dataset_loader.height:
+            y1 = dataset_loader.height-1
+        if y2 >= dataset_loader.height:
+            y2 = dataset_loader.height-1
+
         if DEBUG:
             image = cv2.rectangle(np.ascontiguousarray(np.array(np.moveaxis(
                 obs.numpy()*255, 0, -1), dtype=np.uint8)),
@@ -567,26 +645,12 @@ def adjust_bb(dataset_loader, bb, obs, img_width=360, img_height=200, top=0, lef
                     y1),
                 (x2,
                     y2),
-                color=(0, 0, 255),
+                color=(255, 0, 0),
                 thickness=1)
-            if x1 < 0:
-                x1 = 0
-            if x2 < 0:
-                x2 = 0
-            if y1 < 0:
-                y1 = 0
-            if y2 < 0:
-                y2 = 0
-
-            if x1 > dataset_loader.width:
-                x1 = dataset_loader.width
-            if x2 > dataset_loader.width:
-                x2 = dataset_loader.width
-            if y1 > dataset_loader.height:
-                y1 = dataset_loader.height
-            if y2 > dataset_loader.height:
-                y2 = dataset_loader.height
-            cv2.imwrite("bb_cropped.png", image)
+            
+            # image = image[:, :, ::-1]
+            
+            cv2.imwrite(f"tmp/bb_cropped_idx_{obj_indx}.png", image)    
 
         # replace with new bb
         bb[obj_indx] = np.array([[x1, y1, x2, y2]])
@@ -943,7 +1007,7 @@ def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, comm
             if i == 0 or i == 2:
                 color = (0, 255, 0)
                 image = np.array(
-                    step_t['obs']['camera_front_image'][:, :, ::-1])
+                    step_t['obs']['camera_front_image']) # [:, :, ::-1])
             else:
                 color = (255, 0, 0)
             image = cv2.rectangle(image,
@@ -975,7 +1039,7 @@ def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, comm
 
     if DEBUG:
         image = np.array(
-            step_t['obs']['camera_front_image'][:, :, ::-1])
+            step_t['obs']['camera_front_image']) # [:, :, ::-1])
         for i, single_bb in enumerate(bb):
             if i == 0 or i == 2:
                 color = (0, 255, 0) # green no-targ
@@ -1101,7 +1165,7 @@ def create_gt_bb_all_obj(dataset_loader, traj, step_t, task_name, distractor=Fal
             if i == 0 or i == 2:
                 color = (0, 255, 0)
                 image = np.array(
-                    step_t['obs']['camera_front_image'][:, :, ::-1])
+                    step_t['obs']['camera_front_image']) # [:, :, ::-1])
             else:
                 color = (255, 0, 0)
             image = cv2.rectangle(image,
@@ -1200,6 +1264,44 @@ def trasform_from_world_to_bl(action):
     
     return action_bl
 
+def trasform_from_world_to_bl_panda_dataset(action):
+    aa_gripper = action[3:-1]
+    # convert axes-angle into rotation matrix
+    # R_w_sim_to_gripper_sim = quat2mat(axisangle2quat(aa_gripper))
+    R_w_sim_to_gripper_panda_sim = quat2mat(axisangle2quat(aa_gripper))
+    
+    R_w_sim_to_gripper_sim = R_w_sim_to_gripper_panda_sim @ R_g_panda_sim_to_g_ur5_sim
+    
+    gripper_pos = action[0:3]
+    
+    T_w_sim_gripper_sim = np.zeros((4,4))
+    T_w_sim_gripper_sim[3,3] = 1
+    
+    # position
+    T_w_sim_gripper_sim[0,3] = gripper_pos[0]
+    T_w_sim_gripper_sim[1,3] = gripper_pos[1]
+    T_w_sim_gripper_sim[2,3] = gripper_pos[2]
+    # orientation
+    T_w_sim_gripper_sim[0:3, 0:3] = R_w_sim_to_gripper_sim
+    
+    T_bl_sim_gripper_sim = T_bl_sim_to_w_sim @ T_w_sim_gripper_sim
+    
+    # print(f"Transformation from world to bl:\n{T_bl_sim_gripper_sim}")
+    
+    R_bl_to_gripper_sim = T_bl_sim_gripper_sim[0:3, 0:3]
+    
+    R_bl_to_gripper_real = R_bl_to_gripper_sim @ R_g_sim_to_g_robot
+    
+    action_bl = np.zeros((7))
+    action_bl[0:3] = T_bl_sim_gripper_sim[0:3, 3]
+    action_bl[3:6] = quat2axisangle(mat2quat(R_bl_to_gripper_real))
+    if action[-1] == -1:
+        action_bl[6] = 0
+    else:
+        action_bl[6] = 1
+    
+    return action_bl
+
 def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_action=False, load_state=False, load_eef_point=False, distractor=False, subtask_id=-1, agent_task_id=-1, bb_sequence=False, take_place_loc=False, sim_crop=True, convert_action=True):
 
     images = []
@@ -1219,7 +1321,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
         if not getattr(dataset_loader, "real", False) or (getattr(dataset_loader, "real", False) and sim_crop):
             # cv2.imwrite("prova.png", step_t['obs']['camera_front_image'])
             image = copy.copy(
-                step_t['obs']['camera_front_image'][:, :, ::-1])
+                step_t['obs']['camera_front_image']) # [:, :, ::-1])
         else:
             image = copy.copy(
                 step_t['obs']['camera_front_image'])
@@ -1292,7 +1394,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
             eef_point_time = time.time()
             if DEBUG:
                 image_point = np.array(
-                    step_t['obs']['camera_front_image'][:, :, ::-1], dtype=np.uint8)
+                    step_t['obs']['camera_front_image'], dtype=np.uint8) # [:, :, ::-1], dtype=np.uint8)
                 image_point = cv2.circle(cv2.UMat(image_point), (step_t['obs']['eef_point'][1], step_t['obs']['eef_point'][0]), radius=1, color=(
                     0, 0, 255), thickness=1)
                 cv2.imwrite("gt_point.png", cv2.UMat(image_point))

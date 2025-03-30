@@ -170,17 +170,18 @@ if __name__ == '__main__':
         print("Waiting for debugger attach")
         debugpy.wait_for_client()
         
-    min_max_traj_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_datasets.json'
-    min_max_traj_path_2 = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_datasets_2.json'
+    # min_max_traj_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_datasets.json'
+    # min_max_traj_path_2 = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_datasets_2.json'
     
+    # with open(min_max_traj_path, 'r') as file:
+    #     min_max_dict = json.load(file)
+        
+    # with open(min_max_traj_path_2, 'r') as file:
+    #     min_max_dict_2 = json.load(file)
+    
+    min_max_traj_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_absolute.json'
     with open(min_max_traj_path, 'r') as file:
-        min_max_dict = json.load(file)
-        
-    with open(min_max_traj_path_2, 'r') as file:
-        min_max_dict_2 = json.load(file)
-        
-    min_max_dict['real_new_ur5e_pick_place_converted'] = min_max_dict_2['real_new_ur5e_pick_place_converted']
-    min_max_dict['sim_new_ur5e_pick_place_converted'] = min_max_dict_2['sim_new_ur5e_pick_place_converted']
+        min_max_dict = json.load(file)    
         
     mins_array = np.stack([min_max_dict[i]['min'][:3] for i in min_max_dict.keys()])
     maxs_array = np.stack([min_max_dict[i]['max'][:3] for i in min_max_dict.keys()])
@@ -326,13 +327,12 @@ if __name__ == '__main__':
                     # plot_scaling(old_actions, new_actions, dataset_str, min_new, max_new, -1.0, 1.0, ACTIONS_ELS[act_id]) # to plot values from new dat range to RT1 input tokenization range
                     
                     # break # to plot only 1 traj for each dataset (outer loop)
-                    
                 
                 plot_hist(tokens_actions_per_dataset, tokenizer_instance.vocabsize, dataset_str, min_old, max_old, min_new, max_new, action_el_str, hist_dataset_axes[act_id], tokenizer_instance)
             
-            if not os.path.exists('test_hists_dx_dy_dz_with_angles__minus1_1'):
-                    os.mkdir('test_hists_dx_dy_dz_with_angles__minus1_1')
-            plt.savefig(f'test_hists_dx_dy_dz_with_angles__minus1_1/bin_freq_{dataset_str}.png')
+            if not os.path.exists('bin_hist_plots'):
+                    os.mkdir('bin_hist_plots')
+            plt.savefig(f'bin_hist_plots/bin_freq_{dataset_str}.png')
             
             # exit() # to plot all traj for first dataset     
     

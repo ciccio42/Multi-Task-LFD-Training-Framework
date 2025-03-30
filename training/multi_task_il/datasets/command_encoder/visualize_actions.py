@@ -34,10 +34,10 @@ if __name__ == '__main__':
     sim_ur5_dataset_path = '/user/frosa/multi_task_lfd/ur_multitask_dataset/opt_dataset/pick_place/ur5e_pick_place'
     ur5_uni_paths = [real_ur5_dataset_path, sim_ur5_dataset_path]
     
-    
     # search for 1 traj for each dataset
     traj_paths = []
     finetuning_datasets = os.listdir(finetuning_datasets_path)
+    finetuning_datasets = [i for i in finetuning_datasets if 'converted' in i and not 'old' in i and not 'droid' in i]
     for dataset_name in finetuning_datasets:
         if 'converted' in dataset_name and not 'old' in dataset_name:
             dataset_path = finetuning_datasets_path + f'/{dataset_name}'
@@ -52,9 +52,9 @@ if __name__ == '__main__':
                 if found_pkl:
                     break
     
-    for folder_path in ur5_uni_paths:
-        traj_path = f'{folder_path}/task_14/traj002.pkl'
-        traj_paths.append(traj_path)
+    # for folder_path in ur5_uni_paths:
+    #     traj_path = f'{folder_path}/task_14/traj002.pkl'
+    #     traj_paths.append(traj_path)
         
     # open trajectories
     traj_datas = []
@@ -63,10 +63,10 @@ if __name__ == '__main__':
             traj_data = pickle.load(f)
         traj_datas.append(traj_data)
                 
-    action_plots = 9
-    image_plots = 9
+    action_plots = 6
+    image_plots = 6
     total_plots = image_plots + action_plots
-    col_num = 3
+    col_num = 2
     row_num, col_num = total_plots//col_num, col_num
     print('done loading, now plotting')
     
@@ -126,8 +126,9 @@ if __name__ == '__main__':
         traj_rotations[rot_idx] = rotation_list
 
     #grid specifications
-    gs0 = gridspec.GridSpec(3,3, figure=fig)
-    for i in range(9):
+    row_dataset, col_dataset = 3,2
+    gs0 = gridspec.GridSpec(row_dataset, col_dataset, figure=fig)
+    for i in range(row_dataset * col_dataset):
         gs00 = gridspec.GridSpecFromSubplotSpec(5,5, subplot_spec=gs0[i])
 
         ax0 = fig.add_subplot(gs00[:3,:])
@@ -252,7 +253,7 @@ if __name__ == '__main__':
     # writervideo = FFMpegWriter(fps=10) 
     # anim_fig.save(save_mp4_file, writer=writervideo)
     
-    print('end')
+    print('done')
                 
     
     

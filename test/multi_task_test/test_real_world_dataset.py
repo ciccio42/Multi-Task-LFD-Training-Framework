@@ -99,8 +99,8 @@ def object_detection_inference(model, config, ctr, heights=100, widths=200, size
             context_data_trj, T_context, sample_sides=True, random_frames=random_frames)
         # convert BGR context image to RGB and scale to 0-1
         for i, img in enumerate(context):
-            cv2.imwrite(f"context_{i}.png", np.array(img[:, :, ::-1]))
-        context = [img_formatter(i[:, :, ::-1])[None] for i in context]
+            cv2.imwrite(f"context_{i}.png", np.array(img))
+        context = [img_formatter(i)[None] for i in context]
         # assert len(context ) == 6
         if isinstance(context[0], np.ndarray):
             context = torch.from_numpy(np.concatenate(context, 0))[None]
@@ -199,8 +199,8 @@ def rollout_imitation(model, config, ctr,
             context_data_trj, T_context, sample_sides=True, random_frames=random_frames)
         # convert BGR context image to RGB and scale to 0-1
         for i, img in enumerate(context):
-            cv2.imwrite(f"context_{i}.png", np.array(img[:, :, ::-1]))
-        context = [img_formatter(i[:, :, ::-1])[None] for i in context]
+            cv2.imwrite(f"context_{i}.png", np.array(img))
+        context = [img_formatter(i)[None] for i in context]
         # assert len(context ) == 6
         if isinstance(context[0], np.ndarray):
             context = torch.from_numpy(np.concatenate(context, 0))[None]
@@ -378,6 +378,7 @@ if __name__ == '__main__':
     parser.add_argument('--save_files', action='store_true')
     parser.add_argument('--gt_bb', action='store_true')
     parser.add_argument('--test_skip', action='store_true')
+    parser.add_argument('--human_demo', action='store_true')
 
     args = parser.parse_args()
 
@@ -516,7 +517,7 @@ if __name__ == '__main__':
         loaded = torch.load(model_path, map_location=torch.device('cpu'))
         model.load_state_dict(loaded)
 
-        place_bb_flag = True if "KP" in model_path else False
+        place_bb_flag = True if ("-KP" in model_path or "COD" in model_path) else False
         model = model.eval()  # .cuda()
         n_success = 0
         size = args.size
@@ -550,12 +551,22 @@ if __name__ == '__main__':
         #     "traj_per_subtask": 36,
         #     "demo_per_subtask": 100}
 
-        config.dataset_cfg.mode = "val"
-        config.dataset_cfg.agent_name = "real_new_ur5e"
-        config.dataset_cfg.change_command_epoch = False
-        config.dataset_cfg.root_dir = "/home/rsofnc000/dataset/opt_dataset"
-        config.dataset_cfg.mix_demo_agent = False
-        config.dataset_cfg.mix_sim_real = False
+        if args.human_demo:
+            config.EXPERT_DATA = "/user/frosa/multi_task_lfd/datasets"
+            config.dataset_cfg.mode = "val"
+            config.dataset_cfg.agent_name = "real_ur5e_rgb"
+            config.dataset_cfg.change_command_epoch = False
+            config.dataset_cfg.root_dir = "/user/frosa/multi_task_lfd/datasets/" # "/home/rsofnc000/dataset/opt_dataset"
+            config.dataset_cfg.mix_demo_agent = False
+            config.dataset_cfg.mix_sim_real = False
+        else:
+            config.dataset_cfg.mode = "val"
+            config.dataset_cfg.agent_name = "real_new_ur5e"
+            config.dataset_cfg.change_command_epoch = False
+            config.dataset_cfg.root_dir = "/home/rsofnc000/dataset/opt_dataset"
+            config.dataset_cfg.mix_demo_agent = False
+            config.dataset_cfg.mix_sim_real = False
+        
         dataset = instantiate(config.get('dataset_cfg', None))
         dataset._mix_demo_agent = False
         # get list of pkl files
@@ -612,9 +623,10 @@ if __name__ == '__main__':
                 seeds.append((random.getrandbits(32), i,
                               pkl_file_list[i % len(pkl_file_list)], -1))
             else:
-                seeds.append((random.getrandbits(32), i,
-                              pkl_file_list[i % len(pkl_file_list)][0],
-                              pkl_file_list[i % len(pkl_file_list)][1]))
+                seeds.append((random.getrandbits(32), 
+                              i,
+                              pkl_file_list[i % len(pkl_file_list)][0], # agent
+                              pkl_file_list[i % len(pkl_file_list)][1])) # demo
 
         if parallel:
             with Pool(args.num_workers) as p:

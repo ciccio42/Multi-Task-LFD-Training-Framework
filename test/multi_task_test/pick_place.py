@@ -271,6 +271,7 @@ def pick_place_eval_demo_cond(model, env, context, gpu_id, variation_id, img_for
         elapsed_time = 0.0
         
         # istantiante cond_module_instance
+        cond_module_instance = None
         if 'RT1_video_cond' in str(type(model)):
             from multi_task_il.datasets.command_encoder.utils import init_freezed_cond_module
             cond_module_cfg = config.cond_module
@@ -361,7 +362,8 @@ def pick_place_eval_demo_cond(model, env, context, gpu_id, variation_id, img_for
                 convert_action=convert_action,
                 current_step=n_steps,
                 variation_id=variation_id,
-                cond_module_instance=cond_module_instance
+                cond_module_instance=cond_module_instance,
+                tasks=tasks
             )
 
             traj.append(obs, reward, done, info, action)
@@ -418,7 +420,8 @@ def pick_place_eval_demo_cond(model, env, context, gpu_id, variation_id, img_for
         del states
         del images
         del model
-        del cond_module_instance
+        if cond_module_instance is not None:
+            del cond_module_instance
 
         return traj, tasks
     else:

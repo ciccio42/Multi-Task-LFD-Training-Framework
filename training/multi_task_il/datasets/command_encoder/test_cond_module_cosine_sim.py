@@ -36,38 +36,38 @@ DATA_AUGS = {
         }
 
 dataset_samples_spec = {
-    "asu_table_top_converted": {
-        "name": "asu_table_top_converted",
+    "asu_table_top_converted_absolute_pose": {
+        "name": "asu_table_top_converted_absolute_pose",
         "crop": [0, 35, 0, 0],
         "image_channel_format": "RGB",
     },
-    "berkeley_autolab_ur5_converted": {
-        "name": "berkeley_autolab_ur5_converted",
+    "berkeley_autolab_ur5_converted_absolute_pose": {
+        "name": "berkeley_autolab_ur5_converted_absolute_pose",
         "crop": [0, 0, 0, 0],
         "image_channel_format": "RGB",
     },
-    "iamlab_cmu_pickup_insert_converted": {
-        "name": "iamlab_cmu_pickup_insert_converted",
+    "iamlab_cmu_pickup_insert_converted_absolute_pose": {
+        "name": "iamlab_cmu_pickup_insert_converted_absolute_pose",
         "crop": [0, 0, 0, 0],
         "image_channel_format": "RGB",
     },
-    "taco_play_converted": {
-        "name": "taco_play_converted",
+    "taco_play_converted_absolute_pose": {
+        "name": "taco_play_converted_absolute_pose",
         "crop": [0, 0, 0, 0],
         "image_channel_format": "RGB",
     },
-    "droid_converted": {
-        "name": "droid_converted",
+    "droid_converted_absolute_pose": {
+        "name": "droid_converted_absolute_pose",
         "crop": [0, 0, 0, 0],
         "image_channel_format": "RGB",
     },
-    "sim_new_ur5e_pick_place_converted": {
-        "name": "sim_new_ur5e_pick_place_converted",
+    "sim_new_ur5e_pick_place_converted_absolute": {
+        "name": "sim_new_ur5e_pick_place_converted_absolute",
         "crop": [20, 25, 80, 75],
         "image_channel_format": "RGB",
     },
-    "real_new_ur5e_pick_place_converted": {
-        "name": "real_new_ur5e_pick_place_converted",
+    "real_new_ur5e_pick_place_converted_absolute": {
+        "name": "real_new_ur5e_pick_place_converted_absolute",
         "n_tasks": 16,
         "crop": [20, 25, 80, 75], ############################
         "image_channel_format": "BGR",
@@ -384,7 +384,7 @@ if __name__ == '__main__':
     train_loader = create_train_loader(tasks_spec, args.black_list, DATA_AUGS)
     val_loader = create_val_loader(tasks_spec, args.black_list, DATA_AUGS)
     
-    cond_module = init_cond_module()
+    cond_module = init_cond_module().to(device)
 
     embedding_dict = {} # store embeddings for each task
     # batch_count = 0
@@ -411,18 +411,19 @@ if __name__ == '__main__':
                 val_preds = torch.cat((val_preds, cond_module(demos_sorted)))
             
         ## test preds
-        test_contexts_path = '/user/frosa/multi_task_lfd/checkpoint_save_folder/rt1_sim_abs_aa_weakaug_-1_1-Batch48/results_pick_place/run_1/step-16200_nocorr'
-        test_demos = [f'context{i}.pkl' for i in range(160)]
-        test_demos = [f'{test_contexts_path}/{i}' for i in test_demos]
+        # non esiste più la folder
+        # test_contexts_path = '/user/frosa/multi_task_lfd/checkpoint_save_folder/rt1_sim_abs_aa_weakaug_-1_1-Batch48/results_pick_place/run_1/step-16200_nocorr'
+        # test_demos = [f'context{i}.pkl' for i in range(160)]
+        # test_demos = [f'{test_contexts_path}/{i}' for i in test_demos]
         
-        for idx, test_demo_path in tqdm(enumerate(test_demos)):
-            with open(test_demo_path, "rb") as f:
-                test_demo = pkl.load(f).to(device)
+        # for idx, test_demo_path in tqdm(enumerate(test_demos)):
+        #     with open(test_demo_path, "rb") as f:
+        #         test_demo = pkl.load(f).to(device)
             
-            if idx == 0:    
-                test_preds = cond_module(test_demo)
-            else:
-                test_preds = torch.cat((test_preds, cond_module(test_demo)))
+        #     if idx == 0:    
+        #         test_preds = cond_module(test_demo)
+        #     else:
+        #         test_preds = torch.cat((test_preds, cond_module(test_demo)))
         
         print('end')
     

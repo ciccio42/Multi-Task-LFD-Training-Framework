@@ -154,12 +154,48 @@ def plot_hist(tokens_actions, bucket_size, dataset_str, min_old, max_old, action
     ax.set_xlabel(f'bins for {action_el_str}')
     
     ax.legend(['freq of bin', 'original range'])
+    
+def plot_single_hist(tokens_actions, bucket_size, dataset_str, min_old, max_old, action_el_str, tokenizer, save_folder):
+    
+    fig, ax = plt.subplots()
+    
+    ax.set_xticks(np.arange(0, bucket_size, 25))
+
+    # plot the original range converted to bins defined according to the biggest range
+    min_old_token = tokenizer.tokenize(min_old)
+    max_old_token = tokenizer.tokenize(max_old)
+    ax.axvspan(min_old_token, max_old_token, label='original range', alpha=0.1, color='0.8')
+
+    N, bins, patches = ax.hist(tokens_actions,bins=[i for i in range(bucket_size)], label='freq of bin')    
+    ax.grid()
+    
+    if action_el_str not in ['dphi', 'dtheta', 'dpsi']:
+        ax.set_title(f'original range: [{min_old:.4f},{max_old:.4f}] [m]')
+    else:
+        ax.set_title(f'original range: [{min_old:.4f},{max_old:.4f}] [rad]')
+    # if action_el_str == 'dx': # if you plot grids columns-wise
+    ax.set_ylabel(f'frequency')
+    ax.set_xlabel(f'bins for {action_el_str}')
+    
+    ax.legend(['freq of bin', 'original range'])
+
+    dataset_folder = os.path.join(save_folder, dataset_str)
+    histogram_path = os.path.join(dataset_folder, f'{action_el_str}.png')    
+    folders = [save_folder, dataset_folder]
+    for f in folders:
+        if not os.path.exists(f):
+            os.mkdir(f)
+    
+    plt.savefig(histogram_path)
+    
 
 if __name__ == '__main__':
     
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action='store_true', help="whether or not attach the debugger")
+    parser.add_argument("--single_plot", action='store_true', help="whether or not plot in separate figures")
+    parser.add_argument("--save_folder", default='/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/hist_finetuning')
     args = parser.parse_args()
     
     if args.debug:
@@ -170,7 +206,8 @@ if __name__ == '__main__':
         
     # min_max_traj_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_datasets.json'
     # min_max_traj_path_2 = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_datasets_2.json'
-    min_max_traj_path_abs = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta_sim_no_conv.json'
+    # min_max_traj_path_abs = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_absolute.json'
+    min_max_traj_path_abs = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/min_max_delta.json'
     
     # with open(min_max_traj_path, 'r') as file:
     #     min_max_dict = json.load(file)
@@ -185,8 +222,8 @@ if __name__ == '__main__':
     # min_max_dict['sim_new_ur5e_pick_place_converted'] = min_max_dict_2['sim_new_ur5e_pick_place_converted']
         
     BUCKET_SIZE = 256
-    
-    all_pkl_paths_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/all_pkl_paths.json'
+    # all_pkl_paths_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/all_pkl_paths.json'
+    all_pkl_paths_path = '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/datasets_paths_delta/all_pkl_paths_delta.json'
     with open(all_pkl_paths_path, 'r') as file:
         all_pkl_dict = json.load(file)
     
@@ -203,14 +240,23 @@ if __name__ == '__main__':
     
     
     # for now: for dx, dy, dz, dphi, dtheha, dpsi
-    ACTIONS_ELS = ['dx', 'dy', 'dz', 'dphi', 'dtheta', 'dpsi']
-    BLACK_LIST = ['asu_table_top_converted_absolute_pose',
-                'berkeley_autolab_ur5_converted_absolute_pose',
-                'iamlab_cmu_pickup_insert_converted_absolute_pose',
-                'taco_play_converted_absolute_pose',
-                'droid_converted_absolute_pose',
-                'panda_pick_place'
-                ]
+    # ACTIONS_ELS = ['dx', 'dy', 'dz', 'dphi', 'dtheta', 'dpsi']
+    ACTIONS_ELS = ['x', 'y', 'z', 'e1', 'e2', 'e3']
+    # BLACK_LIST = ['asu_table_top_converted_absolute_pose',
+    #             'berkeley_autolab_ur5_converted_absolute_pose',
+    #             'iamlab_cmu_pickup_insert_converted_absolute_pose',
+    #             'taco_play_converted_absolute_pose',
+    #             'panda_pick_place'
+    #             ]
+    # BLACK_LIST = ['asu_table_top_converted_absolute_pose',
+    #               'berkeley_autolab_ur5_converted_absolute_pose',
+    #               'panda_pick_place']
+    BLACK_LIST = ['berkeley_autolab_ur5_delta',
+                  'asu_table_top_delta',
+                  'iamlab_cmu_pickup_insert_delta',
+                    'real_new_ur5e_pick_place_converted_delta',
+                    'sim_ur5e_pick_place_shifted_converted_delta',
+                    'sim_panda_pick_place_converted_delta']
     only_axes = False
     
     
@@ -232,36 +278,40 @@ if __name__ == '__main__':
     for dataset_str in min_max_dict.keys():
         if dataset_str not in BLACK_LIST:
             
-            fig = plt.figure(layout='constrained')
-            fig.set_figheight(10)
-            if not only_axes:
-                fig.set_figwidth(20) 
-            else:
-                fig.set_figwidth(10)
-            fig.suptitle(f'{dataset_str}')
+            if not args.single_plot:
+                fig = plt.figure(layout='constrained')
+                fig.set_figheight(10)
+                if not only_axes:
+                    fig.set_figwidth(20) 
+                else:
+                    fig.set_figwidth(10)
+                fig.suptitle(f'{dataset_str}')
             
             #grid specifications
-            if only_axes:
-                gs0 = gridspec.GridSpec(3,1, figure=fig)
-                
-                ax00 = fig.add_subplot(gs0[0,0])
-                ax01 = fig.add_subplot(gs0[1,0], sharey=ax00)
-                ax02 = fig.add_subplot(gs0[2,0], sharey=ax01)
-                
-                hist_dataset_axes = [ax00, ax01, ax02]
-            else:
-                gs0 = gridspec.GridSpec(3,2, figure=fig)
-                
-                # axes histograms                
-                ax00 = fig.add_subplot(gs0[0,0])
-                ax01 = fig.add_subplot(gs0[1,0], sharey=ax00)
-                ax02 = fig.add_subplot(gs0[2,0], sharey=ax01)
-                # angles histograms
-                ax03 = fig.add_subplot(gs0[0,1])
-                ax04 = fig.add_subplot(gs0[1,1], sharey=ax03)
-                ax05 = fig.add_subplot(gs0[2,1], sharey=ax04)
+            if not args.single_plot:
+                if only_axes:
+                    gs0 = gridspec.GridSpec(3,1, figure=fig)
+                    
+                    ax00 = fig.add_subplot(gs0[0,0])
+                    ax01 = fig.add_subplot(gs0[1,0], sharey=ax00)
+                    ax02 = fig.add_subplot(gs0[2,0], sharey=ax01)
+                    
+                    hist_dataset_axes = [ax00, ax01, ax02]
+                else:
+                    gs0 = gridspec.GridSpec(3,2, figure=fig)
+                    
+                    # axes histograms                
+                    ax00 = fig.add_subplot(gs0[0,0])
+                    ax01 = fig.add_subplot(gs0[1,0], sharey=ax00)
+                    ax02 = fig.add_subplot(gs0[2,0], sharey=ax01)
+                    # angles histograms
+                    ax03 = fig.add_subplot(gs0[0,1])
+                    ax04 = fig.add_subplot(gs0[1,1], sharey=ax03)
+                    ax05 = fig.add_subplot(gs0[2,1], sharey=ax04)
 
-                hist_dataset_axes = [ax00, ax01, ax02, ax03, ax04, ax05]
+                    hist_dataset_axes = [ax00, ax01, ax02, ax03, ax04, ax05]
+            # else: # single plot for every action dim
+                
             
             for act_id, action_el_str in enumerate(ACTIONS_ELS): # plot each coord
                 
@@ -272,8 +322,8 @@ if __name__ == '__main__':
                 #                                   max=max_old,
                 #                                   vocabsize=BUCKET_SIZE)
                 
-                tokenizer_instance = SimTokenizer(min=-1,
-                                                  max=1,
+                tokenizer_instance = SimTokenizer(min=-0.5,
+                                                  max=0.5,
                                                   vocabsize=BUCKET_SIZE)
 
 
@@ -289,6 +339,15 @@ if __name__ == '__main__':
                     for step_t in traj:
                         try:
                             action_t = step_t['action']
+                            
+                            if action_t.shape[0] == 8:
+                                new_action_t = np.zeros((7,))
+                                new_action_t[:3] = action_t[:3]
+                                new_action_t[3:-1] = quat2axisangle(action_t[3:-1])
+                                new_action_t[-1] = action_t[-1]
+                                
+                                action_t = new_action_t
+                                                    
                             act_value_token = tokenizer_instance.tokenize(action_t[act_id]) # tokenize wrt the min and max range for all axes
                             # print(f'{action_t[act_id]} -> {act_value} -> {act_value_token}')
                             old_actions.append(action_t[act_id])
@@ -296,17 +355,20 @@ if __name__ == '__main__':
                         except Exception:
                             pass # skip action 0 which does not exists if here    
                         
-                        
+                            
                     # break # to plot only 1 traj for each dataset (outer loop)
                     
-                
-                plot_hist(tokens_actions_per_dataset, tokenizer_instance.vocabsize, dataset_str, min_old, max_old, action_el_str, hist_dataset_axes[act_id], tokenizer_instance)
+                if not args.single_plot:
+                    plot_hist(tokens_actions_per_dataset, tokenizer_instance.vocabsize, dataset_str, min_old, max_old, action_el_str, hist_dataset_axes[act_id], tokenizer_instance)
+                else:
+                    plot_single_hist(tokens_actions_per_dataset, tokenizer_instance.vocabsize, dataset_str, min_old, max_old, action_el_str, tokenizer_instance, args.save_folder)
+                    
             
-            
-            save_path = 'test_hists_subsampling'
-            if not os.path.exists(f'{save_path}'):
-                    os.mkdir(f'{save_path}')
-            plt.savefig(f'{save_path}/bin_freq_{dataset_str}.png')
+            if not args.single_plot:
+                save_path = 'test_hist_delta_-1_1'
+                if not os.path.exists(f'{save_path}'):
+                        os.mkdir(f'{save_path}')
+                plt.savefig(f'{save_path}/bin_freq_{dataset_str}.png')
             
             # exit() # to plot all traj for first dataset     
     

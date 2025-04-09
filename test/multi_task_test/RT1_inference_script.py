@@ -2,7 +2,7 @@ import os
 import torch
 # from scipy.misc import imread, imresize, imsave
 import numpy as np
-from multi_task_il.datasets.command_encoder.cond_module import CondModule
+from multi_task_il.models.command_encoder.cond_module import CondModule
 import hydra
 from omegaconf import OmegaConf
 import pickle as pkl

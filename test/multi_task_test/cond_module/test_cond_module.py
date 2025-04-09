@@ -1,4 +1,4 @@
-from multi_task_il.datasets.command_encoder.cond_module import CondModule
+from multi_task_il.models.command_encoder.cond_module import CondModule
 import torch
 from train_scripts.train_cond_module import get_train_val_loader
 import seaborn as sns

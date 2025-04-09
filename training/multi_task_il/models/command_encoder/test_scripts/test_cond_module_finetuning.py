@@ -1,6 +1,6 @@
 
 from multi_task_il.datasets.command_encoder.command_encoder_dataset import CommandEncoderFinetuningDataset, FinetuningCommandEncoderSampler
-from multi_task_il.datasets.command_encoder.cond_module import CondModule
+from multi_task_il.models.command_encoder.cond_module import CondModule
 from multi_task_il.datasets.utils import collate_by_task
 from multiprocessing import cpu_count
 from torch.utils.data import DataLoader

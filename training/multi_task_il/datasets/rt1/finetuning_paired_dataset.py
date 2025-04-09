@@ -440,7 +440,7 @@ if __name__ == '__main__':
                 "null_bb": False,
             }
     import torch
-    from multi_task_il.datasets.command_encoder.cond_module import CondModule
+    from multi_task_il.models.command_encoder.cond_module import CondModule
     from torch.utils.data import DataLoader, BatchSampler, RandomSampler
     
     finetuning_dataset = FinetuningPairedDataset(mode='train',

@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from multi_task_il.datasets.command_encoder.cond_module import CondModule
+from multi_task_il.models.command_encoder.cond_module import CondModule
 from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.transformer_network import TransformerNetwork
 from typing import Optional, Tuple, Union, Any, Dict, List
 from gym import spaces

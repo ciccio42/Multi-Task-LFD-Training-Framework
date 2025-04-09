@@ -247,14 +247,6 @@ class FinetuningCommandEncoderSampler(BatchSampler):
     
     def __len__(self):
         return len(self.dataset)
-
-class ResultsDisplayer():
-    
-    def __init__(self):
-        pass
-    
-    def display_results(self):
-        pass
     
     
 if __name__ == '__main__':
@@ -285,7 +277,7 @@ if __name__ == '__main__':
                 "null_bb": False,
             }
     import torch
-    from multi_task_il.datasets.command_encoder.cond_module import CondModule
+    from multi_task_il.models.command_encoder.cond_module import CondModule
     from torch.utils.data import DataLoader, BatchSampler, RandomSampler
     
     finetuning_dataset = CommandEncoderFinetuningDataset(mode='train',
@@ -319,11 +311,4 @@ if __name__ == '__main__':
     #     print('prova')
     #     break
     
-    for i in val_loader:
-        print('prova')    
-        
-        
-    
-    
-    print('hello')
 

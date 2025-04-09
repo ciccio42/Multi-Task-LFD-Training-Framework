@@ -31,27 +31,44 @@ TARGET='multi_task_il.models.mt_rep.VideoImitation'
 # COND_MODULE_PATH='/user/frosa/multi_task_lfd/checkpoint_save_folder/1Task-pick_place-cond_module_no_lr_1e-4-Batch32/model_save-96.pt'
 COND_MODULE_PATH='/user/frosa/multi_task_lfd/checkpoint_save_folder/cond_module_ALLBUTDROID_20epochs_RGB_weak_aug-Batch32/model_save-1012.pt'
 
-SAVE_FREQ=2899  # 223 * 13. 
+# X-PANDA, X-UR5, MS/MR-UR5/PANDA -> longest: 281
+# X-UR5, MS-UR5 -> longest: 223
+# MS/MR-UR5/PANDA -> longest: 100
+# MR-UR5 -> longest: 13 (dataloader length) (40*16)/48
+# MS-UR5 -> longest: 33 (dataloader length) (100*16)/48
+
+#281x10 #1000 #100x10
+# 281 number of steps * 10 epoch. -> 281 is the longest number of samples for a variation.
+# [ONLY REAL DATASET] 13 n steps * 20 epochs -> 260
+SAVE_FREQ=260 
+# SAVE_FREQ=6690  # 223 number of steps * 30 epoch.
 LOG_FREQ=10
 VAL_FREQ=-1
 # DEVICE=0    # cuda gpu selection
-DEVICE=2  # cuda gpu selection
-DEBUG=false
+DEVICE=3  # cuda gpu selection
+DEBUG=false 
 WANDB_LOG=true
 ROLLOUT=false
-EPOCH=1170 # 1170 epochs are 90 epochs old method
+EPOCH=600
 LOADER_WORKERS=16
 CONFIG_PATH=../experiments
 CONFIG_NAME=config_RT1_finetuning.yaml
 
-RESUME=false
+COSINE_ANNEALING=false
+
+RESUME=true
+FINETUNE=false
 BSIZE=48
 # Policy 1: At each slot is assigned a RandomSampler
 SET_SAME_N=-1
 
 # path where to find jsons for the couples
 # COUPLE_PATHS_JSON='/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/traj_couples_only_sim'
+
+### ABSOLUTE_POSITION
 COUPLE_PATHS_JSON='/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/traj_couples_one_dem'
+### DELTAS
+# COUPLE_PATHS_JSON='/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/traj_couples_one_dem_delta'
 
 OPTIMIZER='AdamW'
 
@@ -59,7 +76,7 @@ HEIGHT=100
 WIDTH=180
 
 TASK_str="pick_place" #[pick_place,nut_assembly,stack_block,button]
-EXP_NAME='rt1_ur5e-datasets_pretraining' #'rt1_sim_abs_new_condmodule' #'rt1_sim_abs_aa_weakaug_-1_1' #'rt1_real_absolute_aa_no_subsample' #'rt1_deltas_no_conv_absolute_actions_2' #"rt1_sim_RGB_-1_1_range_test_2"
+EXP_NAME='rt1_real_X-all+MS-all_to_MR-UR5_finetuning-lr5e-6' #'rt1_real__X-UR5_MS-UR5_to_MR-UR5_finetuning' #'rt1_real_all_COtraining' #'rt1_real_panda-sim_ur5e-sim_ur5e-real_COtraining' #'rt1_real_ur5e-panda-dataset_to_real-lr_e-4' #'rt1_real_ur5e-panda-datasets_CO-training' #'rt1_sim_abs_new_condmodule' #'rt1_sim_abs_aa_weakaug_-1_1' #'rt1_real_absolute_aa_no_subsample' #'rt1_deltas_no_conv_absolute_actions_2' #"rt1_sim_RGB_-1_1_range_test_2"
 PROJECT_NAME=${EXP_NAME}
 
 # TIME_SEQUENCE_LENGHT=6 #6
@@ -83,10 +100,12 @@ python -u ../training/train_scripts/train_any.py \
     debug=${DEBUG} \
     wandb_log=${WANDB_LOG} \
     resume=${RESUME} \
+    finetune=${FINETUNE} \
     loader_workers=${LOADER_WORKERS} \
     save_path=${SAVE_PATH} \
     optimizer=${OPTIMIZER} \
     cond_module_path=${COND_MODULE_PATH} \
-    couple_paths_json=${COUPLE_PATHS_JSON}
+    couple_paths_json=${COUPLE_PATHS_JSON} \
+    cosine_annealing=${COSINE_ANNEALING}
     # width=${WIDTH} \
     # height=${HEIGHT}

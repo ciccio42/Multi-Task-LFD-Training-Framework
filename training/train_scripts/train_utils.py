@@ -36,7 +36,7 @@ import gc
 from colorama import Fore, Back
 from multi_task_il.datasets.command_encoder.multi_task_command_encoder import CommandEncoderSampler, CosineLossCalculator
 from multi_task_il.datasets.command_encoder.command_encoder_dataset import FinetuningCommandEncoderSampler
-from multi_task_il.datasets.command_encoder.finetuning_paired_dataset import FinetuningPairedDatasetSampler
+from multi_task_il.datasets.rt1.finetuning_paired_dataset import FinetuningPairedDatasetSampler
 import cv2
 from multi_task_il.datasets.command_encoder.utils import init_freezed_cond_module
 import math
@@ -1153,9 +1153,9 @@ class Trainer:
             #     print('-'*20)
             wandb_config = {k: self.config.get(k) for k in config_keys}
             # luigi
-            # wandb.login(key='d8ae96268267edd589283209c8b725caadcd4645')
+            wandb.login(key='d8ae96268267edd589283209c8b725caadcd4645')
             # gianluigi
-            wandb.login(key='5f88790e20504ceec6cfa31a400ef37ed5255bea')
+            # wandb.login(key='5f88790e20504ceec6cfa31a400ef37ed5255bea')
             
             print(f"Exp name: {self.config.exp_name}")
             self.config.project_name = self.config.exp_name.split('-Batch')[0]
@@ -1302,9 +1302,9 @@ class Trainer:
             )
 
         # ! only for policy training >>>
-        if hasattr(model, '_object_detector') :
+        if hasattr(model, '_object_detector'):
             print(f"Object detector is set to eval mode")
-            if model._object_detector is not None: 
+            if model._object_detector is not None:
                 model._object_detector.eval()
                 print(f"Object detector mode {model._object_detector.training}")
         # ! only for policy training <<<
@@ -1343,22 +1343,22 @@ class Trainer:
                 # folder_test = 'test_batch_MS-UR5_MS-PANDA_X-UR5_X-PANDA'
                 # folder_test = 'test_batch_cotrain_all_delta'
                 
-                folder_test = 'test_batch_MS-UR5_finetune'
-                if not os.path.exists(folder_test):
-                    os.mkdir(folder_test)
-                num_samples = inputs['finetuning']['traj']['images'].shape[0]
-                traj_steps = inputs['finetuning']['traj']['images'].shape[1]
-                demo_steps = inputs['finetuning']['demo_data']['demo'].shape[1]
-                for k in range(num_samples):
-                    for t in range(demo_steps):
-                        image = inputs['finetuning']['demo_data']['demo'][k][t]
-                        cv2.imwrite(f"{folder_test}/demo_{k}_{t}.png", np.moveaxis(
-                                        image.numpy()*255, 0, -1))                        
-                    
-                    for t in range(traj_steps):
-                        image = inputs['finetuning']['traj']['images'][k][t]
-                        cv2.imwrite(f"{folder_test}/traj_{k}_{t}.png", np.moveaxis(
-                                        image.numpy()*255, 0, -1))
+                # folder_test = 'test_batch_MS-UR5_finetune'
+                # if not os.path.exists(folder_test):
+                #     os.mkdir(folder_test)
+                # num_samples = inputs['finetuning']['traj']['images'].shape[0]
+                # traj_steps = inputs['finetuning']['traj']['images'].shape[1]
+                # demo_steps = inputs['finetuning']['demo_data']['demo'].shape[1]
+                # for k in range(num_samples):
+                #     for t in range(demo_steps):
+                #         image = inputs['finetuning']['demo_data']['demo'][k][t]
+                #         cv2.imwrite(f"{folder_test}/demo_{k}_{t}.png", np.moveaxis(
+                #                         image.numpy()*255, 0, -1))                        
+                #     
+                #     for t in range(traj_steps):
+                #         image = inputs['finetuning']['traj']['images'][k][t]
+                #         cv2.imwrite(f"{folder_test}/traj_{k}_{t}.png", np.moveaxis(
+                #                         image.numpy()*255, 0, -1))
                 
                 
                 tolog = {}

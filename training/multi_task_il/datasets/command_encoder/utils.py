@@ -30,7 +30,7 @@ import time
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 import itertools
-from multi_task_il.datasets.command_encoder.cond_module import CondModule
+from multi_task_il.models.command_encoder.cond_module import CondModule
 
 logging.basicConfig(
     level=logging.INFO,

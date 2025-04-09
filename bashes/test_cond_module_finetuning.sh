@@ -13,16 +13,15 @@ DEBUG=False
 # BLACK_LIST=droid_converted,droid_converted_old,asu_table_top_converted,berkeley_autolab_ur5_converted,iamlab_cmu_pickup_insert_converted,taco_play_converted,real_new_ur5e_pick_place_converted,sim_new_ur5e_pick_place_converted,droid_converted_2909_to_4645,droid_converted_0_to_2909
 # BLACK_LIST=asu_table_top_converted_absolute_pose,berkeley_autolab_ur5_converted_absolute_pose,iamlab_cmu_pickup_insert_converted_absolute_pose,taco_play_converted_absolute_pose,droid_converted_absolute_pose,sim_ur5e_pick_place_shifted_converted_absolute,real_new_ur5e_pick_place_converted_absolute
 BLACK_LIST=droid_converted_absolute_pose,sim_ur5e_pick_place_shifted_converted_absolute,real_new_ur5e_pick_place_converted_absolute,sim_panda_pick_place_converted_absolute,panda_pick_place
-###TODO: test per ogni checkpoint -> fare una sorta di collage
 
-python -u ../training/multi_task_il/datasets/command_encoder/test_cond_module_finetuning.py \
+python -u ../training/multi_task_il/models/command_encoder/test_scripts/test_cond_module_finetuning.py \
     --weights_path=${WEIGHTS_PATH} \
     --cuda_device=${CUDA_DEVICE} \
     --debug=${DEBUG} \
     --black_list=${BLACK_LIST}
 
 
-# python -u ../training/multi_task_il/datasets/command_encoder/test_cond_module_cosine_sim.py \
+# python -u ../training/multi_task_il/models/command_encoder/test_scripts/test_cond_module_cosine_sim.py \
 #     --weights_path=${WEIGHTS_PATH} \
 #     --cuda_device=${CUDA_DEVICE} \
 #     --debug=${DEBUG} \

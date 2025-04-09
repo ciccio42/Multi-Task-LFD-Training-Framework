@@ -1,5 +1,5 @@
 from multi_task_il.datasets.command_encoder.multi_task_command_encoder import CommandEncoderDataset, CommandEncoderSampler
-from multi_task_il.datasets.command_encoder.cond_module import CondModule
+from multi_task_il.models.command_encoder.cond_module import CondModule
 from torch.utils.data import DataLoader
 
 import torch

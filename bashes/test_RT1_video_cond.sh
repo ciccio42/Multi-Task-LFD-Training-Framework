@@ -24,7 +24,7 @@ echo $1
 TASK_NAME='pick_place' #"$1"
 NUM_WORKERS=8 #8 #10 use 4 when plotting embeddings
 EVAL_EACH_TASK=5
-GPU_ID=2 #0
+GPU_ID=1 #0
 
 # RT1__pick_place__sim__90_epochs__5e-4_lr__bs_16_BGR
 
@@ -33,7 +33,8 @@ CKP_FOLDER=/user/frosa/multi_task_lfd/checkpoint_save_folder
 if [ "$TASK_NAME" == 'pick_place' ]; then
     # PROJECT_NAME=1Task-pick_place-Panda_dem_sim_agent_ur5e_sim_2
 
-    PROJECT_NAME=rt1_sim-from-scrath-1-dem
+    # PROJECT_NAME=rt1_sim-from-scrath-1-dem # 40 trajs (reduced dataset)
+    PROJECT_NAME=rt1_sim_1_demo # 100 trajs (full dataset) #11800 best model
     # PROJECT_NAME=rt1_absolute_converted_-1_1 # euler
     # PROJECT_NAME='rt1_deltas_no_conv_absolute_actions_2' # original frame
 
@@ -42,7 +43,7 @@ if [ "$TASK_NAME" == 'pick_place' ]; then
     CONTROLLER_PATH=$BASE_PATH/repo/Multi-Task-LFD-Training-Framework/tasks/multi_task_robosuite_env/controllers/config/osc_pose.json
     for MODEL in ${MODEL_PATH}; do 
         # for S in 2700 5400 8100 10800 13500; do #aggiungi gli altri step qui
-        for S in 22680 25920 29160 32400; do #aggiungi gli altri step qui
+        for S in 11880; do #aggiungi gli altri step qui
             for TASK in pick_place; do
                 for COUNT in 1; do # 1 2 3
                     if [ $COUNT -eq 1 ]; then
@@ -58,7 +59,10 @@ if [ "$TASK_NAME" == 'pick_place' ]; then
                         --project_name ${PROJECT_NAME} \
                         --controller_path ${CONTROLLER_PATH} \
                         --gpu_id ${GPU_ID} \
-                        --save_path ${SAVE_PATH}
+                        --save_path ${SAVE_PATH} \
+                        --save_files \
+                        --sub_action \
+                        --gt_action 45
 
                         # --debug
                         # --save_files

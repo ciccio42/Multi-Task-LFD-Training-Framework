@@ -3,6 +3,7 @@
 #SBATCH --exclude=tnode[01-17]
 #SBATCH --partition=gpuq
 #SBATCH --gres=gpu:2
+#SBATCH -w gnode02
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=32
@@ -45,7 +46,7 @@ SPLIT_PICK_PLACE=false
 LOAD_CONTRASTIVE=true
 LOAD_INV=true
 
-CONCAT_STATE=false
+CONCAT_STATE=true
 CONVERT_ACTION=true
 
 if [ "$TASK_NAME" == 'nut_assembly' ]; then
@@ -219,8 +220,8 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     ### Pick-Place ###
-    RESUME_PATH=1Task-pick_place-MOSAIC-Human-Video_Covert_action_true-Batch32
-    RESUME_STEP=24
+    RESUME_PATH='1Task-pick_place-MOSAIC-Human-Video_State_true_Covert_action_true-Batch32' #1Task-pick_place-MOSAIC-Human-Video_Covert_action_true-Batch32
+    RESUME_STEP='52'                                                                        #24
     RESUME=true
     FINETUNE=false
 
@@ -271,8 +272,8 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
 
     COSINE_ANNEALING=false
 
-    TASK_str="pick_place"                                                        #[pick_place,nut_assembly,stack_block,button]
-    EXP_NAME=1Task-pick_place-MOSAIC-Human-Video_Covert_action_${CONVERT_ACTION} #1Task-${TASK_str}-MOSAIC-Rollout
+    TASK_str="pick_place"                                                                              #[pick_place,nut_assembly,stack_block,button]
+    EXP_NAME=1Task-pick_place-MOSAIC-Human-Video_State_${CONCAT_STATE}_Covert_action_${CONVERT_ACTION} #1Task-${TASK_str}-MOSAIC-Rollout
     PROJECT_NAME=${EXP_NAME}
 
 elif [ "$TASK_NAME" == 'multi' ]; then

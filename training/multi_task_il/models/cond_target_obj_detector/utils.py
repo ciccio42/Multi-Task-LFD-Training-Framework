@@ -89,7 +89,7 @@ def gen_anc_centers(out_size, step=1):
     
     # 2.0 real-world dataset
     # 1.5 real-world dataset
-    anc_pts_x = torch.arange(0, out_w, step) + 1.5 # 
+    anc_pts_x = torch.arange(0, out_w, step) + 2.0 # 1.5
     anc_pts_y = torch.arange(0, out_h, step) + 1.5
 
     return anc_pts_x, anc_pts_y

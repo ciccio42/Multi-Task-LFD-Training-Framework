@@ -202,11 +202,12 @@ class MultiTaskPairedDataset(Dataset):
         ret_dict = {}
 
         end = len(traj)
-        if(start_frame == 0):
-            start_frame = 1
-        start = start_frame if start_frame + self._obs_T < end else start_frame - (self._obs_T - (end - 1 - start_frame))
+        # if(start_frame == 0):
+        #     start_frame = 1
+        # start = start_frame if start_frame + self._obs_T < end else start_frame - (self._obs_T - (end - 1 - start_frame))
         
-        #torch.randint(low=1, high=max(1, end - self._obs_T + 1), size=(1,))
+        # print("start frame with randint", start_frame)
+        start = torch.randint(low=1, high=max(1, end - self._obs_T + 1), size=(1,))
 
         if self._take_first_frame:
             first_frame = [torch.tensor(1)]

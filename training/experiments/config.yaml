@@ -18,7 +18,7 @@ epochs:         10
 bsize:          30
 vsize:          ${bsize} # optionally, set to a different batchsize for validation loader
 node_id: 0
-num_gpus: 2
+num_gpus: 1
 num_nodes: 1
 optimizer:      null #Adam # RMSProp
 loss: ""

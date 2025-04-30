@@ -258,7 +258,8 @@ class DataAugmentation:
                         print("Exception")
                 cv2.imwrite("bb_cropped_after_aug.png", image)
             
-            #augmented = self.normalize(augmented)
+            if self.height == 224 and self.width == self.width:
+                augmented = self.normalize(augmented)
             
             # obs_pil = np.moveaxis(augmented.numpy()*255, 0, -1).astype(np.uint8)
             # obs_pil = Image.fromarray(obs_pil)
@@ -266,8 +267,8 @@ class DataAugmentation:
             
             return augmented, bb, class_frame
         else:
-            
-            # augmented = self.normalize(augmented)
+            if self.height == 224 and self.width == self.width:
+                augmented = self.normalize(augmented)
             
             # obs_pil = np.moveaxis(augmented.numpy()*255, 0, -1).astype(np.uint8)
             # obs_pil = Image.fromarray(obs_pil)

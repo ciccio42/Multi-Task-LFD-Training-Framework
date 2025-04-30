@@ -1,0 +1,181 @@
+{
+  "mivia": {
+    "pick_place": {
+      "0": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/0/task_embedding.pkl"
+      ],
+      "1": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/1/task_embedding.pkl"
+      ],
+      "2": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/2/task_embedding.pkl"
+      ],
+      "3": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/3/task_embedding.pkl"
+      ],
+      "4": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/4/task_embedding.pkl"
+      ],
+      "5": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/5/task_embedding.pkl"
+      ],
+      "6": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/6/task_embedding.pkl"
+      ],
+      "7": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/7/task_embedding.pkl"
+      ],
+      "8": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/8/task_embedding.pkl"
+      ],
+      "9": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/9/task_embedding.pkl"
+      ],
+      "10": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/10/task_embedding.pkl"
+      ],
+      "11": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/11/task_embedding.pkl"
+      ],
+      "12": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/12/task_embedding.pkl"
+      ],
+      "13": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/13/task_embedding.pkl"
+      ],
+      "14": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/14/task_embedding.pkl"
+      ],
+      "15": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/pick_place/15/task_embedding.pkl"
+      ]
+    },
+    "nut_assembly": {
+      "0": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly/0/task_embedding.pkl"
+      ],
+      "1": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly/1/task_embedding.pkl"
+      ],
+      "2": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly/2/task_embedding.pkl"
+      ],
+      "3": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly/3/task_embedding.pkl"
+      ],
+      "4": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly/4/task_embedding.pkl"
+      ],
+      "5": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly/5/task_embedding.pkl"
+      ],
+      "6": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly/6/task_embedding.pkl"
+      ],
+      "7": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly/7/task_embedding.pkl"
+      ],
+      "8": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly/8/task_embedding.pkl"
+      ]
+    },
+    "nut_assembly_1": {
+      "0": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_1/0/task_embedding.pkl"
+      ],
+      "1": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_1/1/task_embedding.pkl"
+      ],
+      "2": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_1/2/task_embedding.pkl"
+      ],
+      "3": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_1/3/task_embedding.pkl"
+      ],
+      "4": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_1/4/task_embedding.pkl"
+      ],
+      "5": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_1/5/task_embedding.pkl"
+      ],
+      "6": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_1/6/task_embedding.pkl"
+      ],
+      "7": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_1/7/task_embedding.pkl"
+      ],
+      "8": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_1/8/task_embedding.pkl"
+      ]
+    },
+    "nut_assembly_2": {
+      "0": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_2/0/task_embedding.pkl"
+      ],
+      "1": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_2/1/task_embedding.pkl"
+      ],
+      "2": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_2/2/task_embedding.pkl"
+      ],
+      "3": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_2/3/task_embedding.pkl"
+      ],
+      "4": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_2/4/task_embedding.pkl"
+      ],
+      "5": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_2/5/task_embedding.pkl"
+      ],
+      "6": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_2/6/task_embedding.pkl"
+      ],
+      "7": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_2/7/task_embedding.pkl"
+      ],
+      "8": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/nut_assembly_2/8/task_embedding.pkl"
+      ]
+    },
+    "block_stacking": {
+      "0": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/block_stacking/0/task_embedding.pkl"
+      ],
+      "1": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/block_stacking/1/task_embedding.pkl"
+      ],
+      "2": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/block_stacking/2/task_embedding.pkl"
+      ],
+      "3": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/block_stacking/3/task_embedding.pkl"
+      ],
+      "4": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/block_stacking/4/task_embedding.pkl"
+      ],
+      "5": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/block_stacking/5/task_embedding.pkl"
+      ]
+    },
+    "press_button": {
+      "0": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/press_button/0/task_embedding.pkl"
+      ],
+      "1": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/press_button/1/task_embedding.pkl"
+      ],
+      "2": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/press_button/2/task_embedding.pkl"
+      ],
+      "3": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/press_button/3/task_embedding.pkl"
+      ],
+      "4": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/press_button/4/task_embedding.pkl"
+      ],
+      "5": [
+        "/home/rsofnc000/dataset/opt_dataset/command_text_embeddings/mivia/press_button/5/task_embedding.pkl"
+      ]
+    }
+  }
+}

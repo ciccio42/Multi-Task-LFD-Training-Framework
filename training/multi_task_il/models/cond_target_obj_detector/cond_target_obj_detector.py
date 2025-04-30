@@ -165,7 +165,7 @@ class ClassificationModule(nn.Module):
 
 
 class FiLM(nn.Module):
-    def __init__(self, backbone_name="resnet18", conv_drop_dim=3, n_res_blocks=18, n_classes=1, n_channels=128, task_embedding_dim=128):
+    def __init__(self, backbone_name="resnet18", conv_drop_dim=3, n_res_blocks=18, n_classes=1, n_channels=128, task_embedding_dim=128, pretrained=False):
         super(FiLM, self).__init__()
 
         self.task_embedding_dim = task_embedding_dim
@@ -174,7 +174,7 @@ class FiLM(nn.Module):
             task_embedding_dim, 2 * n_res_blocks * n_channels)
         self.feature_extractor = get_backbone(backbone_name=backbone_name,
                                               video_backbone=False,
-                                              pretrained=False,
+                                              pretrained=pretrained,
                                               conv_drop_dim=conv_drop_dim)
         self.res_blocks = nn.ModuleList()
 
@@ -262,14 +262,15 @@ class ProposalModule(nn.Module):
             return conf_scores_pred, reg_offsets_pred
 
 
-def make_model(model_dict, backbone_name="resnet18", task_embedding_dim=128, conv_drop_dim=3):
+def make_model(model_dict, backbone_name="resnet18", task_embedding_dim=128, conv_drop_dim=3, pretrained=False):
     backbone = FiLM(
         backbone_name=backbone_name,
         conv_drop_dim=conv_drop_dim,
         n_res_blocks=model_dict['n_res_blocks'],
         n_classes=model_dict['n_classes'],
         n_channels=model_dict['n_channels'],
-        task_embedding_dim=task_embedding_dim)
+        task_embedding_dim=task_embedding_dim,
+        pretrained=pretrained)
     # for name, module in backbone.named_children():
     #     if name == "res_blocks":
     #         for name, module in backbone.res_blocks.named_children():
@@ -373,7 +374,8 @@ class AgentModule(nn.Module):
             model_dict['n_channels'] = n_channels
             backbone = make_model(model_dict=model_dict,
                                   task_embedding_dim=task_embedding_dim,
-                                  conv_drop_dim=conv_drop_dim)
+                                  conv_drop_dim=conv_drop_dim,
+                                  pretrained=pretrained)
             backbone.out_channels = n_channels
             self.out_channels_backbone = n_channels
             self._backbone = backbone

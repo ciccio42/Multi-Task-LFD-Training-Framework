@@ -97,7 +97,7 @@ dataset_cfg:
   width:            224 # 224 # 360 # 180
   split:            [1.0, 0.0]
   demo_T:           4
-  obs_T:            7
+  obs_T:            3
   normalize_action: True
   pick_next: True
   load_bb: True

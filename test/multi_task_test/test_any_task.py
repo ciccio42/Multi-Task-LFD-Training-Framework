@@ -572,7 +572,7 @@ if __name__ == '__main__':
         color = args.color
         variation = args.variation
         seed = args.seed
-        max_T = 130
+        max_T = 150
 
         dataset = None
         if args.test_gt:
@@ -606,7 +606,7 @@ if __name__ == '__main__':
             pkl_file_list = []
             for task_id in demo_files.keys():
                 for pkl_file in demo_files[task_id]:
-                    for i in range(10): # 10 test for each demo
+                    for i in range(args.eval_each_task): # 10 test for each demo
                         variation.append(task_id)
                         pkl_file_list.append(pkl_file)
             

@@ -29,6 +29,7 @@ from robosuite.utils.transform_utils import quat2axisangle, axisangle2quat, quat
 import time
 from copy import deepcopy
 from PIL import Image
+from torchvision.transforms import ToTensor, Normalize
 
 
 _TIME_COUNTER_ = 0
@@ -524,7 +525,7 @@ def transform_action_from_robot_to_world(action):
     action_wl_sim = np.zeros((7))
     action_wl_sim[0:3] = T_wl_sim_gripper_sim[0:3, 3]
     action_wl_sim[3:6] = quat2axisangle(mat2quat(R_wl_sim_gripper_sim))
-    if action[-1] < 0.8:
+    if action[-1] <= 0.99:
         action_wl_sim[6] = -1
     else:
         action_wl_sim[6] = 1
@@ -1383,27 +1384,36 @@ def object_detection_inference(model, env, context, gpu_id, variation_id, img_fo
                 formatted_img = torch.from_numpy(
                     np.array(obs['camera_front_image']))
 
-            model_input = dict()
-            model_input['demo'] = context.to(device=gpu_id)
-            model_input['images'] = formatted_img[None][None].to(device=gpu_id)
-            model_input['gt_bb'] = torch.from_numpy(
-                bb_t[None][None]).float().to(device=gpu_id)
-            if gt_t.shape == 1:
-                model_input['gt_classes'] = torch.from_numpy(
-                    gt_t[None][None][None]).to(device=gpu_id)
-            else:
-                model_input['gt_classes'] = torch.from_numpy(
-                    gt_t[None][None]).to(device=gpu_id)
-            model_input['states'] = torch.from_numpy(
-                np.array(states)).to(device=gpu_id)
+            # model_input = dict()
+            # model_input['demo'] = context.to(device=gpu_id)
+            # model_input['images'] = formatted_img[None][None].to(device=gpu_id)
+            # model_input['gt_bb'] = torch.from_numpy(
+            #     bb_t[None][None]).float().to(device=gpu_id)
+            # if gt_t.shape == 1:
+            #     model_input['gt_classes'] = torch.from_numpy(
+            #         gt_t[None][None][None]).to(device=gpu_id)
+            # else:
+            #     model_input['gt_classes'] = torch.from_numpy(
+            #         gt_t[None][None]).to(device=gpu_id)
+            # model_input['states'] = torch.from_numpy(
+            #     np.array(states)).to(device=gpu_id)
 
-            if task_name in config.dataset_cfg.get("tasks").keys():
-                task_one_hot = np.zeros((1, config.dataset_cfg.n_tasks))
-                task_one_hot[0][config.dataset_cfg.tasks[task_name]
-                                [0]+variation_id] = 1
-                model_input['task_id'] = torch.from_numpy(
-                    np.array(task_one_hot)).to(device=gpu_id)
-
+            # if task_name in config.dataset_cfg.get("tasks").keys():
+            #     task_one_hot = np.zeros((1, config.dataset_cfg.n_tasks))
+            #     task_one_hot[0][config.dataset_cfg.tasks[task_name]
+            #                     [0]+variation_id] = 1
+            #     model_input['task_id'] = torch.from_numpy(
+            #         np.array(task_one_hot)).to(device=gpu_id)
+            
+            model_input = list()
+            model_input.append(context.to(device=gpu_id))
+            model_input.append(formatted_img[None][None].to(
+                device=gpu_id))
+            model_input.append(torch.from_numpy(
+                bb_t[None][None]).float().to(device=gpu_id))
+            model_input.append(torch.from_numpy(
+                gt_t[None][None]).to(device=gpu_id))
+            
             with torch.no_grad():
                 # Perform  detection
                 if policy:
@@ -1746,6 +1756,11 @@ def build_tvf_formatter_obj_detector(config, env_name):
         # ---- Resized crop ----#
         img = resized_crop(img, top=top, left=left, height=box_h,
                            width=box_w, size=(config.dataset_cfg.height, config.dataset_cfg.width))
+        
+        if config.dataset_cfg.height == 224 and  config.dataset_cfg.width ==  224:
+            img = Normalize(
+                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(img)
+        
         # transforms_pipe = transforms.Compose([
         #     transforms.ColorJitter(
         #         brightness=list(config.augs.get(

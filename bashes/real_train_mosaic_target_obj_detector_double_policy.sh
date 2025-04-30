@@ -1,8 +1,9 @@
 #!/bin/bash
 
 #SBATCH --exclude=tnode[01-17]
+#SBATCH --exclude=gnode02
 #SBATCH --partition=gpuq
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=32
@@ -17,12 +18,12 @@ echo $1
 TASK_NAME="$1"
 
 EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset/
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder
+SAVE_PATH=/home/rsofnc000/checkpoint_save_folder/luigi_models
 POLICY='${mosaic}'
 TARGET='multi_task_il.models.mt_rep_double_policy.VideoImitation'
 TASKS_CONFIG=7_tasks_real
 AGENT_NAME=real_new_ur5e
-DEMO_NAME=panda #human_rgb #panda
+DEMO_NAME=human_rgb # [human_rgb or panda]
 
 SAVE_FREQ=-1
 LOG_FREQ=10
@@ -56,9 +57,19 @@ CONCAT_TARGET_OBJ_EMBEDDING=false
 
 CONCAT_BB=true
 LOAD_TARGET_OBJ_DETECTOR=true
-
-CONCAT_STATE=true
+PRETRAINED=true
+CONCAT_STATE=false
 DAGGER=false
+# 5000 when image is 100,180
+MAX_LEN=5000
+DROP_DIM=4      # 2    # 3
+OUT_FEATURE=128 # 512 # 256
+# use (13,23) when image is 100,180
+# use (28,28) when image is 224,224
+DIM_H=13 #13
+DIM_W=23 #23
+HEIGHT=100
+WIDTH=180
 
 if [ "$TASK_NAME" == 'nut_assembly' ]; then
     echo "NUT-ASSEMBLY"
@@ -85,7 +96,7 @@ if [ "$TASK_NAME" == 'nut_assembly' ]; then
     HIDDEN_DIM=512     #256 MT #128 2Task, Nut, button, stack #512 Pick-place
     CONCAT_DEMO_HEAD=false
     CONCAT_DEMO_ACT=true
-    PRETRAINED=false
+    PRETRAINED=true
     NULL_BB=false
 
     EARLY_STOPPING_PATIECE=-1
@@ -199,21 +210,20 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
 
     ### Pick-Place ###
-    RESUME_PATH="Real-1Task-pick_place-MOSAIC-KP-State-Finetune-Batch48"
-    echo "RESUME_PATH: ${RESUME_PATH}"
+    RESUME_PATH="Real-1Task-pick_place-MOSAIC-KP_State_false_Finetued-Batch32"
     #1Task-pick_place-Double-Policy-Convert_action_State_true_Convert_true-Batch32
-    RESUME_STEP="23"
+    RESUME_STEP="34"
     RESUME=true
     FINETUNE=false
 
-    TARGET_OBJ_DETECTOR_STEP=31 #68526 #129762 #198900 #65250
-    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/Real-1Task-pick_place-KP-No-Finetune-Batch32
+    TARGET_OBJ_DETECTOR_STEP=33 #68526 #129762 #198900 #65250
+    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/Real-1Task-pick_place-Human-Demo-KP-No-Finetune-Batch32
 
     BSIZE=32 #32 #128 #64 #32
     COMPUTE_OBJ_DISTRIBUTION=false
     # Policy 1: At each slot is assigned a RandomSampler
     BALANCING_POLICY=0
-    SET_SAME_N=3
+    SET_SAME_N=2
 
     ACTION_DIM=7
     N_MIXTURES=3       #14 MT #7 2Task, Nut, button, stack #3 Pick-place #2 Nut-Assembly
@@ -223,7 +233,6 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     HIDDEN_DIM=512     #256 MT #128 2Task, Nut, button, stack #512 Pick-place
     CONCAT_DEMO_HEAD=false
     CONCAT_DEMO_ACT=true
-    PRETRAINED=false
     NULL_BB=false
 
     EARLY_STOPPING_PATIECE=-1
@@ -231,13 +240,6 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     LR=0.0005
     WEIGHT_DECAY=0.0
     SCHEDULER=None
-
-    DROP_DIM=4      # 2    # 3
-    OUT_FEATURE=128 # 512 # 256
-    DIM_H=13        #14        # 7 (100 DROP_DIM 3)        #8         # 4         # 7
-    DIM_W=23        #14        # 12 (180 DROP_DIM 3)        #8         # 6         # 12
-    HEIGHT=100
-    WIDTH=180
 
     COSINE_ANNEALING=false
 
@@ -356,6 +358,7 @@ srun --output=training_${EXP_NAME}.txt --job-name=training_${TASK_NAME} python -
     actions.concat_img_emb=${CONCAT_IMG_EMB} \
     actions.concat_demo_emb=${CONCAT_DEMO_EMB} \
     attn.attn_ff=${ATTN_FF} \
+    attn.max_len=${MAX_LEN} \
     attn.img_cfg.drop_dim=${DROP_DIM} \
     attn.img_cfg.out_feature=${OUT_FEATURE} \
     simclr.compressor_dim=${COMPRESSOR_DIM} \

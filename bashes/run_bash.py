@@ -2,12 +2,13 @@ import os
 import subprocess
 import re
 import time
+import argparse
 
-BASH_SCRIPT = "/home/rsofnc000/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/real_train_keypoint_detection.sh"
+BASH_SCRIPT = "/home/rsofnc000/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/real_train_mosaic_target_obj_detector_double_policy.sh"
 FINETUNE = False
 RESUME = True
-CHECKPOINT_FOLDER = "/home/rsofnc000/checkpoint_save_folder/Real-1Task-pick_place-KP-No-Finetune-Batch32"
-RESUME_STEP = 9
+CHECKPOINT_FOLDER = "Real-1Task-pick_place-MOSAIC-KP_State_false_Finetued-Batch32"
+RESUME_STEP = 7
 BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}"]
 MAX_EPOCHS = 90  # Set your maximum number of epochs here
 
@@ -23,7 +24,8 @@ def get_highest_epoch(folder):
 
 def run_bash_script():
     global RESUME_STEP, RESUME, BASH_ARGUMENTS  
-    while True:
+    print(f"Running bash script with arguments: {BASH_ARGUMENTS}")
+    for i in range(1, 10):
         result = subprocess.run(['sbatch', BASH_SCRIPT] + BASH_ARGUMENTS, capture_output=True, text=True)
         if result.returncode != 0:
             print(f"Error submitting job: {result.stderr}")
@@ -73,4 +75,31 @@ def run_bash_script():
             time.sleep(5)  # Optional: wait for a few seconds before restarting
 
 if __name__ == "__main__":
+    argparser = argparse.ArgumentParser(description="Run a bash script with job submission and monitoring.")
+    argparser.add_argument("--job_id", type=int, default=0)
+    argparser.add_argument("--first_run", action="store_true")
+    args = argparser.parse_args()
+        
+    if args.first_run:
+        job_id = str(args.job_id)
+        while True:
+            print(f"Checking status of job {job_id}...")
+            result = subprocess.run(['squeue', '--job', job_id], capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"Error checking job status: {result.stderr}")
+                exit(1)
+
+            if job_id not in result.stdout:
+                print(f"Job {job_id} completed.")
+                break
+
+            time.sleep(10)  # Wait for 10 seconds before polling again
+        
+        highest_epoch = get_highest_epoch(CHECKPOINT_FOLDER)
+        print(f"Highest epoch reached: {highest_epoch}")
+        RESUME_STEP = highest_epoch
+        RESUME=True
+        BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}"]
+    
+    
     run_bash_script()

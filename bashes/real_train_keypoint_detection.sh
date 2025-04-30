@@ -1,13 +1,12 @@
 #!/bin/bash
 
 #SBATCH --exclude=tnode[01-17]
-#SBATCH --exclude=gnode07
+#SBATCH --exclude=gnode12
 #SBATCH --partition=gpuq
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=32
-#SBATCH --exclusive
 #SBATCH --export=ALL
 
 export MUJOCO_PY_MUJOCO_PATH=/home/rsofnc000/.mujoco/mujoco210
@@ -16,12 +15,12 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 export HYDRA_FULL_ERROR=1
 
 EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder/luigi_models
+SAVE_PATH=/home/rsofnc000/checkpoint_save_folder/224_224
 POLICY='${cond_target_obj_detector}'
 DATASET_TARGET=multi_task_il.datasets.multi_task_keypoint_dataset.MultiTaskPairedKeypointDetectionDataset
 TASKS_CONFIG=7_tasks_real
 AGENT_NAME=real_new_ur5e
-DEMO_NAME=human_rgb
+DEMO_NAME=panda
 
 TASK_NAME="${1}"
 RESUME_FOLDER="${2}"
@@ -48,7 +47,7 @@ BSIZE=32 #16 #32
 COMPUTE_OBJ_DISTRIBUTION=false
 CONFIG_PATH=../experiments/
 CONFIG_NAME=config_cond_target_obj_detector_real.yaml
-LOADER_WORKERS=16
+LOADER_WORKERS=8
 BALANCING_POLICY=0
 OBS_T=7
 
@@ -65,10 +64,12 @@ NON_SEQUENTIAL=true
 
 DROP_DIM=4      # 2    # 3
 OUT_FEATURE=128 # 512 # 256
-DIM_H=13        #14        # 7 (100 DROP_DIM 3)        #8         # 4         # 7
-DIM_W=23        #14        # 12 (180 DROP_DIM 3)        #8         # 6         # 12
-HEIGHT=100
-WIDTH=180
+# use (13,23) when image is 100,180
+# use (28,28) when image is 224,224
+DIM_H=28 #13
+DIM_W=28 #23
+HEIGHT=224
+WIDTH=224
 N_CLASSES=4
 DAGGER=false
 
@@ -102,7 +103,7 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     TASK_str="pick_place"
-    EXP_NAME=Real-1Task-${TASK_str}-Human-Demo-KP-No-Finetune
+    EXP_NAME=Real-1Task-${TASK_str}-Demo-${DEMO_NAME}-KP-No-Finetune
     PROJECT_NAME=${EXP_NAME}
     SET_SAME_N=2
     RESUME_PATH=${RESUME_FOLDER}

@@ -1,14 +1,8 @@
 #!/bin/sh
-# export MUJOCO_PY_MUJOCO_PATH=/user/frosa/.mujoco/mujoco210
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/frosa/.mujoco/mujoco210/bin
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/frosa/miniconda3/envs/multi_task_lfd/lib
-# export MUJOCO_PY_MUJOCO_PATH="/home/rsofnc000/.mujoco/mujoco210"
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
-# export CUDA_VISIBLE_DEVICES=0
-# export HYDRA_FULL_ERROR=1
 
 #SBATCH --exclude=tnode[01-17]
 #SBATCH --partition=gpuq
+#SBATCH -w gnode11
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
@@ -19,15 +13,15 @@
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 # export CUDA_VISIBLE_DEVICES=1
 BASE_PATH=/home/rsofnc000/Multi-Task-LFD-Framework
-PROJECT_NAME=Real-1Task-pick_place-Human-Demo-KP-No-Finetune #Real-1Task-pick_place-KP-No-Finetune
+PROJECT_NAME=Real-1Task-pick_place-Demo-panda-KP-No-Finetune #Real-1Task-pick_place-KP-No-Finetune
 BATCH=32
-NUM_WORKERS=16
+NUM_WORKERS=1
 GPU_ID=0
-MODEL_PATH=/home/rsofnc000/checkpoint_save_folder/luigi_models/${PROJECT_NAME}-Batch${BATCH}/
+MODEL_PATH=/home/rsofnc000/checkpoint_save_folder/224_224/${PROJECT_NAME}-Batch${BATCH}/
 CONTROLLER_PATH=$BASE_PATH/repo/Multi-Task-LFD-Training-Framework/tasks/multi_task_robosuite_env/controllers/config/osc_pose.json
 
 for MODEL in ${MODEL_PATH}; do
-    for S in 33; do #81000 89100; do
+    for S in 40; do #81000 89100; do
         for TASK in pick_place; do
             for COUNT in 1; do
                 SAVE_PATH=${MODEL}/results_${TASK}/run_${COUNT}

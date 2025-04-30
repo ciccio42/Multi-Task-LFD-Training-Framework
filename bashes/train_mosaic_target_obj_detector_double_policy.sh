@@ -2,17 +2,16 @@
 
 #SBATCH --exclude=tnode[01-17]
 #SBATCH --partition=gpuq
-#SBATCH -w gnode09
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=32
 #SBATCH --export=ALL
+#SBATCH -w gnode07
 
 export MUJOCO_PY_MUJOCO_PATH="/home/rsofnc000/.mujoco/mujoco210"
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
-export CUDA_VISIBLE_DEVICES=0
 
 export HYDRA_FULL_ERROR=1
 echo $1
@@ -31,7 +30,7 @@ DEBUG=false
 WANDB_LOG=true
 ROLLOUT=false
 EPOCH=90
-LOADER_WORKERS=16
+LOADER_WORKERS=8
 CONFIG_PATH=../experiments
 CONFIG_NAME=config.yaml
 CONCAT_IMG_EMB=true
@@ -42,6 +41,17 @@ DEMO_NAME=human_rgb
 
 CONCAT_BB=true
 LOAD_TARGET_OBJ_DETECTOR=true
+
+TASK_NAME="${1}"
+RESUME_FOLDER="${2}"
+RESUME_STEP="${3}"
+FINETUNE="${4:-false}"
+RESUME="${5:-false}"
+echo "Task Name is: $TASK_NAME"
+echo "Resume Folder is: $RESUME_FOLDER"
+echo "Resume Step is: $RESUME_STEP"
+echo "Finetune is: $FINETUNE"
+echo "Resume is: $RESUME"
 
 if [ "$TASK_NAME" == 'nut_assembly' ]; then
     echo "NUT-ASSEMBLY"
@@ -226,9 +236,8 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     ### Pick-Place ###
-    RESUME_PATH=1Task-pick_place-Double-Policy-State_false_Convert_Action_true_Human_Demo-Batch32
-    RESUME_STEP=45
-    RESUME=true
+    RESUME_PATH=${RESUME_FOLDER}
+    RESUME_STEP=${RESUME_STEP}
 
     TARGET_OBJ_DETECTOR_STEP=20554 #68526 #129762 #198900 #65250
     TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/Simulated-Agent-Human-Demonstration-COD-KP-Batch112
@@ -245,11 +254,11 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
 
     LOAD_CONTRASTIVE=false
     LOAD_INV=false
-    CONTRASTIVE_PRE=1.0
-    CONTRASTIVE_POS=1.0
+    CONTRASTIVE_PRE=0.0
+    CONTRASTIVE_POS=0.0
     MUL_INTM=0
     BC_MUL=1.0
-    INV_MUL=1.0
+    INV_MUL=0.0
 
     FREEZE_TARGET_OBJ_DETECTOR=false
     REMOVE_CLASS_LAYERS=false

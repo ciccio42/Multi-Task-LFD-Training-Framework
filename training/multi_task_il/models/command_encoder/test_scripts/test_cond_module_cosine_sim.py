@@ -218,22 +218,31 @@ def get_palette(num_classes):
     palette[15] = (1.0, 0.0, 0.0)
 
 
-def create_embedding_plot(train_preds, val_preds, test_preds, se_embeddings, y):
+def create_embedding_plot(train_preds, val_preds, se_embeddings, y, test_preds=None):
 
-    train_preds_np, val_preds_np, test_preds_np, se_embeddings_np = \
-        train_preds.cpu().numpy(), val_preds.cpu().numpy(), test_preds.cpu().numpy(), se_embeddings.cpu().numpy()
+    train_preds_np = train_preds.cpu().numpy()
+    val_preds_np = val_preds.cpu().numpy()
+    if test_preds != None:
+        test_preds_np = test_preds.cpu().numpy()
+    se_embeddings_np = se_embeddings.cpu().numpy()
 
     feat_cols = [ 'e'+str(i) for i in range(train_preds_np.shape[1]) ]
     
-    df_train, df_val, df_test, df_se = \
-        pd.DataFrame(train_preds_np,columns=feat_cols), \
-            pd.DataFrame(val_preds_np,columns=feat_cols), \
-                pd.DataFrame(test_preds_np,columns=feat_cols), \
-                    pd.DataFrame(se_embeddings_np,columns=feat_cols)
-            
+    if test_preds != None:
+        df_train, df_val, df_test, df_se = \
+            pd.DataFrame(train_preds_np,columns=feat_cols), \
+                pd.DataFrame(val_preds_np,columns=feat_cols), \
+                    pd.DataFrame(test_preds_np,columns=feat_cols), \
+                        pd.DataFrame(se_embeddings_np,columns=feat_cols)
+    elif test_preds == None:
+        df_train, df_val, df_se = \
+            pd.DataFrame(train_preds_np,columns=feat_cols), \
+                pd.DataFrame(val_preds_np,columns=feat_cols), \
+                        pd.DataFrame(se_embeddings_np,columns=feat_cols)
+                
     df_train['y'] = y * 90
     df_val['y'] = y * 10
-    df_test['y'] = y * 10
+    # df_test['y'] = y * 10
     df_se['y'] = y
     
     #----------create TSNE object

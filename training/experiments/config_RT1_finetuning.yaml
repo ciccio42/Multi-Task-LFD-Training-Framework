@@ -11,8 +11,8 @@ cosine_annealing: False
 save_optim:     True
 resume:         False
 finetune:       False
-resume_path:    'rt1_real_X-all+MS-all_to_MR-UR5_finetuning-lr5e-6-Batch48' #'rt1_real_ur5e-panda-datasets_pre-training-Batch48' # /user/frosa/multi_task_lfd/checkpoint_save_folder/rt1_real_ur5e-panda-datasets_pre-training-Batch48/model_save-30910.pt
-resume_step:    2600
+resume_path:    'rt1_real_panda-sim_ur5e-sim_ur5e-real_COtraining-Batch48' #'rt1_real_X-all+MS-all_to_MR-UR5_finetuning-lr5e-6-Batch48' #'rt1_real_ur5e-panda-datasets_pre-training-Batch48' # /user/frosa/multi_task_lfd/checkpoint_save_folder/rt1_real_ur5e-panda-datasets_pre-training-Batch48/model_save-30910.pt
+resume_step:    17000
 device:         0
 exp_name:       -1
 epochs:         10
@@ -24,7 +24,7 @@ bb_sequence: 1
 action_sequence: 1
 task_names: null
 rollout: False
-dataset_target: 'multi_task_il.datasets.command_encoder.finetuning_paired_dataset.FinetuningPairedDataset'
+dataset_target: 'multi_task_il.datasets.rt1.finetuning_paired_dataset.FinetuningPairedDataset'
 couple_paths_json: ''
 # loss multipliers
 inv_mul:        0
@@ -43,7 +43,7 @@ rep_muls:
 train_cfg:
   batch_size:           ${bsize}
   val_size:             ${vsize}
-  lr:                   5e-6 #1e-6 #1e-6 #5e-5 #5e-4 #5e-5 #5e-4 #1e-3 #5e-5 for finetuning
+  lr:                   5e-5 #1e-6 #1e-6 #5e-5 #5e-4 #5e-5 #5e-4 #1e-3 #5e-5 for finetuning
   optimizer:            ${optimizer}
   epochs:               ${epochs}
   log_freq:             ${log_freq}

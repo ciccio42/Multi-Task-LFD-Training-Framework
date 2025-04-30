@@ -2,6 +2,25 @@ import json
 from multi_task_il.models.muse.muse import get_model
 import pickle
 
+command_dict = {
+    'task_00': 'Pick the green box and place it into the first bin',
+    'task_01': 'Pick the green box and place it into the second bin',
+    'task_02': 'Pick the green box and place it into the third bin',
+    'task_03': 'Pick the green box and place it into the fourth bin',
+    'task_04': 'Pick the yellow box and place it into the first bin',
+    'task_05': 'Pick the yellow box and place it into the second bin',
+    'task_06': 'Pick the yellow box and place it into the third bin',
+    'task_07': 'Pick the yellow box and place it into the fourth bin',
+    'task_08': 'Pick the blue box and place it into the first bin',
+    'task_09': 'Pick the blue box and place it into the second bin',
+    'task_10': 'Pick the blue box and place it into the third bin',
+    'task_11': 'Pick the blue box and place it into the fourth bin',
+    'task_12': 'Pick the red box and place it into the first bin',
+    'task_13': 'Pick the red box and place it into the second bin',
+    'task_14': 'Pick the red box and place it into the third bin',
+    'task_15': 'Pick the red box and place it into the fourth bin',
+}
+
 
 def create_emb_and_save_pickle(traj_path, model_torch, tokenize):
     ''' query USE to produce a 512 embedding from the command
@@ -10,7 +29,12 @@ def create_emb_and_save_pickle(traj_path, model_torch, tokenize):
     print(f"computing embedding for {traj_path}...")
     with open(traj_path, "rb") as f:
         traj_data = pickle.load(f)
-    command = traj_data['command']
+    
+    
+    command = traj_data.get('command')
+    if command is None and "task_" in traj_path: # it is one of our datasets
+        command = command_dict[traj_path.split("/")[-2]]
+    
     print(f"command: {command}")
     command_emb = model_torch(tokenize(command)).detach().numpy()
     save_path_command_emb = '/'.join(traj_path.split('/')[:-1])+'/task_embedding.pkl'
@@ -24,7 +48,7 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--task_json', default='./all_pkl_paths.json')
-    parser.add_argument("--debug", default=False, help="whether or not attach the debugger")
+    parser.add_argument('--debug', action='store_true')
     parser.add_argument("--path_to_tokenizer", default='')
     parser.add_argument("--path_to_muse", default='')
     
@@ -49,7 +73,7 @@ if __name__ == '__main__':
     #  3)OPPURE creare un file separato in cui c'è corrispondenza con i task
     #------------------------------------------------------------------------
     
-    black_list = ['sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute']
+    black_list = ['sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'sim_panda_pick_place_converted_absolute']
     
     embeddings_data = {}
     for dataset_name in data.keys():

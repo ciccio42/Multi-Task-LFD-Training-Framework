@@ -554,7 +554,7 @@ if __name__ == '__main__':
         if args.human_demo:
             config.EXPERT_DATA = "/user/frosa/multi_task_lfd/datasets"
             config.dataset_cfg.mode = "val"
-            config.dataset_cfg.agent_name = "real_ur5e_rgb"
+            config.dataset_cfg.agent_name = "real_new_ur5e_rgb"
             config.dataset_cfg.change_command_epoch = False
             config.dataset_cfg.root_dir = "/user/frosa/multi_task_lfd/datasets/" # "/home/rsofnc000/dataset/opt_dataset"
             config.dataset_cfg.mix_demo_agent = False
@@ -634,7 +634,7 @@ if __name__ == '__main__':
         else:
             task_success_flags = [f(seeds[i][0], seeds[i][1], seeds[i][2], seeds[i][3])
                                   for i, _ in enumerate(seeds)]
-        if args.wandb_log:
+        if True or args.wandb_log:
 
             for i, t in enumerate(task_success_flags):
                 log = dict()
@@ -650,7 +650,7 @@ if __name__ == '__main__':
                             t[k][1]) if k != "variation_id" else int(t[k])
                         log[f"{k}_z"] = float(
                             t[k][2]) if k != "variation_id" else int(t[k])
-                wandb.log(log)
+                # wandb.log(log)
 
             to_log = dict()
             flags = dict()
@@ -666,4 +666,4 @@ if __name__ == '__main__':
 
             json.dump({k: v for k, v in to_log.items()}, open(
                 results_dir+'/test_across_{}trajs.json'.format(args.N), 'w'))
-            wandb.log(to_log)
+            # wandb.log(to_log)

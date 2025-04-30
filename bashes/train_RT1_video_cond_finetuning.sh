@@ -45,19 +45,19 @@ SAVE_FREQ=260
 LOG_FREQ=10
 VAL_FREQ=-1
 # DEVICE=0    # cuda gpu selection
-DEVICE=3  # cuda gpu selection
+DEVICE=1  # cuda gpu selection
 DEBUG=false 
 WANDB_LOG=true
 ROLLOUT=false
-EPOCH=600
+EPOCH=900
 LOADER_WORKERS=16
 CONFIG_PATH=../experiments
 CONFIG_NAME=config_RT1_finetuning.yaml
 
 COSINE_ANNEALING=false
 
-RESUME=true
-FINETUNE=false
+RESUME=false
+FINETUNE=true
 BSIZE=48
 # Policy 1: At each slot is assigned a RandomSampler
 SET_SAME_N=-1
@@ -76,7 +76,7 @@ HEIGHT=100
 WIDTH=180
 
 TASK_str="pick_place" #[pick_place,nut_assembly,stack_block,button]
-EXP_NAME='rt1_real_X-all+MS-all_to_MR-UR5_finetuning-lr5e-6' #'rt1_real__X-UR5_MS-UR5_to_MR-UR5_finetuning' #'rt1_real_all_COtraining' #'rt1_real_panda-sim_ur5e-sim_ur5e-real_COtraining' #'rt1_real_ur5e-panda-dataset_to_real-lr_e-4' #'rt1_real_ur5e-panda-datasets_CO-training' #'rt1_sim_abs_new_condmodule' #'rt1_sim_abs_aa_weakaug_-1_1' #'rt1_real_absolute_aa_no_subsample' #'rt1_deltas_no_conv_absolute_actions_2' #"rt1_sim_RGB_-1_1_range_test_2"
+EXP_NAME='rt1_real_MS_ALL_MR_ur5_to_MR_UR5_finetuning-lr5e-5' #'rt1_real__X-UR5_MS-UR5_to_MR-UR5_finetuning' #'rt1_real_all_COtraining' #'rt1_real_panda-sim_ur5e-sim_ur5e-real_COtraining' #'rt1_real_ur5e-panda-dataset_to_real-lr_e-4' #'rt1_real_ur5e-panda-datasets_CO-training' #'rt1_sim_abs_new_condmodule' #'rt1_sim_abs_aa_weakaug_-1_1' #'rt1_real_absolute_aa_no_subsample' #'rt1_deltas_no_conv_absolute_actions_2' #"rt1_sim_RGB_-1_1_range_test_2"
 PROJECT_NAME=${EXP_NAME}
 
 # TIME_SEQUENCE_LENGHT=6 #6

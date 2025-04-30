@@ -730,19 +730,6 @@ if __name__ == '__main__':
             
             dataset = instantiate(config.get('dataset_cfg', None))
             
-            # creates a list of tuples structured in the following way: ()
-            # variation = list()
-            # file_pairs = dataset.demo_files
-            # pkl_file_list = []
-            # for pkl_file in file_pairs.values():
-            #     pkl_file_list.append((pkl_file[3], pkl_file[2]))
-            #     variation_id = pkl_file[3].split(
-            #         '/')[-2].split('task_')[-1].lstrip("0")
-            #     if variation_id == "":
-            #         variation.append(0)
-            #     else:
-            #         variation.append(int(variation_id))
-            
             variation = list()
             demo_files = dataset.demo_files['pick_place']
             pkl_file_list = []
@@ -814,7 +801,7 @@ if __name__ == '__main__':
                 else:
                     task_success_flags = [f(seeds[i][0], seeds[i][1], seeds[i][2])
                                         for i, n in enumerate(range(args.N))]
-
+        print(model_name)
         if "cond_target_obj_detector" not in model_name:
             final_results = dict()
             for k in task_success_flags[0].keys():

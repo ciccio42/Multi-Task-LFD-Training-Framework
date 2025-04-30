@@ -23,7 +23,7 @@ export HYDRA_FULL_ERROR=1
 echo $1
 TASK_NAME='pick_place' #"$1"
 NUM_WORKERS=8 #8 #10 use 4 when plotting embeddings
-EVAL_EACH_TASK=5
+EVAL_EACH_TASK=10
 GPU_ID=1 #0
 
 # RT1__pick_place__sim__90_epochs__5e-4_lr__bs_16_BGR
@@ -47,7 +47,7 @@ if [ "$TASK_NAME" == 'pick_place' ]; then
             for TASK in pick_place; do
                 for COUNT in 1; do # 1 2 3
                     if [ $COUNT -eq 1 ]; then
-                        SAVE_PATH=${MODEL_PATH}/results_${TASK}/run_${COUNT}
+                        SAVE_PATH=${MODEL_PATH}/results_${TASK}_forgradCam/run_${COUNT}
                         # no wandb_log
                         # no --debug
                         python -u $BASE_PATH/repo/Multi-Task-LFD-Training-Framework/test/multi_task_test/test_any_task.py \
@@ -61,9 +61,9 @@ if [ "$TASK_NAME" == 'pick_place' ]; then
                         --gpu_id ${GPU_ID} \
                         --save_path ${SAVE_PATH} \
                         --save_files \
-                        --sub_action \
-                        --gt_action 45
+                        --gt_action 0
 
+                        # --sub_action \ to run the expert
                         # --debug
                         # --save_files
 

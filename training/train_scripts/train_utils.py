@@ -151,7 +151,7 @@ def make_data_loaders(config, dataset_cfg):
     except AttributeError:
         split_var = 0.1
         
-    split_var = 0.0 # skip validation ########################
+    # split_var = 0.0 # skip validation ########################
     if split_var > 0.0:
         dataset_cfg.mode = 'val'
         val_dataset = instantiate(dataset_cfg)
@@ -733,7 +733,7 @@ def calculate_task_loss(config, train_cfg, device, model, task_inputs, val=False
             # compute embedding with freezed cond_module
             cond_embedding = cond_module_instance(copy.deepcopy(model_inputs['demo']))
             
-            apply_minibatch = model_inputs['images'].shape[0] != config.bsize
+            apply_minibatch = model_inputs['demo_data'].shape[0] != config.bsize
 
             if not apply_minibatch:
                 out, ce_loss, bin_acc, bin_acc_interval = model(  # 1550MB
@@ -770,7 +770,23 @@ def calculate_task_loss(config, train_cfg, device, model, task_inputs, val=False
             #     for t, obs in enumerate(first_dem): 
             #         cv2.imwrite(f"cond_module_obs_{t}.png", np.moveaxis(obs.detach().cpu().numpy()*255, 0, -1))
             
-            out = model(model_inputs['demo_data'])     
+            apply_minibatch = model_inputs['demo_data'].shape[0] != config.bsize
+
+            if not apply_minibatch:
+                out = model(model_inputs['demo_data'])
+            else: # apply minibatch
+                total_steps = math.ceil(model_inputs['demo_data'].shape[0] / config.bsize)
+                outputs = []  # minibatch outputs
+                for minibatch_steps in range(total_steps):
+                    start = minibatch_steps * config.bsize
+                    end = (minibatch_steps + 1) * config.bsize
+                    mini_input = model_inputs['demo_data'][start:end]
+                    mini_output = model(mini_input)
+                    print(torch.cuda.memory_summary(device=3))
+                    outputs.append(mini_output)
+                out = torch.cat(outputs, dim=0)
+                    
+                    
         else:  # other baselines
             out = model(
                 images=copy.deepcopy(model_inputs['images']),
@@ -1153,9 +1169,9 @@ class Trainer:
             #     print('-'*20)
             wandb_config = {k: self.config.get(k) for k in config_keys}
             # luigi
-            wandb.login(key='d8ae96268267edd589283209c8b725caadcd4645')
+            # wandb.login(key='d8ae96268267edd589283209c8b725caadcd4645')
             # gianluigi
-            # wandb.login(key='5f88790e20504ceec6cfa31a400ef37ed5255bea')
+            wandb.login(key='5f88790e20504ceec6cfa31a400ef37ed5255bea')
             
             print(f"Exp name: {self.config.exp_name}")
             self.config.project_name = self.config.exp_name.split('-Batch')[0]
@@ -1342,8 +1358,11 @@ class Trainer:
                 # folder_test = 'test_batch_MS-UR5_X-UR5'
                 # folder_test = 'test_batch_MS-UR5_MS-PANDA_X-UR5_X-PANDA'
                 # folder_test = 'test_batch_cotrain_all_delta'
-                
                 # folder_test = 'test_batch_MS-UR5_finetune'
+                
+                # folder_test = 'test_batch_finetuning_from_cotrain'
+                # 
+                # 
                 # if not os.path.exists(folder_test):
                 #     os.mkdir(folder_test)
                 # num_samples = inputs['finetuning']['traj']['images'].shape[0]
@@ -1517,7 +1536,7 @@ class Trainer:
                             
             #### ---- Validation step ----####
             # e != 0 and self._step % val_freq == 0
-            validate = True
+            validate = False
             if "CondTargetObjectDetector" in self.config.policy._target_:
                 if (self._step % val_freq == 0) and not self.config.get("use_daml", False) and self._val_loader is not None:
                     validate = True

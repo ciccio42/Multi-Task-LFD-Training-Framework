@@ -15,8 +15,9 @@ from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.film_efficientne
 from PIL import Image
 from multi_task_il.models.mt_rep import VideoImitation
 from termcolor import colored
-from torch.autograd import Variable
+from torch.autograd import Variable, grad
 # from multi_task_test.utils import compute_activation_map 
+from copy import deepcopy
 
 
 def compute_activation_map(model, agent_obs, prediction):
@@ -51,7 +52,7 @@ visualizations = {}
 
 def save_grad(name):
     def hook(grad):
-        print('grad')
+        print(grad)
         grads[name] = grad
     return hook
 
@@ -70,9 +71,12 @@ def visualize(features, save_file, img):
 
     # Scale map to [0, 1]
     # f_map = (features ** 2).mean(0).mean(1).squeeze().sqrt()
-    f_map = (features ** 2).mean(0).mean(0).squeeze().sqrt()
-    f_map_shifted = f_map - f_map.min().expand_as(f_map)
-    f_map_scaled = f_map_shifted / f_map_shifted.max().expand_as(f_map_shifted)
+    
+    
+    # f_map = (features ** 2).mean(0).mean(0).squeeze().sqrt()
+    # f_map_shifted = f_map - f_map.min().expand_as(f_map)
+    # f_map_scaled = f_map_shifted / f_map_shifted.max().expand_as(f_map_shifted)
+    f_map_scaled = features
 
     if save_file is None:
       print(f_map_scaled)
@@ -80,10 +84,18 @@ def visualize(features, save_file, img):
       # Read original image
     #   img = imread(img_path, mode='RGB')
         orig_img_size = img.shape[-2:]
+        
+        cv2.imwrite('visualize.png', np.array(np.moveaxis(img.detach().cpu().numpy()*255, 0, -1), dtype=np.uint8))
 
         # Convert to image format
         alpha = (255 * f_map_scaled).round()
-        alpha4d = alpha.unsqueeze(0).unsqueeze(0)
+        
+        if len(f_map_scaled.shape) == 3:
+            alpha4d = alpha.unsqueeze(0)
+        elif len(f_map_scaled.shape) == 2:
+            alpha4d = alpha.unsqueeze(0).unsqueeze(0)
+        else:
+            raise Exception
         
         # alpha_upsampled = torch.nn.functional.upsample_bilinear(
         #     alpha4d, size=torch.Size(orig_img_size)).squeeze(0).transpose(1, 0).transpose(1, 2)
@@ -92,6 +104,8 @@ def visualize(features, save_file, img):
         #     alpha4d,  size=torch.Size(orig_img_size), mode='bilinear'
         # ).squeeze(0).transpose(1, 0).transpose(1, 2)
         
+        
+        # ALPHA (uncomment)      
         alpha_upsampled = torch.nn.functional.interpolate(
             alpha4d,  size=torch.Size(orig_img_size), mode='bilinear'
         ).squeeze(0)
@@ -99,14 +113,16 @@ def visualize(features, save_file, img):
         alpha_upsampled_np = alpha_upsampled.cpu().data.numpy()
         alpha_upsampled_cv2 = np.moveaxis(alpha_upsampled_np.astype(np.uint8),0,2)
         
-        img_numpy = (img.cpu().data.numpy()*255).astype(np.uint8)
+        img_numpy = (img.cpu().data.numpy()*255).astype(np.uint8)[::-1,:,:]
         img_cv2 = np.moveaxis(img_numpy,0,2)
         cv2.imwrite('image_before.png', np.moveaxis(img_numpy,0,2))
         
         
         # apply heatmap
+        alpha = 0.3
+        beta = 1-alpha
         heatmap_img = cv2.applyColorMap(alpha_upsampled_cv2, cv2.COLORMAP_JET)
-        super_imposed_img = cv2.addWeighted(heatmap_img, 0.5, img_cv2, 0.5, 0)
+        super_imposed_img = cv2.addWeighted(heatmap_img, alpha, img_cv2, beta, 0)
         cv2.imwrite(save_file, super_imposed_img)
         
         # Create and save visualization
@@ -345,14 +361,17 @@ class InferenceRunner():
         #     cv2.imwrite("cropped.png", obs)
         return img_res, adj_bb
 
-    def pre_process_obs(self, obs: np.array, bb: np.array = None):
+    def pre_process_obs(self, obs: np.array, bb: np.array = None, is_sim=False):
 
         # make RGB
-        obs = copy.deepcopy(obs[:,:,::-1])        
+        # obs = copy.deepcopy(obs[:,:,::-1])             
+        obs = copy.deepcopy(obs)             
 
         crop_params = self._config.tasks_cfgs[self._task_name].get('agent_crop', [
             0, 0, 0, 0])
         crop_params = [0, 30, 120, 120]
+        if is_sim:
+            crop_params = [20, 25, 80, 75]
         if obs.shape == (100, 180, 3):
             crop_params = [0,0,0,0]
             
@@ -403,14 +422,17 @@ class InferenceRunner():
         
 
     
-    def run(self, task, num_steps, traj_idx):
+    def run(self, task, num_steps, traj_idx, test_sim=False):
         
         #### ATTENZIONE! Viene fatto il reset solo all'inizio
         t = 0
         self._context = self._load_context('/user/frosa/multi_task_lfd/datasets', 'panda', 'pick_place', task, 0, one_demo_dataset=True)
         self.pre_process_context()
         
-        task_dir = os.path.join(self._test_dataset_path, f'task_{task:02d}')
+        if args.sim:
+            task_dir = self._test_dataset_path
+        else:
+            task_dir = os.path.join(self._test_dataset_path, f'task_{task:02d}')
         trajs = sorted([f for f in os.listdir(task_dir) if 'traj' in f and '.pkl' in f], key=lambda x: int(x.split('.')[0].replace('traj', '')))
         # take the first trajectory
         traj_dir = os.path.join(task_dir, trajs[traj_idx])
@@ -421,13 +443,18 @@ class InferenceRunner():
         
         max_len = num_steps if num_steps < len(test_traj) else len(test_traj)
         
+        
+        if 'RT1' in str(type(self._model)):
+            # register forward hook function
+            self._model.rt1._image_tokenizer._tokenizer.register_forward_hook(save_activation('features_last_layer'))
+        
         # with torch.no_grad():
         for t in range(max_len):
             
             context = self._context.float().cuda(self._device)
             
             obs = test_traj.get(t)['obs']['camera_front_image'] #BGR -> RGB
-            obs, bb = self.pre_process_obs(obs)
+            obs, bb = self.pre_process_obs(obs, is_sim=test_sim)
             
             i_t = obs.float().cuda(self._device)
             
@@ -435,7 +462,10 @@ class InferenceRunner():
             # for mod in self._model.rt1.modules():
             #     input = mod(input)
             
-            root_dir = 'visualizations_CAM'
+            if args.sim:
+                root_dir = 'visualizations_CAM_simulated'
+            else:
+                root_dir = 'visualizations_CAM'
             if not os.path.exists(root_dir):
                 os.mkdir(root_dir)
 
@@ -463,12 +493,13 @@ class InferenceRunner():
                     
                 embedding = self._cond_module(context)
                 
-                # register forward hook function
-                self._model.rt1._image_tokenizer._tokenizer.register_forward_hook(save_activation('features_last_layer'))
-                
                 # for k,v in visualizations.items():
                 #     v.retain_grad()
 
+                self._model.zero_grad()
+                
+                # cv2.imwrite('francesco_rosa.png', np.array(np.moveaxis(i_t.detach().cpu().numpy()*255, 0, -1), dtype=np.uint8))
+                
                 out, _ = self._model(images=i_t[None],
                                 states=None,
                                 cond_embedding=embedding,
@@ -482,24 +513,50 @@ class InferenceRunner():
                 ### https://www.pinecone.io/learn/class-activation-maps/
                 
                 prediction_logits = self._model.rt1._aux_info['action_predictions_logits']
-                values, indices = torch.max(prediction_logits, dim=-1)
+                
+                # values, indices = torch.max(prediction_logits, dim=-1)
+                
+                with torch.no_grad():
+                    _, indices = torch.max(prediction_logits, dim=-1)
+                
                 visualizations['features_last_layer'].retain_grad()
                 visualizations['features_last_layer'].register_hook(save_grad('features_last_layer'))
                 # x_logit = Variable(values[0][0].data, requires_grad=True)
                 # axis = ['x', 'y', 'z']
-                axis = ['x']
-                for k in range(1): # for x,y and z axis
-                    axis_logit = values[0][k]
-                    self._model.zero_grad()
-                    axis_logit.backward(retain_graph=True)
-                    feature_weights = torch.mean(grads['features_last_layer'].data, axis=(2,3)).squeeze()
-                    relu = torch.nn.ReLU() # to zero negative gradients
-                    feature_weights = relu(feature_weights)
+                relu = torch.nn.ReLU()
+                axis = ['x', 'y', 'z']
+                for k in range(len(axis)): # for x,y and z axis
+                    axis_logit = prediction_logits[0][k][indices[0][k].item()]
+                    
+                    # if k == (len(axis)-1):
+                    #     axis_logit.backward()    
+                    # else:
+                    #     axis_logit.backward(retain_graph=True)
+                    
+                    # grad(axis_logit, )
+                    if k < (len(axis)-1):
+                        gradients = grad(axis_logit, visualizations['features_last_layer'], retain_graph=True)
+                    else:
+                        gradients = grad(axis_logit, visualizations['features_last_layer'])
+                    
+                    # feature_weights = tor5ch.mean(grads['features_last_layer'].data, axis=(2,3)).squeeze()
+                    feature_weights = torch.mean(gradients[0].data, axis=(2,3)).squeeze()
                     features_after_last_film_layer = torch.zeros_like(visualizations['features_last_layer'])
+                    
                     for idx, weight in enumerate(feature_weights):
                         features_after_last_film_layer[:, idx, :, :] = visualizations['features_last_layer'][:, idx, :, :] * feature_weights[idx]
                     
-                    visualize(features_after_last_film_layer, os.path.join(traj_save_dir, f'step_{t:02d}_axis_{axis[k]}.png'), i_t)
+                    # linear combination + Relu
+                    l_grad_cam_for_yc = relu(torch.sum(features_after_last_film_layer, dim=1))
+                    
+                    # normalize ?
+                    l_grad_cam_for_yc /= torch.max(l_grad_cam_for_yc)
+                    
+                    axis_save_dir = os.path.join(traj_save_dir, f'axis_{axis[k]}')
+                    if not os.path.exists(axis_save_dir):
+                        os.mkdir(axis_save_dir)
+                    
+                    visualize(l_grad_cam_for_yc, os.path.join(axis_save_dir, f'step_{t:02d}.png'), i_t)
                 
                 # output backward in order to compute w_1, w_2, ..., w_k where k are the number of feature maps
                 
@@ -521,6 +578,8 @@ class InferenceRunner():
                 ########################################################
                 # compute_activation_map
                 
+                cv2.imwrite('francesco_rosa.png', np.array(np.moveaxis(i_t.detach().cpu().numpy()*255, 0, -1), dtype=np.uint8))
+                
                 # maybe t=0?
                 out = self._model(i_t[None][None],
                             context,
@@ -529,10 +588,24 @@ class InferenceRunner():
                             target_obj_embedding=None,
                             t=0,
                             eval=True)
+                
+                ### conf scores
+                # out['target_obj_prediction']['conf_scores_final'][0]
+                
+                target_indx_flags = out['target_obj_prediction']['classes_final'][0] == 1
+                target_max_score_indx = torch.argmax(
+                    out['target_obj_prediction']['conf_scores_final'][0][target_indx_flags])
+                ### cls scores
+                logit = out['target_obj_prediction']['cls_scores'][target_max_score_indx][-1]
+                
+                gradients = grad(logit, visualizations['features_last_layer'])
 
                 print('ciao')
                 print('ciao')
                 print('ciao')
+                
+                
+                
                 
                 # # get class scores
                 # values, indices = torch.max(out['bc_distrib']._logit_probs, axis=3)
@@ -595,6 +668,7 @@ if __name__ == '__main__':
     parser.add_argument('--traj_idx', type=int, default=0)
     parser.add_argument('--test_dataset', type=str, default=None)
     parser.add_argument('--debug', action='store_true')
+    parser.add_argument('--sim', action='store_true')
     args = parser.parse_args()
 
     if args.debug:
@@ -606,7 +680,8 @@ if __name__ == '__main__':
     conf_file_path = os.path.join(args.model_save_folder, 'config.yaml')
     model_file_path = os.path.join(args.model_save_folder, f'model_save-{args.step}.pt')
     inf_runner = InferenceRunner(conf_file_path=conf_file_path, model_file_path=model_file_path, test_dataset_path=args.test_dataset, grads=grads)
-    inf_runner.run(args.task, args.num_steps, args.traj_idx)
+    inf_runner.run(args.task, args.num_steps, args.traj_idx, test_sim=args.sim)
+    
 
 
 # instantiate cond module

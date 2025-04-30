@@ -9,6 +9,15 @@ wandb/*
 training/train_scripts/command_encoder/models/*
 training/multi_task_il/models/muse/models/*
 training/multi_task_il/models/muse/datasets/*
+*.npy
+*.gif
+*.json
+*.txt
+*.jpeg
+*.mp4
+bashes/luigi
+bashes/*.json
+bashes_luigi
 
 
 # Byte-compiled / optimized / DLL files

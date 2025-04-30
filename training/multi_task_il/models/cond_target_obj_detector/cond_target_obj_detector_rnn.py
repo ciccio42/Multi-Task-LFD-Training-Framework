@@ -18,7 +18,7 @@ from torchvision.models.video import r2plus1d_18, R2Plus1D_18_Weights
 import cv2
 import matplotlib.pyplot as plt
 import time
-DEBUG = False
+DEBUG = True
 
 
 def get_backbone(backbone_name="slow_r50", video_backbone=True, pretrained=False, conv_drop_dim=3):

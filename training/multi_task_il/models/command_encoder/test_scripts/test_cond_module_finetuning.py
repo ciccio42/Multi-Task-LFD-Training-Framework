@@ -80,7 +80,7 @@ def create_val_loader(tasks_spec, black_list, data_augs):
     val_dataset = CommandEncoderFinetuningDataset(mode='val',
                                                 tasks_spec=tasks_spec,
                                                 dataset_samples_spec=dataset_samples_spec,
-                                                jsons_folder='/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes',
+                                                jsons_folder='/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/datasets_paths_absolute',
                                                 black_list=black_list,
                                                 data_augs=DATA_AUGS)
 
@@ -208,7 +208,6 @@ def create_embedding_plot(embedding_dict, centroids_per_task, se_embeddings):
         y_centr.append(k)
         
     #-------- df sentence encoder embeddings       
-
     centroids_numpy = centroids_tensor.numpy()
     df_centr = pd.DataFrame(centroids_numpy,columns=feat_cols)
     df_centr['y'] = y_centr # label numerica
@@ -240,7 +239,7 @@ def create_embedding_plot(embedding_dict, centroids_per_task, se_embeddings):
     
     
     time_start = time.time()
-    tsne = TSNE(n_components=2, verbose=1, perplexity=5, n_iter=500) # vedere se cambiare parametri
+    tsne = TSNE(n_components=2, verbose=1, perplexity=5, n_iter=500, metric='cosine') # vedere se cambiare parametri
     tsne_results = tsne.fit_transform(all_tensor)
     print('t-SNE done! Time elapsed: {} seconds'.format(time.time()-time_start))
 
@@ -277,7 +276,8 @@ def create_embedding_plot(embedding_dict, centroids_per_task, se_embeddings):
     palette[14] = (0.75, 0.0, 0.0)
     palette[15] = (1.0, 0.0, 0.0)
 
-    plt.figure(figsize=(9,12))
+    # plt.figure(figsize=(9,12))
+    plt.figure(figsize=(9,5))
     ax = sns.scatterplot(
         x="tsne-2d-one", y="tsne-2d-two",
         hue="y", # per ora non la uso visto che ogni campione è a se
@@ -300,33 +300,43 @@ def create_embedding_plot(embedding_dict, centroids_per_task, se_embeddings):
     
     # legend="full",
     
-    # ax = sns.scatterplot(
-    #     x="tsne-2d-one", y="tsne-2d-two",
-    #     hue="y",
-    #     palette=palette,
-    #     data=df_se_emb,
-    #     marker="X",
-    #     s=200,
-    #     legend="full"
-    # )
+    ax = sns.scatterplot(
+        x="tsne-2d-one", y="tsne-2d-two",
+        hue="y",
+        palette=palette,
+        data=df_se_emb,
+        marker="X",
+        s=200,
+        legend="full"
+    )
+    
+    
+    # Shrink current axis by 20%
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    
+    # Put a legend to the right of the current axis
+    lgd = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    
     
     # box = ax.get_position()
     # ax.set_position([box.x0, box.y0 + box.height * 0.4,
     #                 box.width, box.height * 0.5])
 
-    # # Put a legend below current axis
+    # Put a legend below current axis (for all embeddings plot)
     # ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
     #         fancybox=True, shadow=True, ncol=7)
+    
 
     
     from datetime import datetime
     ts = datetime.now().strftime("%m-%d_%H:%M")
     ## save clusters plot
     try:
-        plt.savefig(f"finetuning_centroid_figures/embeddings_clusters_{ts}.png")
+        plt.savefig(f"finetuning_centroid_figures/cosine_embeddings_clusters_{ts}.png", bbox_extra_artists=(lgd,), bbox_inches='tight')
     except Exception:
         os.mkdir("finetuning_centroid_figures/")
-        plt.savefig(f"finetuning_centroid_figures/embeddings_clusters_{ts}.png")
+        plt.savefig(f"finetuning_centroid_figures/cosine_embeddings_clusters_{ts}.png")
             
 
 

@@ -34,7 +34,7 @@ from PIL import Image
 _TIME_COUNTER_ = 0
 PICKED = False
 STEP_START_PICK = 0
-GT_AFTER_PICK = True
+GT_AFTER_PICK = False
 AFTER_PICK_CNT = 0
 START_EXPERT = False
 STOP_EXPERT = False
@@ -579,7 +579,7 @@ def null_step(env):
     return current_gripper_pose
 
 
-def get_action(model, env, target_obj_dec, bb, predict_gt_bb, gt_classes, states, images, context, gpu_id, n_steps, max_T=80, baseline=None, action_ranges=[], target_obj_embedding=None, t=-1, real=False, convert_action=False, obs=None, variation_id=None, cond_module_instance=None):
+def get_action(model, env, target_obj_dec, bb, predict_gt_bb, gt_classes, states, images, context, gpu_id, n_steps, max_T=80, baseline=None, action_ranges=[], target_obj_embedding=None, t=-1, real=False, convert_action=False, obs=None, variation_id=None, cond_module_instance=None, controller=None):
     
     s_t = torch.from_numpy(np.concatenate(states, 0).astype(np.float32))[None]
     if isinstance(images[-1], np.ndarray):

@@ -1,3 +1,5 @@
+# copiare le classi che mi servono
+
 import random
 import torch
 from os.path import join, expanduser
@@ -9,7 +11,6 @@ from torchvision import transforms
 from torchvision.transforms import RandomAffine, ToTensor, Normalize, \
     RandomGrayscale, ColorJitter, RandomApply, RandomHorizontalFlip, GaussianBlur, RandomResizedCrop
 from torchvision.transforms.functional import resized_crop
-from robosuite.utils.transform_utils import quat2axisangle, axisangle2quat, quat2mat, mat2quat 
 
 import pickle as pkl
 from collections import defaultdict, OrderedDict
@@ -29,6 +30,7 @@ import time
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 import itertools
+from multi_task_il.models.command_encoder.cond_module import CondModule
 
 logging.basicConfig(
     level=logging.INFO,
@@ -44,13 +46,111 @@ T_bl_sim_to_w_sim = np.array([[0, -1, 0, 0],
 R_g_sim_to_g_robot = np.array([[0, -1, 0], 
                               [1, 0, 0],
                               [0, 0, 1]])
-R_g_panda_sim_to_g_ur5_sim = np.array([[0,-1,0],
-                                        [1 ,0 ,0],
-                                        [0 ,0 ,1]])
-
 
 
 DEBUG = False
+
+
+def _compress_obs(obs):
+    for key in obs.keys():
+        if 'image' in key:
+            if obs[key] is not None:
+                if len(obs[key].shape) == 3:
+                    okay, im_string = cv2.imencode('.jpg', obs[key])
+                    assert okay, "image encoding failed!"
+                    obs[key] = im_string
+        if 'depth_norm' in key:
+            assert len(
+                obs[key].shape) == 2 and obs[key].dtype == np.uint8, "assumes uint8 greyscale depth image!"
+            depth_im = np.tile(obs[key][:, :, None], (1, 1, 3))
+            okay, depth_string = cv2.imencode('.jpg', depth_im)
+            assert okay, "depth encoding failed!"
+            obs[key] = depth_string
+    return obs
+
+
+def _decompress_obs(obs):
+    keys = ["image"]
+    for key in keys:
+        if 'image' in key:
+            if obs[key] is not None:
+                try:
+                    decomp = cv2.imdecode(obs[key], cv2.IMREAD_COLOR)
+                    obs[key] = decomp
+                except:
+                    pass
+        if 'depth_norm' in key:
+            obs[key] = cv2.imdecode(
+                obs[key], cv2.IMREAD_GRAYSCALE).astype(np.uint8)
+    return obs
+
+class Trajectory:
+    def __init__(self, config_str=None):
+        self._data = []
+        self._raw_state = []
+        self._config_str = None
+        self.set_config_str(config_str)
+
+    def append(self, obs, reward=None, done=None, info=None, action=None, raw_state=None):
+        """
+        Logs observation and rewards taken by environment as well as action taken
+        """
+        obs, reward, done, info, action, raw_state = [copy.deepcopy(
+            x) for x in [obs, reward, done, info, action, raw_state]]
+
+        obs = _compress_obs(obs)
+        self._data.append((obs, reward, done, info, action))
+        self._raw_state.append(raw_state)
+
+    @property
+    def T(self):
+        """
+        Returns number of states
+        """
+        return len(self._data)
+
+    def __getitem__(self, t):
+        return self.get(t)
+
+    def get(self, t, decompress=True):
+        assert 0 <= t < self.T or - \
+            self.T < t <= 0, "index should be in (-T, T)"
+
+        obs_t, reward_t, done_t, info_t, action_t = self._data[t]
+        if decompress:
+            obs_t = _decompress_obs(obs_t)
+        ret_dict = dict(obs=obs_t, reward=reward_t,
+                        done=done_t, info=info_t, action=action_t)
+
+        for k in list(ret_dict.keys()):
+            if ret_dict[k] is None:
+                ret_dict.pop(k)
+        return ret_dict
+
+    def change_obs(self, t, obs):
+        obs_t, reward_t, done_t, info_t, action_t = self._data[t]
+        self._data[t] = obs, reward_t, done_t, info_t, action_t
+
+    def __len__(self):
+        return self.T
+
+    def __iter__(self):
+        for d in range(self.T):
+            yield self.get(d)
+
+    def get_raw_state(self, t):
+        assert 0 <= t < self.T or - \
+            self.T < t <= 0, "index should be in (-T, T)"
+        return copy.deepcopy(self._raw_state[t])
+
+    def set_config_str(self, config_str):
+        self._config_str = config_str
+
+    @property
+    def config_str(self):
+        return self._config_str
+
+
 
 OBJECTS_POS_DIM = {
     'pick_place': {
@@ -147,40 +247,10 @@ def collate_by_task(batch):
     logger.debug(f"Batch time {time.time()-start_batch}")
 
     collate_time = time.time()
-    
-    
     for name, data in per_task_data.items():
-    ###############################################################    
-        # for d in data:
-        #     if d['traj']['actions'].shape[-1] > 7:
-        #         print('a')
-        #         cv2.imwrite(f"test_collate_8.png", np.moveaxis(
-        #             d['traj']['images'][-1].numpy()*255, 0, -1))
-        #     else:
-        #         print('b')
-        #         cv2.imwrite(f"test_collate_7.png", np.moveaxis(
-        #             d['traj']['images'][-1].numpy()*255, 0, -1))
-        
-        # for d in data:
-        #     action_vector = d['traj']['actions']
-        #     if action_vector[-1].shape[-1] > 7:
-        #         new_action_vector = np.zeros((action_vector.shape[0], action_vector.shape[1], 7))
-        #         for idx, act_t in enumerate(action_vector):
-        #             new_act_t = np.zeros((1, 7))
-        #             new_act_t[0][:3] = act_t[0][:3]
-        #             new_act_t[0][3:-1] = quat2axisangle(act_t[0][3:-1])
-        #             new_act_t[0][-1] = act_t[0][-1]
-        #             new_action_vector[idx] = new_act_t
-        #         d['traj']['actions'] = new_action_vector
-                
-    #############################################################
-            
         per_task_data[name] = default_collate(data)
-    
     logger.debug(f"Collate time {time.time()-collate_time}")
     return per_task_data
-
-
 
 
 def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_name: str = "panda", root_dir: str = "", task_spec=None, split: list = [0.9, 0.1], allow_train_skip: bool = False, allow_val_skip: bool = False, mix_variations: bool = False, mode='train', mix_sim_real=False):
@@ -190,8 +260,8 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
     demo_file_cnt = 0
     validation_on_skipped_task = False
 
-    for spec in task_spec: # task_spec è una lista
-        if mode == 'val' and len(spec.get('skip_ids', [])) != 0:    
+    for spec in task_spec:
+        if mode == 'val' and len(spec.get('skip_ids', [])) != 0:
             validation_on_skipped_task = False
 
         name, date = spec.get('name', None), spec.get('date', None)
@@ -217,7 +287,7 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
                 root_dir, name, '{}_{}_{}'.format(date, demo_name, name))
         dataset_loader.subtask_to_idx[name] = defaultdict(list)
         dataset_loader.demo_subtask_to_idx[name] = defaultdict(list)
-        for _id in range(spec.get('n_tasks')):  # 16
+        for _id in range(spec.get('n_tasks')):
 
             # take demo file from no-skipped tasks
             if not validation_on_skipped_task:
@@ -238,9 +308,9 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
             task_dir = expanduser(join(agent_dir,  task_id, '*.pkl'))
             agent_files = sorted(glob.glob(task_dir))
             
-            # if 'real' in task_dir and dataset_loader._mix_sim_real:
-            #     task_dir_sim = task_dir.replace(agent_name, agent_name.replace('real_new_', ''))
-            #     agent_files.extend(sorted(glob.glob(task_dir_sim)))
+            if 'real' in task_dir and dataset_loader._mix_sim_real:
+                task_dir_sim = task_dir.replace(agent_name, agent_name.replace('real_new_', ''))
+                agent_files.extend(sorted(glob.glob(task_dir_sim)))
                 
             if len(agent_files) < 100:
                 agent_files = list(itertools.chain.from_iterable((e, e) for e in agent_files))
@@ -444,8 +514,7 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
 
     return count
 
-
-def make_demo(dataset, traj, task_name):
+def make_demo_finetuning(dataset, traj, task_name):
     """
     Do a near-uniform sampling of the demonstration trajectory
     """
@@ -465,12 +534,26 @@ def make_demo(dataset, traj, task_name):
                     int(i * per_bracket), int((i + 1) * per_bracket)))
             # frames.append(_make_frame(n))
             # convert from BGR to RGB and scale to 0-1 range
-            obs = copy.copy(
-                traj.get(n)['obs']['camera_front_image']) # [:, :, ::-1])
+            if dataset.dataset_samples_spec[task_name]['image_channel_format'] == 'BGR':
+                try:
+                    obs = copy.copy(
+                        traj.get(n)['obs']['camera_front_image'][:, :, ::-1]) # BGR -> RGB
+                except KeyError:
+                    obs = copy.copy( 
+                        traj.get(n)['obs']['image'][:, :, ::-1]) # BGR -> RGB
+            elif dataset.dataset_samples_spec[task_name]['image_channel_format'] == 'RGB': # in this else the image is rgb, we want to convert in bgr
+                try:
+                    obs = copy.copy(
+                        traj.get(n)['obs']['camera_front_image']) # we stay in RGB
+                except KeyError:
+                    obs = copy.copy( 
+                        traj.get(n)['obs']['image'])
+            else:
+                raise AttributeError
             processed = dataset.frame_aug(
                 task_name,
                 obs,
-                perform_aug=False,
+                perform_aug=True,
                 frame_number=i,
                 perform_scale_resize=True)
             frames.append(processed)
@@ -495,7 +578,17 @@ def make_demo(dataset, traj, task_name):
                 obj_in_hand = 0
                 # get the first frame with obj_in_hand and the gripper is closed
                 for t in range(1, len(traj)):
-                    state = traj.get(t)['info']['status']
+                    try:
+                        state = traj.get(t)['info']['status']
+                    except KeyError:
+                        trj_t = traj.get(t)
+                        gripper_act = trj_t['action'][-1]
+                        if gripper_act == 1:
+                            obj_in_hand = t
+                            n = t
+                            break
+                        continue                   
+                        
                     trj_t = traj.get(t)
                     gripper_act = trj_t['action'][-1]
                     if state == 'obj_in_hand' and gripper_act == 1:
@@ -507,7 +600,12 @@ def make_demo(dataset, traj, task_name):
                 start_moving = 0
                 end_moving = 0
                 for t in range(obj_in_hand, len(traj)):
-                    state = traj.get(t)['info']['status']
+                    try:
+                        state = traj.get(t)['info']['status']
+                    except KeyError:
+                        trj_t = traj.get(t)
+                        n = int(len(traj)/2)
+                        break 
                     if state == 'moving' and start_moving == 0:
                         start_moving = t
                     elif state != 'moving' and start_moving != 0 and end_moving == 0:
@@ -516,8 +614,12 @@ def make_demo(dataset, traj, task_name):
                 n = start_moving + int((end_moving-start_moving)/2)
 
             # convert from BGR to RGB and scale to 0-1 range
-            obs = copy.copy(
-                traj.get(n)['obs']['camera_front_image']) # [:, :, ::-1])
+            try:
+                obs = copy.copy(
+                    traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
+            except KeyError:
+                obs = copy.copy(
+                    traj.get(n)['obs']['image'][:, :, ::-1]) 
 
             processed = dataset.frame_aug(task_name,
                                           obs,
@@ -540,61 +642,185 @@ def make_demo(dataset, traj, task_name):
     return ret_dict
 
 
-# def adjust_bb(dataset_loader, bb, obs, img_width=360, img_height=200, top=0, left=0, box_w=360, box_h=200):
-#     # For each bounding box
-#     bb = np.array(bb)
-#     if len(bb.shape) == 3:
-#         bb = bb[:, 0, :]
-#     for obj_indx, obj_bb in enumerate(bb):
-#         if len(obj_bb.shape) == 2:
-#             obj_bb = obj_bb[0]
-#         # Convert normalized bounding box coordinates to actual coordinates
-#         x1_old, y1_old, x2_old, y2_old = obj_bb
-#         x1_old = int(x1_old)
-#         y1_old = int(y1_old)
-#         x2_old = int(x2_old)
-#         y2_old = int(y2_old)
-# 
-#         # Modify bb based on computed resized-crop
-#         # 1. Take into account crop and resize
-#         x_scale = dataset_loader.width/box_w
-#         y_scale = dataset_loader.height/box_h
-#         x1 = int((x1_old - left) * x_scale)
-#         x2 = int((x2_old - left) * x_scale)
-#         y1 = int((y1_old - top) * y_scale)
-#         y2 = int((y2_old - top) * y_scale)
-# 
-#         if DEBUG:
-#             image = cv2.rectangle(np.ascontiguousarray(np.array(np.moveaxis(
-#                 obs.numpy()*255, 0, -1), dtype=np.uint8)),
-#                 (x1,
-#                     y1),
-#                 (x2,
-#                     y2),
-#                 color=(0, 0, 255),
-#                 thickness=1)
-#             if x1 < 0:
-#                 x1 = 0
-#             if x2 < 0:
-#                 x2 = 0
-#             if y1 < 0:
-#                 y1 = 0
-#             if y2 < 0:
-#                 y2 = 0
-# 
-#             if x1 > dataset_loader.width:
-#                 x1 = dataset_loader.width
-#             if x2 > dataset_loader.width:
-#                 x2 = dataset_loader.width
-#             if y1 > dataset_loader.height:
-#                 y1 = dataset_loader.height
-#             if y2 > dataset_loader.height:
-#                 y2 = dataset_loader.height
-#             cv2.imwrite("bb_cropped.png", image)
-# 
-#         # replace with new bb
-#         bb[obj_indx] = np.array([[x1, y1, x2, y2]])
-#     return bb
+def init_freezed_cond_module(
+        height=120,
+        width=160,
+        demo_T=4,
+        model_name="r2plus1d_18",
+        pretrained=True,
+        cond_video=True,
+        n_layers=3,
+        demo_W=7,
+        demo_H=7,
+        demo_ff_dim=[128, 64, 32],
+        demo_linear_dim=[512, 512, 512],
+        conv_drop_dim=3,
+        cond_module_model_path=None,
+        device=None
+        ):
+    ## loading model
+    # cond_module = CondModule(model_name='r2plus1d_18', demo_linear_dim=[512, 512, 512], pretrained=True).to(device)
+    cond_module = CondModule(
+        height=height,
+        width=width,
+        demo_T=demo_T,
+        model_name=model_name,
+        pretrained=pretrained,
+        cond_video=cond_video,
+        n_layers=n_layers,
+        demo_W=demo_W,
+        demo_H=demo_H,
+        demo_ff_dim=demo_ff_dim,
+        demo_linear_dim=demo_linear_dim,
+        conv_drop_dim=conv_drop_dim,
+        )
+    weights = torch.load(cond_module_model_path, weights_only=True)
+
+    cond_module.load_state_dict(weights)
+    cond_module.eval()
+
+    model_parameters = filter(lambda p: p.requires_grad, cond_module.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    # print(cond_module)
+    print('Total params in cond module before freezing:', params)
+
+    # freeze cond module
+    for p in cond_module.parameters():
+        p.requires_grad = False
+        
+    model_parameters = filter(lambda p: p.requires_grad, cond_module.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    # print(cond_module)
+    print('Total params in cond module after freezing:', params)
+    
+    return cond_module.to(device)
+
+
+def make_demo(dataset, traj, task_name):
+    """
+    Do a near-uniform sampling of the demonstration trajectory
+    """
+    if dataset.select_random_frames:
+        def clip(x): return int(max(1, min(x, len(traj) - 1)))
+        per_bracket = max(len(traj) / dataset._demo_T, 1)
+        frames = []
+        cp_frames = []
+        for i in range(dataset._demo_T):
+            # fix to using uniform + 'sample_side' now
+            if i == dataset._demo_T - 1:
+                n = len(traj) - 1
+            elif i == 0:
+                n = 1
+            else:
+                n = clip(np.random.randint(
+                    int(i * per_bracket), int((i + 1) * per_bracket)))
+            # frames.append(_make_frame(n))
+            # convert from BGR to RGB and scale to 0-1 range
+            if task_name != 'real_new_ur5e_pick_place_converted':
+                try:
+                    obs = copy.copy(
+                        traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
+                except KeyError:
+                    obs = copy.copy( 
+                        traj.get(n)['obs']['image'][:, :, ::-1])
+            else: # in this else the image is already rgb, we don't need to convert
+                try:
+                    obs = copy.copy(
+                        traj.get(n)['obs']['camera_front_image'])
+                except KeyError:
+                    obs = copy.copy( 
+                        traj.get(n)['obs']['image'])
+            processed = dataset.frame_aug(
+                task_name,
+                obs,
+                perform_aug=True, ################
+                frame_number=i,
+                perform_scale_resize=True)
+            frames.append(processed)
+            if dataset.aug_twice:
+                cp_frames.append(dataset.frame_aug(
+                    task_name,
+                    obs,
+                    True,
+                    perform_aug=False,
+                    perform_scale_resize=True))
+    else:
+        frames = []
+        cp_frames = []
+        for i in range(dataset._demo_T):
+            # get first frame
+            if i == 0:
+                n = 1
+            # get the last frame
+            elif i == dataset._demo_T - 1:
+                n = len(traj) - 1
+            elif i == 1:
+                obj_in_hand = 0
+                # get the first frame with obj_in_hand and the gripper is closed
+                for t in range(1, len(traj)):
+                    try:
+                        state = traj.get(t)['info']['status']
+                    except KeyError:
+                        trj_t = traj.get(t)
+                        gripper_act = trj_t['action'][-1]
+                        if gripper_act == 1:
+                            obj_in_hand = t
+                            n = t
+                            break
+                        continue                   
+                        
+                    trj_t = traj.get(t)
+                    gripper_act = trj_t['action'][-1]
+                    if state == 'obj_in_hand' and gripper_act == 1:
+                        obj_in_hand = t
+                        n = t
+                        break
+            elif i == 2:
+                # get the middle moving frame
+                start_moving = 0
+                end_moving = 0
+                for t in range(obj_in_hand, len(traj)):
+                    try:
+                        state = traj.get(t)['info']['status']
+                    except KeyError:
+                        trj_t = traj.get(t)
+                        n = int(len(traj)/2)
+                        break 
+                    if state == 'moving' and start_moving == 0:
+                        start_moving = t
+                    elif state != 'moving' and start_moving != 0 and end_moving == 0:
+                        end_moving = t
+                        break
+                n = start_moving + int((end_moving-start_moving)/2)
+
+            # convert from BGR to RGB and scale to 0-1 range
+            try:
+                obs = copy.copy(
+                    traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
+            except KeyError:
+                obs = copy.copy(
+                    traj.get(n)['obs']['image'][:, :, ::-1]) 
+
+            processed = dataset.frame_aug(task_name,
+                                          obs,
+                                          perform_aug=False,
+                                          perform_scale_resize=True,
+                                          agent=False)
+            frames.append(processed)
+            if dataset.aug_twice:
+                cp_frames.append(dataset.frame_aug(
+                    task_name,
+                    obs,
+                    True,
+                    perform_aug=False,
+                    perform_scale_resize=True))
+
+    ret_dict = dict()
+    ret_dict['demo'] = torch.stack(frames)
+    if dataset.aug_twice:
+        ret_dict['demo_cp'] = torch.stack(cp_frames)
+    return ret_dict
+
 
 def adjust_bb(dataset_loader, bb, obs, img_width=360, img_height=200, top=0, left=0, box_w=360, box_h=200):
     # For each bounding box
@@ -620,24 +846,6 @@ def adjust_bb(dataset_loader, bb, obs, img_width=360, img_height=200, top=0, lef
         y1 = int((y1_old - top) * y_scale)
         y2 = int((y2_old - top) * y_scale)
 
-        if x1 <= 0:
-            x1 = 0
-        if x2 <= 0:
-            x2 = 0
-        if y1 <= 0:
-            y1 = 0
-        if y2 <= 0:
-            y2 = 0
-
-        if x1 >= dataset_loader.width:
-            x1 = dataset_loader.width-1
-        if x2 >= dataset_loader.width:
-            x2 = dataset_loader.width-1
-        if y1 >= dataset_loader.height:
-            y1 = dataset_loader.height-1
-        if y2 >= dataset_loader.height:
-            y2 = dataset_loader.height-1
-
         if DEBUG:
             image = cv2.rectangle(np.ascontiguousarray(np.array(np.moveaxis(
                 obs.numpy()*255, 0, -1), dtype=np.uint8)),
@@ -645,12 +853,26 @@ def adjust_bb(dataset_loader, bb, obs, img_width=360, img_height=200, top=0, lef
                     y1),
                 (x2,
                     y2),
-                color=(255, 0, 0),
+                color=(0, 0, 255),
                 thickness=1)
-            
-            # image = image[:, :, ::-1]
-            
-            cv2.imwrite(f"tmp/bb_cropped_idx_{obj_indx}.png", image)    
+            if x1 < 0:
+                x1 = 0
+            if x2 < 0:
+                x2 = 0
+            if y1 < 0:
+                y1 = 0
+            if y2 < 0:
+                y2 = 0
+
+            if x1 > dataset_loader.width:
+                x1 = dataset_loader.width
+            if x2 > dataset_loader.width:
+                x2 = dataset_loader.width
+            if y1 > dataset_loader.height:
+                y1 = dataset_loader.height
+            if y2 > dataset_loader.height:
+                y2 = dataset_loader.height
+            cv2.imwrite("bb_cropped.png", image)
 
         # replace with new bb
         bb[obj_indx] = np.array([[x1, y1, x2, y2]])
@@ -717,7 +939,7 @@ def create_data_aug(dataset_loader=object):
                 contrast=list(dataset_loader.data_augs.get(
                     "contrast", [0.5, 1.5])),
                 saturation=list(dataset_loader.data_augs.get(
-                    "contrast", [0.5, 1.5])),
+                    "saturation", [0.5, 1.5])),
                 hue=list(dataset_loader.data_augs.get("hue", [-0.05, 0.05])),
             )
         ])
@@ -761,7 +983,6 @@ def create_data_aug(dataset_loader=object):
     def frame_aug(task_name, obs, second=False, bb=None, class_frame=None, perform_aug=True, frame_number=-1, perform_scale_resize=True, agent=False, sim_crop=False):
 
         if perform_scale_resize:
-            crop_params = None
             img_height, img_width = obs.shape[:2]
             """applies to every timestep's RGB obs['camera_front_image']"""
             if len(getattr(dataset_loader, "demo_crop", OrderedDict())) != 0 and not agent:
@@ -783,12 +1004,17 @@ def create_data_aug(dataset_loader=object):
                 crop_params[1], img_width - left - crop_params[3]
 
             obs = dataset_loader.toTensor(obs)
+
+            # cv2.imwrite(f"debug_crop_2/{task_name}_before_crop_{frame_number}.png", np.moveaxis(
+            #     obs.numpy()*255, 0, -1))
+            
             # ---- Resized crop ----#
             obs = resized_crop(obs, top=top, left=left, height=box_h,
                                width=box_w, size=(dataset_loader.height, dataset_loader.width))
-            if DEBUG:
-                cv2.imwrite(f"prova_resized_{frame_number}.png", np.moveaxis(
-                    obs.numpy()*255, 0, -1))
+            # if DEBUG:
+            #     cv2.imwrite(f"debug_crop_2/{task_name}_prova_resized_{frame_number}.png", np.moveaxis(
+            #         obs.numpy()*255, 0, -1))
+                
             if bb is not None and class_frame is not None:
                 bb = adjust_bb(dataset_loader=dataset_loader,
                                bb=bb,
@@ -847,13 +1073,20 @@ def create_data_aug(dataset_loader=object):
                     augmented.numpy()*255, 0, -1))
         else:
             if perform_aug:
-                augmented = dataset_loader.transforms(obs)
+                aug_prob = dataset_loader.data_augs.get('p', 0.1)
+                if np.random.choice([0,1], p=[1-aug_prob,aug_prob]):
+                    augmented = dataset_loader.transforms(obs)
+                else:
+                    augmented = obs
             else:
                 augmented = obs
             if DEBUG:
                 if agent:
                     cv2.imwrite("weak_augmented.png", np.moveaxis(
                         augmented.numpy()*255, 0, -1))
+            if DEBUG:
+                cv2.imwrite(f"debug_crop_weak_aug/{task_name}_prova_resized_augmented_{frame_number}.png", np.moveaxis(
+                    augmented.numpy()*255, 0, -1))
         assert augmented.shape == obs.shape
 
         if bb is not None:
@@ -1008,7 +1241,7 @@ def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, comm
             if i == 0 or i == 2:
                 color = (0, 255, 0)
                 image = np.array(
-                    step_t['obs']['camera_front_image']) # [:, :, ::-1])
+                    step_t['obs']['camera_front_image'][:, :, ::-1])
             else:
                 color = (255, 0, 0)
             image = cv2.rectangle(image,
@@ -1040,7 +1273,7 @@ def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, comm
 
     if DEBUG:
         image = np.array(
-            step_t['obs']['camera_front_image']) # [:, :, ::-1])
+            step_t['obs']['camera_front_image'][:, :, ::-1])
         for i, single_bb in enumerate(bb):
             if i == 0 or i == 2:
                 color = (0, 255, 0) # green no-targ
@@ -1166,7 +1399,7 @@ def create_gt_bb_all_obj(dataset_loader, traj, step_t, task_name, distractor=Fal
             if i == 0 or i == 2:
                 color = (0, 255, 0)
                 image = np.array(
-                    step_t['obs']['camera_front_image']) # [:, :, ::-1])
+                    step_t['obs']['camera_front_image'][:, :, ::-1])
             else:
                 color = (255, 0, 0)
             image = cv2.rectangle(image,
@@ -1265,45 +1498,7 @@ def trasform_from_world_to_bl(action):
     
     return action_bl
 
-def trasform_from_world_to_bl_panda_dataset(action):
-    aa_gripper = action[3:-1]
-    # convert axes-angle into rotation matrix
-    # R_w_sim_to_gripper_sim = quat2mat(axisangle2quat(aa_gripper))
-    R_w_sim_to_gripper_panda_sim = quat2mat(axisangle2quat(aa_gripper))
-    
-    R_w_sim_to_gripper_sim = R_w_sim_to_gripper_panda_sim @ R_g_panda_sim_to_g_ur5_sim
-    
-    gripper_pos = action[0:3]
-    
-    T_w_sim_gripper_sim = np.zeros((4,4))
-    T_w_sim_gripper_sim[3,3] = 1
-    
-    # position
-    T_w_sim_gripper_sim[0,3] = gripper_pos[0]
-    T_w_sim_gripper_sim[1,3] = gripper_pos[1]
-    T_w_sim_gripper_sim[2,3] = gripper_pos[2]
-    # orientation
-    T_w_sim_gripper_sim[0:3, 0:3] = R_w_sim_to_gripper_sim
-    
-    T_bl_sim_gripper_sim = T_bl_sim_to_w_sim @ T_w_sim_gripper_sim
-    
-    # print(f"Transformation from world to bl:\n{T_bl_sim_gripper_sim}")
-    
-    R_bl_to_gripper_sim = T_bl_sim_gripper_sim[0:3, 0:3]
-    
-    R_bl_to_gripper_real = R_bl_to_gripper_sim @ R_g_sim_to_g_robot
-    
-    action_bl = np.zeros((7))
-    action_bl[0:3] = T_bl_sim_gripper_sim[0:3, 3]
-    action_bl[3:6] = quat2axisangle(mat2quat(R_bl_to_gripper_real))
-    if action[-1] == -1:
-        action_bl[6] = 0
-    else:
-        action_bl[6] = 1
-    
-    return action_bl
-
-def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_action=False, load_state=False, load_eef_point=False, distractor=False, subtask_id=-1, agent_task_id=-1, bb_sequence=False, take_place_loc=False, sim_crop=True, convert_action=True):
+def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_action=False, load_state=False, load_eef_point=False, distractor=False, subtask_id=-1, agent_task_id=-1, bb_sequence=False, take_place_loc=False, sim_crop=True, convert_action=True, subsampling=False, subsample_factor=None):
 
     images = []
     images_cp = []
@@ -1318,42 +1513,56 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
     for j, t in enumerate(chosen_t):
         t = t.item()
         step_t = traj.get(t)
+        # print(f't: {t}')
 
-        if not getattr(dataset_loader, "real", False) or (getattr(dataset_loader, "real", False) and sim_crop):
+        if dataset_loader.dataset_samples_spec[task_name]['image_channel_format'] == 'RGB':
             # cv2.imwrite("prova.png", step_t['obs']['camera_front_image'])
-            image = copy.copy(
-                step_t['obs']['camera_front_image']) # [:, :, ::-1])
+            try:
+                image = copy.copy(
+                    step_t['obs']['camera_front_image']) # we want to stay in RGB domain
+            except KeyError:
+                image = copy.copy(
+                    step_t['obs']['image'])
+        elif dataset_loader.dataset_samples_spec[task_name]['image_channel_format'] == 'BGR':
+            try:
+                image = copy.copy(
+                    step_t['obs']['camera_front_image'][:, :, ::-1]) # RGB -> BGR
+            except KeyError:
+                image = copy.copy(
+                    step_t['obs']['image'][:, :, ::-1]) # RGB -> BGR
         else:
-            image = copy.copy(
-                step_t['obs']['camera_front_image'])
+            raise AttributeError
 
         if DEBUG:
             cv2.imwrite("original_image.png", image)
 
         # Create GT BB
-        bb_time = time.time()
-        if getattr(dataset_loader, '_bbs_T', 1) == 1:
-            bb_frame, class_frame = create_gt_bb(dataset_loader=dataset_loader,
-                                                 traj=traj,
-                                                 step_t=step_t,
-                                                 task_name=task_name,
-                                                 distractor=distractor,
-                                                 command=command,
-                                                 subtask_id=subtask_id,
-                                                 agent_task_id=agent_task_id,
-                                                 take_place_loc=take_place_loc)
+        # bb_time = time.time()
+        # if getattr(dataset_loader, '_bbs_T', 1) == 1:
+        #     bb_frame, class_frame = create_gt_bb(dataset_loader=dataset_loader,
+        #                                          traj=traj,
+        #                                          step_t=step_t,
+        #                                          task_name=task_name,
+        #                                          distractor=distractor,
+        #                                          command=command,
+        #                                          subtask_id=subtask_id,
+        #                                          agent_task_id=agent_task_id,
+        #                                          take_place_loc=take_place_loc)
 
-            logger.debug(f"BB time {time.time()-bb_time}")
-        else:
-            bb_frame, class_frame = create_gt_bb_sequence(dataset_loader=dataset_loader,
-                                                          traj=traj,
-                                                          t=t,
-                                                          task_name=task_name,
-                                                          distractor=distractor,
-                                                          command=command,
-                                                          subtask_id=subtask_id,
-                                                          agent_task_id=agent_task_id)
-        # print(f"BB time: {end_bb-start_bb}")
+        #     logger.debug(f"BB time {time.time()-bb_time}")
+        # else:
+        #     bb_frame, class_frame = create_gt_bb_sequence(dataset_loader=dataset_loader,
+        #                                                   traj=traj,
+        #                                                   t=t,
+        #                                                   task_name=task_name,
+        #                                                   distractor=distractor,
+        #                                                   command=command,
+        #                                                   subtask_id=subtask_id,
+        #                                                   agent_task_id=agent_task_id)
+        # # print(f"BB time: {end_bb-start_bb}")
+
+        bb_frame = np.array([[0,0,0,0]])
+        class_frame = np.array([1])
 
         if dataset_loader._perform_augs:
             # Append bb, obj classes and images
@@ -1395,7 +1604,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
             eef_point_time = time.time()
             if DEBUG:
                 image_point = np.array(
-                    step_t['obs']['camera_front_image'], dtype=np.uint8) # [:, :, ::-1], dtype=np.uint8)
+                    step_t['obs']['camera_front_image'][:, :, ::-1], dtype=np.uint8)
                 image_point = cv2.circle(cv2.UMat(image_point), (step_t['obs']['eef_point'][1], step_t['obs']['eef_point'][0]), radius=1, color=(
                     0, 0, 255), thickness=1)
                 cv2.imwrite("gt_point.png", cv2.UMat(image_point))
@@ -1415,44 +1624,64 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                 cv2.imwrite("adjusted_point.png", cv2.UMat(image))
             logger.debug(f"EEF point: {time.time()-eef_point_time}")
 
-        if load_action and (j >= 1 or ("real" in dataset_loader.agent_name and not dataset_loader.pick_next)):
+        # if load_action and j >= 1 or ("real" in dataset_loader.agent_name and not dataset_loader.pick_next):
+        if load_action and ('FinetuningPairedDataset' in str(type(dataset_loader)) or j >= 1 or ("real" in dataset_loader.agent_name and not dataset_loader.pick_next)):
             action_time = time.time()
             # Load action
             action_list = list()
-            for next_t in range(dataset_loader._action_T):
-                if t+next_t <= len(traj)-1:
-                    action = step_t['action'] if next_t == 0 else traj.get(
-                        t+next_t)['action']
-                else:
-                    action = step_t['action']
-                if "real" in dataset_loader.agent_name:
-                    if not sim_crop:
-                        from robosuite.utils.transform_utils import quat2axisangle
-                        rot_quat = action[3:7]
-                        rot_axis_angle = quat2axisangle(rot_quat)
-                        action = normalize_action(
-                            action=np.concatenate(
-                                (action[:3], rot_axis_angle, [action[7]])),
-                            n_action_bin=dataset_loader._n_action_bin,
-                            action_ranges=dataset_loader._normalization_ranges)
+            if not subsampling:
+                for next_t in range(dataset_loader._action_T):
+                    if t+next_t <= len(traj)-1:
+                        action = step_t['action'] if next_t == 0 else traj.get(
+                            t+next_t)['action']
                     else:
-                        action =normalize_action(
-                            action=trasform_from_world_to_bl(action),
-                            n_action_bin=dataset_loader._n_action_bin,
-                            action_ranges=dataset_loader._normalization_ranges)                 
-                else:
-                    if dataset_loader._normalize_action:
-                        if not convert_action: #TODO: understand normalization
+                        action = step_t['action']
+                    if "real" in dataset_loader.agent_name:
+                        if not sim_crop:
+                            from robosuite.utils.transform_utils import quat2axisangle
+                            rot_quat = action[3:7]
+                            rot_axis_angle = quat2axisangle(rot_quat)
                             action = normalize_action(
-                                action=action,
+                                action=np.concatenate(
+                                    (action[:3], rot_axis_angle, [action[7]])),
                                 n_action_bin=dataset_loader._n_action_bin,
                                 action_ranges=dataset_loader._normalization_ranges)
                         else:
-                            action = normalize_action(
+                            action =normalize_action(
                                 action=trasform_from_world_to_bl(action),
                                 n_action_bin=dataset_loader._n_action_bin,
-                                action_ranges=dataset_loader._normalization_ranges)
-                action_list.append(action)
+                                action_ranges=dataset_loader._normalization_ranges)                 
+                    else:
+                        if dataset_loader._normalize_action:
+                            if not convert_action:
+                                action = normalize_action(
+                                    action=action,
+                                    n_action_bin=dataset_loader._n_action_bin,
+                                    action_ranges=dataset_loader._normalization_ranges)
+                            else:
+                                action = normalize_action(
+                                    action=trasform_from_world_to_bl(action),
+                                    n_action_bin=dataset_loader._n_action_bin,
+                                    action_ranges=dataset_loader._normalization_ranges)
+                    action_list.append(action)
+            else: # subsampling: you can use this only if the actions are deltas
+                for next_t in range(dataset_loader._action_T):
+                    # print([(t + subsample_factor*next_t + delta_t) for delta_t in range(subsample_factor)])
+                    try:
+                        delta_sum_action = [traj.get(t + subsample_factor*next_t + delta_t)['action'] for delta_t in range(subsample_factor)]
+                    except Exception:
+                        if len(traj)-1 == t:
+                            delta_sum_action = [traj.get(t + subsample_factor*next_t + delta_t)['action'] for delta_t in range(subsample_factor-2)]
+                        elif len(traj)-2 == t:
+                            delta_sum_action = [traj.get(t + subsample_factor*next_t + delta_t)['action'] for delta_t in range(subsample_factor-1)]
+                    
+                    gripper_last_t = delta_sum_action[-1][-1]
+                    
+                    delta_sum_action = np.sum(np.stack(delta_sum_action), axis=0)
+                    delta_sum_action[-1] = gripper_last_t
+                                    
+                    action_list.append(delta_sum_action)
+                    
 
             actions.append(action_list)
             logger.debug(f"Action: {time.time()-action_time}")
@@ -1500,6 +1729,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
     end_time_sample = time.time()
     logger.debug(f"Sample time {end_time_sample-time_sample}")
     return images, images_cp, bb, obj_classes, actions, states, points
+    # return images[:-1], images_cp, bb, obj_classes, actions, states, points
 
 
 class DIYBatchSampler(Sampler):
@@ -1749,7 +1979,7 @@ class TrajectoryBatchSampler(Sampler):
         self.balancing_policy = sampler_spec.get('balancing_policy', 0)
         self.num_step = n_step
 
-        ########################## Create sampler for agent trajectories ####################################
+        # Create sampler for agent trajectories
         self.agent_task_samplers = OrderedDict()
         self.agent_task_iterators = OrderedDict()
         self.agent_task_to_idx = agent_task_to_idx
@@ -1797,7 +2027,7 @@ class TrajectoryBatchSampler(Sampler):
             }
             self.task_info[task_name] = curr_task_info
 
-        ################################ Create sampler for demo trajectories #################################
+        # Create sampler for demo trajectories
         self.demo_task_samplers = OrderedDict()
         self.demo_task_iterators = OrderedDict()
         self.demo_task_to_idx = demo_task_to_idx
@@ -1880,13 +2110,13 @@ class TrajectoryBatchSampler(Sampler):
 
             # for each sample in the batch
             for idx in range(self.batch_size):
-                (name, sub_task) = self.idx_map[idx] # idx_map ha 32 elementi: 2 campioni per variazione di task (2*16 = 32)
+                (name, sub_task) = self.idx_map[idx]
 
-                agent_sampler = self.agent_task_samplers[name][sub_task]    
-                agent_iterator = self.agent_task_iterators[name][sub_task]  # prendo l'iteratore
+                agent_sampler = self.agent_task_samplers[name][sub_task]
+                agent_iterator = self.agent_task_iterators[name][sub_task]
 
                 try:
-                    agent_indx = self.agent_subtask_to_idx[name][sub_task][next(    # con l'indice datomi dall'iteratore prendo l'indice della traiettoria dell'agente
+                    agent_indx = self.agent_subtask_to_idx[name][sub_task][next(
                         agent_iterator)]
                 except StopIteration:  # print('early sstop:', i, name)
                     # re-start the smaller-sized tasks
@@ -1920,12 +2150,12 @@ class TrajectoryBatchSampler(Sampler):
                     self.demo_task_iterators[name][sub_task] = demo_iterator
                 agent_demo_pair[agent_indx] = demo_indx
 
-                batch.append([agent_indx, agent_demo_pair[agent_indx]]) # mi assicuro che nel batch ci vanno almeno due istanze per ogni variazione
+                batch.append([agent_indx, agent_demo_pair[agent_indx]])
 
             if len(batch) == self.batch_size:
                 if self.shuffle:
                     random.shuffle(batch)
-                yield batch # con questo batch di numeri viene chiamata la __getitem__ del dataset tramite il dataloader
+                yield batch
                 batch = []
             if len(batch) > 0 and not self.drop_last:
                 if self.shuffle:

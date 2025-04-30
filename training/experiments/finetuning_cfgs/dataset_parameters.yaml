@@ -167,3 +167,10 @@ real_new_ur5e_pick_place_converted_delta:
   crop:                             [0, 30, 120, 120] #[20, 25, 80, 75]  # Render: 200, 360 
   image_channel_format:             'BGR'
   subsample:                        False
+
+human_rgb_pick_place:
+  name:                             'human_rgb_pick_place' 
+  n_tasks:                          16
+  crop:                             [0, 30, 120, 120]
+  image_channel_format:             'RGB'
+  subsample:                        False

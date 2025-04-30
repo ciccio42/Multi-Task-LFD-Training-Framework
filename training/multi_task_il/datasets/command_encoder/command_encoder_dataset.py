@@ -38,7 +38,7 @@ class CommandEncoderFinetuningDataset(Dataset):
         self.aug_twice = aug_twice
         self.aux_pose = aux_pose
         self.select_random_frames = select_random_frames
-        self.black_list = black_list # dataset to exclude
+        self.black_list = ['human_rgb_pick_place'] #black_list # dataset to exclude
         self.use_strong_augs = use_strong_augs
         self.data_augs = data_augs
         self.frame_aug = create_data_aug(self)
@@ -61,7 +61,7 @@ class CommandEncoderFinetuningDataset(Dataset):
         all_file_count = 0
         max_len = 0
         for dataset_name in self.pkl_paths_dict.keys():
-            if dataset_name not in self.black_list:
+            if dataset_name in self.black_list:
                 self.map_tasks_to_idxs[dataset_name] = defaultdict()
                 for task in self.pkl_paths_dict[dataset_name].keys():
                     if type(self.pkl_paths_dict[dataset_name][task]) == list:

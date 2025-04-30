@@ -93,23 +93,23 @@ def convert_to_delta(traj_data, is_sim=True):
         # when outputting -3.14 with obs 3.13 the gripper rotates according to
         # the shortest angle
         
-        # for angle_idx, delta_angle in enumerate(delta_t[3:6]):
+        for angle_idx, delta_angle in enumerate(delta_t[3:6]):
             # this happens when for example an angle is 3,13 and the other -3,14
             # TODO: why at t=0 we have for example 9° degree of delta? -> only at first step
-            # if (delta_angle > math.pi or delta_angle < -math.pi) and t != 0:
+            if (delta_angle > math.pi or delta_angle < -math.pi) and t != 0:
             # if delta_angle > math.pi or delta_angle < -math.pi:
-            #     ang_t_minus_1 = action_t_minus_1[angle_idx+3]
-            #     ang_t = action_t[angle_idx+3]
-                
-            #     if ang_t > 0.0 and ang_t_minus_1 < 0.0:
-            #         ang_t_minus_1 = 2*math.pi - abs(ang_t_minus_1)
-            #     elif ang_t < 0.0 and ang_t_minus_1 > 0.0:
-            #         ang_t = 2*math.pi - abs(ang_t)
-            #     else:
-            #         print(f'[WARNING] unexpected situation when computing angle:\nang_t:{ang_t}, ang_t_minus_1:{ang_t_minus_1}')
-                    
-            #     delta_angle = np.round(ang_t - ang_t_minus_1, 2)
-            #     delta_t[angle_idx+3] = delta_angle
+                ang_t_minus_1 = action_t_minus_1[angle_idx+3]
+                ang_t = action_t[angle_idx+3]
+          
+                if ang_t > 0.0 and ang_t_minus_1 < 0.0:
+                    ang_t_minus_1 = 2*math.pi - abs(ang_t_minus_1)
+                elif ang_t < 0.0 and ang_t_minus_1 > 0.0:
+                    ang_t = 2*math.pi - abs(ang_t)
+                else:
+                    print(f'[WARNING] unexpected situation when computing angle:\nang_t:{ang_t}, ang_t_minus_1:{ang_t_minus_1}')
+              
+                delta_angle = np.round(ang_t - ang_t_minus_1, 2)
+                delta_t[angle_idx+3] = delta_angle
                 
             # elif delta_angle >= 0.2 or delta_angle <= -0.2:
                 

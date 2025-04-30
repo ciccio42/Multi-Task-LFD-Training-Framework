@@ -739,11 +739,11 @@ class CondTargetObjectDetector(nn.Module):
     def activations_hook(self, grad):
         self.activations = grad
 
-    def register_forward_hook(self, layer):
-        """
-        Register a forward hook on the specified layer.
-        """
-        layer.register_forward_hook(self.activations_hook)
+    # def register_forward_hook(self, layer):
+    #     """
+    #     Register a forward hook on the specified layer.
+    #     """
+    #     layer.register_forward_hook(self.activations_hook)
 
     def gradients_hook(self, module, grad_input, grad_output):
         self.gradients = grad_output[0]

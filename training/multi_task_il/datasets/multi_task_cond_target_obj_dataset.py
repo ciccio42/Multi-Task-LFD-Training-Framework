@@ -161,6 +161,10 @@ class CondTargetObjDetectorDataset(Dataset):
             agent_task_id = 0
         else:
             agent_task_id = int(agent_task_id)
+            
+        sim_crop = False
+        if "real" not in agent_file:
+            sim_crop = True
 
         # start_demo = time.time()
         demo_data = make_demo(self, demo_traj[0], task_name)
@@ -169,7 +173,7 @@ class CondTargetObjDetectorDataset(Dataset):
 
         # start_trj = time.time()
         traj = self._make_traj(
-            agent_traj[0], demo_traj[1], task_name, sub_task_id, agent_task_id)
+            agent_traj[0], demo_traj[1], task_name, sub_task_id, agent_task_id, sim_crop=sim_crop)
         # end_trj = time.time()
         # print(f"Trj-time {end_trj-start_trj}")
 
@@ -178,7 +182,7 @@ class CondTargetObjDetectorDataset(Dataset):
         # print("Elapsed time: ", elapsed_time)
         return {'demo_data': demo_data, 'traj': traj, 'task_name': task_name, 'task_id': sub_task_id}
 
-    def _make_traj(self, traj, command, task_name, sub_task_id, agent_task_id):
+    def _make_traj(self, traj, command, task_name, sub_task_id, agent_task_id, sim_crop):
         # get the first frame from the trajectory
         ret_dict = {}
         # print(f"Command {command}")
@@ -221,7 +225,8 @@ class CondTargetObjDetectorDataset(Dataset):
             load_state=self._load_state,
             distractor=True,
             subtask_id=sub_task_id,
-            agent_task_id=agent_task_id)
+            agent_task_id=agent_task_id,
+            sim_crop=sim_crop)
         # end_create_sample = time.time()
         # print(f"Create sample time {end_create_sample-start_create_sample}")
 

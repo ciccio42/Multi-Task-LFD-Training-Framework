@@ -14,6 +14,7 @@
 * dataset, batchsampler are defined in `training/multi_task_il/datasets/rt1/finetuning_paired_dataset.py`
 * to launch training, run bash script `train_RT1_video_cond_finetuning.sh` in `bashes/`
 
+
 # [testing] RT-1
 in order to test
 * open `test_RT1_video_cond.sh` bash script

@@ -54,7 +54,7 @@ pick_place:
   loss_mul:          1
   task_per_batch:    16
   traj_per_subtask:  100
-  demo_per_subtask:  100
+  demo_per_subtask:  40 #! 100, modified by lvicidomini
 
 stack_block:  
   name:             'stack_block'

@@ -4,8 +4,6 @@ import torch
 import hydra
 import os
 
-os.environ['MASTER_ADDR'] = 'localhost' 
-os.environ['MASTER_PORT'] = '9959' 
 torch.autograd.set_detect_anomaly(True)
 # from torch.utils.tensorboard import SummaryWriter
 # writer = SummaryWriter()
@@ -59,7 +57,11 @@ def main(cfg):
             print(f"Number task for {tsk.name} {len(tsk.task_ids)}")
         cfg.bsize = sum(
             [(len(tsk.task_ids)-len(getattr(tsk, "skip_ids", []))) * cfg.set_same_n for tsk in cfg.tasks])
-        cfg.vsize = cfg.bsize
+        if not cfg.dataset_cfg.get('validation_on_skipped_task', False):
+            cfg.vsize = cfg.bsize
+        else:
+            cfg.vsize = sum(
+                [(len(getattr(tsk, "skip_ids", []))) * cfg.set_same_n for tsk in cfg.tasks if getattr(tsk, "skip_ids", [])])
         print(f"Computed batch-size {cfg.bsize}")
         print(
             f'To construct a training batch, set n_per_task of all tasks to {cfg.set_same_n}, new train/val batch sizes: {cfg.train_cfg.batch_size}/{cfg.train_cfg.val_size}')

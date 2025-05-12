@@ -45,7 +45,7 @@ button:
 pick_place:
   name:              'pick_place'
   n_tasks:           16
-  demo_crop:         [0, 30, 140, 120] #[0, 30, 140, 120] # [20, 25, 80, 75]
+  demo_crop:         [20, 25, 80, 75] #[0, 30, 140, 120] #[20, 25, 80, 75]
   agent_crop:        [0, 30, 140, 120] # Render: top, distance_bottom, left, distance_right
   agent_sim_crop:        [20, 25, 80, 75]
   n_per_task:        2

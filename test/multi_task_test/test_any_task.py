@@ -100,8 +100,9 @@ def object_detection_inference(model, config, ctr, heights=100, widths=200, size
             context_data_trj, T_context, sample_sides=True, random_frames=random_frames)
         # convert BGR context image to RGB and scale to 0-1
         for i, img in enumerate(context):
-            cv2.imwrite(f"context_{i}.png", np.array(img[:, :, ::-1]))
-        context = [img_formatter(i[:, :, ::-1])[None] for i in context]
+            cv2.imwrite(f"context_{i}.png", np.array(img)) # [:, :, ::-1]
+        context = [img_formatter(i)[None] for i in context] # [:, :, ::-1]
+        
         # assert len(context ) == 6
         if isinstance(context[0], np.ndarray):
             context = torch.from_numpy(np.concatenate(context, 0))[None]

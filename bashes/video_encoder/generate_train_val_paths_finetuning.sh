@@ -23,6 +23,23 @@ if [ $GENERATE_PATHS_TO_PKLS == true ]; then
         # --delta_files
 fi
 
+#### ---- DOWNLOAD PYTORCH MODEL ---- ####
+# conda install anaconda::git-lfs
+# git lfs install
+# cd /home/rsofnc000/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/training/multi_task_il/models/command_encoder/muse/
+# mkdir models
+# cd universal-sentence-encoder-multilingual-large-3-pytorch/ && mv model.pt ../ && cd .. && rm -rf universal-sentence-encoder-multilingual-large-3-pytorch
+# mkdir universal-sentence-encoder-multilingual-large-3
+# cd universal-sentence-encoder-multilingual-large-3
+
+#### ---- DOWNLAOD ORIGINAL MODEL ---- ####
+####  IN PYTHON ENVIRONMENT ####
+# import kagglehub
+# PATH = kagglehub.model_download("google/universal-sentence-encoder/tensorFlow2/multilingual-large")
+# print(PATH)
+# cd universal-sentence-encoder-multilingual-large-3
+# mv [PATH]/* .
+
 # muse and tokenizer
 PATH_TO_PT_MODEL="/home/rsofnc000/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/training/multi_task_il/models/command_encoder/muse/models/model.pt"
 PATH_TO_TF_MODEL="/home/rsofnc000/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/training/multi_task_il/models/command_encoder/muse/models/universal-sentence-encoder-multilingual-large-3"

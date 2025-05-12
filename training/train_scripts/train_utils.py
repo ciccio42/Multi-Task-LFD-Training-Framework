@@ -390,13 +390,28 @@ class Trainer:
                                             )
 
     def worker(self, local_rank, *args):
+        os.environ['MASTER_ADDR'] = 'localhost' 
+        starting_port = 9959
+        os.environ['MASTER_PORT'] = f'{starting_port}' 
         
         global_rank = args[0] * args[1] + local_rank 
-        dist.init_process_group( 
-        backend='nccl',  
-        world_size=self._world_size, 
-        rank=global_rank 
-        )
+        
+        i = 0
+        while i<10:
+            try:
+                i += 1
+                print(f"Starting port {starting_port}")
+                dist.init_process_group( 
+                backend='nccl',  
+                world_size=self._world_size, 
+                rank=global_rank 
+                )
+                break
+            except:
+                print(f"Port {starting_port} is busy, trying next one")
+                starting_port -= 1
+                os.environ['MASTER_PORT'] = f'{starting_port}' 
+
         
         if global_rank == 0:
                         

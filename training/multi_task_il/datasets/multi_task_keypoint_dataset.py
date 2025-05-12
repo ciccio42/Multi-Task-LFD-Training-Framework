@@ -65,6 +65,7 @@ class MultiTaskPairedKeypointDetectionDataset(Dataset):
             load_eef_point=False,
             mix_sim_real=False,
             dagger=False,
+            validation_on_skipped_task=False,
             ** params):
 
         self.task_crops = OrderedDict()
@@ -129,7 +130,9 @@ class MultiTaskPairedKeypointDetectionDataset(Dataset):
                               split,
                               allow_train_skip,
                               allow_val_skip,
-                              mix_sim_real=self._mix_sim_real)
+                              mix_sim_real=self._mix_sim_real,
+                              mode=mode,
+                              validation_on_skipped_task=validation_on_skipped_task)
 
         self.pairs_count = count
         self.task_count = len(tasks_spec)
@@ -153,7 +156,8 @@ class MultiTaskPairedKeypointDetectionDataset(Dataset):
                                           task_crops=self.task_crops,
                                           agent_sim_crop=self.agent_sim_crop,
                                           demo_crop=self.demo_crop,
-                                          agent_crop=self.agent_crop,)
+                                          agent_crop=self.agent_crop
+                                          )
         
 
     def __len__(self):

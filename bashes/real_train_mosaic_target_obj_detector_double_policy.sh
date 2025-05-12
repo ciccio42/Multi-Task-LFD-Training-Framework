@@ -18,22 +18,22 @@ echo $1
 TASK_NAME="$1"
 
 EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset/
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder/luigi_models
+SAVE_PATH=/home/rsofnc000/checkpoint_save_folder/100_180
 POLICY='${mosaic}'
 TARGET='multi_task_il.models.mt_rep_double_policy.VideoImitation'
 TASKS_CONFIG=7_tasks_real
 AGENT_NAME=real_new_ur5e
-DEMO_NAME=human_rgb # [human_rgb or panda]
+DEMO_NAME=panda #human_rgb # [human_rgb or panda]
 
 SAVE_FREQ=-1
 LOG_FREQ=10
 VAL_FREQ=-1
 DEVICE=0
-DEBUG=false
-WANDB_LOG=true
+DEBUG=true
+WANDB_LOG=false
 ROLLOUT=false
 EPOCH=90
-LOADER_WORKERS=16
+LOADER_WORKERS=1
 CONFIG_PATH=../experiments
 CONFIG_NAME=config_real.yaml
 CONCAT_IMG_EMB=true
@@ -210,14 +210,14 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
 
     ### Pick-Place ###
-    RESUME_PATH="Real-1Task-pick_place-MOSAIC-KP_State_false_Finetued-Batch32"
+    RESUME_PATH="Real-1Task-pick_place-MOSAIC-KP-No-State-Finetune-Batch48"
     #1Task-pick_place-Double-Policy-Convert_action_State_true_Convert_true-Batch32
-    RESUME_STEP="34"
+    RESUME_STEP="62"
     RESUME=true
     FINETUNE=false
 
-    TARGET_OBJ_DETECTOR_STEP=33 #68526 #129762 #198900 #65250
-    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/Real-1Task-pick_place-Human-Demo-KP-No-Finetune-Batch32
+    TARGET_OBJ_DETECTOR_STEP=31 #68526 #129762 #198900 #65250
+    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/Real-1Task-pick_place-KP-No-Finetune-Batch32
 
     BSIZE=32 #32 #128 #64 #32
     COMPUTE_OBJ_DISTRIBUTION=false
@@ -243,8 +243,8 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
 
     COSINE_ANNEALING=false
 
-    TASK_str="pick_place"                                                   #[pick_place,nut_assembly,stack_block,button]
-    EXP_NAME=Real-1Task-pick_place-MOSAIC-KP_State_${CONCAT_STATE}_Finetued #_${FINETUNE}
+    TASK_str="pick_place"                                                                #[pick_place,nut_assembly,stack_block,button]
+    EXP_NAME=Real-1Task-pick_place-${DEMO_NAME}-MOSAIC-KP_State_${CONCAT_STATE}_Finetued #_${FINETUNE}
     PROJECT_NAME=${EXP_NAME}
 
 elif [ "$TASK_NAME" == 'multi' ]; then

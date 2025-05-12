@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #SBATCH --exclude=tnode[01-17]
-#SBATCH --exclude=gnode12
 #SBATCH --partition=gpuq
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
@@ -15,23 +14,35 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 export HYDRA_FULL_ERROR=1
 
 EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder/224_224
+
 POLICY='${cond_target_obj_detector}'
 DATASET_TARGET=multi_task_il.datasets.multi_task_keypoint_dataset.MultiTaskPairedKeypointDetectionDataset
 TASKS_CONFIG=7_tasks_real
 AGENT_NAME=real_new_ur5e
-DEMO_NAME=panda
 
 TASK_NAME="${1}"
 RESUME_FOLDER="${2}"
 RESUME_STEP="${3}"
 FINETUNE="${4:-false}"
 RESUME="${5:-false}"
+DEMO_NAME="${6:-panda}" # [human_rgb or panda]
+SAVE_PATH="${7:-/home/rsofnc000/checkpoint_save_folder/100_180_new}"
 echo "Task Name is: $TASK_NAME"
 echo "Resume Folder is: $RESUME_FOLDER"
 echo "Resume Step is: $RESUME_STEP"
 echo "Finetune is: $FINETUNE"
 echo "Resume is: $RESUME"
+echo "Demo Name is: $DEMO_NAME"
+echo "Save Path is: $SAVE_PATH"
+
+# Set offset_x and offset_y based on DEMO_NAME
+if [ "$DEMO_NAME" = "human_rgb" ]; then
+    OFFSET_X=2.0
+    OFFSET_Y=1.5
+elif [ "$DEMO_NAME" = "panda" ]; then
+    OFFSET_X=1.5
+    OFFSET_Y=1.5
+fi
 
 SAVE_FREQ=-1
 LOG_FREQ=10
@@ -47,7 +58,7 @@ BSIZE=32 #16 #32
 COMPUTE_OBJ_DISTRIBUTION=false
 CONFIG_PATH=../experiments/
 CONFIG_NAME=config_cond_target_obj_detector_real.yaml
-LOADER_WORKERS=8
+LOADER_WORKERS=16
 BALANCING_POLICY=0
 OBS_T=7
 
@@ -66,10 +77,10 @@ DROP_DIM=4      # 2    # 3
 OUT_FEATURE=128 # 512 # 256
 # use (13,23) when image is 100,180
 # use (28,28) when image is 224,224
-DIM_H=28 #13
-DIM_W=28 #23
-HEIGHT=224
-WIDTH=224
+DIM_H=13
+DIM_W=23
+HEIGHT=100
+WIDTH=180
 N_CLASSES=4
 DAGGER=false
 
@@ -103,7 +114,7 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     TASK_str="pick_place"
-    EXP_NAME=Real-1Task-${TASK_str}-Demo-${DEMO_NAME}-KP-No-Finetune
+    EXP_NAME=Real-1Task-${TASK_str}-Demo-${DEMO_NAME}-KP-RGB-Finetune
     PROJECT_NAME=${EXP_NAME}
     SET_SAME_N=2
     RESUME_PATH=${RESUME_FOLDER}
@@ -118,25 +129,6 @@ elif [ "$TASK_NAME" == 'multi' ]; then
     RESUME=false
 fi
 
-# while true; do
-#     highest_epoch=0
-
-#     if [ "$RESUME" = true ]; then
-#         FOLDER_PATH=${RESUME_PATH}
-#         while IFS= read -r file; do
-#             if [[ $file =~ model_save-([0-9]+)\.pt ]]; then
-#                 epoch_number=${BASH_REMATCH[1]}
-#                 if ((epoch_number > highest_epoch)); then
-#                     highest_epoch=$epoch_number
-#                 fi
-#             fi
-#         done < <(find "$FOLDER_PATH" -type f -name 'model_save-*.pt')
-
-#         RESUME_STEP=$highest_epoch
-#         echo "Highest epoch number found: $RESUME_STEP"
-#     fi
-
-#     if ((highest_epoch != EPOCH && highest_epoch != EPOCH - 1)); then
 echo "Running srun command..."
 srun --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u ../training/train_scripts/train_any.py \
     --config-path ${CONFIG_PATH} \
@@ -177,6 +169,8 @@ srun --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u
     cond_target_obj_detector_cfg.n_channels=${OUT_FEATURE} \
     cond_target_obj_detector_cfg.conv_drop_dim=${DROP_DIM} \
     cond_target_obj_detector_cfg.n_classes=${N_CLASSES} \
+    cond_target_obj_detector_cfg.x_offset=${OFFSET_X} \
+    cond_target_obj_detector_cfg.y_offset=${OFFSET_Y} \
     project_name=${PROJECT_NAME} \
     EXPERT_DATA=${EXPERT_DATA} \
     save_path=${SAVE_PATH} \
@@ -190,13 +184,3 @@ srun --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u
     wandb_log=${WANDB_LOG} \
     resume=${RESUME} \
     loader_workers=${LOADER_WORKERS}
-#     else
-#         echo "The highest epoch number ($highest_epoch) is equal to EPOCH ($EPOCH) or EPOCH-1 ($((EPOCH - 1))). Exiting loop."
-#         break
-#     fi
-
-#     RESUME=true
-#     FINETUNE=false
-#     FOLDER_PATH=${SAVE_PATH}/${EXP_NAME}-Batch${BSIZE}
-#     sleep 1 # Optional: Add a sleep to avoid tight loop
-# done

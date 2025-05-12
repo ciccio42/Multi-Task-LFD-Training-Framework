@@ -4,12 +4,14 @@ import re
 import time
 import argparse
 
-BASH_SCRIPT = "/home/rsofnc000/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/real_train_mosaic_target_obj_detector_double_policy.sh"
+BASH_SCRIPT = "/home/rsofnc000/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/real_train_keypoint_detection.sh"
 FINETUNE = False
 RESUME = True
-CHECKPOINT_FOLDER = "Real-1Task-pick_place-MOSAIC-KP_State_false_Finetued-Batch32"
-RESUME_STEP = 7
-BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}"]
+CHECKPOINT_FOLDER = "Real-1Task-pick_place-Demo-panda-KP-RGB-Finetune-Batch32"
+RESUME_STEP = -1
+DEMO_NAME = 'panda'
+SAVE_PATH = '/home/rsofnc000/checkpoint_save_folder/100_180_new'
+BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}", f"{DEMO_NAME}", f"{SAVE_PATH}"]
 MAX_EPOCHS = 90  # Set your maximum number of epochs here
 
 def get_highest_epoch(folder):
@@ -59,13 +61,13 @@ def run_bash_script():
             time.sleep(10)  # Wait for 10 seconds before polling again
         
         
-        highest_epoch = get_highest_epoch(CHECKPOINT_FOLDER)
+        highest_epoch = get_highest_epoch(os.path.join(SAVE_PATH, CHECKPOINT_FOLDER))
         print(f"Highest epoch reached: {highest_epoch}")
         
           
         RESUME_STEP = highest_epoch
         RESUME=True
-        BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}"]
+        BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}", f"{DEMO_NAME}", f"{SAVE_PATH}"]
         
         if highest_epoch >= MAX_EPOCHS or highest_epoch >= MAX_EPOCHS-1:
             print("Reached the maximum number of epochs. Exiting.")
@@ -95,11 +97,11 @@ if __name__ == "__main__":
 
             time.sleep(10)  # Wait for 10 seconds before polling again
         
-        highest_epoch = get_highest_epoch(CHECKPOINT_FOLDER)
+        highest_epoch = get_highest_epoch(os.path.join(SAVE_PATH, CHECKPOINT_FOLDER))
         print(f"Highest epoch reached: {highest_epoch}")
         RESUME_STEP = highest_epoch
         RESUME=True
-        BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}"]
+        BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}",  f"{DEMO_NAME}", f"{SAVE_PATH}"]
     
     
     run_bash_script()

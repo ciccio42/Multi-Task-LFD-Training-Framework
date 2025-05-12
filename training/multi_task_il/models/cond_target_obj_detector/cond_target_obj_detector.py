@@ -352,7 +352,7 @@ class CondModule(nn.Module):
 
 class AgentModule(nn.Module):
 
-    def __init__(self, height=120, width=160, obs_T=4, model_name="resnet18", pretrained=False, load_film=True, n_res_blocks=6, n_classes=2, task_embedding_dim=128, dim_H=7, dim_W=7, conv_drop_dim=3, anc_scales=[1.0, 1.5, 2.0, 3.0, 4.0], anc_ratios=[0.2, 0.5, 0.8, 1, 1.2, 1.5, 2.0]):
+    def __init__(self, height=120, width=160, obs_T=4, model_name="resnet18", pretrained=False, load_film=True, n_res_blocks=6, n_classes=2, task_embedding_dim=128, dim_H=7, dim_W=7, conv_drop_dim=3, anc_scales=[1.0, 1.5, 2.0, 3.0, 4.0], anc_ratios=[0.2, 0.5, 0.8, 1, 1.2, 1.5, 2.0], x_offset=1.5, y_offset=1.5):
         super().__init__()
         self.task_embedding_dim = task_embedding_dim
         if not load_film:
@@ -413,7 +413,9 @@ class AgentModule(nn.Module):
             # generate anchors
             start = time.time()
             self.anc_pts_x, self.anc_pts_y = gen_anc_centers(
-                out_size=(self.out_h, self.out_w))
+                out_size=(self.out_h, self.out_w),
+                x_offset=x_offset,
+                y_offset=y_offset)
             print(f"Gen anc centers {time.time()-start}")
 
             start = time.time()
@@ -740,7 +742,9 @@ class CondTargetObjectDetector(nn.Module):
                                           task_embedding_dim=cond_target_obj_detector_cfg.task_embedding_dim,
                                           anc_ratios=cond_target_obj_detector_cfg.anc_ratios,
                                           anc_scales=cond_target_obj_detector_cfg.anc_scales,
-                                          n_classes=cond_target_obj_detector_cfg.get('n_classes', 2))
+                                          n_classes=cond_target_obj_detector_cfg.get('n_classes', 2),
+                                          x_offset=cond_target_obj_detector_cfg.x_offset,
+                                          y_offset=cond_target_obj_detector_cfg.y_offset,)
 
         # summary(self)
         model_parameters = filter(lambda p: p.requires_grad, self.parameters())

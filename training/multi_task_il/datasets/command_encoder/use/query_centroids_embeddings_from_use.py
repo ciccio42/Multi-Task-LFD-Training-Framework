@@ -71,7 +71,8 @@ if __name__ == '__main__':
             
             
             print(f"\tcommand: {command}")
-            save_path_command_emb = create_emb_and_save_pickle(text_command=command,
+            save_path_command_emb = create_emb_and_save_pickle(
+                                       text_command=command,
                                        save_path=save_folder,
                                        model_torch=model_torch,
                                        tokenize=tokenize)

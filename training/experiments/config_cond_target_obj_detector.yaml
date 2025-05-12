@@ -17,6 +17,9 @@ exp_name:       -1
 epochs:         10
 bsize:          30
 vsize:          ${bsize} # optionally, set to a different batchsize for validation loader
+node_id: 0
+num_gpus: 1
+num_nodes: 1
 optimizer:      null #Adam # RMSProp
 task_names: null
 # multi_task_il.datasets.multi_task_datasets.MultiTaskPairedDataset
@@ -102,6 +105,7 @@ dataset_cfg:
   use_strong_augs:  False 
   select_random_frames: True
   compute_obj_distribution: False
+  validation_on_skipped_task: True
   agent_name: 'ur5e'
   demo_name: 'panda'
   load_action: false
@@ -129,12 +133,18 @@ dataset_cfg:
 
 augs:
   old_aug: false
-  brightness: [0.9, 1.1]
-  contrast: [0.9, 1.1]
-  saturation: [0.9, 1.1]
-  hue: [0.0, 0.0]
+  brightness: 	[0.6, 1.4] #[0.9, 1.1]
+  contrast: [0.7, 1.3] #[0.9, 1.1]
+  saturation: [0.7, 1.3] #[0.9, 1.1]
+  hue: [-0.05, 0.05] #[0.0, 0.0]
   p: 0.1 
   horizontal_flip_p: 0.1
+  affine: True
+  black_patch_prob: 0.5
+  black_patch_params:
+    - 'num_patches': 1
+    - 'min_size': 5
+    - 'max_size': 20
   
   brightness_strong: [0.875, 1.125]
   contrast_strong: [0.5, 1.5]
@@ -158,7 +168,7 @@ cond_target_obj_detector_cfg:
   cond_backbone_name: r2plus1d_18
   agent_backbone_name: resnet18
   cond_video: True
-  pretrained: False
+  pretrained: True
   anc_scales: [1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 6.0] 
   anc_ratios: [0.2, 0.5, 0.8, 1, 1.2, 1.5, 2.0]
   dim_H: 14
@@ -170,6 +180,8 @@ cond_target_obj_detector_cfg:
   demo_linear_dim: [256, 128] #[512, 256, 128]
   task_embedding_dim: 128
   n_classes: 2
+  x_offset: 1.5
+  y_offset: 1.5
 
 actions:
   adim: 7

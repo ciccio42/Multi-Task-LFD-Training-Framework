@@ -11,7 +11,6 @@ from tokenizers import Tokenizer
 from tokenizers import AddedToken
 from einops import rearrange
 from multi_task_il.datasets.savers import Trajectory
-import json
 import multi_task_robosuite_env as mtre
 from multi_task_il.utils import normalize_action, denormalize_action
 from multi_task_il.models.cond_target_obj_detector.utils import project_bboxes
@@ -1379,7 +1378,7 @@ def object_detection_inference(model, env, context, gpu_id, variation_id, img_fo
             # convert observation from BGR to RGB
             if perform_augs:
                 formatted_img, bb_t = img_formatter(
-                    obs['camera_front_image'], bb_t)
+                    obs['camera_front_image'][:,:,::-1], bb_t)
             else:
                 formatted_img = torch.from_numpy(
                     np.array(obs['camera_front_image']))
@@ -1922,7 +1921,7 @@ def build_env_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights
     # convert BGR context image to RGB and scale to 0-1
     for i, img in enumerate(context):
         cv2.imwrite(f"context_{i}.png", np.array(img))
-    context = [img_formatter(i)[None] for i in context]
+    context = [img_formatter(i[:,:,::-1])[None] for i in context]
     # assert len(context ) == 6
     if isinstance(context[0], np.ndarray):
         context = torch.from_numpy(np.concatenate(context, 0))[None]

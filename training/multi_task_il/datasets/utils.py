@@ -140,18 +140,19 @@ def collate_by_task(batch):
     return per_task_data
 
 
-def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_name: str = "panda", root_dir: str = "", task_spec=None, split: list = [0.9, 0.1], allow_train_skip: bool = False, allow_val_skip: bool = False, mix_variations: bool = False, mode='train', mix_sim_real=False):
+def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_name: str = "panda", root_dir: str = "", task_spec=None, split: list = [0.9, 0.1], allow_train_skip: bool = False, allow_val_skip: bool = False, mix_variations: bool = False, mode='train', mix_sim_real=False, validation_on_skipped_task=False):
 
     sample_indx = 0
     agent_file_cnt = 0
     demo_file_cnt = 0
     count = 0
     pair_cnt = 0
-    validation_on_skipped_task = False
 
     for spec in task_spec:
         
-        if mode == 'val' and len(spec.get('skip_ids', [])) != 0:
+        # if mode == 'val' and len(spec.get('skip_ids', [])) != 0:
+        #     validation_on_skipped_task = True
+        if mode == 'train':
             validation_on_skipped_task = False
 
         name, date = spec.get('name', None), spec.get('date', None)
@@ -309,6 +310,12 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
                     # take indices for different manipulated objects
                     target_obj_id = int(_id/num_variation_per_object)
                     for sub_task_id in range(spec.get('n_tasks')):
+                        
+                        # check if the sub-task represents the same manipulated object
+                        target_obj_sub_task_id = int(sub_task_id/num_variation_per_object)
+                        if target_obj_id != target_obj_sub_task_id and mode == 'train':
+                            continue
+                        
                         if not validation_on_skipped_task:
                             if sub_task_id in spec.get('skip_ids', []):
                                 # print(f"Sub_task id {sub_task_id}")
@@ -330,10 +337,15 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
                             if not validation_on_skipped_task:
                                 div = spec.get('n_tasks') - \
                                     len(spec.get('skip_ids', [])) - 1
+                                # agent_files.extend(random.sample(
+                                #     dataset_loader.agent_files[name][sub_task_id], round(different_sample_number / div)))
+                                agent_files.extend(random.sample(
+                                    dataset_loader.agent_files[name][sub_task_id], round(different_sample_number / (num_variation_per_object-1))))
                             else:
                                 div = len(spec.get('skip_ids', [])) - 1
-                            agent_files.extend(random.sample(
-                                dataset_loader.agent_files[name][sub_task_id], round(different_sample_number / div)))
+                                agent_files.extend(random.sample(
+                                    dataset_loader.agent_files[name][sub_task_id], round(different_sample_number / div)))
+                                
                     for agent_file in agent_files:
                         dataset_loader.all_file_pairs[count] = (
                             name, _id, demo_file, agent_file)
@@ -385,7 +397,9 @@ def make_demo(dataset, traj, task_name, human_demo=False):
 
             if not human_demo and (dataset.width != 224 and dataset.height != 224):
                 obs = copy.copy(
-                    traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
+                    traj.get(n)['obs']['camera_front_image'])#[:, :, ::-1]
+                # pil_img = ToPILImage()(obs)
+                # pil_img.save("demo_frame.png")
             elif dataset.width == 224 and dataset.height == 224:
                 obs = copy.copy(
                     traj.get(n)['obs']['camera_front_image'])
@@ -934,7 +948,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
         if not getattr(dataset_loader, "real", False) or (getattr(dataset_loader, "real", False) and sim_crop):
             if not human_demo and (dataset_loader.width != 224 and dataset_loader.height != 224):
                 image = copy.copy(
-                    step_t['obs']['camera_front_image'][:, :, ::-1])
+                    step_t['obs']['camera_front_image'])#[:, :, ::-1]
             elif not human_demo and (dataset_loader.width == 224 and dataset_loader.height == 224):
                 image = copy.copy(
                     step_t['obs']['camera_front_image'])
@@ -948,7 +962,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
             else:
                 if not human_demo and (dataset_loader.width != 224 and dataset_loader.height != 224):
                     image = copy.copy(
-                        step_t['obs']['camera_front_image'])
+                        step_t['obs']['camera_front_image'][:,:,::-1])
                 elif not human_demo and (dataset_loader.width == 224 and dataset_loader.height == 224):
                     image = copy.copy(
                         step_t['obs']['camera_front_image'][:,:,::-1])
@@ -1001,8 +1015,9 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
             logger.debug(f"Aug time: {end_aug-aug_time}")
             images.append(processed)
             
-            # pil_image = ToPILImage()(copy.deepcopy(processed).cpu())
-            # pil_image.save("augmented_image.png")
+            # if t == 1 or t == 2:
+            #     pil_image = ToPILImage()(copy.deepcopy(processed).cpu())
+            #     pil_image.save("augmented_image.png")
             
             
         else:

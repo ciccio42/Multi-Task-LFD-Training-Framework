@@ -18,9 +18,8 @@ from torchvision.models.video import r2plus1d_18, R2Plus1D_18_Weights
 import cv2
 import matplotlib.pyplot as plt
 import time
+
 DEBUG = False
-
-
 def get_backbone(backbone_name="slow_r50", video_backbone=True, pretrained=False, conv_drop_dim=3):
     if video_backbone:
         print(f"Loading video backbone {backbone_name}.....")
@@ -166,7 +165,7 @@ class ClassificationModule(nn.Module):
 
 
 class FiLM(nn.Module):
-    def __init__(self, backbone_name="resnet18", conv_drop_dim=3, n_res_blocks=18, n_classes=1, n_channels=128, task_embedding_dim=128):
+    def __init__(self, backbone_name="resnet18", conv_drop_dim=3, n_res_blocks=18, n_classes=1, n_channels=128, task_embedding_dim=128, pretrained=False):
         super(FiLM, self).__init__()
 
         self.task_embedding_dim = task_embedding_dim
@@ -175,7 +174,7 @@ class FiLM(nn.Module):
             task_embedding_dim, 2 * n_res_blocks * n_channels)
         self.feature_extractor = get_backbone(backbone_name=backbone_name,
                                               video_backbone=False,
-                                              pretrained=False,
+                                              pretrained=pretrained,
                                               conv_drop_dim=conv_drop_dim)
         self.res_blocks = nn.ModuleList()
 
@@ -263,14 +262,15 @@ class ProposalModule(nn.Module):
             return conf_scores_pred, reg_offsets_pred
 
 
-def make_model(model_dict, backbone_name="resnet18", task_embedding_dim=128, conv_drop_dim=3):
+def make_model(model_dict, backbone_name="resnet18", task_embedding_dim=128, conv_drop_dim=3, pretrained=False):
     backbone = FiLM(
         backbone_name=backbone_name,
         conv_drop_dim=conv_drop_dim,
         n_res_blocks=model_dict['n_res_blocks'],
         n_classes=model_dict['n_classes'],
         n_channels=model_dict['n_channels'],
-        task_embedding_dim=task_embedding_dim)
+        task_embedding_dim=task_embedding_dim,
+        pretrained=pretrained)
     # for name, module in backbone.named_children():
     #     if name == "res_blocks":
     #         for name, module in backbone.res_blocks.named_children():
@@ -352,7 +352,7 @@ class CondModule(nn.Module):
 
 class AgentModule(nn.Module):
 
-    def __init__(self, height=120, width=160, obs_T=4, model_name="resnet18", pretrained=False, load_film=True, n_res_blocks=6, n_classes=2, task_embedding_dim=128, dim_H=7, dim_W=7, conv_drop_dim=3, anc_scales=[1.0, 1.5, 2.0, 3.0, 4.0], anc_ratios=[0.2, 0.5, 0.8, 1, 1.2, 1.5, 2.0]):
+    def __init__(self, height=120, width=160, obs_T=4, model_name="resnet18", pretrained=False, load_film=True, n_res_blocks=6, n_classes=2, task_embedding_dim=128, dim_H=7, dim_W=7, conv_drop_dim=3, anc_scales=[1.0, 1.5, 2.0, 3.0, 4.0], anc_ratios=[0.2, 0.5, 0.8, 1, 1.2, 1.5, 2.0], x_offset=1.5, y_offset=1.5):
         super().__init__()
         self.task_embedding_dim = task_embedding_dim
         if not load_film:
@@ -374,7 +374,8 @@ class AgentModule(nn.Module):
             model_dict['n_channels'] = n_channels
             backbone = make_model(model_dict=model_dict,
                                   task_embedding_dim=task_embedding_dim,
-                                  conv_drop_dim=conv_drop_dim)
+                                  conv_drop_dim=conv_drop_dim,
+                                  pretrained=pretrained)
             backbone.out_channels = n_channels
             self.out_channels_backbone = n_channels
             self._backbone = backbone
@@ -395,7 +396,6 @@ class AgentModule(nn.Module):
             self.n_anc_boxes = len(self.anc_scales) * len(self.anc_ratios)
 
             # IoU thresholds for +ve and -ve anchors
-
             self.pos_thresh = 0.4
             self.neg_thresh = 0.3
             self.conf_thresh = 0.7
@@ -413,7 +413,9 @@ class AgentModule(nn.Module):
             # generate anchors
             start = time.time()
             self.anc_pts_x, self.anc_pts_y = gen_anc_centers(
-                out_size=(self.out_h, self.out_w))
+                out_size=(self.out_h, self.out_w),
+                x_offset=x_offset,
+                y_offset=y_offset)
             print(f"Gen anc centers {time.time()-start}")
 
             start = time.time()
@@ -422,6 +424,31 @@ class AgentModule(nn.Module):
             print(f"Gen_anc_base {time.time()-start}")
 
         self.load_film = load_film
+
+    def visualize_attention(self, input_image, feature_map, save_path="attention_overlay.png"):
+        # Step 1: Get the feature map
+        # Assuming feature_map is of shape [batch_size, channels, height, width]
+        # For visualization, you can take the mean across the channel dimension
+        attention_map = torch.mean(feature_map, dim=1).squeeze()  # [height, width]
+
+        # Step 2: Rescale attention map to the input image size
+        attention_map_resized = F.interpolate(attention_map.unsqueeze(0).unsqueeze(0),
+                                            size=(input_image.shape[-2], input_image.shape[-1]),
+                                            mode='bilinear', align_corners=False).squeeze().cpu().detach().numpy()
+
+        # Normalize the attention map between 0 and 1
+        attention_map_resized = (attention_map_resized - np.min(attention_map_resized)) / (np.max(attention_map_resized) - np.min(attention_map_resized))
+
+        # Step 3: Convert the input image to numpy
+        input_image_np = 255*(input_image.squeeze().permute(1, 2, 0).cpu().detach().numpy())
+        # Step 4: Apply colormap to the attention map
+        heatmap = cv2.applyColorMap(np.uint8(255 * attention_map_resized), cv2.COLORMAP_JET)
+
+        # Step 5: Overlay the heatmap on the input image
+        overlay = 0.6 * input_image_np + 0.4 * heatmap  # Weighted sum for overlay
+
+        # Step 6: Save the result
+        cv2.imwrite(save_path, overlay)
 
     def forward(self, agent_obs, task_embedding, gt_bb=None, gt_classes=None, inference=False):
 
@@ -432,6 +459,9 @@ class AgentModule(nn.Module):
         feature_map = self._backbone(
             agent_obs=agent_obs, task_emb=task_embedding)
 
+        # self.visualize_attention(input_image=agent_obs,
+        #                          feature_map=feature_map)        
+    
         # 2. Predict bounding boxes given conditioned embedding and input image
         agent_obs = rearrange(agent_obs, 'B T C H W -> (B T) C H W')
         # N is the number of objects, and C the bb components
@@ -483,7 +513,7 @@ class AgentModule(nn.Module):
                                                   (int(anc_box[2]),
                                                    int(anc_box[3])),
                                                   color=(0, 0, 255), thickness=1)
-                        cv2.imwrite("prova_anch_box.png", image)
+                cv2.imwrite("prova_anch_box.png", image)
 
             if not inference:
                 # if the model is training
@@ -510,15 +540,18 @@ class AgentModule(nn.Module):
 
                 # get separate proposals for each sample
                 pos_proposals_list = []
-                class_positive_list = []
+                # class_positive_list = []
                 batch_size = B
-                for idx in range(batch_size):
-                    proposal_idxs = torch.where(positive_anc_ind_sep == idx)[0]
-                    proposals_sep = proposals[proposal_idxs].detach().clone()
-                    class_sep = GT_class_pos[proposal_idxs].detach().clone()
-                    pos_proposals_list.append(proposals_sep)
-                    class_positive_list.append(class_sep)
 
+                # Create a mask for each index in the batch
+                batch_indices = torch.arange(batch_size, device=positive_anc_ind_sep.device).unsqueeze(1)
+                mask = positive_anc_ind_sep.unsqueeze(0) == batch_indices
+
+                # Use the mask to gather proposals and classes
+                pos_proposals_list = [proposals[torch.where(mask[i])[0]].detach().clone() for i in range(batch_size)]
+                # class_positive_list = [GT_class_pos[torch.where(mask[i])[0]].detach().clone() for i in range(batch_size)]
+                # print(f"Time to separate proposals {time.time()-start_time}")
+                
                 cls_scores = self.classifier(
                     feature_map, pos_proposals_list, GT_class_pos)
 
@@ -651,6 +684,7 @@ class AgentModule(nn.Module):
                     # get classes with highest probability
                     classes_all = torch.argmax(cls_probs, dim=-1)
 
+                  
                     classes_final = []
                     # slice classes to map to their corresponding image
                     c = 0
@@ -708,7 +742,9 @@ class CondTargetObjectDetector(nn.Module):
                                           task_embedding_dim=cond_target_obj_detector_cfg.task_embedding_dim,
                                           anc_ratios=cond_target_obj_detector_cfg.anc_ratios,
                                           anc_scales=cond_target_obj_detector_cfg.anc_scales,
-                                          n_classes=cond_target_obj_detector_cfg.get('n_classes', 2))
+                                          n_classes=cond_target_obj_detector_cfg.get('n_classes', 2),
+                                          x_offset=cond_target_obj_detector_cfg.x_offset,
+                                          y_offset=cond_target_obj_detector_cfg.y_offset,)
 
         # summary(self)
         model_parameters = filter(lambda p: p.requires_grad, self.parameters())
@@ -719,11 +755,11 @@ class CondTargetObjectDetector(nn.Module):
         self.activations = None
         self.gradients = None
 
-    def forward(self, inputs: dict, inference: bool = False):
-        cond_video = inputs['demo']
-        agent_obs = inputs['images']
-        gt_bb = inputs['gt_bb']
-        gt_classes = inputs['gt_classes']
+    def forward(self, inputs: list, inference: bool = False):
+        cond_video = inputs[0] # B, T_demo, C, H, W
+        agent_obs = inputs[1] # B, T_frame, C, H, W
+        gt_bb = inputs[2]
+        gt_classes = inputs[3]
 
         cond_emb = self._cond_backbone(cond_video)
         # print(f"Cond embedding shape: {cond_emb.shape}")

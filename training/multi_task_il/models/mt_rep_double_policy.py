@@ -14,7 +14,9 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 from torchsummary import summary
 from multi_task_il.models.cond_target_obj_detector.utils import project_bboxes
-
+import cv2
+from PIL import Image
+from torchvision.transforms import ToPILImage
 
 class _StackedAttnLayers(nn.Module):
     """
@@ -528,7 +530,6 @@ class VideoImitation(nn.Module):
     def __init__(
         self,
         latent_dim,
-        model_char=None,
         load_target_obj_detector=False,
         target_obj_detector_step=0,
         target_obj_detector_path=None,
@@ -554,11 +555,11 @@ class VideoImitation(nn.Module):
         concat_demo_head=False,
         concat_demo_act=False,
         demo_mean=0,
+        zero_bb_after_pick=False,
         byol_config=dict(),
         simclr_config=dict(),
     ):
         super().__init__()
-        self._model_char = model_char
         self._remove_class_layers = remove_class_layers
         self._concat_bb = concat_bb
         self._bb_sequence = bb_sequence
@@ -634,6 +635,7 @@ class VideoImitation(nn.Module):
         print("Concat-ing embedded demo to action head? {}, to distribution head? {}".format(
             concat_demo_act, concat_demo_head))
 
+        print(f"Concat state: {concat_state} - State dim {sdim}")
         if "KP" not in target_obj_detector_path:
             ac_in_dim = int(latent_dim + float(concat_demo_act)
                             * latent_dim + float(concat_bb) * 4 * self._bb_sequence + float(concat_state) * sdim)
@@ -738,25 +740,14 @@ class VideoImitation(nn.Module):
         # summary(self)
 
     def load_target_obj_detector(self, target_obj_detector_path=None, target_obj_detector_step=-1, gpu_id=0):
-        if self._model_char is None:
-            conf_file = OmegaConf.load(os.path.join(
-                target_obj_detector_path, "config.yaml"))
-        else:
-            conf_file = OmegaConf.load(os.path.join(
-                target_obj_detector_path, f"config_{self._model_char}.yaml"))
-
+        conf_file = OmegaConf.load(os.path.join(
+            target_obj_detector_path, "config.yaml"))
         self._object_detector = hydra.utils.instantiate(
             conf_file.policy)
-        if self._model_char is None:
-            weights = torch.load(os.path.join(
-                target_obj_detector_path,
-                f"model_save-{target_obj_detector_step}.pt"),
-                map_location=torch.device(gpu_id))
-        else:
-            weights = torch.load(os.path.join(
-                target_obj_detector_path,
-                f"model_save_{self._model_char}-{target_obj_detector_step}.pt"),
-                map_location=torch.device(gpu_id))
+        weights = torch.load(os.path.join(
+            target_obj_detector_path,
+            f"model_save-{target_obj_detector_step}.pt"),
+            map_location=torch.device(gpu_id))
         self._object_detector.load_state_dict(weights)
         # self._object_detector.to("cuda:0")
         self._object_detector.eval()
@@ -887,7 +878,8 @@ class VideoImitation(nn.Module):
         """directly modifies output dict to put action outputs inside"""
         out = dict()
         # single-head case
-        bb.requires_grad = True
+        if bb is not None:
+            bb.requires_grad = True
         if embed_out is not None:
             demo_embed, img_embed = embed_out['demo_embed'], embed_out['img_embed']
             assert demo_embed.shape[1] == self._demo_T
@@ -1038,7 +1030,6 @@ class VideoImitation(nn.Module):
         target_obj_embedding=None,
         compute_activation_map=False,
         first_phase=None,
-        place=True,
         t=-1
     ):
         B, obs_T, _, height, width = images.shape
@@ -1061,7 +1052,7 @@ class VideoImitation(nn.Module):
             model_input['gt_bb'] = bb
             model_input['gt_classes'] = gt_classes
             self._object_detector.eval()
-            prediction = self._object_detector(model_input,
+            prediction = self._object_detector(inputs=[context, images, bb, gt_classes],
                                                inference=True)
             if len(prediction['classes_final']) == B*obs_T:
                 predicted_bb_list = list()
@@ -1071,7 +1062,7 @@ class VideoImitation(nn.Module):
                 for indx in range(len(prediction['classes_final'])):
                     target_indx_flags = prediction['classes_final'][indx] == 1
                     place_indx_flags = torch.zeros((1, 1))
-                    if "KP" in self._target_obj_detector_path or place:
+                    if "KP" in self._target_obj_detector_path:
                         place_indx_flags = prediction['classes_final'][indx] == 2
 
                     # get target object bb
@@ -1086,6 +1077,14 @@ class VideoImitation(nn.Module):
                                                       width_scale_factor=scale_factor[0],
                                                       height_scale_factor=scale_factor[1],
                                                       mode='a2p')[0][target_indx_flags][target_max_score_indx][None, :]
+                        
+                        # # plot predicted bb
+                        # img = np.moveaxis(images[indx, 0].cpu().numpy()*255, 0, -1).astype(np.uint8)
+                        # img = np.ascontiguousarray(img)
+                        # img = cv2.rectangle(img, (int(predicted_bb[0][0].item()), int(predicted_bb[0][1].item())), (int(predicted_bb[0][2].item()), int(predicted_bb[0][3].item())), (0, 255, 0), 2)
+                        # pil_image = Image.fromarray(img)
+                        # pil_image.save(f"predicted_bb_{t}.png")
+                        
                     else:
                         # print("No bb target")
                         # Get index for target object
@@ -1093,7 +1092,7 @@ class VideoImitation(nn.Module):
                             (1, 4)).to(device=images.get_device())
 
                     # get place bb
-                    if torch.sum((place_indx_flags == True).int()) != 0 and ("KP" in self._target_obj_detector_path or place):
+                    if torch.sum((place_indx_flags == True).int()) != 0 and "KP" in self._target_obj_detector_path:
                         # 2. Get the confidence scores for the target predictions and the the max
                         place_max_score_indx = torch.argmax(
                             prediction['conf_scores_final'][indx][place_indx_flags])
@@ -1106,7 +1105,7 @@ class VideoImitation(nn.Module):
                                                             mode='a2p')[0][place_indx_flags][place_max_score_indx][None, :]
                         predicted_bb = torch.concat(
                             (predicted_bb, predicted_bb_place))
-                    elif "KP" in self._target_obj_detector_path or place:
+                    elif "KP" in self._target_obj_detector_path:
                         # print("No bb place")
                         # Get index for target object
                         predicted_bb = torch.concat((predicted_bb, torch.zeros(
@@ -1156,10 +1155,11 @@ class VideoImitation(nn.Module):
             out = self.get_action(
                 embed_out=embed_out,
                 target_obj_embedding=target_obj_embedding,
-                bb=None,
+                bb=torch.zeros(B, obs_T, 2, 4).to(images.get_device()),
                 ret_dist=ret_dist,
                 states=states,
-                eval=eval)
+                eval=eval,
+                first_phase=self.first_phase if eval else first_phase)
 
         if self._concat_bb:
             out['predicted_bb'] = predicted_bb

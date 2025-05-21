@@ -84,11 +84,13 @@ def calc_gt_offsets(pos_anc_coords, gt_bbox_mapping):
     return torch.stack([tx_, ty_, tw_, th_], dim=-1)
 
 
-def gen_anc_centers(out_size):
+def gen_anc_centers(out_size, x_offset, y_offset, step=1):
     out_h, out_w = out_size
-
-    anc_pts_x = torch.arange(0, out_w) + 1.5
-    anc_pts_y = torch.arange(0, out_h) + 1.5  # + 0.5
+    
+    # 2.0 real-world dataset
+    # 1.5 sim dataset
+    anc_pts_x = torch.arange(0, out_w, step) + x_offset # 1.5
+    anc_pts_y = torch.arange(0, out_h, step) + y_offset
 
     return anc_pts_x, anc_pts_y
 

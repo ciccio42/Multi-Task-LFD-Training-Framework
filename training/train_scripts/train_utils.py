@@ -94,9 +94,10 @@ def make_model(config, local_rank):
             rpath, map_location=torch.device("cuda:" + str(local_rank)))
         if finetune:
             state_dict_keys = list(state_dict.keys())
-            for key in state_dict_keys:
-                if '_object_detector' in key or '_cond_backbone' in key or '_agent_backbone' in key:
-                    state_dict.pop(key)
+            if 'cond_target_obj_detector' not in config.policy._target_:
+                for key in state_dict_keys:
+                    if '_object_detector' in key or '_cond_backbone' in key or '_agent_backbone' in key:
+                        state_dict.pop(key)
         model.load_state_dict(state_dict,strict=False)
         optimizer_state_dict = None
         if resume:

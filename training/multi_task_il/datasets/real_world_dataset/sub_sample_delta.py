@@ -2,10 +2,12 @@ from multi_task_il.datasets.savers import Trajectory
 import pickle as pkl
 import numpy as np
 from PIL import Image
+from utils import *
 
 DATASET_PATH = '/home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2'
 OUT_PATH = '/home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place'
 DELTA=True
+
 if DELTA:
     OUT_PATH = f"{OUT_PATH}_delta_action"
 
@@ -21,6 +23,10 @@ if __name__ == '__main__':
 
     # task paths
     task_paths = glob.glob(os.path.join(DATASET_PATH, 'task_*'))
+    # convert gripper orientation to end effector orientation
+    R_ee_to_gripper = np.array([[.0, -1.0, .0], 
+                                [1.0, .0, .0], 
+                                [.0, .0, 1.0]])
     
     for task_path in task_paths:
         print(f'Processing {task_path}')
@@ -48,6 +54,7 @@ if __name__ == '__main__':
                 else:
                     # compute distance between current and previous position
                     current_pos = traj[t]['obs']['eef_pos']
+                    current_quat = traj[t]['obs']['eef_quat']
                     gripper_state = traj[t-1]['action'][-1]
                     distance = np.linalg.norm(current_pos - previous_pos)
                     if distance > 0.05 and gripper_state == previous_gripper_state:
@@ -57,13 +64,20 @@ if __name__ == '__main__':
                         # pil_img = Image.fromarray(traj[t]['obs']['camera_front_image'])
                         # pil_img.save(f'{t}.png')
                         if DELTA:
+                            action = np.zeros(7)
                             action_delta = current_pos - previous_pos
+                            eef_mat = R_ee_to_gripper @ quat2mat(current_quat)
+                            action_rot = mat2euler(eef_mat)
+                            gripper_action = traj[t-1]['action'][-1]
+                            action[:3] = action_delta
+                            action[3:6] = action_rot
+                            action[6] = gripper_action
                             
                         new_traj.append(traj[previous_t]['obs'], 
                                         traj[previous_t]['reward'], 
                                         traj[previous_t]['done'], 
                                         traj[previous_t]['info'], 
-                                        traj[t-1]['action'])
+                                        action)
                         previous_pos = current_pos
                         previous_t = t
                     elif gripper_state != previous_gripper_state:
@@ -73,11 +87,23 @@ if __name__ == '__main__':
                         # pil_img = Image.fromarray(traj[t]['obs']['camera_front_image'])
                         # pil_img.save(f'change_gripper_{t}.png')
                         # save the previous trajectory
+                        if DELTA:
+                            action = np.zeros(7)
+                            action_delta = current_pos - previous_pos
+                            eef_mat = R_ee_to_gripper @ quat2mat(current_quat)
+                            action_rot = mat2euler(eef_mat)
+                            gripper_action = traj[t-1]['action'][-1]
+                            action[:3] = action_delta
+                            action[3:6] = action_rot
+                            action[6] = gripper_action
+                        
+                        
                         new_traj.append(traj[previous_t]['obs'], 
                                         traj[previous_t]['reward'], 
                                         traj[previous_t]['done'], 
                                         traj[previous_t]['info'], 
-                                        traj[t-1]['action'])
+                                        action)
+                        
                         previous_pos = current_pos
                         previous_t = t
                         previous_gripper_state = gripper_state

@@ -1,7 +1,8 @@
 #!/bin/bash
 
-#SBATCH --exclude=tnode[01-17]
+#SBATCH -A hpc_default
 #SBATCH --partition=gpuq
+#SBATCH --exclude=gnode02,gnode03
 #SBATCH --gres=gpu:2
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
@@ -31,6 +32,21 @@ WANDB_LOG=true
 
 EPOCH=90 # start from 16
 BSIZE=80 #16 #32
+
+TASK_NAME="${1}"
+RESUME_PATH="${2}"
+RESUME_STEP="${3}"
+FINETUNE="${4:-false}"
+RESUME="${5:-false}"
+DEMO_NAME="${6:-panda}" # [human_rgb or panda]
+SAVE_PATH="${7:-/home/rsofnc000/checkpoint_save_folder/100_180_new}"
+echo "Task Name is: $TASK_NAME"
+echo "Resume Folder is: $RESUME_FOLDER"
+echo "Resume Step is: $RESUME_STEP"
+echo "Finetune is: $FINETUNE"
+echo "Resume is: $RESUME"
+echo "Demo Name is: $DEMO_NAME"
+echo "Save Path is: $SAVE_PATH"
 
 COMPUTE_OBJ_DISTRIBUTION=false
 CONFIG_PATH=../experiments/
@@ -64,9 +80,6 @@ if [ "$TASK_NAME" == 'nut_assembly' ]; then
     EXP_NAME=1Task-${TASK_str}-CTOD-KP_MO_0_4_8
     PROJECT_NAME=${EXP_NAME}
     SET_SAME_N=7
-    RESUME_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder/${EXP_NAME}-Batch74/
-    RESUME_STEP=72675
-    RESUME=false
 elif [ "$TASK_NAME" == 'button' ] || [ "$TASK_NAME" == 'press_button_close_after_reaching' ]; then
     echo "BUTTON"
     TASK_str="press_button_close_after_reaching"
@@ -82,18 +95,12 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
     EXP_NAME=1Task-${TASK_str}-CTOD-KP_NO_0_3_5
     PROJECT_NAME=${EXP_NAME}
     SET_SAME_N=7
-    RESUME_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder/${EXP_NAME}-Batch74/
-    RESUME_STEP=72675
-    RESUME=false
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     TASK_str="pick_place"
-    EXP_NAME=1Task-${TASK_str}-CTOD-KP_NO_0_5_10_15
+    EXP_NAME=1Task-${TASK_str}-COD-RGB
     PROJECT_NAME=${EXP_NAME}
-    SET_SAME_N=7
-    RESUME_PATH=''
-    RESUME_STEP=''
-    RESUME=false
+    SET_SAME_N=2
 elif [ "$TASK_NAME" == 'multi' ]; then
     echo "Multi Task"
     TASK_str=["pick_place","nut_assembly","stack_block","press_button_close_after_reaching"]
@@ -105,7 +112,7 @@ elif [ "$TASK_NAME" == 'multi' ]; then
     RESUME=false
 fi
 
-srun --output=training_${TASK_NAME}.txt --job-name=training_${TASK_NAME} python -u ../training/train_scripts/train_any.py \
+srun --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u ../training/train_scripts/train_any.py \
     --config-path ${CONFIG_PATH} \
     --config-name ${CONFIG_NAME} \
     policy=${POLICY} \

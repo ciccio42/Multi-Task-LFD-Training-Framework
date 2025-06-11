@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#SBATCH --exclude=tnode[01-17]
-#SBATCH --exclude=gnode02
+#SBATCH -A hpc_default
+#SBATCH -w gnode02
 #SBATCH --partition=gpuq
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
@@ -9,31 +9,47 @@
 #SBATCH --cpus-per-task=32
 #SBATCH --export=ALL
 
-export MUJOCO_PY_MUJOCO_PATH="/home/rsofnc000/.mujoco/mujoco210"
+export MUJOCO_PY_MUJOCO_PATH=/home/rsofnc000/.mujoco/mujoco210
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
+export HYDRA_FULL_ERROR=1
 
+EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
 export HYDRA_FULL_ERROR=1
 echo $1
 TASK_NAME="$1"
 
 EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset/
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder/100_180
 POLICY='${mosaic}'
 TARGET='multi_task_il.models.mt_rep_double_policy.VideoImitation'
 TASKS_CONFIG=7_tasks_real
 AGENT_NAME=real_new_ur5e
-DEMO_NAME=panda #human_rgb # [human_rgb or panda]
+
+TASK_NAME="${1}"
+RESUME_PATH="${2}"
+RESUME_STEP="${3}"
+FINETUNE="${4:-false}"
+RESUME="${5:-false}"
+DEMO_NAME="${6:-panda}" # [human_rgb or panda]
+SAVE_PATH="${7:-/home/rsofnc000/checkpoint_save_folder/100_180_new}"
+W=${8:-"gnode01"}
+echo "Task Name is: $TASK_NAME"
+echo "Resume Folder is: $RESUME_PATH"
+echo "Resume Step is: $RESUME_STEP"
+echo "Finetune is: $FINETUNE"
+echo "Resume is: $RESUME"
+echo "Demo Name is: $DEMO_NAME"
+echo "Save Path is: $SAVE_PATH"
 
 SAVE_FREQ=-1
 LOG_FREQ=10
 VAL_FREQ=-1
 DEVICE=0
-DEBUG=true
-WANDB_LOG=false
+DEBUG=false
+WANDB_LOG=true
 ROLLOUT=false
-EPOCH=90
-LOADER_WORKERS=1
+EPOCH=180
+LOADER_WORKERS=16
 CONFIG_PATH=../experiments
 CONFIG_NAME=config_real.yaml
 CONCAT_IMG_EMB=true
@@ -42,6 +58,7 @@ PICK_NEXT=true
 NORMALIZE_ACTION=true
 CHANGE_COMMAND_EPOCH=true
 SPLIT_PICK_PLACE=true
+NORMALIZE_IMG=false
 
 LOAD_CONTRASTIVE=false
 LOAD_INV=false
@@ -73,7 +90,6 @@ WIDTH=180
 
 if [ "$TASK_NAME" == 'nut_assembly' ]; then
     echo "NUT-ASSEMBLY"
-    #SBATCH --job-name=nut_assembly
     ### Nut-Assembly ###
     RESUME_PATH=1Task-nut_assembly-Double-Policy-Contrastive-false-Inverse-false-trial-2-Batch27
     RESUME_STEP=18640
@@ -89,11 +105,11 @@ if [ "$TASK_NAME" == 'nut_assembly' ]; then
     SET_SAME_N=3
 
     ACTION_DIM=7
-    N_MIXTURES=7       #14 MT #7 2Task, Nut, button, stack #3 Pick-place #2 Nut-Assembly
-    OUT_DIM=128        #64 MT #64 2Task, Nut, button, stack #128 Pick-place
-    ATTN_FF=256        #256 MT #128 2Task, Nut, button, stack #256 Pick-place
-    COMPRESSOR_DIM=256 #256 MT #128 2Task, Nut, button, stack #256 Pick-place
-    HIDDEN_DIM=512     #256 MT #128 2Task, Nut, button, stack #512 Pick-place
+    N_MIXTURES=7       # 14 MT #7 2Task, Nut, button, stack #3 Pick-place #2 Nut-Assembly
+    OUT_DIM=128        # 64 MT #64 2Task, Nut, button, stack #128 Pick-place
+    ATTN_FF=256        # 256 MT #128 2Task, Nut, button, stack #256 Pick-place
+    COMPRESSOR_DIM=256 # 256 MT #128 2Task, Nut, button, stack #256 Pick-place
+    HIDDEN_DIM=512     # 256 MT #128 2Task, Nut, button, stack #512 Pick-place
     CONCAT_DEMO_HEAD=false
     CONCAT_DEMO_ACT=true
     PRETRAINED=true
@@ -107,8 +123,8 @@ if [ "$TASK_NAME" == 'nut_assembly' ]; then
 
     DROP_DIM=4      # 2    # 3
     OUT_FEATURE=128 # 512 # 256
-    DIM_H=13        #14        # 7 (100 DROP_DIM 3)        #8         # 4         # 7
-    DIM_W=23        #14        # 12 (180 DROP_DIM 3)        #8         # 6         # 12
+    DIM_H=13        # 14        # 7 (100 DROP_DIM 3)        #8         # 4         # 7
+    DIM_W=23        # 14        # 12 (180 DROP_DIM 3)        #8         # 6         # 12
     HEIGHT=100
     WIDTH=180
 
@@ -209,28 +225,23 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
 
-    ### Pick-Place ###
-    RESUME_PATH="Real-1Task-pick_place-MOSAIC-KP-No-State-Finetune-Batch48"
-    #1Task-pick_place-Double-Policy-Convert_action_State_true_Convert_true-Batch32
-    RESUME_STEP="62"
-    RESUME=true
-    FINETUNE=false
+    TARGET_OBJ_DETECTOR_STEP=26
+    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/Real-KP-COD-pick_place-Demo-human_rgb-Finetune-true-NORMALIZE-false-Batch32
+    # Real-1Task-pick_place-Demo-panda-KP-RGB-Finetune-Batch32
+    # Real-1Task-pick_place-Demo-human_rgb-KP-RGB-Finetune-Batch32
 
-    TARGET_OBJ_DETECTOR_STEP=31 #68526 #129762 #198900 #65250
-    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/Real-1Task-pick_place-KP-No-Finetune-Batch32
-
-    BSIZE=32 #32 #128 #64 #32
+    BSIZE=32
     COMPUTE_OBJ_DISTRIBUTION=false
     # Policy 1: At each slot is assigned a RandomSampler
     BALANCING_POLICY=0
     SET_SAME_N=2
 
     ACTION_DIM=7
-    N_MIXTURES=3       #14 MT #7 2Task, Nut, button, stack #3 Pick-place #2 Nut-Assembly
-    OUT_DIM=128        #64 MT #64 2Task, Nut, button, stack #128 Pick-place
-    ATTN_FF=256        #256 MT #128 2Task, Nut, button, stack #256 Pick-place
-    COMPRESSOR_DIM=256 #256 MT #128 2Task, Nut, button, stack #256 Pick-place
-    HIDDEN_DIM=512     #256 MT #128 2Task, Nut, button, stack #512 Pick-place
+    N_MIXTURES=3       # 14 MT #7 2Task, Nut, button, stack #3 Pick-place #2 Nut-Assembly
+    OUT_DIM=128        # 64 MT #64 2Task, Nut, button, stack #128 Pick-place
+    ATTN_FF=256        # 256 MT #128 2Task, Nut, button, stack #256 Pick-place
+    COMPRESSOR_DIM=256 # 256 MT #128 2Task, Nut, button, stack #256 Pick-place
+    HIDDEN_DIM=512     # 256 MT #128 2Task, Nut, button, stack #512 Pick-place
     CONCAT_DEMO_HEAD=false
     CONCAT_DEMO_ACT=true
     NULL_BB=false
@@ -243,8 +254,8 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
 
     COSINE_ANNEALING=false
 
-    TASK_str="pick_place"                                                                #[pick_place,nut_assembly,stack_block,button]
-    EXP_NAME=Real-1Task-pick_place-${DEMO_NAME}-MOSAIC-KP_State_${CONCAT_STATE}_Finetued #_${FINETUNE}
+    TASK_str="pick_place"
+    EXP_NAME=Real-1Task-pick_place-${DEMO_NAME}-MOSAIC-KP_State_${CONCAT_STATE}_Finetued_${FINETUNE}_LR_${LR}
     PROJECT_NAME=${EXP_NAME}
 
 elif [ "$TASK_NAME" == 'multi' ]; then
@@ -337,6 +348,7 @@ srun --output=training_${EXP_NAME}.txt --job-name=training_${TASK_NAME} python -
     dataset_cfg.split_pick_place=${SPLIT_PICK_PLACE} \
     dataset_cfg.dagger=${DAGGER} \
     dataset_cfg.demo_name=${DEMO_NAME} \
+    augs.normalize=${NORMALIZE_IMG} \
     samplers.balancing_policy=${BALANCING_POLICY} \
     mosaic._target_=${TARGET} \
     mosaic.load_target_obj_detector=${LOAD_TARGET_OBJ_DETECTOR} \

@@ -1,148 +1,176 @@
-#!/bin/sh
+#!/bin/bash
 
-#SBATCH --exclude=tnode[01-17]
+#SBATCH -A hpc_default
 #SBATCH --partition=gpuq
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=32
-#SBATCH --exclusive
 #SBATCH --export=ALL
 
-# export MUJOCO_PY_MUJOCO_PATH="/home/rsofnc000/.mujoco/mujoco210"
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
-# export CUDA_VISIBLE_DEVICES=3
-
+export MUJOCO_PY_MUJOCO_PATH=/home/rsofnc000/.mujoco/mujoco210
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 export HYDRA_FULL_ERROR=1
-echo $1
-TASK_NAME="$1"
 
-EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset/
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder
-POLICY='${mosaic}'
+EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
+
+POLICY='${cond_target_obj_detector}'
+DATASET_TARGET=multi_task_il.datasets.multi_task_keypoint_dataset.MultiTaskPairedKeypointDetectionDataset
+TASKS_CONFIG=7_tasks_real
+AGENT_NAME=real_new_ur5e
+
+TASK_NAME="${1}"
+RESUME_FOLDER="${2}"
+RESUME_STEP="${3}"
+FINETUNE="${4:-false}"
+RESUME="${5:-false}"
+DEMO_NAME="${6:-panda}" # [human_rgb or panda]
+SAVE_PATH="${7:-/home/rsofnc000/checkpoint_save_folder/100_180_new}"
+echo "Task Name is: $TASK_NAME"
+echo "Resume Folder is: $RESUME_FOLDER"
+echo "Resume Step is: $RESUME_STEP"
+echo "Finetune is: $FINETUNE"
+echo "Resume is: $RESUME"
+echo "Demo Name is: $DEMO_NAME"
+echo "Save Path is: $SAVE_PATH"
+
+# Set offset_x and offset_y based on DEMO_NAME
+if [ "$DEMO_NAME" = "human_rgb" ]; then
+    OFFSET_X=2.0
+    OFFSET_Y=1.5
+elif [ "$DEMO_NAME" = "panda" ]; then
+    OFFSET_X=1.5
+    OFFSET_Y=1.5
+fi
 
 SAVE_FREQ=-1
 LOG_FREQ=10
 VAL_FREQ=-1
-DEVICE=0
+PRINT_FREQ=$LOG_FREQ
+DEVICE=-1
 DEBUG=false
 WANDB_LOG=true
 
-EXP_NAME=Real-Pick-Place-MOSAIC-CTOD-State-Finetune
-PROJECT_NAME=${EXP_NAME}
-TASK_str=pick_place #[pick_place,nut_assembly]
+EPOCH=90 # start from 16
+BSIZE=32 #16 #32
 
-RESUME_PATH=1Task-pick_place-MOSAIC-CTOD-State-true-ZERO_BB_AFTER_PICK_Convertion_true-Batch32
-RESUME_STEP=288630
-RESUME=false
-FINETUNE=true
-
-LOAD_TARGET_OBJ_DETECTOR=true
-TARGET_OBJ_DETECTOR_STEP=38880
-TARGET_OBJ_DETECTOR_PATH=/home/rsofnc000/checkpoint_save_folder/Real-1Task-pick_place-CTOD-Finetune-Batch112
-CONCAT_BB=true
-
-AGENT_NAME=real_new_ur5e
-
-ROLLOUT=false
-EPOCH=90
-BSIZE=27 #32 #128 #64 #32
 COMPUTE_OBJ_DISTRIBUTION=false
-# Policy 1: At each slot is assigned a RandomSampler
-BALANCING_POLICY=0
-SET_SAME_N=3
-CONFIG_PATH=../experiments
-CONFIG_NAME=config_real.yaml
+CONFIG_PATH=../experiments/
+CONFIG_NAME=config_cond_target_obj_detector_real.yaml
 LOADER_WORKERS=16
-NORMALIZE_ACTION=true
-PICK_NEXT=true
+BALANCING_POLICY=0
+OBS_T=7
 
-LOAD_CONTRASTIVE=false
-LOAD_INV=false
-CONTRASTIVE_PRE=0.0
-CONTRASTIVE_POS=0.0
-MUL_INTM=0
-BC_MUL=1.0
-INV_MUL=0.0
-
-FREEZE_TARGET_OBJ_DETECTOR=false
-REMOVE_CLASS_LAYERS=false
-CONCAT_TARGET_OBJ_EMBEDDING=false
-CONCAT_STATE=true
-
-ACTION_DIM=7
-N_MIXTURES=3       #7 MT #3 Pick-place
-OUT_DIM=128        #64 MT #128 Pick-place
-ATTN_FF=256        #128 MT #256 Pick-place
-COMPRESSOR_DIM=256 #128 MT #256 Pick-place
-HIDDEN_DIM=512     #128 MT #512 Pick-place
-CONCAT_DEMO_HEAD=false
-CONCAT_DEMO_ACT=true
-PRETRAINED=false
-NULL_BB=false
-
-EARLY_STOPPING_PATIECE=-1
+EARLY_STOPPING_PATIECE=20
 OPTIMIZER='AdamW'
-LR=0.0005
-WEIGHT_DECAY=0.0
-SCHEDULER=None
+LR=0.00001
+WEIGHT_DECAY=5
+SCHEDULER='ReduceLROnPlateau'
+FIRST_FRAMES=false
+ONLY_FIRST_FRAMES=false
+ROLLOUT=false
+PERFORM_AUGS=true
+NON_SEQUENTIAL=true
 
 DROP_DIM=4      # 2    # 3
 OUT_FEATURE=128 # 512 # 256
-DIM_H=13        #14        # 7 (100 DROP_DIM 3)        #8         # 4         # 7
-DIM_W=23        #14        # 12 (180 DROP_DIM 3)        #8         # 6         # 12
+# use (13,23) when image is 100,180
+# use (28,28) when image is 224,224
+DIM_H=13
+DIM_W=23
 HEIGHT=100
 WIDTH=180
+N_CLASSES=2
+DAGGER=false
 
-COSINE_ANNEALING=false
+if [ "$TASK_NAME" == 'nut_assembly' ]; then
+    echo "NUT-ASSEMBLY"
+    TASK_str="nut_assembly"
+    EXP_NAME=1Task-${TASK_str}-CTOD-KP_NO_0_4_8
+    PROJECT_NAME=${EXP_NAME}
+    SET_SAME_N=7
+    RESUME_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder/${EXP_NAME}-Batch74/
+    RESUME_STEP=72675
+    RESUME=false
+elif [ "$TASK_NAME" == 'button' ] || [ "$TASK_NAME" == 'press_button_close_after_reaching' ]; then
+    echo "BUTTON"
+    TASK_str="press_button_close_after_reaching"
+    EXP_NAME=1Task-press_button-CTOD-KP
+    PROJECT_NAME=${EXP_NAME}
 
-srun --output=train_${EXP_NAME}.txt --job-name=${EXP_NAME} python ../training/train_scripts/train_any.py \
+    RESUME_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder/${EXP_NAME}-Batch74/
+    RESUME_STEP=72675
+    RESUME=false
+elif [ "$TASK_NAME" == 'stack_block' ]; then
+    echo "STACK_BLOCK"
+    TASK_str="stack_block"
+    EXP_NAME=1Task-${TASK_str}-CTOD-KP_NO_0_3_5
+    PROJECT_NAME=${EXP_NAME}
+    SET_SAME_N=7
+    RESUME_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder/${EXP_NAME}-Batch74/
+    RESUME_STEP=72675
+    RESUME=false
+elif [ "$TASK_NAME" == 'pick_place' ]; then
+    echo "Pick-Place"
+    TASK_str="pick_place"
+    EXP_NAME=Real-1Task-${TASK_str}-Demo-${DEMO_NAME}-Finetune-${FINETUNE}
+    PROJECT_NAME=${EXP_NAME}
+    SET_SAME_N=2
+    RESUME_PATH=${RESUME_FOLDER}
+    RESUME_STEP=${RESUME_STEP}
+elif [ "$TASK_NAME" == 'multi' ]; then
+    echo "Multi Task"
+    TASK_str=["pick_place","nut_assembly","stack_block","press_button_close_after_reaching"]
+    EXP_NAME=4Task-CTOD-KP #1Task-${TASK_str}-CTOD-KP
+    PROJECT_NAME=${EXP_NAME}
+    RESUME_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder/${EXP_NAME}-Batch74/
+    RESUME_STEP=72675
+    RESUME=false
+fi
+
+echo "Running srun command..."
+srun -A hpc_default --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u ../training/train_scripts/train_any.py \
     --config-path ${CONFIG_PATH} \
     --config-name ${CONFIG_NAME} \
     policy=${POLICY} \
     device=${DEVICE} \
-    set_same_n=${SET_SAME_N} \
     task_names=${TASK_str} \
+    set_same_n=${SET_SAME_N} \
+    rollout=${ROLLOUT} \
     exp_name=${EXP_NAME} \
     save_freq=${SAVE_FREQ} \
     log_freq=${LOG_FREQ} \
     val_freq=${VAL_FREQ} \
+    print_freq=${PRINT_FREQ} \
+    dataset_target=${DATASET_TARGET} \
     bsize=${BSIZE} \
     vsize=${BSIZE} \
     epochs=${EPOCH} \
+    finetune=${FINETUNE} \
     dataset_cfg.agent_name=${AGENT_NAME} \
-    rollout=${ROLLOUT} \
-    dataset_cfg.normalize_action=${NORMALIZE_ACTION} \
-    dataset_cfg.pick_next=${PICK_NEXT} \
+    dataset_cfg.obs_T=${OBS_T} \
+    dataset_cfg.non_sequential=${NON_SEQUENTIAL} \
     dataset_cfg.compute_obj_distribution=${COMPUTE_OBJ_DISTRIBUTION} \
+    dataset_cfg.first_frames=${FIRST_FRAMES} \
+    dataset_cfg.only_first_frame=${ONLY_FIRST_FRAMES} \
     dataset_cfg.height=${HEIGHT} \
     dataset_cfg.width=${WIDTH} \
+    dataset_cfg.perform_augs=${PERFORM_AUGS} \
+    dataset_cfg.mix_sim_real=false \
+    dataset_cfg.dagger=${DAGGER} \
+    dataset_cfg.demo_name=${DEMO_NAME} \
     samplers.balancing_policy=${BALANCING_POLICY} \
-    mosaic.load_target_obj_detector=${LOAD_TARGET_OBJ_DETECTOR} \
-    mosaic.target_obj_detector_step=${TARGET_OBJ_DETECTOR_STEP} \
-    mosaic.target_obj_detector_path=${TARGET_OBJ_DETECTOR_PATH} \
-    mosaic.freeze_target_obj_detector=${FREEZE_TARGET_OBJ_DETECTOR} \
-    mosaic.remove_class_layers=${REMOVE_CLASS_LAYERS} \
-    mosaic.dim_H=${DIM_H} \
-    mosaic.dim_W=${DIM_W} \
-    mosaic.concat_bb=${CONCAT_BB} \
-    mosaic.load_contrastive=${LOAD_CONTRASTIVE} \
-    mosaic.concat_target_obj_embedding=${CONCAT_TARGET_OBJ_EMBEDDING} \
-    augs.null_bb=${NULL_BB} \
-    attn.img_cfg.pretrained=${PRETRAINED} \
-    actions.adim=${ACTION_DIM} \
-    actions.n_mixtures=${N_MIXTURES} \
-    actions.out_dim=${OUT_DIM} \
-    attn.attn_ff=${ATTN_FF} \
-    attn.img_cfg.drop_dim=${DROP_DIM} \
-    attn.img_cfg.out_feature=${OUT_FEATURE} \
-    simclr.compressor_dim=${COMPRESSOR_DIM} \
-    simclr.hidden_dim=${HIDDEN_DIM} \
-    mosaic.concat_state=${CONCAT_STATE} \
-    mosaic.concat_demo_head=${CONCAT_DEMO_HEAD} \
-    mosaic.concat_demo_act=${CONCAT_DEMO_ACT} \
     early_stopping_cfg.patience=${EARLY_STOPPING_PATIECE} \
+    cond_target_obj_detector_cfg.height=${HEIGHT} \
+    cond_target_obj_detector_cfg.width=${WIDTH} \
+    cond_target_obj_detector_cfg.dim_H=${DIM_H} \
+    cond_target_obj_detector_cfg.dim_W=${DIM_W} \
+    cond_target_obj_detector_cfg.n_channels=${OUT_FEATURE} \
+    cond_target_obj_detector_cfg.conv_drop_dim=${DROP_DIM} \
+    cond_target_obj_detector_cfg.n_classes=${N_CLASSES} \
+    cond_target_obj_detector_cfg.x_offset=${OFFSET_X} \
+    cond_target_obj_detector_cfg.y_offset=${OFFSET_Y} \
     project_name=${PROJECT_NAME} \
     EXPERT_DATA=${EXPERT_DATA} \
     save_path=${SAVE_PATH} \
@@ -152,14 +180,7 @@ srun --output=train_${EXP_NAME}.txt --job-name=${EXP_NAME} python ../training/tr
     train_cfg.lr=${LR} \
     train_cfg.weight_decay=${WEIGHT_DECAY} \
     train_cfg.lr_schedule=${SCHEDULER} \
-    simclr.mul_pre=${CONTRASTIVE_PRE} \
-    simclr.mul_pos=${CONTRASTIVE_POS} \
-    simclr.mul_intm=${MUL_INTM} \
-    bc_mul=${BC_MUL} \
-    inv_mul=${INV_MUL} \
-    cosine_annealing=${COSINE_ANNEALING} \
     debug=${DEBUG} \
     wandb_log=${WANDB_LOG} \
     resume=${RESUME} \
-    finetune=${FINETUNE} \
     loader_workers=${LOADER_WORKERS}

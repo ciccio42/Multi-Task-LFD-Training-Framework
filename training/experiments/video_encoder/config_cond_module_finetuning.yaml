@@ -100,10 +100,10 @@ dataset_cfg:
   select_random_frames: True
 augs:
   old_aug: False
-  brightness: [0.9, 1.1]
-  contrast: [0.9, 1.1]
-  saturation: [0.9, 1.1]
-  hue: [0.0, 0.0]
+  brightness: [0.6, 1.4] #[0.9, 1.1]
+  contrast: [0.7, 1.3] #[0.9, 1.1]
+  saturation: [0.7, 1.3] #[0.9, 1.1]
+  hue: [-0.05, 0.05] #[0.0, 0.0]
   p: 0.1
   horizontal_flip_p: 0.5
   brightness_strong: [0.875, 1.125]

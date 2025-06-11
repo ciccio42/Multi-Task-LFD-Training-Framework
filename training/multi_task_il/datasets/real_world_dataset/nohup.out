@@ -1,0 +1,6 @@
+Exception raised during import
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_11
+Traceback (most recent call last):
+  File "/home/rsofnc000/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/training/multi_task_il/datasets/real_world_dataset/sub_sample_delta.py", line 43, in <module>
+    data = pkl.load(f)
+KeyboardInterrupt

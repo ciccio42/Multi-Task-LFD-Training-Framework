@@ -22,6 +22,8 @@ from tqdm import tqdm
 import logging
 import itertools
 from torchvision.transforms import ToPILImage
+import json
+import os
 
 logging.basicConfig(
     level=logging.INFO,
@@ -254,7 +256,8 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
                     # open file and check trajectory lenght
                     with open(agent, "rb") as f:
                         agent_data = pkl.load(f)
-                        trj_len = agent_data['len']
+                        # trj_len = agent_data['len']
+                        trj_len = len(agent_data['traj'])
                         
                         dataset_loader.all_agent_files[agent_file_cnt] = (name, _id, agent, trj_len)
                         agent_file_cnt += 1
@@ -312,9 +315,10 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
                     for sub_task_id in range(spec.get('n_tasks')):
                         
                         # check if the sub-task represents the same manipulated object
-                        target_obj_sub_task_id = int(sub_task_id/num_variation_per_object)
-                        if target_obj_id != target_obj_sub_task_id and mode == 'train':
-                            continue
+                        if len(spec.get('skip_ids', [])) != 0:
+                            target_obj_sub_task_id = int(sub_task_id/num_variation_per_object)
+                            if target_obj_id != target_obj_sub_task_id and mode == 'train':
+                                continue
                         
                         if not validation_on_skipped_task:
                             if sub_task_id in spec.get('skip_ids', []):
@@ -372,6 +376,8 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
             dataset_loader.task_crops[name] = spec.get(
                 'crop', [0, 0, 0, 0])
 
+    with open(os.path.join(root_dir, name, f'{mode}_{demo_name}_{agent_name}_all_file_pairs.json'), 'w') as f:
+        json.dump(dataset_loader.all_file_pairs, f)
     return count, pair_cnt
 
 

@@ -93,10 +93,20 @@ class _StackedAttnLayers(nn.Module):
         B, d, T, H, W = inputs.shape
 
         # obs_T could be as small as 1
-        obs_T = T - self._demo_T
+        if self.compute_demo_emb:
+            obs_T = T - self._demo_T
+        else:
+            obs_T = T
         out_dict = dict()
         for i in range(self._n_layers):
-            demo_ly_in, obs_ly_in = inputs.split([self._demo_T, obs_T], dim=2)
+            if (self.compute_img_emb and self.compute_demo_emb):
+                demo_ly_in, obs_ly_in = inputs.split([self._demo_T, obs_T], dim=2)
+            elif self.compute_img_emb and not self.compute_demo_emb:
+                obs_ly_in = inputs
+                demo_ly_in = None
+            elif not self.compute_img_emb and self.compute_demo_emb:
+                obs_ly_in = None
+                demo_ly_in = inputs
             # -> (B, d, demo_T, H, W), (B, d, obs_T, H, W)
             if self.compute_demo_emb:
                 # process demo first
@@ -844,18 +854,21 @@ class VideoImitation(nn.Module):
         return mu_inv, scale_inv, logit_inv
 
     def _get_action_distribution(self, action_module, action_dist, bb, img_embed, states, demo_embed, first_phase):
-        if self.concat_demo_act:  # for action model
+        #if self.concat_demo_act:  # for action model
+        #if self._concat_demo_emb:
+        if img_embed is not None:
             if self._concat_demo_emb:
-                if img_embed is not None:
-                    ac_in = torch.cat((img_embed, demo_embed), dim=2)
-                else:
-                    ac_in = demo_embed
-            if self._concat_bb:
-                bb = rearrange(bb, 'B T O D -> B T (O D)')
-                if not self._concat_demo_emb and not self._concat_img_emb:
-                    ac_in = bb
-                else:
-                    ac_in = torch.cat((ac_in, bb), dim=2)
+                ac_in = torch.cat((img_embed, demo_embed), dim=2)
+            else:
+                ac_in = img_embed
+        else:
+            ac_in = demo_embed
+        if self._concat_bb:
+            bb = rearrange(bb, 'B T O D -> B T (O D)')
+            if not self._concat_demo_emb and not self._concat_img_emb:
+                ac_in = bb
+            else:
+                ac_in = torch.cat((ac_in, bb), dim=2)
 
         if self._concat_state:
             ac_in = torch.cat((ac_in, states), 2)
@@ -882,7 +895,8 @@ class VideoImitation(nn.Module):
             bb.requires_grad = True
         if embed_out is not None:
             demo_embed, img_embed = embed_out['demo_embed'], embed_out['img_embed']
-            assert demo_embed.shape[1] == self._demo_T
+            if demo_embed is not None:
+                assert demo_embed.shape[1] == self._demo_T
 
         if not eval:
             obs_T = self._obs_T  # img_embed.shape[1]
@@ -1062,7 +1076,7 @@ class VideoImitation(nn.Module):
                 for indx in range(len(prediction['classes_final'])):
                     target_indx_flags = prediction['classes_final'][indx] == 1
                     place_indx_flags = torch.zeros((1, 1))
-                    if "KP" in self._target_obj_detector_path:
+                    if "KP" in self._target_obj_detector_path or 'COD' in self._target_obj_detector_path :
                         place_indx_flags = prediction['classes_final'][indx] == 2
 
                     # get target object bb
@@ -1092,7 +1106,7 @@ class VideoImitation(nn.Module):
                             (1, 4)).to(device=images.get_device())
 
                     # get place bb
-                    if torch.sum((place_indx_flags == True).int()) != 0 and "KP" in self._target_obj_detector_path:
+                    if torch.sum((place_indx_flags == True).int()) != 0 and ("KP" in self._target_obj_detector_path or 'COD' in self._target_obj_detector_path):
                         # 2. Get the confidence scores for the target predictions and the the max
                         place_max_score_indx = torch.argmax(
                             prediction['conf_scores_final'][indx][place_indx_flags])
@@ -1105,7 +1119,7 @@ class VideoImitation(nn.Module):
                                                             mode='a2p')[0][place_indx_flags][place_max_score_indx][None, :]
                         predicted_bb = torch.concat(
                             (predicted_bb, predicted_bb_place))
-                    elif "KP" in self._target_obj_detector_path:
+                    elif "KP" in self._target_obj_detector_path or 'COD' in self._target_obj_detector_path:
                         # print("No bb place")
                         # Get index for target object
                         predicted_bb = torch.concat((predicted_bb, torch.zeros(

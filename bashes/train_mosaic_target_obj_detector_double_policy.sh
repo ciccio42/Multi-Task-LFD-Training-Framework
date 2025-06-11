@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#SBATCH -A hpc_default
 #SBATCH --exclude=tnode[01-17]
 #SBATCH --partition=gpuq
 #SBATCH --gres=gpu:1
@@ -7,18 +8,16 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=32
 #SBATCH --export=ALL
-#SBATCH -w gnode07
 
-export MUJOCO_PY_MUJOCO_PATH="/home/rsofnc000/.mujoco/mujoco210"
+export MUJOCO_PY_MUJOCO_PATH=/home/rsofnc000/.mujoco/mujoco210
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
+export HYDRA_FULL_ERROR=1
+EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
 
 export HYDRA_FULL_ERROR=1
-echo $1
-TASK_NAME="$1"
 
 EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset/
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder/luigi_models
 POLICY='${mosaic}'
 TARGET='multi_task_il.models.mt_rep_double_policy.VideoImitation'
 
@@ -30,14 +29,13 @@ DEBUG=false
 WANDB_LOG=true
 ROLLOUT=false
 EPOCH=90
-LOADER_WORKERS=8
+LOADER_WORKERS=16
 CONFIG_PATH=../experiments
 CONFIG_NAME=config.yaml
 CONCAT_IMG_EMB=true
-CONCAT_DEMO_EMB=true
-CONCAT_STATE=false
+CONCAT_DEMO_EMB=false
+CONCAT_STATE=true
 CONVERT_ACTION=true
-DEMO_NAME=human_rgb
 
 CONCAT_BB=true
 LOAD_TARGET_OBJ_DETECTOR=true
@@ -47,11 +45,15 @@ RESUME_FOLDER="${2}"
 RESUME_STEP="${3}"
 FINETUNE="${4:-false}"
 RESUME="${5:-false}"
+DEMO_NAME="${6:-panda}" # [human_rgb or panda]
+SAVE_PATH="${7:-/home/rsofnc000/checkpoint_save_folder/100_180_new}"
 echo "Task Name is: $TASK_NAME"
 echo "Resume Folder is: $RESUME_FOLDER"
 echo "Resume Step is: $RESUME_STEP"
 echo "Finetune is: $FINETUNE"
 echo "Resume is: $RESUME"
+echo "Demo Name is: $DEMO_NAME"
+echo "Save Path is: $SAVE_PATH"
 
 if [ "$TASK_NAME" == 'nut_assembly' ]; then
     echo "NUT-ASSEMBLY"
@@ -239,8 +241,8 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     RESUME_PATH=${RESUME_FOLDER}
     RESUME_STEP=${RESUME_STEP}
 
-    TARGET_OBJ_DETECTOR_STEP=20554 #68526 #129762 #198900 #65250
-    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/Simulated-Agent-Human-Demonstration-COD-KP-Batch112
+    TARGET_OBJ_DETECTOR_STEP=26
+    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/1Task-pick_place-COD-RGB-Batch32
 
     BSIZE=32 #32 #128 #64 #32
     COMPUTE_OBJ_DISTRIBUTION=false
@@ -271,8 +273,8 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     COMPRESSOR_DIM=256 #256 MT #128 2Task, Nut, button, stack #256 Pick-place
     HIDDEN_DIM=512     #256 MT #128 2Task, Nut, button, stack #512 Pick-place
     CONCAT_DEMO_HEAD=false
-    CONCAT_DEMO_ACT=true
-    PRETRAINED=false
+    CONCAT_DEMO_ACT=false
+    PRETRAINED=true
     NULL_BB=false
 
     EARLY_STOPPING_PATIECE=-1
@@ -291,8 +293,9 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     COSINE_ANNEALING=false
 
     TASK_str="pick_place" #[pick_place,nut_assembly,stack_block,button]
-    EXP_NAME=1Task-${TASK_str}-Double-Policy-State_${CONCAT_STATE}_Convert_Action_${CONVERT_ACTION}_Human_Demo
+    EXP_NAME=1Task-${TASK_str}-Double-Policy-State_${CONCAT_STATE}_Convert_Action_${CONVERT_ACTION}_DEMO_${DEMO_NAME}_CONCAT_DEMO_ACT_${CONCAT_DEMO_ACT}_CONCAT_DEMO_EMB_${CONCAT_DEMO_EMB}
     PROJECT_NAME=${EXP_NAME}
+
 elif [ "$TASK_NAME" == 'multi' ]; then
     echo "Multi Task"
     ### Pick-Place ###

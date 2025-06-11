@@ -409,7 +409,7 @@ if __name__ == '__main__':
 
     try_path = args.model
     real = True if "Real" in try_path else False
-    place = True if ("-KP" in try_path or "Double" in try_path) else False
+    place = True if ("-KP" in try_path or "Double" in try_path or 'COD' in try_path) else False
     # if 'log' not in args.model and 'mosaic' not in args.model:
     #     print("Appending dir to given exp_name: ", args.model)
     #     try_path = join(LOG_PATH, args.model)
@@ -659,6 +659,11 @@ if __name__ == '__main__':
             else:
                 seeds = [(random.getrandbits(32), i, None) for i in range(args.N)]
 
+        # saving seeds for reproducibility
+        # with open(os.path.join(results_dir, 'seeds.txt'), 'w') as f:
+        #     for seed in seeds:
+        #         f.write(f"{seed[0]}\n")
+        
         if parallel:
             with Pool(args.num_workers) as p:
                 task_success_flags = p.starmap(f, seeds)

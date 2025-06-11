@@ -151,7 +151,7 @@ class DataAugmentation:
             
 
  
-        if self.height == 224 and self.width == self.width:
+        if self.height == 224 and self.width == 224:
             augmented = self.normalize(augmented)
         
         # obs_pil = np.moveaxis(augmented.numpy()*255, 0, -1).astype(np.uint8)

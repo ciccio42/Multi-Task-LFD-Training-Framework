@@ -17,7 +17,7 @@ JITTER_FACTORS = {'brightness': 0.4,
 
 class DataAugmentation:
     
-    def __init__(self, data_augs, mode, height, width, use_strong_augs, task_crops=OrderedDict(), agent_sim_crop=OrderedDict(), agent_crop=OrderedDict(), demo_crop=OrderedDict()):  
+    def __init__(self, data_augs, mode, height, width, use_strong_augs, task_crops=OrderedDict(), agent_sim_crop=OrderedDict(), agent_crop=OrderedDict(), demo_crop=OrderedDict(), normalize=False):  
 
         assert data_augs, 'Must give some basic data-aug parameters'
         if mode == 'train':
@@ -32,6 +32,7 @@ class DataAugmentation:
         self.agent_sim_crop = agent_sim_crop
         self.agent_crop = agent_crop
         self.demo_crop = demo_crop
+        self.normalize_flag = normalize
 
         self.toTensor = ToTensor()
 
@@ -60,9 +61,9 @@ class DataAugmentation:
         ])
 
         self.affine_transform = A.Compose([
-            A.HorizontalFlip(p=self.data_augs.get("horizontal_flip_p", 0.0)),
             A.ShiftScaleRotate(shift_limit=0.1, rotate_limit=0, scale_limit=0, p=self.data_augs.get("affine_p", 9.0))
         ])
+        # A.HorizontalFlip(p=self.data_augs.get("horizontal_flip_p", 0.0))
 
     
     def _apply_random_black_patches(self, img):
@@ -117,8 +118,11 @@ class DataAugmentation:
             obs = self.toTensor(obs)
             
             # ---- Resized crop ----#
-            obs = resized_crop(obs, top=top, left=left, height=box_h,
-                               width=box_w, size=(self.height, self.width))
+            obs = resized_crop(obs, top=top, 
+                               left=left, 
+                               height=box_h,
+                               width=box_w, 
+                               size=(self.height, self.width))
             if DEBUG:
                 cv2.imwrite(f"prova_resized_{frame_number}.png", np.moveaxis(
                     obs.numpy()*255, 0, -1))
@@ -183,7 +187,8 @@ class DataAugmentation:
             augmented = obs
 
         # ---- Apply random black patches (if enabled) ----
-        augmented = self._apply_random_black_patches(augmented)
+        if agent:
+            augmented = self._apply_random_black_patches(augmented)
 
         if DEBUG:
             cv2.imwrite("augmented_debug.png", np.moveaxis(augmented.numpy()*255, 0, -1))
@@ -205,7 +210,8 @@ class DataAugmentation:
             obs_pil.save(f"agent_augmented.png")
 
         # ---- Normalization ----
-        augmented = self.normalize(augmented)
+        if self.normalize_flag:
+            augmented = self.normalize(augmented)
         
         if bb is not None:
             return augmented, bb, class_frame  

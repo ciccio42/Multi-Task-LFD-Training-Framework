@@ -1021,11 +1021,17 @@ def get_predicted_bb(prediction, pred_flags, perform_augs, model, formatted_img,
     max_score = torch.argmax(
         prediction['conf_scores_final'][0][pred_flags])
     max_score_coef = prediction['conf_scores_final'][0][pred_flags][max_score]
-
+    mean = np.array([0.485, 0.456, 0.406])
+    std = np.array([0.229, 0.224, 0.225])
+    denormalize = transforms.Normalize((-1 * mean / std), (1.0 / std))
+    
     if perform_augs:
         scale_factor = model.get_scale_factors()
+        # image = np.array(np.moveaxis(
+        #     formatted_img[:, :, :].cpu().numpy(), 0, -1), dtype=np.uint8)
+        formatted_img = denormalize(formatted_img).cpu().numpy()
         image = np.array(np.moveaxis(
-            formatted_img[:, :, :].cpu().numpy()*255, 0, -1), dtype=np.uint8)
+             formatted_img, 0, -1)*255, dtype=np.uint8)
         predicted_bb = project_bboxes(bboxes=prediction['proposals'][0][None][None],
                                       width_scale_factor=scale_factor[0],
                                       height_scale_factor=scale_factor[1],
@@ -1059,9 +1065,13 @@ def get_predicted_bb(prediction, pred_flags, perform_augs, model, formatted_img,
                                   color=(0, 255, 0), thickness=1)
 
         if pick:
-            cv2.imwrite("predicted_bb_pick.png", image)
+            # cv2.imwrite("predicted_bb_pick.png", image)
+            pil_image = Image.fromarray(image)
+            pil_image.save("predicted_bb_pick.png")
         elif not pick:
-            cv2.imwrite("predicted_bb_place.png", image)
+            # cv2.imwrite("predicted_bb_place.png", image)
+            pil_image = Image.fromarray(image)
+            pil_image.save("predicted_bb_place.png")
 
         # compute IoU over time
         iou_t = box_iou(boxes1=torch.from_numpy(
@@ -1378,7 +1388,7 @@ def object_detection_inference(model, env, context, gpu_id, variation_id, img_fo
             # convert observation from BGR to RGB
             if perform_augs:
                 formatted_img, bb_t = img_formatter(
-                    obs['camera_front_image'][:,:,::-1], bb_t)
+                    obs['camera_front_image'], bb_t) # [:,:,::-1]
             else:
                 formatted_img = torch.from_numpy(
                     np.array(obs['camera_front_image']))
@@ -1756,9 +1766,11 @@ def build_tvf_formatter_obj_detector(config, env_name):
         img = resized_crop(img, top=top, left=left, height=box_h,
                            width=box_w, size=(config.dataset_cfg.height, config.dataset_cfg.width))
         
-        if config.dataset_cfg.height == 224 and  config.dataset_cfg.width ==  224:
-            img = Normalize(
-                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(img)
+        # img = Normalize(
+        #         mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(img)
+        # if config.dataset_cfg.height == 224 and  config.dataset_cfg.width ==  224:
+        #     img = Normalize(
+        #         mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(img)
         
         # transforms_pipe = transforms.Compose([
         #     transforms.ColorJitter(
@@ -1773,8 +1785,8 @@ def build_tvf_formatter_obj_detector(config, env_name):
         # ])
         # img = transforms_pipe(img)
 
-        cv2.imwrite("resized_target_obj.png", np.moveaxis(
-            img.numpy()*255, 0, -1))
+        # cv2.imwrite("resized_target_obj.png", np.moveaxis(
+        #     img.numpy()*255, 0, -1))
 
         if bb is not None:
             from multi_task_il.datasets.utils import adjust_bb
@@ -1921,7 +1933,7 @@ def build_env_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights
     # convert BGR context image to RGB and scale to 0-1
     for i, img in enumerate(context):
         cv2.imwrite(f"context_{i}.png", np.array(img))
-    context = [img_formatter(i[:,:,::-1])[None] for i in context]
+    context = [img_formatter(i)[None] for i in context] # [:,:,::-1]
     # assert len(context ) == 6
     if isinstance(context[0], np.ndarray):
         context = torch.from_numpy(np.concatenate(context, 0))[None]

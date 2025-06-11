@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --exclude=tnode[01-17]
+#SBATCH -A hpc_default
 #SBATCH --partition=gpuq
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
@@ -72,6 +72,7 @@ ONLY_FIRST_FRAMES=false
 ROLLOUT=false
 PERFORM_AUGS=true
 NON_SEQUENTIAL=true
+NORMALIZE_IMG=false
 
 DROP_DIM=4      # 2    # 3
 OUT_FEATURE=128 # 512 # 256
@@ -114,7 +115,7 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     TASK_str="pick_place"
-    EXP_NAME=Real-1Task-${TASK_str}-Demo-${DEMO_NAME}-KP-RGB-Finetune
+    EXP_NAME=Real-KP-COD-${TASK_str}-Demo-${DEMO_NAME}-Finetune-${FINETUNE}-NORMALIZE-${NORMALIZE_IMG}
     PROJECT_NAME=${EXP_NAME}
     SET_SAME_N=2
     RESUME_PATH=${RESUME_FOLDER}
@@ -130,7 +131,7 @@ elif [ "$TASK_NAME" == 'multi' ]; then
 fi
 
 echo "Running srun command..."
-srun --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u ../training/train_scripts/train_any.py \
+srun -A hpc_default --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u ../training/train_scripts/train_any.py \
     --config-path ${CONFIG_PATH} \
     --config-name ${CONFIG_NAME} \
     policy=${POLICY} \
@@ -171,6 +172,7 @@ srun --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u
     cond_target_obj_detector_cfg.n_classes=${N_CLASSES} \
     cond_target_obj_detector_cfg.x_offset=${OFFSET_X} \
     cond_target_obj_detector_cfg.y_offset=${OFFSET_Y} \
+    augs.normalize=${NORMALIZE_IMG} \
     project_name=${PROJECT_NAME} \
     EXPERT_DATA=${EXPERT_DATA} \
     save_path=${SAVE_PATH} \

@@ -4,11 +4,11 @@ import re
 import time
 import argparse
 
-BASH_SCRIPT = "/home/rsofnc000/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/real_train_keypoint_detection.sh"
+BASH_SCRIPT = "/home/rsofnc000/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/train_mosaic_target_obj_detector_double_policy.sh"
 FINETUNE = False
 RESUME = True
-CHECKPOINT_FOLDER = "Real-1Task-pick_place-Demo-panda-KP-RGB-Finetune-Batch32"
-RESUME_STEP = -1
+CHECKPOINT_FOLDER = "1Task-pick_place-Double-Policy-State_true_Convert_Action_true_DEMO_panda_CONCAT_DEMO_ACT_false_CONCAT_DEMO_EMB_false-Batch32"
+RESUME_STEP = 10
 DEMO_NAME = 'panda'
 SAVE_PATH = '/home/rsofnc000/checkpoint_save_folder/100_180_new'
 BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}", f"{DEMO_NAME}", f"{SAVE_PATH}"]

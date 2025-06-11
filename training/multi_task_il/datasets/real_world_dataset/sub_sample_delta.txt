@@ -1,0 +1,19 @@
+/home/rsofnc000/.conda/envs/multi_task_lfd/bin/../lib/gcc/x86_64-conda-linux-gnu/12.1.0/../../../../x86_64-conda-linux-gnu/bin/ld: cannot find -lGL
+collect2: error: ld returned 1 exit status
+Exception raised during import
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_11
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_12
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_02
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_04
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_06
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_05
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_01
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_14
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_09
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_13
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_08
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_03
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_00
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_10
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_07
+Processing /home/rsofnc000/dataset/opt_dataset/pick_place/real_new_ur5e_pick_place_old_2/task_15

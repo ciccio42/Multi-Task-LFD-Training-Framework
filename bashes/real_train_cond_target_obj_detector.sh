@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#SBATCH --exclude=tnode[01-17]
-#SBATCH --exclude=gnode12
+#SBATCH -A hpc_default
 #SBATCH --partition=gpuq
+#SBATCH -w gnode01
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
@@ -15,23 +15,35 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 export HYDRA_FULL_ERROR=1
 
 EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder/100_180_new
+
 POLICY='${cond_target_obj_detector}'
-DATASET_TARGET=multi_task_il.datasets.multi_task_keypoint_dataset.MultiTaskPairedKeypointDetectionDataset
+DATASET_TARGET=multi_task_il.datasets.multi_task_target_obj_datasets.MultiTaskPairedKeypointDetectionDataset
 TASKS_CONFIG=7_tasks_real
 AGENT_NAME=real_new_ur5e
-DEMO_NAME=panda
 
 TASK_NAME="${1}"
 RESUME_FOLDER="${2}"
 RESUME_STEP="${3}"
 FINETUNE="${4:-false}"
 RESUME="${5:-false}"
+DEMO_NAME="${6:-panda}" # [human_rgb or panda]
+SAVE_PATH="${7:-/home/rsofnc000/checkpoint_save_folder/100_180_new}"
 echo "Task Name is: $TASK_NAME"
 echo "Resume Folder is: $RESUME_FOLDER"
 echo "Resume Step is: $RESUME_STEP"
 echo "Finetune is: $FINETUNE"
 echo "Resume is: $RESUME"
+echo "Demo Name is: $DEMO_NAME"
+echo "Save Path is: $SAVE_PATH"
+
+# Set offset_x and offset_y based on DEMO_NAME
+if [ "$DEMO_NAME" = "human_rgb" ]; then
+    OFFSET_X=2.0
+    OFFSET_Y=1.5
+elif [ "$DEMO_NAME" = "panda" ]; then
+    OFFSET_X=1.5
+    OFFSET_Y=1.5
+fi
 
 SAVE_FREQ=-1
 LOG_FREQ=10
@@ -47,7 +59,7 @@ BSIZE=32 #16 #32
 COMPUTE_OBJ_DISTRIBUTION=false
 CONFIG_PATH=../experiments/
 CONFIG_NAME=config_cond_target_obj_detector_real.yaml
-LOADER_WORKERS=8
+LOADER_WORKERS=16
 BALANCING_POLICY=0
 OBS_T=7
 
@@ -61,6 +73,7 @@ ONLY_FIRST_FRAMES=false
 ROLLOUT=false
 PERFORM_AUGS=true
 NON_SEQUENTIAL=true
+NORMALIZE_IMG=false
 
 DROP_DIM=4      # 2    # 3
 OUT_FEATURE=128 # 512 # 256
@@ -103,7 +116,7 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     TASK_str="pick_place"
-    EXP_NAME=Real-1Task-${TASK_str}-Demo-${DEMO_NAME}-CTOD-KP-Finetuned
+    EXP_NAME=Real-CTOD-${TASK_str}-Demo-${DEMO_NAME}-Finetune-${FINETUNE}-NORMALIZE-${NORMALIZE_IMG}
     PROJECT_NAME=${EXP_NAME}
     SET_SAME_N=2
     RESUME_PATH=${RESUME_FOLDER}
@@ -119,7 +132,7 @@ elif [ "$TASK_NAME" == 'multi' ]; then
 fi
 
 echo "Running srun command..."
-srun --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u ../training/train_scripts/train_any.py \
+srun -A hpc_default --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u ../training/train_scripts/train_any.py \
     --config-path ${CONFIG_PATH} \
     --config-name ${CONFIG_NAME} \
     policy=${POLICY} \
@@ -158,6 +171,9 @@ srun --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u
     cond_target_obj_detector_cfg.n_channels=${OUT_FEATURE} \
     cond_target_obj_detector_cfg.conv_drop_dim=${DROP_DIM} \
     cond_target_obj_detector_cfg.n_classes=${N_CLASSES} \
+    cond_target_obj_detector_cfg.x_offset=${OFFSET_X} \
+    cond_target_obj_detector_cfg.y_offset=${OFFSET_Y} \
+    augs.normalize=${NORMALIZE_IMG} \
     project_name=${PROJECT_NAME} \
     EXPERT_DATA=${EXPERT_DATA} \
     save_path=${SAVE_PATH} \

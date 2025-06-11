@@ -83,9 +83,13 @@ class CondModule(nn.Module):
                 input_dim = demo_linear_dim[indx-1]
             mlp_encoder.append(nn.Linear(in_features=input_dim,
                                          out_features=layer_dim))
+            # add batch normalization
+            mlp_encoder.append(nn.BatchNorm1d(layer_dim))
+            # add dropout
+            mlp_encoder.append(nn.Dropout(p=0.2))
             if indx != len(demo_linear_dim) - 1:
                 mlp_encoder.append(nn.ReLU())
-
+            
         self._mlp_encoder = nn.Sequential(*mlp_encoder)
 
     def forward(self, input):

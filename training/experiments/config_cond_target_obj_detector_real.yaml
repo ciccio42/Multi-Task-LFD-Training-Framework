@@ -150,6 +150,7 @@ augs:
     num_patches: 1
     min_size: 5
     max_size: 30
+  normalize: True
   
   brightness_strong: [0.875, 1.125]
   contrast_strong: [0.5, 1.5]

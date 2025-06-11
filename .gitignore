@@ -174,3 +174,5 @@ bashes_luigi/vrt1/wandb
 bashes_luigi/vrt1/images_and_stuff
 bashes_luigi/vrt1/training_logs
 bashes_luigi/*.txt
+.vscode/
+pycdc

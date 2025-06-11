@@ -28,6 +28,10 @@ import gc
 from colorama import Fore, Back
 import torch.distributed as dist
 import time
+from multi_task_il.datasets.vrt1.vrt1_dataset import VRT1_Dataset
+from multi_task_il.datasets.vrt1.sampler import VRT1Sampler
+from multi_task_il.models.command_encoder.cond_module import CondModule
+
 
 
 
@@ -158,12 +162,13 @@ def make_loss_function(config):
             loss_function = calculate_task_loss
         else:
             loss_function = calculate_grad_norm_loss
-
     elif "vima" in config.policy._target_:
         loss_function = loss_function_vima
     elif "cond_target_obj_detector" in config.policy._target_:
         loss_function = loss_func_bb
-
+    elif "rt1" in config.policy._target_: # in RT1 the loss is computed by the module itself
+        loss_function = None
+        
     return loss_function
 
 def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: int = 1):
@@ -174,11 +179,16 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
         f"---- Number of workder {config.get('loader_workers', cpu_count())}-----")
     dataset_cfg.mode = 'train'
     dataset = instantiate(dataset_cfg)
+    if isinstance(dataset, VRT1_Dataset) and dataset.set_same_n >= 1:
+        config['bsize'] = dataset.batch_size
+        config['vsize'] = dataset.batch_size
+            
     train_step = int(config.get('epochs') *
                      int(len(dataset)/(num_replicas*config.get('bsize'))))
     epoch_step = int(len(dataset)/(num_replicas*config.get('bsize')))
     
-    if not dataset_cfg.change_command_epoch:
+    
+    if not dataset_cfg.get('change_command_epoch', True) and not isinstance(dataset, VRT1_Dataset):
         train_sampler = DIYBatchSampler(
             task_to_idx=dataset.task_to_idx,
             subtask_to_idx=dataset.subtask_to_idx,
@@ -189,7 +199,7 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
             dataset=dataset,
             num_replicas=num_replicas,
             rank=global_rank)
-    else:
+    elif dataset_cfg.get('change_command_epoch', True) and not isinstance(dataset, VRT1_Dataset):
         train_sampler = TrajectoryBatchSampler(
             dataset,
             agent_files=dataset.all_agent_files,
@@ -205,6 +215,18 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
             num_replicas=num_replicas,
             rank=global_rank,
         )
+    elif isinstance(dataset, VRT1_Dataset):
+        train_sampler = VRT1Sampler(
+            task_to_idx=dataset.dataset_to_indx,
+            sampler_spec=config.samplers,
+            batch_size=config.get('bsize'),
+            n_step=train_step,
+            epoch_steps=epoch_step,
+            dataset=dataset,
+            num_replicas=num_replicas,
+            rank=global_rank,
+        )
+        
 
     train_loader = DataLoader(
         dataset,
@@ -220,12 +242,13 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
     if dataset_cfg.split[1] > 0.0:
         dataset_cfg.mode = 'val'
         val_dataset = instantiate(dataset_cfg)
+        
         # allow validation batch to have a different size
         config.samplers.batch_size = config.train_cfg.val_size
         val_step = int(config.get('epochs') *
                        int(len(val_dataset)/config.get('vsize')))
 
-        if not dataset_cfg.change_command_epoch:
+        if not dataset_cfg.get('change_command_epoch', True) and not isinstance(dataset, VRT1_Dataset):
             val_sampler = DIYBatchSampler(
                 task_to_idx=val_dataset.task_to_idx,
                 subtask_to_idx=val_dataset.subtask_to_idx,
@@ -236,7 +259,7 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
                 dataset = val_dataset,
                 num_replicas=num_replicas,
                 rank=global_rank)
-        else:
+        elif dataset_cfg.get('change_command_epoch', True) and not isinstance(dataset, VRT1_Dataset):
             val_sampler = TrajectoryBatchSampler(
                 val_dataset,
                 agent_files=val_dataset.all_agent_files,
@@ -247,12 +270,23 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
                 tasks_spec=dataset_cfg.tasks_spec,
                 object_distribution_to_indx=val_dataset.object_distribution_to_indx,
                 sampler_spec=config.samplers,
-                n_step=train_step,
+                n_step=val_step,
                 epoch_steps=int(len(val_dataset)/(num_replicas*config.get('bsize'))),
                 num_replicas=num_replicas,
                 rank=global_rank,
             )
-
+        elif isinstance(dataset, VRT1_Dataset):
+            val_sampler = VRT1Sampler(
+                    task_to_idx=val_dataset.dataset_to_indx,
+                    sampler_spec=config.samplers,
+                    batch_size=config.get('vsize'),
+                    n_step=val_step,
+                    epoch_steps=int(len(val_dataset)/(num_replicas*config.get('bsize'))),
+                    dataset=val_dataset,
+                    num_replicas=num_replicas,
+                    rank=global_rank,
+                )
+        
         val_loader = DataLoader(
             val_dataset,
             batch_sampler=val_sampler,
@@ -324,6 +358,59 @@ def generate_figure(images, context, fname='burner.png'):
     plt.tight_layout()
     print("Saving figure to: ", fname)
     plt.savefig(fname)
+
+
+def init_freezed_cond_module(
+        height=120,
+        width=160,
+        demo_T=4,
+        model_name="r2plus1d_18",
+        pretrained=True,
+        cond_video=True,
+        n_layers=3,
+        demo_W=7,
+        demo_H=7,
+        demo_ff_dim=[128, 64, 32],
+        demo_linear_dim=[512, 512, 512],
+        conv_drop_dim=3,
+        cond_module_model_path=None,
+        device=None
+        ):
+    
+    cond_module = CondModule(
+        height=height,
+        width=width,
+        demo_T=demo_T,
+        model_name=model_name,
+        pretrained=pretrained,
+        cond_video=cond_video,
+        n_layers=n_layers,
+        demo_W=demo_W,
+        demo_H=demo_H,
+        demo_ff_dim=demo_ff_dim,
+        demo_linear_dim=demo_linear_dim,
+        conv_drop_dim=conv_drop_dim,
+        )
+    weights = torch.load(cond_module_model_path, weights_only=True)
+
+    cond_module.load_state_dict(weights)
+    cond_module.eval()
+
+    # model_parameters = filter(lambda p: p.requires_grad, cond_module.parameters())
+    # params = sum([np.prod(p.size()) for p in model_parameters])
+    # # print(cond_module)
+    # print('Total params in cond module before freezing:', params)
+
+    # # freeze cond module
+    # for p in cond_module.parameters():
+    #     p.requires_grad = False
+        
+    # model_parameters = filter(lambda p: p.requires_grad, cond_module.parameters())
+    # params = sum([np.prod(p.size()) for p in model_parameters])
+    # # print(cond_module)
+    # print('Total params in cond module after freezing:', params)
+    
+    return cond_module
 
 
 class Trainer:
@@ -407,7 +494,7 @@ class Trainer:
                 #     print(k, dict(self.config.get(k)))
                 #     print('-'*20)
                 wandb_config = {k: self.config.get(k) for k in config_keys}
-                wandb.login(key='227ed2fded06f63748a7a29dae55acdda7d131ff', relogin=True)
+                wandb.login(key='d8ae96268267edd589283209c8b725caadcd4645', relogin=True)
                 print(f"Exp name: {self.config.exp_name}")
                 self.config.project_name = self.config.exp_name.split('-Batch')[0]
                 run = wandb.init(project=self.config.project_name,
@@ -421,7 +508,7 @@ class Trainer:
                    local_rank=local_rank)
          
 
-    def train_loop(self, train_loader, scheduler, loss_function, global_rank, local_rank, model, optimizer, task_loss_muls, raw_stats: dict = dict(), epoch: int = 0, log_freq: int = -1, print_freq: int = -1, frac: float = 0.0):
+    def train_loop(self, train_loader, scheduler, loss_function, global_rank, local_rank, model, cond_model, optimizer, task_loss_muls, val_loader=None, raw_stats: dict = dict(), epoch: int = 0, log_freq: int = -1, print_freq: int = -1, frac: float = 0.0, weights_fn=None, save_fn=None):
         
         #### ---- Train loop ----####
         model = model.train()
@@ -431,8 +518,12 @@ class Trainer:
             print(f"Object detector is set to eval mode")
             if model.module._object_detector is not None: 
                 model.module._object_detector.eval()
-                print(f"Object detector mode {model.module._object_detector.training}")    
-            
+                print(f"Object detector mode {model.module._object_detector.training}")
+        
+        # if "RT1_video_cond" in self.config.policy._target_:
+        #     print(f"Cond module is set to eval mode")
+        #     model.module.cond_module.eval()
+                    
         train_step = len(train_loader)
         print(f"Training for {train_step} steps")
         epoch_steps = 0
@@ -442,70 +533,182 @@ class Trainer:
             # calculate loss here:
             # if global_rank == 0:
             #     start_inference = time.time()
-            task_losses = loss_function(
-                self.config, self.train_cfg, self._device_list[local_rank], model, inputs)
+            if loss_function is not None:
+                task_losses = loss_function(
+                    self.config, self.train_cfg, self._device_list[local_rank], model, inputs)
+            else: # RT1 inference
+                # prepare inputs for model
+                model_inputs, task_to_idx = prepare_inputs(inputs, self._device_list[local_rank])
+                with torch.no_grad():
+                    cond_embedding = cond_model(model_inputs['demo'])
+                out, loss, bin_acc, bin_acc_interval = model(
+                      images = model_inputs['images'],
+                      demo = model_inputs['demo'],
+                      cond_embedding = cond_embedding,
+                      actions = model_inputs['actions'],
+                      bsize = model_inputs['images'].shape[0])
+            
             # if global_rank == 0:
             #     end_inference = time.time()
             #     print("Inference time: ", end_inference - start_inference)
             
-            if "grad_norm" not in self.config.get("loss", ""):
-                optimizer.zero_grad()
-                weighted_task_loss = sum(
-                    [l["loss_sum"] * task_loss_muls.get(name) for name, l in task_losses.items()])
-                weighted_task_loss.backward()
-                optimizer.step()
-            else:
-                raise Exception("Grad Norm not implemented yet")        
+            if "RT1_video_cond" not in self.config.policy._target_:
+                if "grad_norm" not in self.config.get("loss", ""):
+                    optimizer.zero_grad()
+                    weighted_task_loss = sum(
+                        [l["loss_sum"] * task_loss_muls.get(name) for name, l in task_losses.items()])
+                    weighted_task_loss.backward()
+                    optimizer.step()
+                else:
+                    raise Exception("Grad Norm not implemented yet")        
 
-            if getattr(model, '_load_contrastive', False) and not 'cond_target_obj_detector' in self.config.policy._target_:
-                # update target params
-                mod = model.module if isinstance(model, nn.DataParallel) else model
-                if self.train_cfg.target_update_freq > -1:
-                    mod.momentum_update(frac)
-                    if self._step % self.train_cfg.target_update_freq == 0:
-                        mod.soft_param_update()    
+                if getattr(model, '_load_contrastive', False) and not 'cond_target_obj_detector' in self.config.policy._target_:
+                    # update target params
+                    mod = model.module if isinstance(model, nn.DataParallel) else model
+                    if self.train_cfg.target_update_freq > -1:
+                        mod.momentum_update(frac)
+                        if self._step % self.train_cfg.target_update_freq == 0:
+                            mod.soft_param_update()
+            else:
+                loss.backward()
+                optimizer.step()
+                optimizer.zero_grad()
                 
             # log stats
             # calculate train iter stats
-            if global_rank == 0:
-                tolog = dict()
-                
-                if self._step % log_freq == 0:
-                    train_print = collect_stats(
-                        self._step, task_losses, raw_stats, prefix='train')
+            if "RT1_video_cond" not in self.config.policy._target_:
+                if global_rank == 0:
+                    tolog = dict()
                     
-                    if self.config.wandb_log:
-                        tolog['train_step'] = self._step
-                        tolog['epoch'] = epoch
-                        i = 0
-                        for task_name, losses in task_losses.items():
-                            if "grad_norm" in self.config.get("loss", ""):
-                                #tolog[f'train/weight_loss_{task_name}'] = weights_loss[i]
-                                raise Exception("Grad Norm not implemented yet")  
-                            for loss_name, loss_val in losses.items():
-                                tolog[f'train/{loss_name}/{task_name}'] = loss_val
-                                tolog[f'train/{task_name}/{loss_name}'] = loss_val
-                            i += 1
-
-                    if self._step % print_freq == 0:
-                        epoch_steps += 1
-                        print(f"Epoch perc {epoch_steps / train_step}")
-                        print(
-                            'Training epoch {1}/{2}, step {0}: \t '.format(self._step, epoch, self.config.epochs))
-                        print(train_print)
+                    if self._step % log_freq == 0:
+                        train_print = collect_stats(
+                            self._step, task_losses, raw_stats, prefix='train')
                         
-                    if scheduler != 'None' and self.config.cosine_annealing:
                         if self.config.wandb_log:
-                            # log learning-rate
-                            tolog['learning_rate'] = scheduler.optimizer.param_groups[0]['lr']
+                            tolog['train_step'] = self._step
+                            tolog['epoch'] = epoch
+                            i = 0
+                            for task_name, losses in task_losses.items():
+                                if "grad_norm" in self.config.get("loss", ""):
+                                    #tolog[f'train/weight_loss_{task_name}'] = weights_loss[i]
+                                    raise Exception("Grad Norm not implemented yet")  
+                                for loss_name, loss_val in losses.items():
+                                    tolog[f'train/{loss_name}/{task_name}'] = loss_val
+                                    tolog[f'train/{task_name}/{loss_name}'] = loss_val
+                                i += 1
+
+                        if self._step % print_freq == 0:
+                            epoch_steps += 1
+                            print(f"Epoch perc {epoch_steps / train_step}")
+                            print(
+                                'Training epoch {1}/{2}, step {0}: \t '.format(self._step, epoch, self.config.epochs))
+                            print(train_print)
                             
-                    if self.config.wandb_log:
-                        wandb.log(tolog)
+                        if scheduler != 'None' and self.config.cosine_annealing:
+                            if self.config.wandb_log:
+                                # log learning-rate
+                                tolog['learning_rate'] = scheduler.optimizer.param_groups[0]['lr']
+                                
+                        if self.config.wandb_log:
+                            wandb.log(tolog)
+                        
+                    self._step += 1
+
+            else:
+                if global_rank == 0:
+                    tolog = dict()
+                    if self._step % print_freq == 0:
+                        if self.config.wandb_log:
+                            tolog['train_step'] = self._step
+                            tolog['epoch'] = epoch
+                            tolog['train/loss'] = loss.item()
+                            
+                            for i, ax_accuracy in enumerate(bin_acc):
+                                if i == 0:
+                                    ax = 'x'
+                                elif i == 1:
+                                    ax = 'y'
+                                elif i == 2:
+                                    ax = 'z'
+                                elif i == 3:
+                                    ax = 'R'
+                                elif i == 4:
+                                    ax = 'P'
+                                elif i == 5:
+                                    ax = 'Y'
+                                elif i == 6:
+                                    ax = 'G'
+                                tolog[f'train/acc_{ax}'] = bin_acc[i]
+                                tolog[f'train/acc_{ax}_interval'] = bin_acc_interval[i]
+                        
+                        if self._step % print_freq == 0:
+                            epoch_steps += 1
+                            print(f"Epoch perc {epoch_steps / train_step}")
+                            print(
+                                'Training epoch {1}/{2}, step {0}: \t '.format(self._step, epoch, self.config.epochs))
+                            print('Train loss: ', loss.item())
+                            print('Train accuracy: ', bin_acc)
+                            print('Train accuracy interval: ', bin_acc_interval)
+                            
+                            if self.config.wandb_log:
+                                wandb.log(tolog)
+                       
+                    # updating step
+                    self._step += 1
                     
-                self._step += 1
+                    #! ===== VALIDATION =====
+                    # validate and save the model every x steps
+                    if self._step % self.train_cfg.get('save_freq', 10) == 0:
+                        del inputs
+                        gc.collect()
+                        torch.cuda.empty_cache()
+                        val_metric = self.val_loop(val_loader=val_loader,
+                                        scheduler=scheduler,
+                                        loss_function=loss_function,
+                                        global_rank=global_rank,
+                                        local_rank=local_rank,
+                                        model=model,
+                                        cond_model=cond_model,
+                                        optimizer=optimizer,
+                                        task_loss_muls=task_loss_muls,
+                                        task_names=self.task_names,
+                                        raw_stats=raw_stats,
+                                        epoch=epoch)
+                        
+                        # setting model to train mode again
+                        model = model.train()
+                
+                        if not isinstance(val_metric, torch.Tensor):
+                            val_metric = torch.tensor(val_metric)
+                        
+                        # torch.distributed.all_reduce(val_metric, op=dist.ReduceOp.AVG)
+                        
+                        if global_rank == 0:
+                            print(f"Val metric {val_metric}")
+
+                        if self.config.train_cfg.lr_schedule != 'None':
+                            # perform lr-scheduling step
+                            scheduler.step(val_loss=val_metric)
+                        
+                        # check for early stopping
+                        if self.train_cfg.early_stopping.patience != -1:
+                            self._early_stopping(val_metric,
+                                                model,
+                                                self._epoch,
+                                                optimizer,
+                                                rank=global_rank)
+                        dist.barrier()
+                        
+                        # save model
+                        if global_rank == 0:
+                            self.save_checkpoint(model, optimizer, weights_fn, save_fn, number=self._step)
+                        
+                        if self._early_stopping.early_stop:
+                            print('Early stopping after epoch {}'.format(epoch + 1))
+                            break
 
 
-    def val_loop(self, val_loader, scheduler, loss_function, global_rank, local_rank, model, optimizer, task_loss_muls, task_names, raw_stats: dict = dict(), epoch: int = 0,):
+    def val_loop(self, val_loader, scheduler, loss_function, global_rank, local_rank, model, optimizer, task_loss_muls, task_names, cond_model=None, raw_stats: dict = dict(), epoch: int = 0,):
              
         validate = True
         tolog = dict()
@@ -514,6 +717,8 @@ class Trainer:
         if "CondTargetObjectDetector" in self.config.policy._target_:
             if not self.config.get("use_daml", False) and val_loader is not None:
                 validate = True
+        elif "RT1_video_cond" in self.config.policy._target_:
+            validate = True
         else:
             if (((epoch % 10 == 0) or (epoch == self.config.epochs-1)) and not self.config.get("use_daml", False)) and val_loader is not None:
                 validate= True
@@ -528,64 +733,140 @@ class Trainer:
                 # exhaust all data in val loader and take avg loss
                 all_val_losses = {task: defaultdict(
                     list) for task in task_names}
+
+                loss = []
+                bin_acc = []
+                bin_acc_interval = []
                 
                 # val_iter = iter(val_loader)
                 # for i, val_inputs in tqdm(enumerate(val_loader), total=len(val_loader)):
                 for i, val_inputs in tqdm(enumerate(val_loader), total=len(val_loader)):
-                    use_daml = self.config.get("use_daml", False)
-                    if use_daml:  # allow grad!
-                        val_task_losses = loss_function(
-                                            self.config, 
-                                            self.train_cfg, 
-                                            self._device_list[local_rank], 
-                                            model, 
-                                            val_inputs)
+                    if "RT1_video_cond" in self.config.policy._target_: # RT1 model
+                            # prepare inputs for model
+                            model_inputs, task_to_idx = prepare_inputs(val_inputs, self._device_list[local_rank])
+                            with torch.no_grad():
+                                cond_embedding = cond_model(model_inputs['demo'])
+                            _, tmp_loss, tmp_bin_acc, tmp_bin_acc_interval = model(
+                                images = model_inputs['images'],
+                                demo = model_inputs['demo'],
+                                cond_embedding = cond_embedding,
+                                actions = model_inputs['actions'],
+                                bsize = model_inputs['images'].shape[0])
+                            loss.append(tmp_loss.item())
+                            bin_acc.append(tmp_bin_acc)
+                            bin_acc_interval.append(tmp_bin_acc_interval)
                     else:
-                        with torch.no_grad():
+                        use_daml = self.config.get("use_daml", False)
+                        if use_daml:  # allow grad!
                             val_task_losses = loss_function(
-                                self.config,             
-                                self.train_cfg, 
-                                self._device_list[local_rank], 
-                                model, 
-                                val_inputs,
-                                val=False)
+                                                self.config, 
+                                                self.train_cfg, 
+                                                self._device_list[local_rank], 
+                                                model, 
+                                                val_inputs)
+                        else:
+                            with torch.no_grad():
+                                val_task_losses = loss_function(
+                                    self.config,             
+                                    self.train_cfg, 
+                                    self._device_list[local_rank], 
+                                    model, 
+                                    val_inputs,
+                                    val=False)
 
-                    for task, losses in val_task_losses.items():
-                        for k, v in losses.items():
-                            all_val_losses[task][k].append(v)
+                        for task, losses in val_task_losses.items():
+                            for k, v in losses.items():
+                                all_val_losses[task][k].append(v)
 
-                # take average across all batches in the val loader
-                avg_losses = dict()
-                for task, losses in all_val_losses.items():
-                    avg_losses[task] = {
-                        k: torch.mean(torch.stack(v)) for k, v in losses.items()}
+                        # take average across all batches in the val loader
+                        avg_losses = dict()
+                        for task, losses in all_val_losses.items():
+                            avg_losses[task] = {
+                                k: torch.mean(torch.stack(v)) for k, v in losses.items()}
 
-                # compute the sum of validation losses
-                weighted_task_loss_val = sum(
-                    [l["loss_sum"] * task_loss_muls.get(name) for name, l in avg_losses.items()])
+                        # compute the sum of validation losses
+                        weighted_task_loss_val = sum(
+                            [l["loss_sum"] * task_loss_muls.get(name) for name, l in avg_losses.items()])
                 
-                if global_rank == 0:
-                    val_print = collect_stats(
-                    self._step, avg_losses, raw_stats, prefix='val')
-                    
-                    print('Validation step {}:'.format(self._step))
-                    print(val_print)
+                        if global_rank == 0:
+                            val_print = collect_stats(
+                            self._step, avg_losses, raw_stats, prefix='val')
+                            
+                            print('Validation step {}:'.format(self._step))
+                            print(val_print)
 
-                    if self.config.wandb_log:
-                        # log learning-rate
-                        tolog['validation_step'] = self._step
-                        tolog['validation_epoch'] = epoch
-                        for task_name, losses in avg_losses.items():
-                            for loss_name, loss_val in losses.items():
-                                tolog[f'val/{loss_name}/{task_name}'] = loss_val
-                                tolog[f'val/{task_name}/{loss_name}'] = loss_val
-                                
-                        if not(isinstance(scheduler, BaseScheduler)):
-                            tolog['learning_rate'] = scheduler._schedule.optimizer.param_groups[0]['lr']
-                        wandb.log(tolog)
+                            if self.config.wandb_log:
+                                # log learning-rate
+                                tolog['validation_step'] = self._step
+                                tolog['validation_epoch'] = epoch
+                                for task_name, losses in avg_losses.items():
+                                    for loss_name, loss_val in losses.items():
+                                        tolog[f'val/{loss_name}/{task_name}'] = loss_val
+                                        tolog[f'val/{task_name}/{loss_name}'] = loss_val
+                                        
+                                if not(isinstance(scheduler, BaseScheduler)):
+                                    tolog['learning_rate'] = scheduler._schedule.optimizer.param_groups[0]['lr']
+                                wandb.log(tolog)
                                     
-                return weighted_task_loss_val
+                            return weighted_task_loss_val
             
+                if "RT1_video_cond" in self.config.policy._target_:
+                    if global_rank == 0:
+                        # computing the mean loss and accuracy across all the validation batches
+                        loss = np.mean(loss)
+                        
+                        # bin_acc
+                        bin_acc_sums = defaultdict(float)
+                        bin_acc_counts = defaultdict(int)
+
+                        for bin_acc_dict in bin_acc:
+                            for k, v in bin_acc_dict.items():
+                                bin_acc_sums[k] += v
+                                bin_acc_counts[k] += 1
+                        bin_acc = {k: bin_acc_sums[k] / bin_acc_counts[k] for k in bin_acc_sums}
+                        
+                        # bin_acc_interval
+                        bin_acc_interval_sums = defaultdict(float)
+                        bin_acc_interval_counts = defaultdict(int)
+
+                        for bin_acc_interval_dict in bin_acc_interval:
+                            for k, v in bin_acc_interval_dict.items():
+                                bin_acc_interval_sums[k] += v
+                                bin_acc_interval_counts[k] += 1
+                        bin_acc_interval = {k: bin_acc_interval_sums[k] / bin_acc_interval_counts[k] for k in bin_acc_interval_sums}
+                        
+                        tolog = dict()
+                        if self.config.wandb_log:
+                            tolog['val_step'] = self._step
+                            tolog['epoch'] = epoch
+                            tolog['val/loss'] = loss
+                            
+                            for i, ax_accuracy in enumerate(bin_acc):
+                                if i == 0:
+                                    ax = 'x'
+                                elif i == 1:
+                                    ax = 'y'
+                                elif i == 2:
+                                    ax = 'z'
+                                elif i == 3:
+                                    ax = 'R'
+                                elif i == 4:
+                                    ax = 'P'
+                                elif i == 5:
+                                    ax = 'Y'
+                                elif i == 6:
+                                    ax = 'G'
+                                tolog[f'val/acc_{ax}'] = bin_acc[i]
+                                tolog[f'val/acc_{ax}_interval'] = bin_acc_interval[i]
+                        
+                            print('val loss: ', loss)
+                            print('val accuracy: ', bin_acc)
+                            print('val accuracy interval: ', bin_acc_interval)
+                            
+                            if self.config.wandb_log:
+                                wandb.log(tolog)
+                                
+                        return loss
             elif rollout:
                 raise Exception("Rollout not implemented yet")
             
@@ -744,6 +1025,31 @@ class Trainer:
         model = nn.parallel.DistributedDataParallel(model, 
                                                     device_ids=[local_rank],
                                                     find_unused_parameters=True)
+        
+        if "RT1_video_cond" in self.config.policy._target_:
+            # Load cond module
+            cond_model = init_freezed_cond_module(
+                height=self.config.policy.cond_module_cfg.height,
+                width=self.config.policy.cond_module_cfg.width,
+                demo_T=self.config.policy.cond_module_cfg.demo_T,
+                model_name=self.config.policy.cond_module_cfg.model_name,
+                pretrained=self.config.policy.cond_module_cfg.pretrained,
+                cond_video=self.config.policy.cond_module_cfg.cond_video,
+                n_layers=self.config.policy.cond_module_cfg.n_layers,
+                demo_W=self.config.policy.cond_module_cfg.demo_W,
+                demo_H=self.config.policy.cond_module_cfg.demo_H,
+                demo_ff_dim=self.config.policy.cond_module_cfg.demo_ff_dim,
+                demo_linear_dim=self.config.policy.cond_module_cfg.demo_linear_dim,
+                conv_drop_dim=self.config.policy.cond_module_cfg.conv_drop_dim,
+                cond_module_model_path=self.config.policy.cond_module_cfg.cond_module_model_path
+            )
+            cond_model.eval()
+            cond_model = cond_model.to(device)
+            # cond_model = nn.parallel.DistributedDataParallel(cond_model,
+            #                                                 device_ids=[local_rank],
+            #                                                 find_unused_parameters=True)
+                    
+
         dist.barrier()
 
         # initialize constants:
@@ -771,10 +1077,14 @@ class Trainer:
         val_freq = self.train_cfg.get('val_freq', 1000)
         print_freq = self.train_cfg.get('print_freq', 10000)
         save_freq = self.train_cfg.get('save_freq', 10000)
-        if save_freq == -1:
-            save_freq = len(train_loader)
+        if "RT1_video_cond" in self.config.policy._target_:
+            self.train_cfg['save_freq'] = int(len(train_loader) / self.train_cfg.get('save_freq', 10))
+        else:
+            if save_freq == -1:
+                save_freq = len(train_loader)
         if val_freq == -1:
             val_freq = len(train_loader)
+        
         print(f"Save frequency {save_freq}")
         print(f"Val frequency {val_freq}")
 
@@ -828,11 +1138,13 @@ class Trainer:
             # with tqdm(train_loader, unit="batch") as tepoch:
             
             self.train_loop(train_loader=train_loader,
+                            val_loader=val_loader,
                             scheduler=lr_scheduler,
                             loss_function=loss_function,
                             global_rank=global_rank,
                             local_rank=local_rank,
                             model=model,
+                            cond_model=cond_model,
                             optimizer=optimizer,
                             task_loss_muls=task_loss_muls,
                             raw_stats=raw_stats,
@@ -844,7 +1156,7 @@ class Trainer:
             dist.barrier()
             
             #### ---- Validation step ----####
-            if val_loader is not None:
+            if val_loader is not None and "RT1_video_cond" not in self.config.policy._target_: # skipping validation for RT1 because it is already present in the train loop
                 val_metric = self.val_loop(val_loader=val_loader,
                                         scheduler=lr_scheduler, 
                                         loss_function=loss_function, 
@@ -890,23 +1202,23 @@ class Trainer:
             
                                 
 
-    def save_checkpoint(self, model, optimizer, weights_fn=None, save_fn=None, save_name=None):
+    def save_checkpoint(self, model, optimizer, weights_fn=None, save_fn=None, save_name=None, number=0):
         
 
         model_to_save = model.module if isinstance(model, torch.nn.parallel.DistributedDataParallel) else model
 
         if save_name is not None:
             torch.save(model_to_save.state_dict(),
-                    self._save_fname +'-{}-{}.pt'.format(save_name,self._epoch))
+                    self._save_fname +'-{}-{}.pt'.format(save_name,number))
         else:
             torch.save(model_to_save.state_dict(),
-                    self._save_fname + '-{}.pt'.format(self._epoch))
+                    self._save_fname + '-{}.pt'.format(number))
             
         if self.config.get('save_optim', False):
             torch.save(optimizer.state_dict(), self._save_fname +
                        '-optim.pt')
         
-        print(f'Model checkpoint saved at epoch {self._epoch}')
+        print(f'Model checkpoint saved at epoch/step {number}')
         return
 
     @property
@@ -974,10 +1286,12 @@ class Workspace(object):
 
     def run(self):
 
-        torch.multiprocessing.spawn(self.trainer.worker,
-                                    nprocs=self.config.num_gpus, 
-                                    args=(  self.config.node_id,
-                                            self.config.num_gpus,
-                                            self.config))
+        # torch.multiprocessing.spawn(self.trainer.worker,
+        #                             nprocs=self.config.num_gpus, 
+        #                             args=(  self.config.node_id,
+        #                                     self.config.num_gpus,
+        #                                     self.config))
+        
+        self.trainer.worker(0, 0, 1, self.config)
         
         print("Done training")

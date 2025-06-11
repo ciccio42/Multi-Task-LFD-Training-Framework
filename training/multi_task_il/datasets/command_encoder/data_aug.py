@@ -39,17 +39,21 @@ class DataAugmentation:
         # Imagenet-v1 normalization
         self.normalize = Normalize(
             mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        
         self.transforms = transforms.Compose([
-            transforms.ColorJitter(
-                brightness=list(self.data_augs.get(
-                    "brightness", [0.875, 1.125])),
-                contrast=list(self.data_augs.get(
-                    "contrast", [0.5, 1.5])),
-                saturation=list(self.data_augs.get(
-                    "contrast", [0.5, 1.5])),
-                hue=list(self.data_augs.get("hue", [-0.05, 0.05])),
-            )
+            transforms.RandomApply([
+                transforms.ColorJitter(
+                        brightness=list(self.data_augs.get(
+                            "brightness", [0.875, 1.125])),
+                        contrast=list(self.data_augs.get(
+                            "contrast", [0.5, 1.5])),
+                        saturation=list(self.data_augs.get(
+                            "contrast", [0.5, 1.5])),
+                        hue=list(self.data_augs.get("hue", [-0.05, 0.05])),
+                    )
+                ], p=self.data_augs.get('p', 0.5)),
         ])
+        
         print("Using strong augmentations?", self.use_strong_augs)
         self.strong_augs = transforms.Compose([
             transforms.ColorJitter(
@@ -133,26 +137,28 @@ class DataAugmentation:
 
             
         # ---- Augmentation ----#
-        if self.use_strong_augs and second:
-            augmented = self.strong_augs(obs)
-            if DEBUG:
-                cv2.imwrite("strong_augmented.png", np.moveaxis(
-                    augmented.numpy()*255, 0, -1))
-        else:
-            if perform_aug:
-                augmented = self.transforms(obs)
-            else:
-                augmented = obs
-            if DEBUG:
-                if agent:
-                    cv2.imwrite("weak_augmented.png", np.moveaxis(
+        if self.mode == "train": # applying augmentation only during training
+            if self.use_strong_augs and second:
+                augmented = self.strong_augs(obs)
+                if DEBUG:
+                    cv2.imwrite("strong_augmented.png", np.moveaxis(
                         augmented.numpy()*255, 0, -1))
+            else:
+                if perform_aug:
+                    augmented = self.transforms(obs)
+                else:
+                    augmented = obs
+                if DEBUG:
+                    if agent:
+                        cv2.imwrite("weak_augmented.png", np.moveaxis(
+                            augmented.numpy()*255, 0, -1))
+        else:
+            augmented = obs
+        
         assert augmented.shape == obs.shape
-            
-
  
-        if self.height == 224 and self.width == self.width:
-            augmented = self.normalize(augmented)
+        # if self.height == 224 and self.width == self.width:
+        #     augmented = self.normalize(augmented)
         
         # obs_pil = np.moveaxis(augmented.numpy()*255, 0, -1).astype(np.uint8)
         # obs_pil = Image.fromarray(obs_pil)

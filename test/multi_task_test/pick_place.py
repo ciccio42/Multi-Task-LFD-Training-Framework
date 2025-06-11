@@ -228,7 +228,7 @@ def pick_place_eval_vima(model, env, gpu_id, variation_id, target_obj_dec=None, 
     return traj, tasks
 
 
-def pick_place_eval_demo_cond(model, env, context, gpu_id, variation_id, img_formatter, max_T=85, concat_bb=False, baseline=False, action_ranges=[], gt_env=None, controller=None, task_name=None, config=None, gt_traj=None, perform_augs=True, predict_gt_bb=False, sub_action=False, gt_action=4, real=True, place=False, convert_action=False):
+def pick_place_eval_demo_cond(model, env, context, gpu_id, variation_id, img_formatter, max_T=85, concat_bb=False, baseline=False, action_ranges=[], gt_env=None, controller=None, task_name=None, config=None, gt_traj=None, perform_augs=True, predict_gt_bb=False, sub_action=False, gt_action=4, real=True, place=False, convert_action=False, cond_module_instance = None):
 
     if gt_traj is None:
         start_up_env_return = \
@@ -335,7 +335,9 @@ def pick_place_eval_demo_cond(model, env, context, gpu_id, variation_id, img_for
                 controller=controller,
                 target_obj_emb=target_obj_emb,
                 place=place,
-                convert_action=convert_action
+                convert_action=convert_action,
+                cond_module_instance=cond_module_instance,
+                current_step=n_steps
             )
 
             traj.append(obs, reward, done, info, action)
@@ -595,7 +597,7 @@ def pick_place_eval_demo_cond(model, env, context, gpu_id, variation_id, img_for
         return gt_traj, info
 
 
-def pick_place_eval(model, env, gt_env, context, gpu_id, variation_id, img_formatter, max_T=85, baseline=False, action_ranges=[], model_name=None, task_name="pick_place", config=None, gt_file=None, gt_bb=False, sub_action=False, gt_action=4, real=True, expert_traj=None, place_bb_flag=False, convert_action=False):
+def pick_place_eval(model, env, gt_env, context, gpu_id, variation_id, img_formatter, max_T=85, baseline=False, action_ranges=[], model_name=None, task_name="pick_place", config=None, gt_file=None, gt_bb=False, sub_action=False, gt_action=4, real=True, expert_traj=None, place_bb_flag=False, convert_action=False, cond_module_instance=None):
 
     print(f"Model name {model_name}")
 
@@ -697,4 +699,5 @@ def pick_place_eval(model, env, gt_env, context, gpu_id, variation_id, img_forma
                                          gt_action=gt_action,
                                          real=real,
                                          place=place_bb_flag,
-                                         convert_action=convert_action)
+                                         convert_action=convert_action,
+                                         cond_module_instance=cond_module_instance)

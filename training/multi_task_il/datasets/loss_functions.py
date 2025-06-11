@@ -10,6 +10,39 @@ from collections import defaultdict, OrderedDict
 from torch.nn import CrossEntropyLoss
 import copy
 
+
+def prepare_inputs(inputs, device):
+    model_inputs = defaultdict()
+    task_to_idx = dict()
+    
+    for indx, task_name in enumerate(inputs.keys()):
+        
+        if task_name not in task_to_idx.keys():
+            task_to_idx[task_name] = []
+        
+        task_to_idx[task_name].append(indx)
+        
+        for key in inputs[task_name].keys():
+            
+            if 'demo_data' in key:
+                sample_keys = ["demo"]
+            elif 'traj' in key:
+                sample_keys = ["images", "actions"]
+            else:
+                continue
+            
+            
+            for sample_key in sample_keys:
+                
+                if sample_key not in model_inputs.keys():
+                    model_inputs[sample_key] = inputs[task_name][key][sample_key].to(device)
+                else:
+                    model_inputs[sample_key] = torch.cat(
+                        (model_inputs[sample_key], inputs[task_name][key][sample_key].to(device)), dim=0)                
+                    
+    return model_inputs, task_to_idx
+
+
 def calculate_maml_loss(config, device, meta_model, model_inputs):
     states, actions = model_inputs['states'], model_inputs['actions']
     images, context = model_inputs['images'], model_inputs['demo']

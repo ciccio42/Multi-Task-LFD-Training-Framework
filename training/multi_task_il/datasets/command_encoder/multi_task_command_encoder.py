@@ -33,3 +33,17 @@ class CosineLossCalculator():
         loss = self.cosine_loss(output_embedding, gt_embedding, target)
             
         return loss 
+
+
+class EuclideanDistanceLossCalculator(torch.nn.Module):
+    def __init__(self):
+        super(EuclideanDistanceLossCalculator, self).__init__()
+
+    def forward(self, predicted, target):
+        # check if the shapes match
+        assert predicted.shape == target.shape, "The shape of the two tensors must match"
+        
+        # compute the Euclidean distance
+        distance = torch.norm(predicted - target, p=2, dim=1)
+        
+        return distance.mean()  # mean distance across the batch

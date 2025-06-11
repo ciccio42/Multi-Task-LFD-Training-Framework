@@ -26,6 +26,9 @@ def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset_folder', default='/user/frosa/multi_task_lfd/datasets')
+    parser.add_argument('--panda_sim_dataset_folder')
+    parser.add_argument('--ur5e_sim_folder')
+    parser.add_argument('--human_dataset_folder')
     parser.add_argument("--debug", action='store_true', help="whether or not attach the debugger")
     parser.add_argument("--write_all_pkl_path", action='store_true', help="whether or not write all pkl paths")
     parser.add_argument("--write_train_pkl_path", action='store_true', help="whether or not write pkl for training file")
@@ -34,8 +37,8 @@ def main():
     parser.add_argument("--skip_pretraining_datasets", action='store_true')
     parser.add_argument("--ur5e_sim_dataset", action='store_true')
     parser.add_argument("--panda_sim_dataset", action='store_true')
+    parser.add_argument("--human_dataset", action='store_true')
     parser.add_argument("--delta_files", action='store_true', help="whether or not writing paths for delta datasets")
-    # parser.add_argument("--ur5e_real", action='store_true')
     
     args = parser.parse_args()
     
@@ -211,6 +214,31 @@ def main():
                     elif _idx in idxs_val:
                         val_pkl_files_paths[dataset_name][task_name].append(f'{root}/{file}')
         
+    if args.human_dataset:
+        print(f'searching into {args.human_dataset_folder}')
+        for root, dirs, files in os.walk(args.human_dataset_folder):
+            if len(dirs) != 0 and root.split('/')[-1] == args.human_dataset_folder.split('/')[-1]:
+                dataset_name = root.split('/')[-1]
+                for pkl_dict in pkl_files_paths:
+                    pkl_dict[dataset_name] = {}
+                    
+                for task in sorted(dirs):
+                    if task != 'img' and task != 'video':
+                        for pkl_dict in pkl_files_paths:
+                            pkl_dict[dataset_name][task] = []
+            elif len(files) != 0:
+                files = [i for i in files if i.endswith(".pkl") and i != 'task_embedding.pkl']
+                files = sorted(files)
+                idxs_train = split_files(len(files), train_val_split, 'train')
+                idxs_val = split_files(len(files), train_val_split, 'val')
+                task_name = root.split('/')[-1]
+                for _idx, file in enumerate(files):
+                    all_pkl_files_paths[dataset_name][task_name].append(f'{root}/{file}')
+                    if _idx in idxs_train:
+                        train_pkl_files_paths[dataset_name][task_name].append(f'{root}/{file}')
+                    elif _idx in idxs_val:
+                        val_pkl_files_paths[dataset_name][task_name].append(f'{root}/{file}')
+    
     save_json_folder = f'datasets_paths_{keyword}'
     if not os.path.exists(save_json_folder):
         os.mkdir(save_json_folder)

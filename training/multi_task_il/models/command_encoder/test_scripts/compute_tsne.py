@@ -30,6 +30,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--debug', action='store_true', help='Debug mode') 
     parser.add_argument('--compute_embeddings', action='store_true')
+    parser.add_argument('--compute_tsne', action='store_true')
+    parser.add_argument('--all_dataset_plot', action='store_true')
     parser.add_argument('--split', type=str, default='val', help='Split to use for evaluation (train/val)')
     parser.add_argument('--model_path', type=str, default='/home/rsofnc000/checkpoint_save_folder/Video_Encoder/Video_Encoder_multi-Batch74', help='Path to the model file')
     parser.add_argument('--ckpt', type=int, default=99, help='Checkpoint number')
@@ -72,6 +74,11 @@ if __name__ == '__main__':
         for data_item in tqdm(data_loader):
             # 3. Get the data
             # print(data_item)
+            # demo = data_item['demo_data']['demo'].to(torch.device('cuda'))
+            # traj_path = data_item['traj_path'][0]
+            # dataset_name = data_item['dataset_name']
+            # print(f"Running inference on demo: {dataset_name} - {data_item['task_name']}")
+            
     
             demo = data_item['demo_data']['demo'].to(torch.device('cuda'))
             print(f"Running inference on demo: {data_item['dataset_name']} - {data_item['task']}")
@@ -107,7 +114,7 @@ if __name__ == '__main__':
         # Save to NPZ file
         np.savez(os.path.join(save_path, 'predictions.npz'), **npz_dict)
     
-    else:
+    elif args.compute_tsne:
         # --- Compute t-SNE ---
         save_path = os.path.join(args.model_path, f'prediction_{split}_{args.ckpt}')
         npz_path = os.path.join(save_path, 'predictions.npz')
@@ -119,6 +126,8 @@ if __name__ == '__main__':
         markers = []
         groups = []
 
+        dataset_labels = []
+
         for key, embedding in loaded.items():
             embeddings.append(embedding.flatten())
             marker_type = "text" if "text_embedding" in key else "demo"
@@ -128,17 +137,21 @@ if __name__ == '__main__':
                 group = group.split('panda_')[1]
             groups.append(group)
             labels.append(key)
+            dataset_labels.append(key.split('/')[0])
 
+        # Remove duplicates
+        unique_dataset_labels = sorted(set(dataset_labels))
+        
         embeddings = np.stack(embeddings)
         # cosine_dist = cosine_distances(embeddings)
-
-        tsne = TSNE(n_components=2, metric='cosine', init='random', perplexity=50, random_state=42)
+        perplexity = 50
+        tsne = TSNE(n_components=2, metric='cosine', init='random', perplexity=perplexity, random_state=42)
         tsne_result = tsne.fit_transform(embeddings)
 
         tsne_x = tsne_result[:, 0]
         tsne_y = tsne_result[:, 1]
 
-       # Map tasks to their groups
+        # Map tasks to their groups
         task_to_variations = defaultdict(list)
         for group in groups:
             task_name = group.split('/')[0]
@@ -189,7 +202,7 @@ if __name__ == '__main__':
             if marker_type == "text":
                 try:
                     variation_label = int(group.split('_')[-1])
-                except IndexError:
+                except Exception:
                     variation_label = "?"
                 plt.text(x + 0.5, y, variation_label, fontsize=9, weight='bold', color=color)
                 
@@ -204,8 +217,113 @@ if __name__ == '__main__':
         plt.title("Cosine Similarity between Predicted Embeddings")
         plt.legend(title="Task/Variation", bbox_to_anchor=(1.05, 1), loc='upper left')
         plt.tight_layout()
-        plt.savefig(os.path.join(save_path, 'tsne_plot.png'))
+        plt.savefig(os.path.join(save_path, f'tsne_plot_perplexity_{perplexity}.png'))
 
+    if args.all_dataset_plot:
+        print("Plotting all datasets")
+        # --- Compute t-SNE ---
+        save_path = os.path.join(args.model_path, f'prediction_{split}_{args.ckpt}')
+        npz_path = os.path.join(save_path, 'predictions.npz')
+
+        loaded = np.load(npz_path)
+
+        labels = []
+        embeddings = []
+        markers = []
+        groups = []
+
+        dataset_labels = []
+
+        for key, embedding in loaded.items():
+            embeddings.append(embedding.flatten())
+            marker_type = "text" if "text_embedding" in key else "demo"
+            markers.append(marker_type)
+            group = "/".join(key.split('/')[:2])  # task_name/variation_name
+            if 'panda_' in group:
+                group = group.split('panda_')[1]
+            groups.append(group)
+            labels.append(key)
+            dataset_labels.append(key.split('/')[0])
+
+        # Remove duplicates
+        unique_dataset_labels = sorted(set(dataset_labels))
+        
+        embeddings = np.stack(embeddings)
+        # cosine_dist = cosine_distances(embeddings)
+        perplexity = 1
+        tsne = TSNE(n_components=2, metric='cosine', init='random', perplexity=perplexity, random_state=42)
+        tsne_result = tsne.fit_transform(embeddings)
+
+        tsne_x = tsne_result[:, 0]
+        tsne_y = tsne_result[:, 1]
+
+        # Map tasks to their groups
+        task_to_variations = defaultdict(list)
+        for group in groups:
+            task_name = group.split('/')[0]
+            task_to_variations[task_name].append(group)
+
+        # --- Assign specific base colors for known tasks ---
+        def get_color_variations(base_color, n_variations, s_range=(0.5, 1.0), v_range=(0.7, 1.0)):
+            """Generate variations of a base color in HSV space."""
+            h, s, v = colorsys.rgb_to_hsv(*base_color)
+            variations = []
+            for i in range(n_variations):
+                sat = s_range[0] + (s_range[1] - s_range[0]) * (i / max(n_variations - 1, 1))
+                val = v_range[0] + (v_range[1] - v_range[0]) * (i / max(n_variations - 1, 1))
+                variations.append(colorsys.hsv_to_rgb(h, sat, val))
+            return variations
+
+        # Manually set base RGB colors
+        task_base_colors = {
+            "pick_place": (0.0, 0.0, 1.0),       # Blue
+            "nut_assembly": (1.0, 0.0, 0.0),     # Red
+            "stack_block": (0.0, 1.0, 0.0),     # Green
+            "button": (1.0, 1.0, 0),     # Yellow
+        }
+
+        # Group variations under tasks
+        task_to_variations = defaultdict(set)
+        for group in groups:
+            task_name = group.split('/')[0]
+            if 'panda_' in task_name:
+                task_name = task_name.split('panda_')[1]
+            task_to_variations[task_name].add(group)
+
+        # Generate color variations
+        group_to_color = {}
+        for task, variation_list in task_to_variations.items():
+            base_color = task_base_colors.get(task, (0.7, 0.7, 0.7))  # default gray if unknown task
+            unique_variations = sorted(set(variation_list))
+            color_variants = get_color_variations(base_color, len(unique_variations))
+            for group, color in zip(unique_variations, color_variants):
+                group_to_color[group] = color
+
+        # --- Plot ---
+        plt.figure(figsize=(10, 8))
+        plotted_legend_labels = set()
+
+        for x, y, marker_type, group in zip(tsne_x, tsne_y, markers, groups):
+            color = group_to_color.get(group, (0.5, 0.5, 0.5))  # fallback gray
+            if marker_type == "text":
+                try:
+                    variation_label = int(group.split('_')[-1])
+                except Exception:
+                    variation_label = "?"
+                plt.text(x + 0.5, y, variation_label, fontsize=9, weight='bold', color=color)
+                
+                plt.scatter(x, y, c=[color], marker='*', s=150)
+            else:
+                if group not in plotted_legend_labels:
+                    plt.scatter(x, y, c=[color], marker='o', s=60, label=group)
+                    plotted_legend_labels.add(group)
+                else:
+                    plt.scatter(x, y, c=[color], marker='o', s=60)
+
+        plt.title("Cosine Similarity between Predicted Embeddings")
+        plt.legend(title="Task/Variation", bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.tight_layout()
+        plt.savefig(os.path.join(save_path, f'tsne_plot_perplexity_{perplexity}.png'))
 
     
         

@@ -20,7 +20,7 @@ epochs:         10
 bsize:          32
 vsize:          ${bsize} # optionally, set to a different batchsize for validation loader
 optimizer:      null #Adam # RMSProp
-loss: ""
+loss: "mse" # "mse" or "cosine"
 bb_sequence: 1
 action_sequence: 1
 task_names: null
@@ -66,8 +66,6 @@ defaults:
   - ../tasks_cfgs:  7_tasks
   - dataset_parameters: dataset_parameters
 
-
-
 # dataset/loader/samplers
 loader_workers:   20
 samplers:        
@@ -88,23 +86,24 @@ dataset_cfg:
   tasks_spec: ${tasks}
   dataset_samples_spec: ${dataset_parameters}
   mode: 'train'
-  jsons_folder: '/home/rsofnc000/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/video_encoder/datasets_paths_absolute'
+  jsons_folder: ''
   demo_T: 4
-  width: 180
-  height: 100
+  width: 224 # 180
+  height: 224 # 100
   aug_twice: False
   aux_pose: True
   use_strong_augs: False
   data_augs: ${augs}
-  black_list: ['sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'droid_converted_absolute_pose']
+  black_list: [] # ['sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'droid_converted_absolute_pose']
   select_random_frames: True
+
 augs:
   old_aug: False
-  brightness: [0.9, 1.1]
-  contrast: [0.9, 1.1]
-  saturation: [0.9, 1.1]
-  hue: [0.0, 0.0]
-  p: 0.1
+  brightness: [0.6, 1.4] #[0.9, 1.1]
+  contrast: [0.7, 1.3] #[0.9, 1.1]
+  saturation: [0.7, 1.3] #[0.9, 1.1]
+  hue: [-0.05, 0.05] #[0.0, 0.0]
+  p: 0.0
   horizontal_flip_p: 0.5
   brightness_strong: [0.875, 1.125]
   contrast_strong: [0.5, 1.5]
@@ -119,8 +118,8 @@ policy: ???  # set to any set of configs via command line, e.g. policy='${tosil}
 
 cond_module:
   _target_: multi_task_il.models.command_encoder.cond_module.CondModule
-  height: 120 # not used
-  width: 160 # not used
+  height: 100 # not used
+  width: 180 # not used
   demo_T: 4
   model_name: 'r2plus1d_18'
   pretrained: True
@@ -129,5 +128,5 @@ cond_module:
   demo_W: 7
   demo_H: 7
   demo_ff_dim: [128, 64, 32]
-  demo_linear_dim: [512, 512, 512]
+  demo_linear_dim: [512, 512, 512] # [] or [512, 256, 128]
   conv_drop_dim: 3

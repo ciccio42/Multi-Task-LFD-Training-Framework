@@ -75,18 +75,28 @@ class CondModule(nn.Module):
             linear_input = 512
 
         # MLP encoder
-        mlp_encoder = []
-        for indx, layer_dim in enumerate(demo_linear_dim):
-            if indx == 0:
-                input_dim = linear_input
-            else:
-                input_dim = demo_linear_dim[indx-1]
-            mlp_encoder.append(nn.Linear(in_features=input_dim,
-                                         out_features=layer_dim))
-            if indx != len(demo_linear_dim) - 1:
-                mlp_encoder.append(nn.ReLU())
-
-        self._mlp_encoder = nn.Sequential(*mlp_encoder)
+        
+        if len(demo_linear_dim) != 0:
+            mlp_encoder = []
+            for indx, layer_dim in enumerate(demo_linear_dim):
+                if indx == 0:
+                    input_dim = linear_input
+                else:
+                    input_dim = demo_linear_dim[indx-1]
+                mlp_encoder.append(nn.Linear(in_features=input_dim,
+                                            out_features=layer_dim))
+                # add batch normalization
+                mlp_encoder.append(nn.BatchNorm1d(layer_dim))
+                # add dropout
+                mlp_encoder.append(nn.Dropout(p=0.2))
+                if indx != len(demo_linear_dim) - 1:
+                    # mlp_encoder.append(nn.Tanh())
+                    mlp_encoder.append(nn.ReLU())
+                
+            self._mlp_encoder = nn.Sequential(*mlp_encoder)
+        else:
+            print("No MLP encoder defined, using backbone output as task embedding")
+            self._mlp_encoder = None
 
     def forward(self, input):
         # 1. Compute features for each frame in the batch
@@ -105,7 +115,10 @@ class CondModule(nn.Module):
             backbone_input = rearrange(input, 'B T C H W -> B C T H W')
             backbone_out = rearrange(self._backbone(
                 backbone_input), 'B C T H W -> B (C T H W)')
-            task_embedding = self._mlp_encoder(backbone_out)
+            if self._mlp_encoder is None:
+                task_embedding = backbone_out
+            else:
+                task_embedding = self._mlp_encoder(backbone_out)
 
         # print(task_embedding.shape)
         return task_embedding

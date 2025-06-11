@@ -57,6 +57,7 @@ T_w_sim_to_bl_sim = np.array([[0, 1, 0, -0.612],
                               [-1, 0, 0, 0],
                               [0, 0, 1, 0.860],
                               [0, 0, 0, 1]])
+
 T_g_robot_to_g_sim = np.array([[0, 1, 0, 0], 
                               [-1, 0, 0, 0],
                               [0, 0, 1, 0],
@@ -64,20 +65,23 @@ T_g_robot_to_g_sim = np.array([[0, 1, 0, 0],
 R_g_sim_to_g_robot = np.array([[0, -1, 0], 
                               [1, 0, 0],
                               [0, 0, 1]])
+R_g_robot_to_g_sim = np.transpose(R_g_sim_to_g_robot)
+
+T_bl_sim_to_w_sim = np.array([[0, -1, 0, 0], 
+                              [1, 0, 0, 0.612],
+                              [0, 0, 1, -0.860],
+                              [0, 0, 0, 1]])
+
+R_ee_to_gripper = np.array([[.0, -1.0, .0],
+                            [1.0, .0, .0],
+                            [.0, .0, 1.0]])
+
 R_ws_x = np.array([[0.9104503, -0.4136117, -0.0023614],
                    [-0.4135816, -0.9104307,  0.0081400],
                    [-0.0055167, -0.0064344, -0.9999641]]) @ np.array([[-0.4304586, -0.9014726, -0.0453046],
                                                                       [-0.9026073,  0.4300453,  0.0190052],
                                                                       [0.0023503,  0.0490732, -0.9987924] ])
 p_ws_x = np.array([0.00809527, 0.00107287, 0.00358016])
-
-# >>> obs_t1 - action_t
-# array([-0.00809527, -0.00107287, -0.00358016])
-
-# >>> action - obs_t1 
-# array([0.00809527, 0.00107287, 0.00358016])
-
-         
 
 def make_prompt(env: object, obs: object, command: str, task_name: str):
     ret_dict = {'states': [],
@@ -422,82 +426,6 @@ def adjust_bb(bb, crop_params=[20, 25, 80, 75]):
     y2 = int((y2_old/y_scale)+top)
     return [x1, y1, x2, y2]
 
-# def transform_action_from_robot_to_world_RT1(action):
-#     aa_gripper = action[3:-1]
-#     # convert axes-angle into rotation matrix
-#     R_bl_sim_to_gripper_r = euler2mat(aa_gripper)
-    
-#     gripper_pos = action[0:3]
-    
-#     T_bl_sim_gripper_r = np.zeros((4,4))
-#     T_bl_sim_gripper_r[3,3] = 1
-    
-#     # position
-#     T_bl_sim_gripper_r[0,3] = gripper_pos[0]
-#     T_bl_sim_gripper_r[1,3] = gripper_pos[1]
-#     T_bl_sim_gripper_r[2,3] = gripper_pos[2]
-#     # orientation
-#     T_bl_sim_gripper_r[0:3, 0:3] = R_bl_sim_to_gripper_r
-    
-#     T_bl_sim_gripper_sim = T_bl_sim_gripper_r @ T_g_robot_to_g_sim
-    
-#     T_wl_sim_gripper_sim = T_w_sim_to_bl_sim @ T_bl_sim_gripper_sim
-    
-#     R_wl_sim_gripper_sim = T_wl_sim_gripper_sim[0:3, 0:3]
-    
-#     action_wl_sim = np.zeros((7))
-#     action_wl_sim[0:3] = T_wl_sim_gripper_sim[0:3, 3]
-#     action_wl_sim[3:6] = quat2axisangle(mat2quat(R_wl_sim_gripper_sim))
-#     if action[-1] < 0.8:
-#         action_wl_sim[6] = 1
-#     else:
-#         action_wl_sim[6] = -1
-    
-#     return action_wl_sim
-
-
-T_bl_sim_to_w_sim = np.array([[0, -1, 0, 0], 
-                              [1, 0, 0, 0.612],
-                              [0, 0, 1, -0.860],
-                              [0, 0, 0, 1]])
-
-
-def trasform_from_world_to_bl(action):
-    aa_gripper = action[3:-1]
-    # convert axes-angle into rotation matrix
-    R_w_sim_to_gripper_sim = quat2mat(axisangle2quat(aa_gripper))
-    
-    gripper_pos = action[0:3]
-    
-    T_w_sim_gripper_sim = np.zeros((4,4))
-    T_w_sim_gripper_sim[3,3] = 1
-    
-    # position
-    T_w_sim_gripper_sim[0,3] = gripper_pos[0]
-    T_w_sim_gripper_sim[1,3] = gripper_pos[1]
-    T_w_sim_gripper_sim[2,3] = gripper_pos[2]
-    # orientation
-    T_w_sim_gripper_sim[0:3, 0:3] = R_w_sim_to_gripper_sim
-    
-    T_bl_sim_gripper_sim = T_bl_sim_to_w_sim @ T_w_sim_gripper_sim
-    
-    # print(f"Transformation from world to bl:\n{T_bl_sim_gripper_sim}")
-    
-    R_bl_to_gripper_sim = T_bl_sim_gripper_sim[0:3, 0:3]
-    
-    R_bl_to_gripper_real = R_bl_to_gripper_sim @ R_g_sim_to_g_robot
-    
-    action_bl = np.zeros((7))
-    action_bl[0:3] = T_bl_sim_gripper_sim[0:3, 3]
-    action_bl[3:6] = quat2axisangle(mat2quat(R_bl_to_gripper_real))
-    if action[-1] == -1:
-        # action_bl[6] = 0
-        action_bl[6] = 1 # aperto
-    else:
-        # action_bl[6] = 1
-        action_bl[6] = 0 # chiuso
-    
-    return action_bl
 
 def transform_action_from_robot_to_world(action):
     aa_gripper = action[3:-1]
@@ -532,6 +460,56 @@ def transform_action_from_robot_to_world(action):
     
     return action_wl_sim
 
+def transform_action_from_robot_to_world_rt1(eef_pos, eef_quat):
+    R_bl_to_g_r = quat2mat(eef_quat)
+    
+    R_bl_to_g_s = R_bl_to_g_r @ R_g_robot_to_g_sim
+    
+    T_bl_to_g_s = np.zeros((4,4))
+    T_bl_to_g_s[:3,:3] = R_bl_to_g_s
+    T_bl_to_g_s[:3,3] = np.array([eef_pos[0],
+                                  eef_pos[1],
+                                  eef_pos[2]]).T
+    T_bl_to_g_s[3,3] = 1
+    
+    T_w_sim_to_g_s = T_w_sim_to_bl_sim @ T_bl_to_g_s
+    
+    g_pos = np.array([T_w_sim_to_g_s[0, 3],
+             T_w_sim_to_g_s[1, 3],
+             T_w_sim_to_g_s[2, 3]])
+    
+    quat = mat2quat(T_w_sim_to_g_s[:3,:3])
+    
+    return g_pos, quat
+    
+    
+
+
+def trasform_from_world_to_base_link(eef_pos, eef_quat):
+    # first transform to align with world frame
+    R_w_sim_to_gripper_sim = R_ee_to_gripper @ quat2mat(eef_quat)
+    
+    T_w_sim_gripper_sim = np.zeros((4,4))
+    T_w_sim_gripper_sim[3,3] = 1
+    
+    # position
+    T_w_sim_gripper_sim[0,3] = eef_pos[0]
+    T_w_sim_gripper_sim[1,3] = eef_pos[1]
+    T_w_sim_gripper_sim[2,3] = eef_pos[2]
+    
+    # orientation
+    T_w_sim_gripper_sim[0:3, 0:3] = R_w_sim_to_gripper_sim
+    
+    T_bl_sim_gripper_sim = T_bl_sim_to_w_sim @ T_w_sim_gripper_sim
+        
+    R_bl_to_gripper_sim = T_bl_sim_gripper_sim[0:3, 0:3]
+    
+    R_bl_to_gripper_real = R_bl_to_gripper_sim @ R_g_sim_to_g_robot
+    
+    xyz = T_bl_sim_gripper_sim[0:3, 3]
+    quat = mat2quat(R_bl_to_gripper_real)
+
+    return xyz, quat
 
 def null_step(env):
     current_gripper_position = env.sim.data.site_xpos[env.robots[0].eef_site_id]
@@ -646,108 +624,28 @@ def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, ima
     FIX_ROT = False
     ROUND = False
     if 'RT1_video_cond' in str(model.__class__):
-                    
-        # if t < 6:
-        #     action = null_step(env)
-        #     # convert to bl frame
-        #     action_null = trasform_from_world_to_bl(deepcopy(action))
-        #     action_null = torch.from_numpy(action_null).to(next(model.parameters()).device)
-            
-        #     action_null_dict = {'world_vector': action_null[:3], 'rotation_delta': action_null[3:-1], 'gripper_closedness_action': action_null[-1]}
-            
-        #     should_be = model.rt1._action_tokenizer.tokenize(action_null_dict)
-
-        #     # print('should_be')
-        #     # print(should_be)
-        #     # print('it is:')
-        #     # print(model.rt1_memory['action_tokens'][0][t])
-        #     model.rt1_memory['action_tokens'][0][t] = deepcopy(should_be)
+        pos_delta_bl = action[:3]
         
+        current_eef_pos_bl, _ = trasform_from_world_to_base_link(
+            eef_pos = obs['eef_pos'],
+            eef_quat= obs['eef_quat']
+        )
         
-        # elif t>=6 and CHANGE_FROM_BL_TO_WORLD: 
-        if CHANGE_FROM_BL_TO_WORLD: 
-            # # get current pos and RPY of the eef wrt to WF
-            # pos_t = deepcopy(obs['eef_pos'])
-            # # TODO capire chi genera eef_quat
-            # rot_t  = (R_ws_x @ quat2mat(deepcopy(obs['eef_quat'])))
-            
-            # # in this case the output of this model are deltas (dxdydz, drolldpitchdyaw), which have to be summed to the current observation.
-            # delta_pos = action[:3]
-            # delta_rot = action[3:-1]
-            
-            # # rot_t = mat2quat(rot_t @ euler2mat(delta_rot))
-            
-            # # 1) 
-            # action[:3] = pos_t + T_w_sim_to_bl_sim[:3,:3] @ delta_pos
-            
-            # action[3:-1] = quat2axisangle(mat2quat(rot_t))
-            # # action[3:-1] = quat2axisangle(rot_t)
-            
-            # action[-1] = 1.0 if action[-1] == 0.0 else 0.0  # rt1 outputs 0.0 for closed and 1.0 for open gripper
-            
-            # # global PICKED
-            # # if not PICKED:
-            # #     global _TIME_COUNTER_
-            # #     if action[-1] == 1.0 and _TIME_COUNTER_ < 5:
-            # #         _TIME_COUNTER_ += 1
-            # #         action[-1] = 0.0
-            # #     elif action[-1] == 1.0 and _TIME_COUNTER_ == 5:
-            # #         _TIME_COUNTER_ = 0    
-            # #         PICKED = True
-           
-           
-           
-            # nope 
-            # action[:3] = T_w_sim_to_bl_sim[:3,:3] @ deepcopy(action[:3])
-            # action[3:-1] = T_w_sim_to_bl_sim[:3,:3] @ deepcopy(action[3:-1])
-            # action[-1] = 1.0 if action[-1] == 0.0 else -1.0  # rt1 outputs 0.0 for closed and 1.0 for open gripper
-            # print('\t -------------')
-            # print(action)
-            
-            # print('\t---------')
-            # print(f'bl: {action}')
-            
-            
-            ### if action in euler angles
-            # action = transform_action_from_robot_to_world_RT1(action) 
-            ### if action in axis angle
-            action = transform_action_from_robot_to_world(action)
-            # print(f'wf: {action}')
-            
-        elif DELTA_NO_CONV:
-            
-            pos_t = deepcopy(obs['eef_pos'])
-            rot_t  = (R_ws_x @ quat2mat(deepcopy(obs['eef_quat'])))
-            
-            if ROUND:
-                delta_pos = np.round(deepcopy(action[:3]), 2)
-                # if (delta_pos == np.array([-0.0,-0.0,-0.0])).all():
-                #     print('delta 0')
-            else:
-                delta_pos = deepcopy(action[:3])
-            delta_rot = deepcopy(action[3:-1])
-            
-            if not FIX_ROT:
-                rot_t = mat2quat(rot_t @ quat2mat(axisangle2quat(delta_rot)))
-            
-            action[:3] = pos_t + delta_pos
-            
-            if not FIX_ROT:
-                action[3:-1] = quat2axisangle(rot_t)
-            else:
-                action[3:-1] = quat2axisangle(mat2quat(rot_t))
-            
-            # array([-0.14132614,  0.13795022,  0.86179454])
-            # array([-0.14132614,  0.13795021,  0.86179453], dtype=np.float32) ACTION
-            # array([-0.14942141,  0.13687734,  0.85821437]) # OBS
-            
-        # else:
-            # rot_t  = (R_ws_x @ quat2mat(deepcopy(obs['eef_quat'])))
-            # action[3:-1] = quat2axisangle(mat2quat(rot_t))
-           
-        # print('axis angle') 
-        # print(action)
-        return action, None, None, None, None, None
+        next_pos = current_eef_pos_bl + pos_delta_bl
+        next_quat = mat2quat(euler2mat(-action[3:6]))
+        
+        # transform from bl to world sim
+        next_pos, next_quat = transform_action_from_robot_to_world_rt1(
+            eef_pos=next_pos,
+            eef_quat=next_quat
+        )
+        new_action = np.zeros(7)
+        new_action[:3] = next_pos
+        new_action[3:6] = quat2axisangle(next_quat)
+        new_action[6] = -1 if action[6]>0.90 else 1
+              
+        return new_action, predicted_prob, target_obj_embedding, out.get('activation_map', None), out.get('target_obj_prediction', None), out.get('predicted_bb', None)
+               
     else:               
         # action[3:7] = [1.0, 1.0, 0.0, 0.0]
         if len(action.shape) != 1:
@@ -1757,9 +1655,9 @@ def build_tvf_formatter_obj_detector(config, env_name):
         img = resized_crop(img, top=top, left=left, height=box_h,
                            width=box_w, size=(config.dataset_cfg.height, config.dataset_cfg.width))
         
-        if config.dataset_cfg.height == 224 and  config.dataset_cfg.width ==  224:
-            img = Normalize(
-                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(img)
+        # if config.dataset_cfg.height == 224 and  config.dataset_cfg.width ==  224:
+        #     img = Normalize(
+        #         mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(img)
         
         # transforms_pipe = transforms.Compose([
         #     transforms.ColorJitter(

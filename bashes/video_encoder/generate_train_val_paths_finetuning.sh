@@ -1,9 +1,9 @@
 #!/bin/bash
 
-DATASET_FOLDER='/home/rsofnc000/dataset/opt_dataset'
+DATASET_FOLDER='/user/frosa/multi_task_lfd/datasets/datasets_delta'
 # PANDA_PICK_PLACE_DATASET='/user/frosa/multi_task_lfd/ur_multitask_dataset/opt_dataset/pick_place/panda_pick_place'
 # parms for script executions
-GENERATE_PATHS_TO_PKLS=false       #executes the 1st script
+GENERATE_PATHS_TO_PKLS=true       #executes the 1st script
 GENERATE_CENTROIDS_EMBEDDINGS=true #executes the 2nd script
 
 # 1st script parameters
@@ -18,9 +18,10 @@ if [ $GENERATE_PATHS_TO_PKLS == true ]; then
                 --write_val_pkl_path \
                 --write_all_pkl_path \
                 --split=${SPLIT} \
-                --panda_sim_dataset
+                --panda_sim_dataset \
+                --delta_files
         # --debug
-        # --delta_files
+        
 fi
 
 # muse and tokenizer

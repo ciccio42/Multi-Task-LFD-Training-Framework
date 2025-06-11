@@ -165,3 +165,12 @@ training/multi_task_il/models/command_encoder/test_scripts/*txt
 bashes/video_encoder/*txt
 training/multi_task_il/models/command_encoder/muse/models/universal-sentence-encoder-multilingual-large-3/*
 training/multi_task_il/models/command_encoder/muse/models/*pt
+bashes_luigi/video_encoder/outputs
+bashes_luigi/video_encoder/wandb
+bashes_luigi/video_encoder/images_and_stuff
+bashes_luigi/video_encoder/training_logs
+bashes_luigi/vrt1/outputs
+bashes_luigi/vrt1/wandb
+bashes_luigi/vrt1/images_and_stuff
+bashes_luigi/vrt1/training_logs
+bashes_luigi/*.txt

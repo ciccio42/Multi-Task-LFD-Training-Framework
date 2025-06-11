@@ -27,6 +27,7 @@ from multi_task_test.utils import *
 from multi_task_test import *
 import re
 from colorama import Back
+from multi_task_il.models.command_encoder.cond_module import CondModule
 
 
 def seed_everything(seed=42):
@@ -38,6 +39,43 @@ def seed_everything(seed=42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
+def init_freezed_cond_module(
+        height=120,
+        width=160,
+        demo_T=4,
+        model_name="r2plus1d_18",
+        pretrained=True,
+        cond_video=True,
+        n_layers=3,
+        demo_W=7,
+        demo_H=7,
+        demo_ff_dim=[128, 64, 32],
+        demo_linear_dim=[512, 512, 512],
+        conv_drop_dim=3,
+        cond_module_model_path=None,
+        device=None
+        ):
+    
+    cond_module = CondModule(
+        height=height,
+        width=width,
+        demo_T=demo_T,
+        model_name=model_name,
+        pretrained=pretrained,
+        cond_video=cond_video,
+        n_layers=n_layers,
+        demo_W=demo_W,
+        demo_H=demo_H,
+        demo_ff_dim=demo_ff_dim,
+        demo_linear_dim=demo_linear_dim,
+        conv_drop_dim=conv_drop_dim,
+        )
+    weights = torch.load(cond_module_model_path, weights_only=True)
+
+    cond_module.load_state_dict(weights)
+    cond_module.eval()
+        
+    return cond_module
 
 def extract_last_number(path):
     # Use regular expression to find the last number in the path
@@ -141,14 +179,13 @@ def object_detection_inference(model, config, ctr, heights=100, widths=200, size
 
 
 def rollout_imitation(model, config, ctr,
-                      heights=100, widths=200, size=0, shape=0, color=0, max_T=150, env_name='place', gpu_id=-1, baseline=None, variation=None, controller_path=None, seed=None, action_ranges=[], model_name=None, gt_bb=False, sub_action=False, gt_action=4, real=True, gt_file=None, demo_file=None, place=False):
+                      heights=100, widths=200, size=0, shape=0, color=0, max_T=150, env_name='place', gpu_id=-1, baseline=None, variation=None, controller_path=None, seed=None, action_ranges=[], model_name=None, gt_bb=False, sub_action=False, gt_action=4, real=True, gt_file=None, demo_file=None, place=False, cond_module_instance=None):
     if gpu_id == -1:
         gpu_id = int(ctr % torch.cuda.device_count())
     print(f"Model GPU id {gpu_id}")
-    try:
-        model = model.cuda(gpu_id)
-    except:
-        print("Error")
+    model = model.cuda(gpu_id)
+    if cond_module_instance is not None:
+        cond_module_instance = cond_module_instance.cuda(gpu_id)
 
     if "vima" not in model_name:
         if "CondPolicy" not in model_name and config.augs.get("old_aug", True):
@@ -181,7 +218,8 @@ def rollout_imitation(model, config, ctr,
                                                                             shape=shape,
                                                                             color=color,
                                                                             gpu_id=gpu_id,
-                                                                            variation=variation, random_frames=random_frames,
+                                                                            variation=variation, 
+                                                                            random_frames=random_frames,
                                                                             controller_path=controller_path,
                                                                             ret_gt_env=True,
                                                                             seed=seed,
@@ -210,7 +248,8 @@ def rollout_imitation(model, config, ctr,
                              expert_traj=expert_traj,
                              gt_file=gt_file,
                              place_bb_flag=place,
-                             convert_action=config.dataset_cfg.convert_action)
+                             convert_action=config.dataset_cfg.convert_action,
+                             cond_module_instance=cond_module_instance)
         print("Evaluated traj #{}, task#{}, reached? {} picked? {} success? {} ".format(
             ctr, variation_id, info['reached'], info['picked'], info['success']))
         # print(f"Avg prediction {info['avg_pred']}")
@@ -251,7 +290,7 @@ def rollout_imitation(model, config, ctr,
         return traj, info
 
 
-def _proc(model, config, results_dir, heights, widths, size, shape, color, env_name, baseline, variation, max_T, controller_path, model_name, gpu_id, save, gt_bb, sub_action, gt_action, real, place, seed, n, gt_file, demo_file=None):
+def _proc(model, cond_module_instance, config, results_dir, heights, widths, size, shape, color, env_name, baseline, variation, max_T, controller_path, model_name, gpu_id, save, gt_bb, sub_action, gt_action, real, place, seed, n, gt_file, demo_file=None):
     
     json_name = results_dir + '/traj{}.json'.format(n)
     pkl_name = results_dir + '/traj{}.pkl'.format(n)
@@ -293,7 +332,8 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                                                real=real,
                                                gt_file=gt_file,
                                                demo_file=demo_file,
-                                               place=place)
+                                               place=place,
+                                               cond_module_instance=cond_module_instance)
         else:
             if variation is not None:
                 variation_id = variation[n % len(variation)]
@@ -564,6 +604,28 @@ if __name__ == '__main__':
                                                gpu_id=args.gpu_id)
             except:
                 print("Exception not loading target obj detector")
+        
+        if "RT1_video_cond" in config.policy._target_:
+            # Load cond module
+            cond_module = init_freezed_cond_module(
+                height=config.policy.cond_module_cfg.height,
+                width=config.policy.cond_module_cfg.width,
+                demo_T=config.policy.cond_module_cfg.demo_T,
+                model_name=config.policy.cond_module_cfg.model_name,
+                pretrained=config.policy.cond_module_cfg.pretrained,
+                cond_video=config.policy.cond_module_cfg.cond_video,
+                n_layers=config.policy.cond_module_cfg.n_layers,
+                demo_W=config.policy.cond_module_cfg.demo_W,
+                demo_H=config.policy.cond_module_cfg.demo_H,
+                demo_ff_dim=config.policy.cond_module_cfg.demo_ff_dim,
+                demo_linear_dim=config.policy.cond_module_cfg.demo_linear_dim,
+                conv_drop_dim=config.policy.cond_module_cfg.conv_drop_dim,
+                cond_module_model_path=config.policy.cond_module_cfg.cond_module_model_path
+            )
+            cond_module.eval()
+        else:
+            cond_module = None
+        
         # model.set_conv_layer_reference(model)
         model = model.eval()  # .cuda()
         n_success = 0
@@ -572,7 +634,7 @@ if __name__ == '__main__':
         color = args.color
         variation = args.variation
         seed = args.seed
-        max_T = 150
+        max_T = 150 # 30
 
         dataset = None
         if args.test_gt:
@@ -581,6 +643,7 @@ if __name__ == '__main__':
             from multiprocessing import cpu_count
             from multi_task_il.datasets.utils import DIYBatchSampler, collate_by_task
             config.dataset_cfg.mode = "train"
+            
             config.EXPERT_DATA = "/raid/home/frosa_Loc/no_opt_dataset"
             dataset = instantiate(config.get('dataset_cfg', None))
             pkl_file_dict = dataset.agent_files
@@ -598,15 +661,24 @@ if __name__ == '__main__':
             config.dataset_cfg.mode = "val"
             config.dataset_cfg.agent_name="ur5e"
             config.dataset_cfg.demo_name="human_rgb"
+            config.dataset_cfg.num_demo = 1 # takes only one demo per task, in our case 10 test per task
             
             dataset = instantiate(config.get('dataset_cfg', None))
             
             variation = list()
-            demo_files = dataset.demo_files['pick_place']
+            try:
+                demo_files = dataset.demo_files['pick_place']
+            except:
+                demo_files = dataset.demo_files['sim_ur5e_pick_place_delta_subsample']
             pkl_file_list = []
             for task_id in demo_files.keys():
                 for pkl_file in demo_files[task_id]:
                     for i in range(args.eval_each_task): # 10 test for each demo
+                        if isinstance(task_id, str):
+                            if "task_00" != task_id:
+                                task_id = int(task_id.split('_')[-1].lstrip('0'))
+                            else:
+                                task_id = 0
                         variation.append(task_id)
                         pkl_file_list.append(pkl_file)
             
@@ -619,6 +691,7 @@ if __name__ == '__main__':
         print(f"---- Testing model {model_name} ----")
         f = functools.partial(_proc,
                               model,
+                              cond_module,
                               config,
                               results_dir,
                               heights,

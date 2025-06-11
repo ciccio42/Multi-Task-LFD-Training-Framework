@@ -9,6 +9,25 @@ from multi_task_il.datasets.command_encoder.utils import *
 import random
 from .data_aug import DataAugmentation
 
+mivia_commands = {
+    "task_00": "Pick the green box and place it into the first bin",
+    "task_01": "Pick the green box and place it into the second bin",
+    "task_02": "Pick the green box and place it into the third bin",
+    "task_03": "Pick the green box and place it into the fourth bin",
+    "task_04": "Pick the yellow box and place it into the first bin",
+    "task_05": "Pick the yellow box and place it into the second bin",
+    "task_06": "Pick the yellow box and place it into the third bin",
+    "task_07": "Pick the yellow box and place it into the fourth bin",
+    "task_08": "Pick the blue box and place it into the first bin",
+    "task_09": "Pick the blue box and place it into the second bin",
+    "task_10": "Pick the blue box and place it into the third bin",
+    "task_11": "Pick the blue box and place it into the fourth bin",
+    "task_12": "Pick the red box and place it into the first bin",
+    "task_13": "Pick the red box and place it into the second bin",
+    "task_14": "Pick the red box and place it into the third bin",
+    "task_15": "Pick the red box and place it into the fourth bin"
+    }
+
 class CommandEncoderFinetuningDataset(Dataset):
     
     def __init__(self,
@@ -39,13 +58,13 @@ class CommandEncoderFinetuningDataset(Dataset):
         self.black_list = black_list # dataset to exclude
         self.use_strong_augs = use_strong_augs
         self.data_augs = data_augs
-        
+
         assert jsons_folder != '', 'you must specify a location for the json folder'
         if self.mode == 'train':
-            with open(f'{jsons_folder}/train_pkl_paths_absolute.json', 'r') as file:
+            with open(f'{jsons_folder}/train_pkl_paths.json', 'r') as file:
                 self.pkl_paths_dict = json.load(file)
         elif self.mode == 'val':
-            with open(f'{jsons_folder}/val_pkl_paths_absolute.json', 'r') as file:
+            with open(f'{jsons_folder}/val_pkl_paths.json', 'r') as file:
                 self.pkl_paths_dict = json.load(file)
                 
         #load embedding json paths
@@ -60,6 +79,7 @@ class CommandEncoderFinetuningDataset(Dataset):
         
         
         for dataset_name in self.pkl_paths_dict.keys():
+            text_command_dataset = ""
             if dataset_name == 'panda_pick_place' or dataset_name == 'panda_nut_assembly' or dataset_name == 'panda_stack_block' or dataset_name == 'panda_button':
                 text_command_dataset = 'mivia'
                 if 'button' in dataset_name:
@@ -84,14 +104,27 @@ class CommandEncoderFinetuningDataset(Dataset):
                         self.map_tasks_to_idxs[dataset_name][variation_name] = []
                         
                         for trj_path in self.pkl_paths_dict[dataset_name][variation_name]: # for all task in the list
-                            # get the corresponding command text embedding
-                            embedding = self.embeddings_paths_dict[text_command_dataset][task_name][str(variation_number)][0]
-                            
+                            if text_command_dataset == 'mivia':
+                                # get the corresponding command text embedding
+                                embedding = self.embeddings_paths_dict[text_command_dataset][task_name][str(variation_number)][0]
+                            else: # other type of dataset
+                                embedding = self.embeddings_paths_dict[dataset_name][variation_name][0]
                             self.all_pkl_paths[all_file_count] = (trj_path, variation_name, embedding, dataset_name) #add to all_pkl_paths
                             self.map_tasks_to_idxs[dataset_name][variation_name].append(all_file_count) #memorize mapping
                             all_file_count+=1
-                        
-            
+                    elif type(self.pkl_paths_dict[dataset_name][variation_name]) == dict:
+                        for sub_variation_name in self.pkl_paths_dict[dataset_name][variation_name].keys():
+                            self.map_tasks_to_idxs[dataset_name][sub_variation_name] = []
+                            for trj_path in self.pkl_paths_dict[dataset_name][variation_name][sub_variation_name]: # for all task in the list
+                                if text_command_dataset == 'mivia':
+                                    # get the corresponding command text embedding
+                                    embedding = self.embeddings_paths_dict[text_command_dataset][task_name][str(variation_number)][0]
+                                else: # other type of dataset
+                                    embedding = self.embeddings_paths_dict[dataset_name][variation_name][sub_variation_name][0]
+                                self.all_pkl_paths[all_file_count] = (trj_path, sub_variation_name, embedding, dataset_name) #add to all_pkl_paths
+                                self.map_tasks_to_idxs[dataset_name][sub_variation_name].append(all_file_count) #memorize mapping
+                                all_file_count+=1
+
         self.all_file_count = all_file_count
         self.max_len = max_len
         print(f'[{self.mode.capitalize()}] total file count: {all_file_count}')
@@ -123,25 +156,16 @@ class CommandEncoderFinetuningDataset(Dataset):
         
         demo_traj = load_traj(traj_path) # loading trajectory
         demo_data = make_demo_finetuning(self, demo_traj[0], dataset_name)  #TODO: augs
-        
-        # for t,frame in enumerate(demo_data['demo']):
-        #     img_debug = np.moveaxis(frame.detach().cpu().numpy()*255, 0, -1)
-        #     cv2.imwrite(f"video_cond_debug_demo_{t}.png", img_debug)
-        
-        # from PIL import Image
-        # for t,frame in enumerate(demo_data['demo']):
-        #     img_debug = np.moveaxis(frame.detach().cpu().numpy()*255, 0, -1).astype(np.uint8)
-        #     im = Image.fromarray(
-        #     img_debug
-        #     )
-        #     im.save(f'pil_video_cond_{t}.png')
+        sentence = demo_traj[1]
+        if sentence is None and "task_" in traj_path: # one of our datasets
+            sentence = mivia_commands[traj_path.split('/')[-2]]
         
         embedding_data = pkl.load(open(embedding_path, 'rb'))
     
         return {'demo_data': demo_data, 
                 'embedding_data': torch.from_numpy(embedding_data), 
                 'task_name': "finetuning",
-                'sentence': demo_traj[1],
+                'sentence': sentence,
                 'traj_path': traj_path,
                 'dataset_name': dataset_name,
                 'task': task_name,

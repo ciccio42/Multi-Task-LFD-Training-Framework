@@ -16,6 +16,8 @@ from torch.utils.data.dataloader import default_collate
 from torch.multiprocessing import cpu_count
 import torch.nn as nn
 from tqdm import tqdm
+import math
+from torchvision.utils import save_image
 
 def collate_by_task(batch):
     """ Use this for validation: groups data by task names to compute per-task losses """
@@ -111,9 +113,18 @@ def make_optimizer_schedule( optimizer, optim_weights, optimizer_state_dict, con
 
 
 def make_loss_function(config):
-    
     print(f"Creating loss function")
-    loss_function = CosineLossCalculator(batch_size=config.bsize)    
+    
+    loss = config.get('loss') # getting loss from config
+    
+    if loss == 'mse':
+        loss_function = nn.MSELoss(reduction='mean')
+    elif loss == 'cosine':
+        loss_function = CosineLossCalculator(batch_size=config.bsize)
+    else:
+        raise ValueError(f"Unknown loss function {config.get('loss_function', 'cosine')}")
+    
+    print(f"Loss function {loss_function} created")
 
     return loss_function
 
@@ -121,9 +132,9 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
     dataset_cfg.mode = 'train'
     dataset = hydra.utils.instantiate(dataset_cfg)
 
-    train_step = int(config.get('epochs') *
-                     int(len(dataset)/(num_replicas*config.get('bsize'))))
-    epoch_step = int(len(dataset)/(num_replicas*config.get('bsize')))
+    frac = math.ceil(dataset.all_file_count/(num_replicas*config.get('bsize')))
+    train_step = int(config.get('epochs') * frac)
+    epoch_step = frac
 
     print(f"Mode {dataset_cfg.mode} Train step {train_step}, epoch step {epoch_step}")
     train_sampler = FinetuningCommandEncoderSampler(dataset=dataset, 
@@ -147,16 +158,17 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
     dataset_cfg.mode = 'val'
     val_dataset = hydra.utils.instantiate(dataset_cfg)
     config.samplers.batch_size = config.train_cfg.val_size
-    val_step = int(config.get('epochs') *
-                    int(len(val_dataset)/config.get('vsize')))
-    val_epoch_step = int(len(val_dataset)/config.get('vsize'))
+    val_frac = math.ceil(val_dataset.all_file_count/(config.get('vsize')))
+    val_step = int(config.get('epochs') * val_frac)
+    val_epoch_step = val_frac
+    print(f"Mode {dataset_cfg.mode} Validation step {val_step}, epoch step {val_epoch_step}")
     val_sampler = FinetuningCommandEncoderSampler(val_dataset, 
-                                                    batch_size=config.get('bsize'),
-                                                n_sampler_per_task=config.set_same_n,
-                                                epoch_step=val_epoch_step,
-                                                shuffle=True)
+                                                  batch_size=config.get('bsize'),
+                                                  n_sampler_per_task=config.set_same_n,
+                                                  epoch_step=val_epoch_step,
+                                                  shuffle=False)
     val_loader = DataLoader(
-        dataset,
+        val_dataset,
         batch_sampler=val_sampler,
         num_workers=config.get('loader_workers', cpu_count()),
         collate_fn=collate_by_task,
@@ -164,9 +176,6 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
         prefetch_factor=2,
         persistent_workers=True
     )
-    
-        
-        
         
     return train_loader, val_loader
 
@@ -224,27 +233,27 @@ class Trainer:
     def worker(self, local_rank, *args):
         
         global_rank = args[0] * args[1] + local_rank 
-        dist.init_process_group( 
-        backend='nccl',  
-        world_size=self._world_size, 
-        rank=global_rank 
-        )
+        # dist.init_process_group( 
+        # backend='nccl',  
+        # world_size=self._world_size, 
+        # rank=global_rank 
+        # )
         
-        if global_rank == 0:
+        # if global_rank == 0:
                         
-            if self.config.wandb_log:
-                config_keys = ['train_cfg', 'tasks', 'samplers', 'dataset_cfg', 'policy']
-                # for k in config_keys:
-                #     print(k, self.config.get(k))
-                #     print(k, dict(self.config.get(k)))
-                #     print('-'*20)
-                wandb_config = {k: self.config.get(k) for k in config_keys}
-                wandb.login(key='227ed2fded06f63748a7a29dae55acdda7d131ff', relogin=True)
-                print(f"Exp name: {self.config.exp_name}")
-                self.config.project_name = self.config.exp_name.split('-Batch')[0]
-                run = wandb.init(project=self.config.project_name,
-                                name=self.config.exp_name,
-                                sync_tensorboard=False)
+        if self.config.wandb_log:
+            config_keys = ['train_cfg', 'tasks', 'samplers', 'dataset_cfg', 'policy']
+            # for k in config_keys:
+            #     print(k, self.config.get(k))
+            #     print(k, dict(self.config.get(k)))
+            #     print('-'*20)
+            wandb_config = {k: self.config.get(k) for k in config_keys}
+            wandb.login(key='d8ae96268267edd589283209c8b725caadcd4645', relogin=True)
+            print(f"Exp name: {self.config.exp_name}")
+            self.config.project_name = self.config.exp_name.split('-Batch')[0]
+            run = wandb.init(project=self.config.project_name,
+                            name=self.config.exp_name,
+                            sync_tensorboard=False)
         
         self.train(num_replicas=self._world_size,
                    global_rank=global_rank,
@@ -257,18 +266,22 @@ class Trainer:
         train_step = len(train_loader)/ self.config.get('bsize')
         print(f"Training for {train_step} steps")
         epoch_steps = 0
+        batch_num = 0
         for inputs in tqdm(train_loader):
             torch.cuda.empty_cache()
             
             model_inputs = inputs['finetuning']['demo_data']['demo'].to(self._device_list[local_rank])
             generated_embedding = model(input=model_inputs)
             gt_embedding = inputs['finetuning']['embedding_data'].to(self._device_list[local_rank])
-            task_losses = loss_function.compute_cosine_similarity(generated_embedding, 
-                                                                  gt_embedding)
             
+            # calculating loss
+            if isinstance(loss_function, nn.MSELoss):
+                task_losses = loss_function(generated_embedding, gt_embedding)
+            elif isinstance(loss_function, CosineLossCalculator):
+                task_losses = loss_function.compute_cosine_similarity(generated_embedding, gt_embedding)
+            optimizer.zero_grad() #! very important
             task_losses.backward()
             optimizer.step()
-            
             
             # log stats
             # calculate train iter stats
@@ -302,8 +315,10 @@ class Trainer:
                 model_inputs = val_inputs['finetuning']['demo_data']['demo'].to(self._device_list[local_rank])
                 generated_embedding = model(input=model_inputs)
                 gt_embedding = val_inputs['finetuning']['embedding_data'].to(self._device_list[local_rank])
-                task_losses = loss_function.compute_cosine_similarity(generated_embedding, 
-                                                                      gt_embedding)
+                if isinstance(loss_function, nn.MSELoss):
+                    task_losses = loss_function(generated_embedding, gt_embedding)
+                elif isinstance(loss_function, CosineLossCalculator):
+                    task_losses = loss_function.compute_cosine_similarity(generated_embedding, gt_embedding)
                 
                 accumulated_loss += task_losses.item()
                 
@@ -364,7 +379,7 @@ class Trainer:
             global_rank=global_rank)
         
         
-        dist.barrier()
+        # dist.barrier()
         
         # wrap model in DataParallel if needed and transfer to correct device
         print('\n-------------------\nTraining stage\nFound {} GPU devices \n'.format(self.device_count))
@@ -373,10 +388,10 @@ class Trainer:
         print('Model on device: {}'.format("cuda:" + str(local_rank) if torch.cuda.is_available() else "cpu"))
         device = torch.device("cuda:" + str(local_rank) if torch.cuda.is_available() else "cpu")
         model = model.to(device)
-        model = nn.parallel.DistributedDataParallel(model, 
-                                                    device_ids=[local_rank],
-                                                    find_unused_parameters=True)
-        dist.barrier()
+        # model = nn.parallel.DistributedDataParallel(model, 
+        #                                             device_ids=[local_rank],
+        #                                             find_unused_parameters=True)
+        # dist.barrier()
         
         
         # initialize constants:
@@ -431,7 +446,7 @@ class Trainer:
                             print_freq=print_freq,
                             frac=frac)
                 
-            dist.barrier()
+            # dist.barrier()
             
             #### ---- Validation step ----####
             if val_loader is not None:
@@ -482,10 +497,12 @@ class Workspace(object):
         
     def run(self):
 
-        torch.multiprocessing.spawn(self.trainer.worker,
-                                    nprocs=self.config.num_gpus, 
-                                    args=(  self.config.node_id,
-                                            self.config.num_gpus,
-                                            self.config))
+        # torch.multiprocessing.spawn(self.trainer.worker,
+        #                             nprocs=self.config.num_gpus, 
+        #                             args=(  self.config.node_id,
+        #                                     self.config.num_gpus,
+        #                                     self.config))
+        
+        self.trainer.worker(0, 0, 1, self.config)
         
         print("Done training")

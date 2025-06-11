@@ -383,24 +383,33 @@ def make_demo(dataset, traj, task_name, human_demo=False):
                     int(i * per_bracket), int((i + 1) * per_bracket)))
             # frames.append(_make_frame(n))
 
-            if not human_demo and (dataset.width != 224 and dataset.height != 224):
-                obs = copy.copy(
-                    traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
-            elif dataset.width == 224 and dataset.height == 224:
-                obs = copy.copy(
-                    traj.get(n)['obs']['camera_front_image'])
-            else:
-                obs = copy.copy(
-                    traj.get(n)['obs']['camera_front_image'])
+            try:
+                if not human_demo and (dataset.width != 224 and dataset.height != 224):
+                    obs = copy.copy(
+                        traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
+                elif dataset.width == 224 and dataset.height == 224:
+                    obs = copy.copy(
+                        traj.get(n)['obs']['camera_front_image'])
+                else:
+                    obs = copy.copy(
+                        traj.get(n)['obs']['camera_front_image'])
+            except:
+                obs = traj.get(n)['obs']['image']
             
-            processed = dataset.frame_aug(
-                task_name,
-                obs,
-                perform_aug=False,
-                frame_number=i,
-                perform_scale_resize=True)
+            if not hasattr(dataset, 'vrt1_dataset'): 
+                processed = dataset.frame_aug(
+                    task_name,
+                    obs,
+                    perform_aug=False,
+                    frame_number=i,
+                    perform_scale_resize=True)
+            else:
+                processed = dataset.frame_aug(obs, 
+                                              task_name,
+                                              perform_aug=False,
+                                              perform_scale_resize=True)
             frames.append(processed)
-            if dataset.aug_twice:
+            if not hasattr(dataset, 'vrt1_dataset') and dataset.get('aug_twice', False):
                 cp_frames.append(dataset.frame_aug(
                     task_name,
                     obs,

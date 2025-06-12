@@ -114,12 +114,12 @@ dataset_cfg:
   perform_augs: True
   perform_scale_resize: True
   agent_name: 'ur5'
+  demo_name: 'human_rgb'
   pick_next: False
   normalize_action: False
 
 
 augs:
-
 
   old_aug: false
   brightness: [0.9, 1.1]
@@ -177,28 +177,20 @@ rt1_video_cond:
       dtype: numpy.float32
   output_tensor_space:
     world_vector:
-      low_x: -1
-      low_y: -1
-      low_z: -1
-      high_x: 1
-      high_y: 1
-      high_z: 1
-    #### for absolute
-    rotation_delta:
-      low_phi: -3.14
-      low_theta: -3.14
-      low_psi: -3.14
-      high_phi: 3.14
-      high_theta: 3.14
-      high_psi: 3.14
+      low_x: -0.25
+      low_y: -0.25
+      low_z: -0.25
+      high_x: 0.25
+      high_y: 0.25
+      high_z: 0.25
     #### for delta
-    # rotation_delta:
-    #   low_phi: -6.28
-    #   low_theta: -6.28
-    #   low_psi: -6.28
-    #   high_phi: 6.28
-    #   high_theta: 6.28
-    #   high_psi: 6.28
+    rotation_delta:
+      low_phi: -6.28
+      low_theta: -6.28
+      low_psi: -6.28
+      high_phi: 6.28
+      high_theta: 6.28
+      high_psi: 6.28
     ###### END ABSOLUTE SIM DATASET RANGE
     gripper_closedness_action:
       # low: 0.0 # 0.0 chiuso

@@ -1,3 +1,4 @@
+import argparse
 import json
 from multi_task_il.models.command_encoder.muse.muse import get_model
 import pickle
@@ -22,12 +23,11 @@ command_dict = {
     'task_15': 'Pick the red box and place it into the fourth bin',
 }
 
-
 def create_emb_and_save_pickle(traj_path, model_torch, tokenizer, output_folder, dataset_name):
     ''' query USE to produce a 512 embedding from the command
         associated to the task at traj_path
     '''
-    print(f"computing embedding for {traj_path}...")
+    print(f"Computing embedding for {traj_path}")
     with open(traj_path, "rb") as f:
         traj_data = pickle.load(f)
     
@@ -35,11 +35,11 @@ def create_emb_and_save_pickle(traj_path, model_torch, tokenizer, output_folder,
     if command is None and "task_" in traj_path: # it is one of our datasets
         command = command_dict[traj_path.split("/")[-2]]
         
-    print(f"command: {command}")
+    print(f"Generating embedding for command: {command}")
     command_emb = model_torch(tokenizer(command)).detach().numpy()
     
     index = traj_path.split("/").index(dataset_name)
-    save_path_command_emb = os.path.join(output_folder, "", *traj_path.split("/")[index:-1])
+    save_path_command_emb = os.path.join(output_folder, *traj_path.split("/")[index:-1])
 
     if not os.path.exists(save_path_command_emb):
         os.makedirs(save_path_command_emb)
@@ -53,15 +53,14 @@ def create_emb_and_save_pickle(traj_path, model_torch, tokenizer, output_folder,
 
 
 if __name__ == '__main__':
-    
-    import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--task_json', default='./all_pkl_paths.json')
-    parser.add_argument("--path_to_tokenizer", default='')
-    parser.add_argument("--path_to_muse", default='')
+    parser.add_argument("--path_to_tokenizer")
+    parser.add_argument("--path_to_muse")
     parser.add_argument("--path_to_dataset")
-    parser.add_argument("--output_folder", default=None)
-    parser.add_argument('--debug', default=False)
+    parser.add_argument("--output_json_folder")
+    parser.add_argument("--embedding_save_folder")
+    parser.add_argument("--debug", action='store_true', help="whether or not attach the debugger")
     
     args = parser.parse_args()
     
@@ -74,17 +73,9 @@ if __name__ == '__main__':
     with open(args.task_json, 'r') as file:
         data = json.load(file)
     
-    print(f"Getting Universal Sentence Encoder and Tokenizer...", end=' ')
+    print(f"Getting Universal Sentence Encoder and Tokenizer...")
     model_torch, tokenizer = get_model(args.path_to_muse, args.path_to_tokenizer)
-    print(f"done.")
     
-    #----------------------- TODO -------------------------------------------
-    #  1)usare task_count_info.json e fornire questa all'USE
-    #  2)una volta prodotto l'embedding, combinarlo con il gruppo di comandi
-    #  3)OPPURE creare un file separato in cui c'è corrispondenza con i task
-    #------------------------------------------------------------------------
-    
-    # black_list = ['sim_ur5e_pick_place_shifted_converted_absolute', 'real_new_ur5e_pick_place_converted_absolute', 'sim_panda_pick_place_converted_absolute']
     black_list = []
     
     embeddings_data = {}
@@ -97,9 +88,7 @@ if __name__ == '__main__':
                     # USE for the embedding and save into embeddings_data
                     istances_list = data[dataset_name][task]
                     traj_path = istances_list[0] # take only one traj, the command string is the same for all elements in the folder
-                    # if traj_path == '/user/frosa/multi_task_lfd/datasets/taco_play_converted/stack_yellow_on_/taco_play_03201.pkl':
-                    #     continue
-                    save_path_command_emb = create_emb_and_save_pickle(traj_path, model_torch, tokenizer, args.output_folder, dataset_name)
+                    save_path_command_emb = create_emb_and_save_pickle(traj_path, model_torch, tokenizer, args.embedding_save_folder, dataset_name)
                     embeddings_data[dataset_name][task].append(save_path_command_emb)
                     
                 elif type(data[dataset_name][task]) == dict:
@@ -109,13 +98,14 @@ if __name__ == '__main__':
                         embeddings_data[dataset_name][task][subtask] = []
                         istances_list = data[dataset_name][task][subtask]
                         traj_path = istances_list[0] # take only one traj
-                        save_path_command_emb = create_emb_and_save_pickle(traj_path, model_torch, tokenizer, args.output_folder, dataset_name)
+                        save_path_command_emb = create_emb_and_save_pickle(traj_path, model_torch, tokenizer, args.embedding_save_folder, dataset_name)
                         embeddings_data[dataset_name][task][subtask].append(save_path_command_emb)
-                
-    #----------------------- TODO ---------------------------
-    #  visualizzare nello spazio gli embedding
-    #-------------------------------------------------------             
-            
-    with open("embeddings_data.json", "w") as outfile: 
-        json.dump(embeddings_data,outfile,indent=2) 
+
+    # saving the embeddings paths to a json file
+    save_path = os.path.join(args.output_json_folder, 'embeddings_data.json')
+    if not os.path.exists(args.output_json_folder):
+        os.makedirs(args.output_json_folder)
+        
+    with open(save_path, "w") as outfile: 
+        json.dump(embeddings_data, outfile, indent=2) 
     

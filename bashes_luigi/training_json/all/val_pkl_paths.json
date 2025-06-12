@@ -1,0 +1,1509 @@
+{
+  "asu_table_top_delta": {
+    "put_down_blue_can": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/put_down_blue_can/asu_table_top_converted_externally_to_rlds_00000.pkl"
+    ],
+    "pick_green_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_green_bottle/asu_table_top_converted_externally_to_rlds_00001.pkl"
+    ],
+    "put_down_white_carton": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/put_down_white_carton/asu_table_top_converted_externally_to_rlds_00002.pkl"
+    ],
+    "move_brown_object": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/move_brown_object/asu_table_top_converted_externally_to_rlds_00003.pkl"
+    ],
+    "place_down_brown_object": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/place_down_brown_object/asu_table_top_converted_externally_to_rlds_00004.pkl"
+    ],
+    "put_down_red_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/put_down_red_bottle/asu_table_top_converted_externally_to_rlds_00005.pkl"
+    ],
+    "place_down_blue_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/place_down_blue_bottle/asu_table_top_converted_externally_to_rlds_00006.pkl"
+    ],
+    "raise_white_carton": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/raise_white_carton/asu_table_top_converted_externally_to_rlds_00007.pkl"
+    ],
+    "raise_bread": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/raise_bread/asu_table_top_converted_externally_to_rlds_00008.pkl"
+    ],
+    "pick_up_brown_object": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_up_brown_object/asu_table_top_converted_externally_to_rlds_00009.pkl"
+    ],
+    "put_down_glass_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/put_down_glass_bottle/asu_table_top_converted_externally_to_rlds_00010.pkl"
+    ],
+    "pick_blue_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_blue_bottle/asu_table_top_converted_externally_to_rlds_00011.pkl"
+    ],
+    "pick_red_cube": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_red_cube/asu_table_top_converted_externally_to_rlds_00012.pkl"
+    ],
+    "move_white_carton": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/move_white_carton/asu_table_top_converted_externally_to_rlds_00013.pkl"
+    ],
+    "move_maroon_square": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/move_maroon_square/asu_table_top_converted_externally_to_rlds_00014.pkl"
+    ],
+    "move_green_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/move_green_bottle/asu_table_top_converted_externally_to_rlds_00015.pkl"
+    ],
+    "place_down_green_glass_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/place_down_green_glass_bottle/asu_table_top_converted_externally_to_rlds_00016.pkl"
+    ],
+    "hold_pepsi_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/hold_pepsi_bottle/asu_table_top_converted_externally_to_rlds_00018.pkl"
+    ],
+    "move_green_glass_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/move_green_glass_bottle/asu_table_top_converted_externally_to_rlds_00019.pkl"
+    ],
+    "place_down_red_cube": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/place_down_red_cube/asu_table_top_converted_externally_to_rlds_00020.pkl"
+    ],
+    "hold_coke_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/hold_coke_bottle/asu_table_top_converted_externally_to_rlds_00021.pkl"
+    ],
+    "pick_up_maroon_cube": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_up_maroon_cube/asu_table_top_converted_externally_to_rlds_00023.pkl"
+    ],
+    "push_cocacola_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/push_cocacola_bottle/asu_table_top_converted_externally_to_rlds_00024.pkl"
+    ],
+    "put_down_red_can": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/put_down_red_can/asu_table_top_converted_externally_to_rlds_00025.pkl"
+    ],
+    "push_maroon_square": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/push_maroon_square/asu_table_top_converted_externally_to_rlds_00026.pkl"
+    ],
+    "move_red_object": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/move_red_object/asu_table_top_converted_externally_to_rlds_00027.pkl"
+    ],
+    "put_down_white_box": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/put_down_white_box/asu_table_top_converted_externally_to_rlds_00030.pkl"
+    ],
+    "pick_cocacola_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_cocacola_bottle/asu_table_top_converted_externally_to_rlds_00031.pkl"
+    ],
+    "place_down_red_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/place_down_red_bottle/asu_table_top_converted_externally_to_rlds_00032.pkl"
+    ],
+    "place_down_red_square": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/place_down_red_square/asu_table_top_converted_externally_to_rlds_00033.pkl"
+    ],
+    "raise_maroon_square": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/raise_maroon_square/asu_table_top_converted_externally_to_rlds_00035.pkl"
+    ],
+    "hold_blue_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/hold_blue_bottle/asu_table_top_converted_externally_to_rlds_00036.pkl"
+    ],
+    "place_down_white_box": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/place_down_white_box/asu_table_top_converted_externally_to_rlds_00038.pkl"
+    ],
+    "push_maroon_object": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/push_maroon_object/asu_table_top_converted_externally_to_rlds_00039.pkl"
+    ],
+    "push_white_carton": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/push_white_carton/asu_table_top_converted_externally_to_rlds_00040.pkl"
+    ],
+    "move_milk_box": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/move_milk_box/asu_table_top_converted_externally_to_rlds_00041.pkl"
+    ],
+    "hold_red_object": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/hold_red_object/asu_table_top_converted_externally_to_rlds_00042.pkl"
+    ],
+    "place_down_milk_box": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/place_down_milk_box/asu_table_top_converted_externally_to_rlds_00044.pkl"
+    ],
+    "push_red_object": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/push_red_object/asu_table_top_converted_externally_to_rlds_00045.pkl"
+    ],
+    "raise_blue_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/raise_blue_bottle/asu_table_top_converted_externally_to_rlds_00046.pkl"
+    ],
+    "hold_red_square": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/hold_red_square/asu_table_top_converted_externally_to_rlds_00050.pkl"
+    ],
+    "pick_cocacola_can": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_cocacola_can/asu_table_top_converted_externally_to_rlds_00051.pkl"
+    ],
+    "push_pepsi_can": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/push_pepsi_can/asu_table_top_converted_externally_to_rlds_00055.pkl"
+    ],
+    "push_milk_box": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/push_milk_box/asu_table_top_converted_externally_to_rlds_00056.pkl"
+    ],
+    "place_down_maroon_object": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/place_down_maroon_object/asu_table_top_converted_externally_to_rlds_00057.pkl"
+    ],
+    "move_white_box": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/move_white_box/asu_table_top_converted_externally_to_rlds_00058.pkl"
+    ],
+    "put_down_milk_box": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/put_down_milk_box/asu_table_top_converted_externally_to_rlds_00059.pkl"
+    ],
+    "pick_up_red_object": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_up_red_object/asu_table_top_converted_externally_to_rlds_00060.pkl"
+    ],
+    "pick_up_white_carton": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_up_white_carton/asu_table_top_converted_externally_to_rlds_00061.pkl"
+    ],
+    "put_down_bread": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/put_down_bread/asu_table_top_converted_externally_to_rlds_00062.pkl"
+    ],
+    "put_down_blue_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/put_down_blue_bottle/asu_table_top_converted_externally_to_rlds_00063.pkl"
+    ],
+    "pick_red_object": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_red_object/asu_table_top_converted_externally_to_rlds_00064.pkl"
+    ],
+    "pick_blue_can": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_blue_can/asu_table_top_converted_externally_to_rlds_00069.pkl"
+    ],
+    "move_pepsi_can": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/move_pepsi_can/asu_table_top_converted_externally_to_rlds_00071.pkl"
+    ],
+    "pick_up_milk_carton": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_up_milk_carton/asu_table_top_converted_externally_to_rlds_00072.pkl"
+    ],
+    "pick_up_bread": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_up_bread/asu_table_top_converted_externally_to_rlds_00073.pkl"
+    ],
+    "place_down_maroon_square": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/place_down_maroon_square/asu_table_top_converted_externally_to_rlds_00075.pkl"
+    ],
+    "pick_white_box": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_white_box/asu_table_top_converted_externally_to_rlds_00076.pkl"
+    ],
+    "push_coke_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/push_coke_bottle/asu_table_top_converted_externally_to_rlds_00077.pkl"
+    ],
+    "push_milk_carton": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/push_milk_carton/asu_table_top_converted_externally_to_rlds_00078.pkl"
+    ],
+    "hold_brown_object": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/hold_brown_object/asu_table_top_converted_externally_to_rlds_00080.pkl"
+    ],
+    "hold_white_box": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/hold_white_box/asu_table_top_converted_externally_to_rlds_00081.pkl"
+    ],
+    "pick_maroon_square": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_maroon_square/asu_table_top_converted_externally_to_rlds_00082.pkl"
+    ],
+    "move_yellow_object": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/move_yellow_object/asu_table_top_converted_externally_to_rlds_00085.pkl"
+    ],
+    "push_brown_object": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/push_brown_object/asu_table_top_converted_externally_to_rlds_00086.pkl"
+    ],
+    "pick_up_red_can": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_up_red_can/asu_table_top_converted_externally_to_rlds_00087.pkl"
+    ],
+    "put_down_maroon_object": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/put_down_maroon_object/asu_table_top_converted_externally_to_rlds_00088.pkl"
+    ],
+    "push_green_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/push_green_bottle/asu_table_top_converted_externally_to_rlds_00089.pkl"
+    ],
+    "raise_red_can": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/raise_red_can/asu_table_top_converted_externally_to_rlds_00090.pkl"
+    ],
+    "pick_up_yellow_object": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_up_yellow_object/asu_table_top_converted_externally_to_rlds_00091.pkl"
+    ],
+    "raise_pepsi_can": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/raise_pepsi_can/asu_table_top_converted_externally_to_rlds_00092.pkl"
+    ],
+    "pick_coke_can": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_coke_can/asu_table_top_converted_externally_to_rlds_00093.pkl"
+    ],
+    "pick_up_white_box": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_up_white_box/asu_table_top_converted_externally_to_rlds_00094.pkl"
+    ],
+    "place_down_pepsi_can": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/place_down_pepsi_can/asu_table_top_converted_externally_to_rlds_00095.pkl"
+    ],
+    "place_down_maroon_cube": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/place_down_maroon_cube/asu_table_top_converted_externally_to_rlds_00096.pkl"
+    ],
+    "push_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/push_bottle/asu_table_top_converted_externally_to_rlds_00100.pkl"
+    ],
+    "raise_coke_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/raise_coke_bottle/asu_table_top_converted_externally_to_rlds_00101.pkl"
+    ],
+    "put_down_pepsi_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/put_down_pepsi_bottle/asu_table_top_converted_externally_to_rlds_00102.pkl"
+    ],
+    "place_down_red_can": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/place_down_red_can/asu_table_top_converted_externally_to_rlds_00103.pkl"
+    ],
+    "hold_green_glass_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/hold_green_glass_bottle/asu_table_top_converted_externally_to_rlds_00104.pkl"
+    ],
+    "move_bread": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/move_bread/asu_table_top_converted_externally_to_rlds_00105.pkl"
+    ],
+    "place_down_glass_bottle": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/place_down_glass_bottle/asu_table_top_converted_externally_to_rlds_00107.pkl"
+    ],
+    "pick_bread": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/asu_table_top_delta/pick_bread/asu_table_top_converted_externally_to_rlds_00108.pkl"
+    ]
+  },
+  "berkeley_autolab_ur5_delta": {
+    "sweep": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00003.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00019.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00033.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00077.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00141.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00163.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00206.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00229.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00251.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00256.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00350.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00448.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00487.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00508.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00524.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00526.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00567.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00571.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00575.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00601.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00607.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00698.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/sweep/berkeley_autolab_ur5_00789.pkl"
+    ],
+    "pick_place": {
+      "bottle": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00006.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00041.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00066.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00108.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00165.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00185.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00237.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00255.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00285.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00288.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00391.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00471.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00520.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00556.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00569.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00570.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00612.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00623.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00626.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00637.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00645.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00756.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/bottle/berkeley_autolab_ur5_00839.pkl"
+      ],
+      "cup": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00010.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00034.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00047.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00071.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00110.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00123.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00155.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00177.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00190.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00192.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00264.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00349.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00389.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00443.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00456.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00464.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00536.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00541.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00544.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00576.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00581.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00690.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/cup/berkeley_autolab_ur5_00793.pkl"
+      ],
+      "tiger": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00017.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00036.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00060.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00092.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00144.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00188.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00239.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00268.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00276.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00278.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00373.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00483.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00535.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00558.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00561.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00572.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00613.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00616.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00624.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00635.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00642.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00753.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/berkeley_autolab_ur5_delta/pick_place/tiger/berkeley_autolab_ur5_00821.pkl"
+      ]
+    }
+  },
+  "iamlab_cmu_pickup_insert_delta": {
+    "pick_green_block": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00023.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00037.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00052.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00101.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00126.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00181.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00193.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00195.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00286.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00395.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00450.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00487.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00504.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00525.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00527.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00529.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00539.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00544.pkl"
+    ],
+    "pick_pink_block": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00012.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00024.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00046.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00068.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00116.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00145.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00199.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00209.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00216.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00288.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00362.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00383.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00416.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00419.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00426.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00457.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00458.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00467.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00473.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00475.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_pink_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00570.pkl"
+    ],
+    "insert_green_block": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/insert_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00004.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/insert_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00039.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/insert_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00066.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/insert_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00112.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/insert_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00204.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/insert_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00211.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/insert_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00214.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/insert_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00466.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/insert_green_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00535.pkl"
+    ],
+    "pick_blue_block": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_blue_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00009.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_blue_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00036.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_blue_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00078.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_blue_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00110.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_blue_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00179.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_blue_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00188.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_blue_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00189.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_blue_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00435.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_blue_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00472.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_blue_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00500.pkl"
+    ],
+    "pick_yellow_block": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_yellow_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00111.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_yellow_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00142.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_yellow_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00158.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_yellow_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00177.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_yellow_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00332.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_yellow_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00376.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/iamlab_cmu_pickup_insert_delta/pick_yellow_block/iamlab_cmu_pickup_insert_converted_externally_to_rlds_00574.pkl"
+    ]
+  },
+  "taco_play_delta": {
+    "rotate": {
+      "rotate_yellow_block_left": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_yellow_block_left/taco_play_00174.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_yellow_block_left/taco_play_00418.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_yellow_block_left/taco_play_00709.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_yellow_block_left/taco_play_01340.pkl"
+      ],
+      "rotate_pink_block_right": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_pink_block_right/taco_play_00187.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_pink_block_right/taco_play_00312.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_pink_block_right/taco_play_00823.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_pink_block_right/taco_play_01324.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_pink_block_right/taco_play_02458.pkl"
+      ],
+      "rotate_purple_block_right": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_purple_block_right/taco_play_00232.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_purple_block_right/taco_play_00262.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_purple_block_right/taco_play_00518.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_purple_block_right/taco_play_00701.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_purple_block_right/taco_play_02010.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_purple_block_right/taco_play_02254.pkl"
+      ],
+      "rotate_yellow_block_right": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_yellow_block_right/taco_play_00343.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_yellow_block_right/taco_play_00374.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_yellow_block_right/taco_play_00485.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_yellow_block_right/taco_play_00818.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_yellow_block_right/taco_play_01576.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_yellow_block_right/taco_play_01990.pkl"
+      ],
+      "rotate_purple_block_left": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_purple_block_left/taco_play_00445.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_purple_block_left/taco_play_00594.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_purple_block_left/taco_play_00699.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_purple_block_left/taco_play_01838.pkl"
+      ],
+      "rotate_pink_block_left": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_pink_block_left/taco_play_00554.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_pink_block_left/taco_play_00710.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/rotate/rotate_pink_block_left/taco_play_01805.pkl"
+      ]
+    },
+    "push": {
+      "push_yellow_block_right": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_yellow_block_right/taco_play_00127.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_yellow_block_right/taco_play_00287.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_yellow_block_right/taco_play_00364.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_yellow_block_right/taco_play_00619.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_yellow_block_right/taco_play_02586.pkl"
+      ],
+      "push_pink_block_in_drawer": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_pink_block_in_drawer/taco_play_00083.pkl"
+      ],
+      "push_yellow_block_left": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_yellow_block_left/taco_play_00030.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_yellow_block_left/taco_play_00380.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_yellow_block_left/taco_play_00441.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_yellow_block_left/taco_play_00694.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_yellow_block_left/taco_play_01152.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_yellow_block_left/taco_play_01229.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_yellow_block_left/taco_play_01233.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_yellow_block_left/taco_play_02526.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_yellow_block_left/taco_play_03020.pkl"
+      ],
+      "push_purple_block_left": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_purple_block_left/taco_play_00240.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_purple_block_left/taco_play_00357.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_purple_block_left/taco_play_00452.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_purple_block_left/taco_play_00803.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_purple_block_left/taco_play_01714.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_purple_block_left/taco_play_01949.pkl"
+      ],
+      "push_pink_block_left": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_pink_block_left/taco_play_00715.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_pink_block_left/taco_play_01107.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_pink_block_left/taco_play_01138.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_pink_block_left/taco_play_01979.pkl"
+      ],
+      "push_pink_block_right": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_pink_block_right/taco_play_00530.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_pink_block_right/taco_play_00607.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_pink_block_right/taco_play_01004.pkl"
+      ],
+      "push_purple_block_right": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_purple_block_right/taco_play_00745.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_purple_block_right/taco_play_01017.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_purple_block_right/taco_play_01369.pkl"
+      ],
+      "push_yellow_block_in_drawer": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_yellow_block_in_drawer/taco_play_00729.pkl"
+      ],
+      "push_purple_block_in_drawer": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/push/push_purple_block_in_drawer/taco_play_01338.pkl"
+      ]
+    },
+    "open": {
+      "open_drawer": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_00031.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_00086.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_00160.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_00295.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_00476.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_00488.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_00532.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_00539.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_00620.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_00649.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_00755.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_00827.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_00938.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_01124.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_01182.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_01342.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_01431.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_01459.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_01798.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_01831.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_01880.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_02106.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_02214.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_02385.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_02386.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_02582.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_02673.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_02899.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/open/open_drawer/taco_play_03004.pkl"
+      ]
+    },
+    "stack": {
+      "stack_pink_on_purple": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/stack/stack_pink_on_purple/taco_play_00003.pkl"
+      ],
+      "stack_yellow_on_purple": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/stack/stack_yellow_on_purple/taco_play_00371.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/stack/stack_yellow_on_purple/taco_play_01362.pkl"
+      ],
+      "stack_purple_on_pink": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/stack/stack_purple_on_pink/taco_play_00234.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/stack/stack_purple_on_pink/taco_play_00962.pkl"
+      ],
+      "stack_purple_on_yellow": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/stack/stack_purple_on_yellow/taco_play_00581.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/stack/stack_purple_on_yellow/taco_play_00691.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/stack/stack_purple_on_yellow/taco_play_01016.pkl"
+      ],
+      "stack_yellow_on_": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/stack/stack_yellow_on_/taco_play_00354.pkl"
+      ],
+      "stack_pink_on_yellow": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/stack/stack_pink_on_yellow/taco_play_00453.pkl"
+      ],
+      "stack_yellow_on_pink": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/stack/stack_yellow_on_pink/taco_play_00975.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/stack/stack_yellow_on_pink/taco_play_01471.pkl"
+      ]
+    },
+    "turn": {
+      "turn_off_blue_led": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_blue_led/taco_play_00009.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_blue_led/taco_play_00198.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_blue_led/taco_play_00419.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_blue_led/taco_play_00608.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_blue_led/taco_play_00905.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_blue_led/taco_play_00980.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_blue_led/taco_play_00994.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_blue_led/taco_play_02887.pkl"
+      ],
+      "turn_off_green_led": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_green_led/taco_play_00140.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_green_led/taco_play_00426.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_green_led/taco_play_00576.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_green_led/taco_play_00736.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_green_led/taco_play_01760.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_green_led/taco_play_01889.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_green_led/taco_play_01942.pkl"
+      ],
+      "turn_off_red_led": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_red_led/taco_play_00117.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_red_led/taco_play_00203.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_red_led/taco_play_00266.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_red_led/taco_play_00510.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_red_led/taco_play_01689.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_off_red_led/taco_play_01918.pkl"
+      ],
+      "turn_on_green_led": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_green_led/taco_play_00248.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_green_led/taco_play_00423.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_green_led/taco_play_00575.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_green_led/taco_play_00695.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_green_led/taco_play_01366.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_green_led/taco_play_01395.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_green_led/taco_play_01442.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_green_led/taco_play_03109.pkl"
+      ],
+      "turn_on_red_led": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_red_led/taco_play_00070.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_red_led/taco_play_00397.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_red_led/taco_play_00613.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_red_led/taco_play_01511.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_red_led/taco_play_01543.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_red_led/taco_play_01912.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_red_led/taco_play_03023.pkl"
+      ],
+      "turn_on_blue_led": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_blue_led/taco_play_00109.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_blue_led/taco_play_00284.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_blue_led/taco_play_00439.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_blue_led/taco_play_00910.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_blue_led/taco_play_01376.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_blue_led/taco_play_01537.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_blue_led/taco_play_01624.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/turn/turn_on_blue_led/taco_play_03058.pkl"
+      ]
+    },
+    "place": {
+      "place_yellow_drawer": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer/taco_play_00014.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer/taco_play_00170.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer/taco_play_00372.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer/taco_play_00863.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer/taco_play_01264.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer/taco_play_01425.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer/taco_play_01465.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer/taco_play_02952.pkl"
+      ],
+      "place_purple_box": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_box/taco_play_00301.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_box/taco_play_00459.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_box/taco_play_00481.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_box/taco_play_00737.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_box/taco_play_00760.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_box/taco_play_01947.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_box/taco_play_02117.pkl"
+      ],
+      "place_yellow_table": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_table/taco_play_00036.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_table/taco_play_00221.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_table/taco_play_00482.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_table/taco_play_00842.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_table/taco_play_01398.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_table/taco_play_01440.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_table/taco_play_01446.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_table/taco_play_02809.pkl"
+      ],
+      "place_pink_table": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_table/taco_play_00082.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_table/taco_play_00166.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_table/taco_play_00274.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_table/taco_play_00799.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_table/taco_play_00870.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_table/taco_play_01648.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_table/taco_play_01887.pkl"
+      ],
+      "place_purple_drawer_top": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_drawer_top/taco_play_00063.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_drawer_top/taco_play_00228.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_drawer_top/taco_play_00487.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_drawer_top/taco_play_00663.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_drawer_top/taco_play_01087.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_drawer_top/taco_play_01123.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_drawer_top/taco_play_01139.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_drawer_top/taco_play_02945.pkl"
+      ],
+      "place_purple_left_cabinet": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_left_cabinet/taco_play_00253.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_left_cabinet/taco_play_00365.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_left_cabinet/taco_play_00528.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_left_cabinet/taco_play_00959.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_left_cabinet/taco_play_02379.pkl"
+      ],
+      "place_yellow_box": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_box/taco_play_00382.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_box/taco_play_00527.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_box/taco_play_00658.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_box/taco_play_01070.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_box/taco_play_02074.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_box/taco_play_02413.pkl"
+      ],
+      "place_yellow_right_cabinet": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_right_cabinet/taco_play_00192.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_right_cabinet/taco_play_00548.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_right_cabinet/taco_play_01262.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_right_cabinet/taco_play_02740.pkl"
+      ],
+      "place_pink_drawer_top": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_drawer_top/taco_play_00233.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_drawer_top/taco_play_00289.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_drawer_top/taco_play_00475.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_drawer_top/taco_play_00569.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_drawer_top/taco_play_01552.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_drawer_top/taco_play_01587.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_drawer_top/taco_play_01665.pkl"
+      ],
+      "place_yellow_drawer_top": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer_top/taco_play_00107.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer_top/taco_play_00451.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer_top/taco_play_00627.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer_top/taco_play_00889.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer_top/taco_play_01049.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer_top/taco_play_01199.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer_top/taco_play_01200.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_drawer_top/taco_play_02711.pkl"
+      ],
+      "place_purple_drawer": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_drawer/taco_play_00300.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_drawer/taco_play_00457.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_drawer/taco_play_00580.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_drawer/taco_play_00935.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_drawer/taco_play_02168.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_drawer/taco_play_02339.pkl"
+      ],
+      "place_purple_table": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_table/taco_play_00153.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_table/taco_play_00263.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_table/taco_play_00384.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_table/taco_play_01006.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_table/taco_play_01847.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_table/taco_play_02049.pkl"
+      ],
+      "place_pink_left_cabinet": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_left_cabinet/taco_play_00339.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_left_cabinet/taco_play_00387.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_left_cabinet/taco_play_01586.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_left_cabinet/taco_play_02768.pkl"
+      ],
+      "place_pink_right_cabinet": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_right_cabinet/taco_play_00118.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_right_cabinet/taco_play_00180.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_right_cabinet/taco_play_00675.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_right_cabinet/taco_play_01132.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_right_cabinet/taco_play_02321.pkl"
+      ],
+      "place_pink_box": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_box/taco_play_00282.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_box/taco_play_00313.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_box/taco_play_00589.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_box/taco_play_01174.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_box/taco_play_02481.pkl"
+      ],
+      "place_pink_drawer": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_drawer/taco_play_00411.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_drawer/taco_play_00467.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_drawer/taco_play_00678.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_drawer/taco_play_01053.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_drawer/taco_play_02206.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_pink_drawer/taco_play_02425.pkl"
+      ],
+      "place_purple_right_cabinet": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_right_cabinet/taco_play_00625.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_right_cabinet/taco_play_00891.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_right_cabinet/taco_play_01400.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_purple_right_cabinet/taco_play_01535.pkl"
+      ],
+      "place_yellow_left_cabinet": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_left_cabinet/taco_play_00512.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_left_cabinet/taco_play_00645.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_left_cabinet/taco_play_00821.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_left_cabinet/taco_play_01343.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_left_cabinet/taco_play_02318.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/place/place_yellow_left_cabinet/taco_play_02612.pkl"
+      ]
+    },
+    "lift": {
+      "lift_pink_block": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_00025.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_00206.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_00399.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_00494.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_00798.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_00977.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_01137.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_01225.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_01271.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_01300.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_01845.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_02634.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_02758.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_02879.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_02922.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_pink_block/taco_play_02932.pkl"
+      ],
+      "lift_purple_block": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_00056.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_00177.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_00294.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_00401.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_00616.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_00849.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_00998.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_01084.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_01221.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_01346.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_01903.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_02437.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_02688.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_02848.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_02889.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_purple_block/taco_play_02897.pkl"
+      ],
+      "lift_yellow_block": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_00079.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_00162.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_00307.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_00443.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_00783.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_00844.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_01067.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_01105.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_01173.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_01687.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_02142.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_02382.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_02489.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_02594.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_02773.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_02815.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_02867.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/lift/lift_yellow_block/taco_play_02873.pkl"
+      ]
+    },
+    "move": {
+      "move_slide_left": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_00061.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_00147.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_00191.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_00251.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_00489.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_00638.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_00903.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_00997.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_01050.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_01526.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_02112.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_02357.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_02599.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_02729.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_02968.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_03041.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/move/move_slide_left/taco_play_03133.pkl"
+      ]
+    },
+    "unstack": {
+      "unstack_pink_block": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/unstack/unstack_pink_block/taco_play_00034.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/unstack/unstack_pink_block/taco_play_00744.pkl"
+      ],
+      "unstack_yellow_block": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/unstack/unstack_yellow_block/taco_play_00302.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/unstack/unstack_yellow_block/taco_play_01505.pkl"
+      ],
+      "unstack_purple_block": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/unstack/unstack_purple_block/taco_play_00368.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/unstack/unstack_purple_block/taco_play_00529.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/unstack/unstack_purple_block/taco_play_00916.pkl"
+      ]
+    },
+    "close": {
+      "close_drawer": [
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_00065.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_00138.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_00207.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_00349.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_00592.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_00630.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_00733.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_00774.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_00807.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_00883.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_01252.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_01599.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_01745.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_01836.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_01858.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_01890.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_02155.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_02164.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_02179.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_02228.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_02263.pkl",
+        "/user/frosa/multi_task_lfd/datasets/datasets_delta/taco_play_delta/close/close_drawer/taco_play_02702.pkl"
+      ]
+    }
+  },
+  "sim_panda_pick_place_converted_delta": {
+    "task_00": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_00/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_00/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_00/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_00/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_00/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_00/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_00/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_00/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_00/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_00/traj077.pkl"
+    ],
+    "task_01": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_01/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_01/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_01/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_01/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_01/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_01/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_01/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_01/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_01/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_01/traj077.pkl"
+    ],
+    "task_02": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_02/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_02/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_02/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_02/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_02/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_02/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_02/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_02/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_02/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_02/traj077.pkl"
+    ],
+    "task_03": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_03/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_03/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_03/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_03/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_03/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_03/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_03/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_03/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_03/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_03/traj077.pkl"
+    ],
+    "task_04": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_04/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_04/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_04/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_04/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_04/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_04/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_04/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_04/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_04/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_04/traj077.pkl"
+    ],
+    "task_05": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_05/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_05/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_05/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_05/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_05/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_05/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_05/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_05/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_05/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_05/traj077.pkl"
+    ],
+    "task_06": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_06/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_06/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_06/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_06/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_06/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_06/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_06/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_06/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_06/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_06/traj077.pkl"
+    ],
+    "task_07": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_07/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_07/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_07/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_07/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_07/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_07/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_07/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_07/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_07/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_07/traj077.pkl"
+    ],
+    "task_08": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_08/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_08/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_08/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_08/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_08/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_08/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_08/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_08/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_08/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_08/traj077.pkl"
+    ],
+    "task_09": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_09/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_09/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_09/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_09/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_09/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_09/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_09/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_09/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_09/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_09/traj077.pkl"
+    ],
+    "task_10": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_10/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_10/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_10/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_10/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_10/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_10/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_10/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_10/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_10/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_10/traj077.pkl"
+    ],
+    "task_11": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_11/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_11/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_11/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_11/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_11/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_11/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_11/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_11/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_11/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_11/traj077.pkl"
+    ],
+    "task_12": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_12/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_12/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_12/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_12/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_12/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_12/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_12/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_12/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_12/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_12/traj077.pkl"
+    ],
+    "task_13": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_13/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_13/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_13/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_13/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_13/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_13/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_13/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_13/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_13/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_13/traj077.pkl"
+    ],
+    "task_14": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_14/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_14/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_14/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_14/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_14/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_14/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_14/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_14/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_14/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_14/traj077.pkl"
+    ],
+    "task_15": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_15/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_15/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_15/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_15/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_15/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_15/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_15/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_15/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_15/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta/task_15/traj077.pkl"
+    ]
+  },
+  "sim_ur5e_pick_place_delta_subsample": {
+    "task_00": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_00/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_00/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_00/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_00/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_00/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_00/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_00/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_00/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_00/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_00/traj077.pkl"
+    ],
+    "task_01": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_01/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_01/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_01/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_01/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_01/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_01/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_01/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_01/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_01/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_01/traj077.pkl"
+    ],
+    "task_02": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_02/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_02/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_02/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_02/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_02/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_02/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_02/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_02/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_02/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_02/traj077.pkl"
+    ],
+    "task_03": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_03/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_03/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_03/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_03/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_03/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_03/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_03/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_03/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_03/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_03/traj077.pkl"
+    ],
+    "task_04": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_04/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_04/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_04/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_04/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_04/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_04/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_04/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_04/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_04/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_04/traj077.pkl"
+    ],
+    "task_05": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_05/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_05/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_05/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_05/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_05/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_05/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_05/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_05/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_05/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_05/traj077.pkl"
+    ],
+    "task_06": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_06/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_06/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_06/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_06/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_06/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_06/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_06/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_06/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_06/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_06/traj077.pkl"
+    ],
+    "task_07": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_07/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_07/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_07/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_07/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_07/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_07/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_07/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_07/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_07/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_07/traj077.pkl"
+    ],
+    "task_08": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_08/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_08/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_08/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_08/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_08/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_08/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_08/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_08/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_08/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_08/traj077.pkl"
+    ],
+    "task_09": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_09/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_09/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_09/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_09/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_09/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_09/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_09/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_09/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_09/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_09/traj077.pkl"
+    ],
+    "task_10": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_10/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_10/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_10/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_10/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_10/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_10/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_10/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_10/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_10/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_10/traj077.pkl"
+    ],
+    "task_11": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_11/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_11/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_11/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_11/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_11/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_11/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_11/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_11/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_11/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_11/traj077.pkl"
+    ],
+    "task_12": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_12/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_12/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_12/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_12/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_12/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_12/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_12/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_12/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_12/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_12/traj077.pkl"
+    ],
+    "task_13": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_13/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_13/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_13/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_13/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_13/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_13/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_13/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_13/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_13/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_13/traj077.pkl"
+    ],
+    "task_14": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_14/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_14/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_14/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_14/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_14/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_14/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_14/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_14/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_14/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_14/traj077.pkl"
+    ],
+    "task_15": [
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_15/traj001.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_15/traj006.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_15/traj010.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_15/traj017.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_15/traj028.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_15/traj030.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_15/traj031.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_15/traj067.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_15/traj073.pkl",
+      "/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample/task_15/traj077.pkl"
+    ]
+  },
+  "real_new_ur5e_pick_place_delta_action": {
+    "task_00": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_00/traj001.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_00/traj006.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_00/traj010.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_00/traj017.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_00/traj028.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_00/traj030.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_00/traj031.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_00/traj067.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_00/traj073.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_00/traj077.pkl"
+    ],
+    "task_01": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_01/traj005.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_01/traj008.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_01/traj015.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_01/traj033.pkl"
+    ],
+    "task_02": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_02/traj005.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_02/traj008.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_02/traj015.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_02/traj033.pkl"
+    ],
+    "task_03": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_03/traj005.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_03/traj008.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_03/traj015.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_03/traj033.pkl"
+    ],
+    "task_04": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_04/traj005.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_04/traj008.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_04/traj015.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_04/traj033.pkl"
+    ],
+    "task_05": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_05/traj005.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_05/traj008.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_05/traj015.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_05/traj033.pkl"
+    ],
+    "task_06": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_06/traj005.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_06/traj008.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_06/traj015.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_06/traj033.pkl"
+    ],
+    "task_07": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_07/traj005.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_07/traj008.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_07/traj015.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_07/traj033.pkl"
+    ],
+    "task_08": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_08/traj005.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_08/traj008.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_08/traj015.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_08/traj033.pkl"
+    ],
+    "task_09": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_09/traj005.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_09/traj008.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_09/traj015.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_09/traj033.pkl"
+    ],
+    "task_10": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_10/traj005.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_10/traj008.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_10/traj015.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_10/traj033.pkl"
+    ],
+    "task_11": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_11/traj005.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_11/traj008.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_11/traj015.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_11/traj033.pkl"
+    ],
+    "task_12": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_12/traj005.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_12/traj008.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_12/traj015.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_12/traj033.pkl"
+    ],
+    "task_13": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_13/traj005.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_13/traj008.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_13/traj015.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_13/traj033.pkl"
+    ],
+    "task_14": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_14/traj005.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_14/traj008.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_14/traj015.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_14/traj033.pkl"
+    ],
+    "task_15": [
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_15/traj005.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_15/traj008.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_15/traj015.pkl",
+      "/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action/task_15/traj033.pkl"
+    ]
+  },
+  "human_rgb_pick_place": {
+    "task_00": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_00/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_00/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_00/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_00/traj033.pkl"
+    ],
+    "task_01": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_01/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_01/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_01/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_01/traj033.pkl"
+    ],
+    "task_02": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_02/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_02/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_02/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_02/traj033.pkl"
+    ],
+    "task_03": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_03/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_03/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_03/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_03/traj033.pkl"
+    ],
+    "task_04": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_04/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_04/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_04/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_04/traj033.pkl"
+    ],
+    "task_05": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_05/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_05/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_05/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_05/traj033.pkl"
+    ],
+    "task_06": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_06/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_06/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_06/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_06/traj033.pkl"
+    ],
+    "task_07": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_07/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_07/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_07/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_07/traj033.pkl"
+    ],
+    "task_08": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_08/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_08/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_08/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_08/traj033.pkl"
+    ],
+    "task_09": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_09/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_09/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_09/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_09/traj033.pkl"
+    ],
+    "task_10": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_10/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_10/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_10/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_10/traj033.pkl"
+    ],
+    "task_11": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_11/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_11/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_11/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_11/traj033.pkl"
+    ],
+    "task_12": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_12/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_12/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_12/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_12/traj033.pkl"
+    ],
+    "task_13": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_13/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_13/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_13/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_13/traj033.pkl"
+    ],
+    "task_14": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_14/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_14/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_14/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_14/traj033.pkl"
+    ],
+    "task_15": [
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_15/traj005.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_15/traj008.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_15/traj015.pkl",
+      "/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place/task_15/traj033.pkl"
+    ]
+  }
+}

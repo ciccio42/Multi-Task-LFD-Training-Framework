@@ -29,7 +29,7 @@ def _compress_obs(obs):
 
 
 def _decompress_obs(obs):
-    keys = ["camera_front_image", "eye_in_hand_image"]
+    keys = ["camera_front_image", "eye_in_hand_image", "image"]
     for key in keys:
         if 'image' in key:
             try:

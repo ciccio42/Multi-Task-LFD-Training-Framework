@@ -22,6 +22,7 @@ from tqdm import tqdm
 import logging
 import itertools
 from torchvision.transforms import ToPILImage
+from savers import Trajectory
 
 logging.basicConfig(
     level=logging.INFO,

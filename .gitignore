@@ -165,6 +165,7 @@ training/multi_task_il/models/command_encoder/test_scripts/*txt
 bashes/video_encoder/*txt
 training/multi_task_il/models/command_encoder/muse/models/universal-sentence-encoder-multilingual-large-3/*
 training/multi_task_il/models/command_encoder/muse/models/*pt
+bashes_luigi/training_json
 bashes_luigi/video_encoder/outputs
 bashes_luigi/video_encoder/wandb
 bashes_luigi/video_encoder/images_and_stuff

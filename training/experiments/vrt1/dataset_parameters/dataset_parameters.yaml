@@ -138,6 +138,13 @@ real_new_ur5e_pick_place_delta_action:
   image_channel_format:             'BGR'
   subsample:                        False
 
+real_ur5e_rgb_pick_place_delta:
+  name:                             'real_ur5e_rgb_pick_place_delta' 
+  n_tasks:                          16
+  crop:                             [0, 30, 120, 120]
+  image_channel_format:             'RGB'
+  subsample:                        False
+
 human_rgb_pick_place:
   name:                             'human_rgb_pick_place' 
   n_tasks:                          16

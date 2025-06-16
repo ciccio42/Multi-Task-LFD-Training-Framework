@@ -5,10 +5,17 @@
 # from scripts directory
 source generate_train_val_paths_json.sh
 ```
+
 2. Generate training and validation couples json.
 ```bash
 # from scripts directory
-source generate_train_val_couples_json.sh
+source generate_couples_from_json.sh
+```
+
+3. To convert MIVIA dataset to delta action format and subsample them, run:
+```bash
+# from scripts directory
+source convert_mivia_dataset_to_delta_and_subsample.sh
 ```
 
 ```bash
@@ -16,7 +23,9 @@ PATH_TO_PT_MODEL="../../training/multi_task_il/models/command_encoder/muse/model
 PATH_TO_TF_MODEL="../../training/multi_task_il/models/command_encoder/muse/models/universal-sentence-encoder-multilingual-large-3"
 
 PATH_TO_PANDA_SIMULATED_DATASET="/user/frosa/multi_task_lfd/ur_multitask_dataset/opt_dataset/pick_place/panda_pick_place"
-PATH_TO_UR5E_SIMULATED_DATASET="/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/ur5e_pick_place/real_new_ur5e_pick_place_delta_action"
+PATH_TO_UR5E_SIMULATED_DATASET="/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/ur5e_pick_place"
+PATH_TO_UR5E_REAL_DATASET="/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place"
+
 
 PATH_TO_UR5E_REAL_DELTA_SUBSAMPLED_DATASET="/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action
 "

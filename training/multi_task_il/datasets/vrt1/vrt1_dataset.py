@@ -103,21 +103,22 @@ class VRT1_Dataset(Dataset):
             # for each variation in the given dataset    
             for variation_name in self.pkl_paths_dict[dataset_name]:
                 
-                if (dataset_name == 'berkeley_autolab_ur5_delta' and variation_name == 'pick_place') or (dataset_name == 'tako_play' and isinstance(self.pkl_paths_dict[dataset_name][variation_name], dict)):
+                if isinstance(self.pkl_paths_dict[dataset_name][variation_name], dict):
                     # some dataset have 3 level dictionary structure
                     for sub_variation in self.pkl_paths_dict[dataset_name][variation_name]:
                         if sub_variation not in self.dataset_to_indx[dataset_name]:
-                            self.dataset_to_indx[dataset_name][f"{variation_name}_{sub_variation}"] = dict()    
+                            self.dataset_to_indx[dataset_name][f"{variation_name}_{sub_variation}"] = []    
                         self._read_sample(dataset_name=dataset_name, 
                                           variation_name=f"{variation_name}_{sub_variation}", 
                                           samples=self.pkl_paths_dict[dataset_name][variation_name][sub_variation])
 
-                if variation_name not in self.dataset_to_indx[dataset_name]:
-                    self.dataset_to_indx[dataset_name][variation_name] = []
+                else:
+                    if variation_name not in self.dataset_to_indx[dataset_name]:
+                        self.dataset_to_indx[dataset_name][variation_name] = []
                     
-                self._read_sample(dataset_name=dataset_name, 
-                                  variation_name=variation_name, 
-                                  samples=self.pkl_paths_dict[dataset_name][variation_name])
+                    self._read_sample(dataset_name=dataset_name, 
+                                    variation_name=variation_name, 
+                                    samples=self.pkl_paths_dict[dataset_name][variation_name])
                 
         
         for spec in self.dataset_samples_spec:
@@ -153,11 +154,14 @@ class VRT1_Dataset(Dataset):
             agent_file = sample[1]
             
             # open agent pkl file
-            with open(os.path.join(agent_file), 'rb') as file:
-                agent_data = pkl.load(file)
-                trj_len = len(agent_data['traj'])
-                self.frame_cnt += trj_len
-                
+            try:
+                with open(agent_file, 'rb') as file:
+                    agent_data = pkl.load(file)
+                    trj_len = len(agent_data['traj'])
+                    self.frame_cnt += trj_len
+            except Exception as e:
+                print(f"Error loading agent file {agent_file}: {e}")
+                continue    
             self.indx_to_sample[self.sample_cnt] = (f"{dataset_name}", f"{variation_name}", demo_file, agent_file, trj_len)
             self.dataset_to_indx[dataset_name][variation_name].append(self.sample_cnt)
             self.sample_cnt += 1
@@ -257,4 +261,5 @@ class VRT1_Dataset(Dataset):
             aux_pose = [traj.get(t, False)['obs']['ee_aa'][:3]
                         for t in (grip_t, drop_t)]
             ret_dict['aux_pose'] = np.concatenate(aux_pose).astype(np.float32)
+        
         return ret_dict

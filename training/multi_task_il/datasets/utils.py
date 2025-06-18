@@ -942,29 +942,35 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
         step_t = traj.get(t)
 
         if not getattr(dataset_loader, "real", False) or (getattr(dataset_loader, "real", False) and sim_crop):
-            if not human_demo and (dataset_loader.width != 224 and dataset_loader.height != 224):
-                image = copy.copy(
-                    step_t['obs']['camera_front_image'][:, :, ::-1])
-            elif not human_demo and (dataset_loader.width == 224 and dataset_loader.height == 224):
-                image = copy.copy(
-                    step_t['obs']['camera_front_image'])
-            else:
-                image = copy.copy(
-                    step_t['obs']['camera_front_image'])
+            try:
+                if not human_demo and (dataset_loader.width != 224 and dataset_loader.height != 224):
+                    image = copy.copy(
+                        step_t['obs']['camera_front_image'][:, :, ::-1])
+                elif not human_demo and (dataset_loader.width == 224 and dataset_loader.height == 224):
+                    image = copy.copy(
+                        step_t['obs']['camera_front_image'])
+                else:
+                    image = copy.copy(
+                        step_t['obs']['camera_front_image'])
+            except:
+                image = copy.copy(step_t['obs']['image'])
         else:
             if step_t['obs'].get('camera_front_image_full_size', None) is not None:
                 image = copy.copy(
                 cv2.imdecode(step_t['obs']['camera_front_image_full_size'], cv2.IMREAD_COLOR))
             else:
-                if not human_demo and (dataset_loader.width != 224 and dataset_loader.height != 224):
-                    image = copy.copy(
-                        step_t['obs']['camera_front_image'])
-                elif not human_demo and (dataset_loader.width == 224 and dataset_loader.height == 224):
-                    image = copy.copy(
-                        step_t['obs']['camera_front_image'][:,:,::-1])
-                else:
-                    image = copy.copy(
-                        step_t['obs']['camera_front_image'][:,:,::-1])
+                try:
+                    if not human_demo and (dataset_loader.width != 224 and dataset_loader.height != 224):
+                        image = copy.copy(
+                            step_t['obs']['camera_front_image'])
+                    elif not human_demo and (dataset_loader.width == 224 and dataset_loader.height == 224):
+                        image = copy.copy(
+                            step_t['obs']['camera_front_image'][:,:,::-1])
+                    else:
+                        image = copy.copy(
+                            step_t['obs']['camera_front_image'][:,:,::-1])
+                except:
+                    image = copy.copy(step_t['obs']['image'])
 
         if DEBUG:
             cv2.imwrite("original_image.png", image)

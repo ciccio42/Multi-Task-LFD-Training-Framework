@@ -1260,13 +1260,13 @@ class Workspace(object):
         self.config = self.trainer.config
         
         # map between task and number of tasks
-        n_tasks = []
-        tasks = dict()
-        start = 0
-        for i, task in enumerate(cfg.tasks):
-            n_tasks.append(task['n_tasks'])
-            tasks[task['name']] = (start, task['n_tasks'])
-            start += task['n_tasks']
+        # n_tasks = []
+        # tasks = dict()
+        # start = 0
+        # for i, task in enumerate(cfg.tasks):
+        #     n_tasks.append(task['n_tasks'])
+        #     tasks[task['name']] = (start, task['n_tasks'])
+        #     start += task['n_tasks']
 
         # move log path to here!
         print('\n----Done initializing Workspace, saving config.yaml to directory: {}----\n'.format(

@@ -9,8 +9,8 @@ JSON_FILES=( all_pkl_paths.json train_pkl_paths.json val_pkl_paths.json )
 JSON_ROOT_FOLDER="/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes_luigi/training_json/all"
 
 HUMAN_DATASET_NAME="human_rgb_pick_place"
-SIM_UR5E_DATASET_NAME="sim_ur5e_pick_place_delta_subsample"
-REAL_UR5E_DATASET_NAME="real_new_ur5e_pick_place_delta_action"
+SIM_UR5E_DATASET_NAME="sim_ur5e_pick_place_delta"
+REAL_UR5E_DATASET_NAME="real_ur5e_rgb_pick_place_delta"
 
 for i in "${JSON_FILES[@]}"
 do

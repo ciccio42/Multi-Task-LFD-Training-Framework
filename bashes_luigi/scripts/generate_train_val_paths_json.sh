@@ -15,10 +15,9 @@ OUTPUT_FOLDER='/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD
 
 PANDA_SIM_PICK_PLACE_DATASET='/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta'
 
-#! TO CHECK, convert the dataset to delta format
-UR5E_SIM_PICK_PLACE_DATASET='/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsample' # '/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/ur5e_pick_place'
+UR5E_SIM_PICK_PLACE_DATASET='/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta'
 
-UR5E_REAL_PICK_PLACE_DATASET='/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action'
+UR5E_REAL_PICK_PLACE_DATASET='/user/frosa/multi_task_lfd/datasets/datasets_delta/real_ur5e_rgb_pick_place_delta'
 
 HUMAN_DATASET_FOLDER='/user/frosa/multi_task_lfd/datasets/pick_place/human_rgb_pick_place'
 

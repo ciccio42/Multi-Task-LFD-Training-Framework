@@ -24,7 +24,7 @@ bb_sequence: 1
 action_sequence: 1
 task_names: null
 rollout: False
-dataset_target: 'multi_task_il.datasets.rt1.finetuning_paired_dataset.FinetuningPairedDataset'
+dataset_target: 'multi_task_il.datasets.vrt1.vrt1_dataset.VRT1_Dataset'
 couple_paths_json: ''
 # loss multipliers
 inv_mul:        0
@@ -75,7 +75,7 @@ set_same_n:   -1
 limit_num_traj: -1
 limit_num_demo: -1
 defaults:
-  - tasks_cfgs:  7_tasks
+  - tasks_cfgs:  tasks
   - finetuning_cfgs: dataset_parameters.yaml
 
 # dataset/loader/samplers
@@ -96,13 +96,14 @@ dataset_cfg:
   jsons_folder: ${couple_paths_json}
   demo_T: 4
   obs_T: 6
-  width: 180
-  height: 100
+  width: 224
+  height: 224
   aug_twice: False
-  aux_pose: True
+  aux_pose: False
   use_strong_augs: False
   data_augs: ${augs}
-  black_list: ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'iamlab_cmu_pickup_insert_converted_absolute_pose','taco_play_converted_absolute_pose', 'sim_ur5e_pick_place_shifted_converted_absolute', 'sim_panda_pick_place_converted_absolute']
+  batch_size: ${bsize}
+  black_list: [] # ['asu_table_top_converted_absolute_pose', 'berkeley_autolab_ur5_converted_absolute_pose', 'iamlab_cmu_pickup_insert_converted_absolute_pose','taco_play_converted_absolute_pose', 'sim_ur5e_pick_place_shifted_converted_absolute', 'sim_panda_pick_place_converted_absolute']
   select_random_frames: True # the 4 frames: [first, random, random, last]
   convert_action: False # this is because we already converted them
   take_first_frame: False # if True the agent trajectory in the training starts with the first frame
@@ -110,13 +111,15 @@ dataset_cfg:
   split_pick_place: False
   state_spec: ('ee_aa' 'gripper_qpos')
   load_eef_point: False
-  bbs_T: 1
+  bbs_T: -1
   perform_augs: True
   perform_scale_resize: True
   agent_name: 'ur5'
   demo_name: 'human_rgb'
   pick_next: False
   normalize_action: False
+  max_demo_for_variation: 2
+  split: [0.9, 0.1] # (train, val) split
 
 
 augs:
@@ -143,8 +146,8 @@ policy: ???  # set to any set of configs via command line, e.g. policy='${tosil}
 cond_module_path: ''
 
 cond_module:
-  height: 120 # not used
-  width: 160 # not used
+  height: 224 # not used
+  width: 224 # not used
   demo_T: 4
   model_name: "r2plus1d_18"
   pretrained: True
@@ -159,7 +162,7 @@ cond_module:
 
 
 rt1_video_cond:
-  _target_: multi_task_il.models.rt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+  _target_: multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
   ### rt1 params
   input_tensor_space:
     image:
@@ -215,4 +218,5 @@ rt1_video_cond:
   img_width: ${dataset_cfg.width}
   # action_order: Optional[List[str]] = None
   concat_target_obj_embedding: False
+  cond_module_cfg: ${cond_module}
   

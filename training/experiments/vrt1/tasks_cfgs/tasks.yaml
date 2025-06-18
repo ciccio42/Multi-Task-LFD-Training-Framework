@@ -79,3 +79,67 @@ basketball:
   task_per_batch:   12
   traj_per_subtask:  100
   demo_per_subtask:  100 
+
+
+asu_table_top_delta:
+  name:                             'asu_table_top_delta'
+  crop:                             [0, 35, 0, 0]
+  image_channel_format:             'RGB'
+  demo_per_subtask:             2
+  subsample:                        False
+
+berkeley_autolab_ur5_delta:
+  name:                             'berkeley_autolab_ur5_delta'
+  crop:                             [0, 0, 0, 0]
+  image_channel_format:             'RGB'
+  demo_per_subtask:             2
+  subsample:                        False
+
+iamlab_cmu_pickup_insert_delta:
+  name:                             'iamlab_cmu_pickup_insert_delta'
+  crop:                             [0, 0, 0, 0]
+  image_channel_format:             'RGB'
+  subsample:                        False
+  demo_per_subtask:             2
+
+
+taco_play_delta:
+  name:                             'taco_play_delta'
+  crop:                             [0, 0, 0, 0]
+  image_channel_format:             'RGB'
+  subsample:                        False
+  demo_per_subtask:             2
+
+
+sim_ur5e_pick_place_delta:
+  name:                             'sim_ur5e_pick_place_delta'
+  crop:                             [20, 25, 80, 75]
+  image_channel_format:             'RGB'
+  subsample:                        False 
+  demo_per_subtask:             2
+
+
+
+sim_panda_pick_place_converted_delta:
+  name:                             'sim_panda_pick_place_converted_delta'
+  crop:                             [20, 25, 80, 75]
+  image_channel_format:             'RGB'
+  subsample:                        False
+  demo_per_subtask:             2
+
+
+real_ur5e_rgb_pick_place_delta:
+  name:                             'real_ur5e_rgb_pick_place_delta' 
+  n_tasks:                          16
+  crop:                             [0, 30, 120, 120]
+  image_channel_format:             'RGB'
+  subsample:                        False
+  demo_per_subtask:             2
+
+human_rgb_pick_place:
+  name:                             'human_rgb_pick_place' 
+  n_tasks:                          16
+  crop:                             [0, 30, 120, 120]
+  image_channel_format:             'RGB'
+  subsample:                        False
+  demo_per_subtask:             2

@@ -22,13 +22,15 @@ source convert_mivia_dataset_to_delta_and_subsample.sh
 PATH_TO_PT_MODEL="../../training/multi_task_il/models/command_encoder/muse/models/model.pt"
 PATH_TO_TF_MODEL="../../training/multi_task_il/models/command_encoder/muse/models/universal-sentence-encoder-multilingual-large-3"
 
+# ORIGINAL DATASET
 PATH_TO_PANDA_SIMULATED_DATASET="/user/frosa/multi_task_lfd/ur_multitask_dataset/opt_dataset/pick_place/panda_pick_place"
 PATH_TO_UR5E_SIMULATED_DATASET="/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/ur5e_pick_place"
 PATH_TO_UR5E_REAL_DATASET="/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place"
 
-
-PATH_TO_UR5E_REAL_DELTA_SUBSAMPLED_DATASET="/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/real_new_ur5e_pick_place_delta_action
-"
+# DELTA DATASET
+PATH_TO_PANDA_SIMULATED_DELTA_SUBSAMPLED_DATASET="/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_panda_pick_place_converted_delta"
+PATH_TO_UR5E_SIMULATED_DELTA_SUBSAMPLED_DATASET="/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta"
+PATH_TO_UR5E_REAL_DELTA_SUBSAMPLED_DATASET="/user/frosa/multi_task_lfd/datasets/datasets_delta/real_ur5e_rgb_pick_place_delta"
 ```
 
 ## Video Encoder

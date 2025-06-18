@@ -1,11 +1,11 @@
 import torch
 from torch import nn
 from multi_task_il.models.command_encoder.cond_module import CondModule
-from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.transformer_network import TransformerNetwork
+from multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.transformer_network import TransformerNetwork
 from typing import Optional, Tuple, Union, Any, Dict, List
 from gym import spaces
 from collections import OrderedDict
-from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.tokenizers.utils import *
+from multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.tokenizers.utils import *
 import cv2
 from copy import deepcopy
 
@@ -36,7 +36,8 @@ class RT1_video_cond(nn.Module):
             return_attention_scores: bool = False,
             img_height: int = 224,
             img_width: int = 224,
-            concat_target_obj_embedding: bool = False,        
+            concat_target_obj_embedding: bool = False,
+            cond_module_cfg: dict = None, # this is the config for the cond module, if None it will not be used        
         ) -> None:
         super().__init__()
         self.rt1 = TransformerNetwork(
@@ -118,7 +119,8 @@ class RT1_video_cond(nn.Module):
         
     def forward(self,
                 images,
-                states,
+                demo,
+                # states,
                 cond_embedding,
                 actions, # actions are normalized in [-1.0, 1.0] with normalizations ranges defined in .yaml
                 bsize,

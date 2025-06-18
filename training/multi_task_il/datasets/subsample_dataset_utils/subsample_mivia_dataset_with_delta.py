@@ -49,10 +49,10 @@ def transform_eef_pos_and_eef_quat_from_world_to_base_link(eef_pos, eef_quat):
     return new_eef_pos, new_eef_quat
 
 
-gripper_state_dict = {
-    'open': -1.0,
-    'closed': 1.0
-}
+# gripper_state_dict = {
+#     'open': -1.0,
+#     'closed': 1.0
+# }
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

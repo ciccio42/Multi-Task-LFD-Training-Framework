@@ -21,27 +21,23 @@ class DataAugmentation:
         self.width = width
         self.height = height
         self.toTensor = ToTensor()
-        self.normalize = Normalize([
-            0.485,
-            0.456,
-            0.406], [
-            0.229,
-            0.224,
-            0.225], **('mean', 'std'))
-        self.transforms = transforms.Compose([
-            transforms.ColorJitter(list(config.get('brightness', [
-                0.875,
-                1.125])), list(config.get('contrast', [
-                0.5,
-                1.5])), list(config.get('contrast', [
-                0.5,
-                1.5])), list(config.get('hue', [
-                -0.05,
-                0.05])), **('brightness', 'contrast', 'saturation', 'hue'))])
-
     
-    def __call__(self, obs, dataset_name, perform_aug, perform_scale_resize = (True, True)):
-        crop_params = self.crop_config.get(dataset_name, None)['crop']
+        self.transforms = transforms.Compose([
+            transforms.RandomApply([
+                transforms.ColorJitter(
+                        brightness=list(self.config.get(
+                            "brightness", [0.875, 1.125])),
+                        contrast=list(self.config.get(
+                            "contrast", [0.5, 1.5])),
+                        saturation=list(self.config.get(
+                            "contrast", [0.5, 1.5])),
+                        hue=list(self.config.get("hue", [-0.05, 0.05])),
+                    )
+                ], p=self.config.get('p', 0.5)),
+        ])
+
+    def __call__(self, task_name, obs, second=False, bb=None, class_frame=None, perform_aug=True, frame_number=-1, perform_scale_resize=True, agent=False, sim_crop=False):
+        crop_params = self.crop_config.get(task_name, None)
         top = crop_params[0]
         left = crop_params[2]
         img_height = obs.shape[0]
@@ -50,8 +46,11 @@ class DataAugmentation:
         box_w = img_width - left - crop_params[3]
         obs = obs.copy()
         obs = self.toTensor(obs)
-        obs = resized_crop(obs, top, left, box_h, box_w, (self.height, self.width), **('top', 'left', 'height', 'width', 'size'))
-        augmented = self.transforms(obs)
+        obs = resized_crop(obs, top, left, box_h, box_w, (self.height, self.width))
+        if self.mode == 'train' and perform_aug:
+            augmented = self.transforms(obs)
+        else:
+            augmented = obs
         return augmented
 
 

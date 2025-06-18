@@ -410,7 +410,7 @@ def make_demo(dataset, traj, task_name, human_demo=False):
                                               perform_aug=False,
                                               perform_scale_resize=True)
             frames.append(processed)
-            if not hasattr(dataset, 'vrt1_dataset') and dataset.get('aug_twice', False):
+            if not hasattr(dataset, 'vrt1_dataset') and getattr(dataset, 'aug_twice', False):
                 cp_frames.append(dataset.frame_aug(
                     task_name,
                     obs,
@@ -971,7 +971,9 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
 
         # Create GT BB
         bb_time = time.time()
-        if getattr(dataset_loader, '_bbs_T', 1) == 1:
+        bb_frame = None
+        class_frame = None
+        if getattr(dataset_loader, '_bbs_T', -1) == 1:
             bb_frame, class_frame = create_gt_bb(dataset_loader=dataset_loader,
                                                  traj=traj,
                                                  step_t=step_t,
@@ -983,7 +985,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                                                  take_place_loc=take_place_loc)
 
             logger.debug(f"BB time {time.time()-bb_time}")
-        else:
+        elif getattr(dataset_loader, '_bbs_T', -1) > 1:
             bb_frame, class_frame = create_gt_bb_sequence(dataset_loader=dataset_loader,
                                                           traj=traj,
                                                           t=t,
@@ -995,9 +997,10 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
         # print(f"BB time: {end_bb-start_bb}")
 
         if dataset_loader._perform_augs:
+            bb_aug, class_frame = None, None
             # Append bb, obj classes and images
             aug_time = time.time()
-            processed, bb_aug, class_frame = dataset_loader.frame_aug(
+            processed = dataset_loader.frame_aug(
                 task_name,
                 image,
                 False,
@@ -1018,8 +1021,10 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
         else:
             bb_aug = bb_frame
 
-        bb.append(torch.from_numpy(bb_aug.astype(np.int32)))
-        obj_classes.append((torch.from_numpy(class_frame.astype(np.int32))))
+        if bb_aug is not None:
+            bb.append(torch.from_numpy(bb_aug.astype(np.int32)))
+        if class_frame is not None:
+            obj_classes.append((torch.from_numpy(class_frame.astype(np.int32))))
 
         if dataset_loader.aug_twice:
             aug_twice_time = time.time()
@@ -1057,7 +1062,10 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                 cv2.imwrite("adjusted_point.png", cv2.UMat(image))
             logger.debug(f"EEF point: {time.time()-eef_point_time}")
 
-        if load_action and (j >= 1 or ("real" in dataset_loader.agent_name and not dataset_loader.pick_next)):
+        
+        #if load_action and (j >= 1 or ("real" in dataset_loader.agent_name and not dataset_loader.pick_next)):
+        if load_action and ('VRT1_Dataset' in str(type(dataset_loader)) or j >= 1 or ("real" in dataset_loader.agent_name and not dataset_loader.pick_next)):
+
             action_time = time.time()
             # Load action
             action_list = list()
@@ -1108,7 +1116,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
             state_time = time.time()
             state = []
             # Load states
-            for k in dataset_loader._state_spec:
+            for k in dataset_loader._load_state_spec:
                 if k == 'action':
                     norm_start = time.time()
                     state_component = normalize_action(

@@ -250,7 +250,7 @@ if __name__ == '__main__':
         
         embeddings = np.stack(embeddings)
         # cosine_dist = cosine_distances(embeddings)
-        perplexity = 1
+        perplexity = 20
         tsne = TSNE(n_components=2, metric='cosine', init='random', perplexity=perplexity, random_state=42)
         tsne_result = tsne.fit_transform(embeddings)
 

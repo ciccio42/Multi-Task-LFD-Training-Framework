@@ -29,7 +29,7 @@ from colorama import Fore, Back
 import torch.distributed as dist
 import time
 from multi_task_il.datasets.vrt1.vrt1_dataset import VRT1_Dataset
-from multi_task_il.datasets.vrt1.sampler import VRT1Sampler
+from multi_task_il.datasets.vrt1.vrt1_sampler import VRT1_Sampler
 from multi_task_il.models.command_encoder.cond_module import CondModule
 
 
@@ -179,7 +179,7 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
         f"---- Number of workder {config.get('loader_workers', cpu_count())}-----")
     dataset_cfg.mode = 'train'
     dataset = instantiate(dataset_cfg)
-    if isinstance(dataset, VRT1_Dataset) and dataset.set_same_n >= 1:
+    if isinstance(dataset, VRT1_Dataset):
         config['bsize'] = dataset.batch_size
         config['vsize'] = dataset.batch_size
             
@@ -216,7 +216,7 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
             rank=global_rank,
         )
     elif isinstance(dataset, VRT1_Dataset):
-        train_sampler = VRT1Sampler(
+        train_sampler = VRT1_Sampler(
             task_to_idx=dataset.dataset_to_indx,
             sampler_spec=config.samplers,
             batch_size=config.get('bsize'),
@@ -245,8 +245,7 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
         
         # allow validation batch to have a different size
         config.samplers.batch_size = config.train_cfg.val_size
-        val_step = int(config.get('epochs') *
-                       int(len(val_dataset)/config.get('vsize')))
+        val_step = int(len(val_dataset)/config.get('vsize'))
 
         if not dataset_cfg.get('change_command_epoch', True) and not isinstance(dataset, VRT1_Dataset):
             val_sampler = DIYBatchSampler(
@@ -276,12 +275,12 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
                 rank=global_rank,
             )
         elif isinstance(dataset, VRT1_Dataset):
-            val_sampler = VRT1Sampler(
+            val_sampler = VRT1_Sampler(
                     task_to_idx=val_dataset.dataset_to_indx,
                     sampler_spec=config.samplers,
-                    batch_size=config.get('vsize'),
+                    batch_size=config.get('bsize'),
                     n_step=val_step,
-                    epoch_steps=int(len(val_dataset)/(num_replicas*config.get('bsize'))),
+                    epoch_steps=val_step,
                     dataset=val_dataset,
                     num_replicas=num_replicas,
                     rank=global_rank,

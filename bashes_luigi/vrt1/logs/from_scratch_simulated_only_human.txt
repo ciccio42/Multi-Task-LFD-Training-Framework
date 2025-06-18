@@ -1,0 +1,2163 @@
+pythonpath:  /raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/training/multi_task_il/models/vrt1/repo:/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/training/multi_task_il/datasets
+pybullet build time: Sep  9 2023 15:14:45
+Exception raised during import
+Exception raised during import
+2025-06-18 12:41:35.226121: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:485] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2025-06-18 12:41:35.247527: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:8454] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2025-06-18 12:41:35.254134: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1452] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2025-06-18 12:41:35.269657: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2025-06-18 12:41:36.306435: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+/raid/home/frosa_Loc/conda/envs/multi_task_lfd_rt1/lib/python3.9/site-packages/hydra/_internal/defaults_list.py:251: UserWarning: In 'config_vrt1.yaml': Defaults list is missing `_self_`. See https://hydra.cc/docs/1.2/upgrades/1.0_to_1.1/default_composition_order for more information
+  warnings.warn(msg, UserWarning)
+Cuda available True
+Only using 2 demon. trajectory for each sub-task
+Adding device 0
+List of devices [device(type='cuda', index=0)]
+Saving dir /user/frosa/multi_task_lfd/checkpoint_save_folder/luigi_checkpoint/RT1-From_Scratch_Simulated_Only-Human_224x224-Batch8
+Finished initializing trainer
+
+----Done initializing Workspace, saving config.yaml to directory: /user/frosa/multi_task_lfd/checkpoint_save_folder/luigi_checkpoint/RT1-From_Scratch_Simulated_Only-Human_224x224-Batch8----
+
+[2025-06-18 12:41:39,532][torch.distributed.distributed_c10d][INFO] - Added key: store_based_barrier_key:1 to store for rank: 0
+[2025-06-18 12:41:39,532][torch.distributed.distributed_c10d][INFO] - Rank 0: Completed store-based barrier for key:store_based_barrier_key:1 with 1 nodes.
+wandb: Appending key for api.wandb.ai to your netrc file: /home/frosa_Loc/.netrc
+Exp name: RT1-From_Scratch_Simulated_Only-Human_224x224-Batch8
+wandb: Currently logged in as: l-vicidomini11 (l-vicidomini11-universit-degli-studi-di-salerno). Use `wandb login --relogin` to force relogin
+wandb: wandb version 0.20.1 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.15.10
+wandb: Run data is saved locally in /raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes_luigi/vrt1/wandb/run-20250618_124141-txjg70lu
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run RT1-From_Scratch_Simulated_Only-Human_224x224-Batch8
+wandb: ⭐️ View project at https://wandb.ai/l-vicidomini11-universit-degli-studi-di-salerno/RT1-From_Scratch_Simulated_Only-Human_224x224
+wandb: 🚀 View run at https://wandb.ai/l-vicidomini11-universit-degli-studi-di-salerno/RT1-From_Scratch_Simulated_Only-Human_224x224/runs/txjg70lu
+/raid/home/frosa_Loc/conda/envs/multi_task_lfd_rt1/lib/python3.9/site-packages/gym/spaces/box.py:127: UserWarning: [33mWARN: Box bound precision lowered by casting to float32[0m
+  logger.warn(f"Box bound precision lowered by casting to {self.dtype}")
+use_daml not in configuration file
+Model initialized to: multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Creating AdamW (
+Parameter Group 0
+    amsgrad: False
+    betas: (0.9, 0.999)
+    capturable: False
+    eps: 1e-08
+    foreach: None
+    lr: 5e-05
+    maximize: False
+    weight_decay: 0.05
+), with lr 5e-05
+Lr-scheduler ReduceLROnPlateau
+Lr-schedule ReduceLROnPlateau
+ Weighting each task loss separately: {'human_rgb_pick_place': 1.0}
+Initializing multi_task_il.datasets.vrt1.vrt1_dataset.VRT1_Dataset with hydra config. 
+
+---- Number of workder 8-----
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_00, max demos: 2
+0it [00:00, ?it/s]88it [00:00, 879.37it/s]181it [00:00, 960.21it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_01, max demos: 2
+0it [00:00, ?it/s]98it [00:00, 973.75it/s]181it [00:00, 996.87it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_02, max demos: 2
+0it [00:00, ?it/s]100it [00:00, 997.36it/s]181it [00:00, 994.69it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_03, max demos: 2
+0it [00:00, ?it/s]56it [00:00, 525.77it/s]156it [00:00, 795.75it/s]181it [00:00, 785.67it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_04, max demos: 2
+0it [00:00, ?it/s]86it [00:00, 859.72it/s]172it [00:00, 391.00it/s]181it [00:00, 439.22it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_05, max demos: 2
+0it [00:00, ?it/s]103it [00:00, 1020.09it/s]181it [00:00, 1021.75it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_06, max demos: 2
+0it [00:00, ?it/s]61it [00:00, 605.86it/s]153it [00:00, 788.56it/s]181it [00:00, 794.72it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_07, max demos: 2
+0it [00:00, ?it/s]87it [00:00, 868.30it/s]181it [00:00, 919.66it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_08, max demos: 2
+0it [00:00, ?it/s]89it [00:00, 887.66it/s]181it [00:00, 951.69it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_09, max demos: 2
+0it [00:00, ?it/s]45it [00:00, 433.38it/s]89it [00:00, 374.83it/s]181it [00:00, 544.55it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_10, max demos: 2
+0it [00:00, ?it/s]42it [00:00, 386.10it/s]82it [00:00, 393.93it/s]181it [00:00, 590.05it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_11, max demos: 2
+0it [00:00, ?it/s]11it [00:00, 48.94it/s]105it [00:00, 395.07it/s]181it [00:00, 449.17it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_12, max demos: 2
+0it [00:00, ?it/s]52it [00:00, 515.91it/s]149it [00:00, 777.92it/s]181it [00:00, 773.62it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_13, max demos: 2
+0it [00:00, ?it/s]88it [00:00, 876.41it/s]181it [00:00, 955.22it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_14, max demos: 2
+0it [00:00, ?it/s]85it [00:00, 848.66it/s]181it [00:00, 951.64it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_15, max demos: 2
+0it [00:00, ?it/s]75it [00:00, 746.50it/s]161it [00:00, 811.75it/s]181it [00:00, 800.69it/s]
+Dataset train loaded, total frames: 44726
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_00, max demos: 2
+0it [00:00, ?it/s]21it [00:00, 874.79it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_01, max demos: 2
+0it [00:00, ?it/s]21it [00:00, 638.48it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_02, max demos: 2
+0it [00:00, ?it/s]21it [00:00, 1125.11it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_03, max demos: 2
+0it [00:00, ?it/s]21it [00:00, 976.17it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_04, max demos: 2
+0it [00:00, ?it/s]21it [00:00, 857.06it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_05, max demos: 2
+0it [00:00, ?it/s]11it [00:00, 47.44it/s]21it [00:00, 87.23it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_06, max demos: 2
+0it [00:00, ?it/s]21it [00:00, 1148.99it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_07, max demos: 2
+0it [00:00, ?it/s]21it [00:00, 1095.68it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_08, max demos: 2
+0it [00:00, ?it/s]21it [00:00, 1033.76it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_09, max demos: 2
+0it [00:00, ?it/s]21it [00:00, 928.47it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_10, max demos: 2
+0it [00:00, ?it/s]21it [00:00, 1052.12it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_11, max demos: 2
+0it [00:00, ?it/s]21it [00:00, 1006.37it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_12, max demos: 2
+0it [00:00, ?it/s]21it [00:00, 906.35it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_13, max demos: 2
+0it [00:00, ?it/s]21it [00:00, 1027.42it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_14, max demos: 2
+0it [00:00, ?it/s]21it [00:00, 1045.46it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_15, max demos: 2
+0it [00:00, ?it/s]21it [00:00, 970.48it/s]
+Dataset val loaded, total frames: 5132
+
+-------------------
+Training stage
+Found 1 GPU devices 
+
+Model on device: cuda:0
+Loading video backbone r2plus1d_18.....
+Loading pretrained weights for r2plus1d_18
+Save frequency 10
+Val frequency 5590
+
+----Loss multipliers: 
+ BC: 0 inv: 0 Point: 0
+----
+Training for 1000 epochs train dataloader has length 5590, \ which sums to 5590000 total train steps, \ validation loader has length 641
+Training frac 0.001
+Training for 5590 steps
+  0%|          | 0/5590 [00:00<?, ?it/s]/raid/home/frosa_Loc/conda/envs/multi_task_lfd_rt1/lib/python3.9/site-packages/torch/autograd/__init__.py:197: UserWarning: Grad strides do not match bucket view strides. This may indicate grad was not created according to the gradient layout contract, or that the param's strides changed since DDP was constructed.  This is not an error, but may impair performance.
+grad.sizes() = [8, 64, 1, 1], strides() = [64, 1, 64, 64]
+bucket_view.sizes() = [8, 64, 1, 1], strides() = [64, 1, 1, 1] (Triggered internally at ../torch/csrc/distributed/c10d/reducer.cpp:325.)
+  Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+Epoch perc 0.00017889087656529517
+Training epoch 1/1000, step 0: 	 
+Train loss:  5.801442623138428
+Train accuracy:  {0: 0.0, 1: 0.0, 2: 0.0, 3: 0.0416666679084301, 4: 0.0, 5: 0.0, 6: 0.0}
+Train accuracy interval:  {0: 0.0, 1: 0.0416666679084301, 2: 0.02083333395421505, 3: 0.0416666679084301, 4: 0.0, 5: 0.0, 6: 0.0}
+  0%|          | 1/5590 [00:03<5:06:18,  3.29s/it]Epoch perc 0.00035778175313059033
+Training epoch 1/1000, step 1: 	 
+Train loss:  5.216355323791504
+Train accuracy:  {0: 0.0, 1: 0.0625, 2: 0.0416666679084301, 3: 0.02083333395421505, 4: 0.3125, 5: 0.1458333432674408, 6: 0.0}
+Train accuracy interval:  {0: 0.0416666679084301, 1: 0.1041666716337204, 2: 0.1458333432674408, 3: 0.0416666679084301, 4: 0.3333333432674408, 5: 0.375, 6: 0.0}
+  0%|          | 2/5590 [00:04<2:51:36,  1.84s/it]Epoch perc 0.0005366726296958855
+Training epoch 1/1000, step 2: 	 
+Train loss:  4.724752902984619
+Train accuracy:  {0: 0.0625, 1: 0.0416666679084301, 2: 0.0416666679084301, 3: 0.0, 4: 0.8125, 5: 0.3541666865348816, 6: 0.0}
+Train accuracy interval:  {0: 0.2083333432674408, 1: 0.1041666716337204, 2: 0.2291666716337204, 3: 0.0, 4: 0.8125, 5: 0.9791666865348816, 6: 0.0}
+  0%|          | 3/5590 [00:04<2:08:56,  1.38s/it]Epoch perc 0.0007155635062611807
+Training epoch 1/1000, step 3: 	 
+Train loss:  4.469606399536133
+Train accuracy:  {0: 0.1041666716337204, 1: 0.1458333432674408, 2: 0.02083333395421505, 3: 0.0, 4: 0.9375, 5: 0.3958333432674408, 6: 0.0}
+Train accuracy interval:  {0: 0.25, 1: 0.2916666865348816, 2: 0.1875, 3: 0.0, 4: 0.9583333730697632, 5: 0.9375, 6: 0.0}
+  0%|          | 4/5590 [00:05<1:50:58,  1.19s/it]Epoch perc 0.0008944543828264759
+Training epoch 1/1000, step 4: 	 
+Train loss:  4.217940330505371
+Train accuracy:  {0: 0.0625, 1: 0.0833333358168602, 2: 0.0833333358168602, 3: 0.0, 4: 0.9375, 5: 0.4166666865348816, 6: 0.0}
+Train accuracy interval:  {0: 0.2291666716337204, 1: 0.2083333432674408, 2: 0.1458333432674408, 3: 0.0, 4: 1.0, 5: 0.9166666865348816, 6: 0.0}
+  0%|          | 5/5590 [00:06<1:39:57,  1.07s/it]Epoch perc 0.001073345259391771
+Training epoch 1/1000, step 5: 	 
+Train loss:  3.8151299953460693
+Train accuracy:  {0: 0.1041666716337204, 1: 0.1458333432674408, 2: 0.02083333395421505, 3: 0.0833333358168602, 4: 0.8541666865348816, 5: 0.5208333730697632, 6: 0.0625}
+Train accuracy interval:  {0: 0.3125, 1: 0.3125, 2: 0.0833333358168602, 3: 0.0833333358168602, 4: 1.0, 5: 0.9375, 6: 0.0625}
+  0%|          | 6/5590 [00:07<1:31:57,  1.01it/s]Epoch perc 0.0012522361359570662
+Training epoch 1/1000, step 6: 	 
+Train loss:  3.722736120223999
+Train accuracy:  {0: 0.0416666679084301, 1: 0.0416666679084301, 2: 0.02083333395421505, 3: 0.2916666865348816, 4: 1.0, 5: 0.2083333432674408, 6: 0.4791666865348816}
+Train accuracy interval:  {0: 0.1875, 1: 0.125, 2: 0.125, 3: 0.2916666865348816, 4: 1.0, 5: 0.8125, 6: 0.4791666865348816}
+  0%|          | 7/5590 [00:08<1:26:49,  1.07it/s]Epoch perc 0.0014311270125223613
+Training epoch 1/1000, step 7: 	 
+Train loss:  3.3477864265441895
+Train accuracy:  {0: 0.0416666679084301, 1: 0.0833333358168602, 2: 0.0, 3: 0.4375, 4: 0.875, 5: 0.2708333432674408, 6: 0.6666666865348816}
+Train accuracy interval:  {0: 0.2083333432674408, 1: 0.1875, 2: 0.1041666716337204, 3: 0.4583333432674408, 4: 0.875, 5: 0.5, 6: 0.6666666865348816}
+  0%|          | 8/5590 [00:09<1:24:28,  1.10it/s]Epoch perc 0.0016100178890876566
+Training epoch 1/1000, step 8: 	 
+Train loss:  3.3354830741882324
+Train accuracy:  {0: 0.0416666679084301, 1: 0.0416666679084301, 2: 0.02083333395421505, 3: 0.5416666865348816, 4: 0.9375, 5: 0.1458333432674408, 6: 0.75}
+Train accuracy interval:  {0: 0.125, 1: 0.0833333358168602, 2: 0.0625, 3: 0.5625, 4: 0.9791666865348816, 5: 0.6458333730697632, 6: 0.75}
+  0%|          | 9/5590 [00:10<1:24:44,  1.10it/s]Epoch perc 0.0017889087656529517
+Training epoch 1/1000, step 9: 	 
+Train loss:  3.180330991744995
+Train accuracy:  {0: 0.1041666716337204, 1: 0.0833333358168602, 2: 0.0416666679084301, 3: 0.5208333730697632, 4: 0.9166666865348816, 5: 0.2708333432674408, 6: 0.5833333730697632}
+Train accuracy interval:  {0: 0.3125, 1: 0.3125, 2: 0.1666666716337204, 3: 0.625, 4: 1.0, 5: 0.7708333730697632, 6: 0.5833333730697632}
+  0%|          | 10/5590 [00:10<1:22:20,  1.13it/s]Epoch perc 0.001967799642218247
+Training epoch 1/1000, step 10: 	 
+Train loss:  3.234373092651367
+Train accuracy:  {0: 0.02083333395421505, 1: 0.0, 2: 0.02083333395421505, 3: 0.5625, 4: 0.9791666865348816, 5: 0.2291666716337204, 6: 0.7916666865348816}
+Train accuracy interval:  {0: 0.1041666716337204, 1: 0.0625, 2: 0.125, 3: 0.5625, 4: 1.0, 5: 0.9583333730697632, 6: 0.7916666865348816}
+  0%|          | 11/5590 [00:11<1:20:29,  1.16it/s]Epoch perc 0.002146690518783542
+Training epoch 1/1000, step 11: 	 
+Train loss:  3.301790475845337
+Train accuracy:  {0: 0.0833333358168602, 1: 0.0, 2: 0.0, 3: 0.5416666865348816, 4: 0.9166666865348816, 5: 0.2916666865348816, 6: 0.5625}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.2291666716337204, 2: 0.1041666716337204, 3: 0.6458333730697632, 4: 1.0, 5: 0.8958333730697632, 6: 0.5625}
+  0%|          | 12/5590 [00:12<1:18:58,  1.18it/s]Epoch perc 0.002325581395348837
+Training epoch 1/1000, step 12: 	 
+Train loss:  2.8136165142059326
+Train accuracy:  {0: 0.0625, 1: 0.0833333358168602, 2: 0.0625, 3: 0.6458333730697632, 4: 1.0, 5: 0.3541666865348816, 6: 0.6666666865348816}
+Train accuracy interval:  {0: 0.25, 1: 0.2083333432674408, 2: 0.2916666865348816, 3: 0.6666666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.6666666865348816}
+  0%|          | 13/5590 [00:13<1:18:18,  1.19it/s]Epoch perc 0.0025044722719141325
+Training epoch 1/1000, step 13: 	 
+Train loss:  2.8605008125305176
+Train accuracy:  {0: 0.0416666679084301, 1: 0.0625, 2: 0.0416666679084301, 3: 0.5208333730697632, 4: 0.9166666865348816, 5: 0.3541666865348816, 6: 0.7083333730697632}
+Train accuracy interval:  {0: 0.2291666716337204, 1: 0.25, 2: 0.125, 3: 0.5625, 4: 1.0, 5: 0.9583333730697632, 6: 0.7083333730697632}
+  0%|          | 14/5590 [00:14<1:17:45,  1.20it/s]Epoch perc 0.0026833631484794273
+Training epoch 1/1000, step 14: 	 
+Train loss:  2.8944761753082275
+Train accuracy:  {0: 0.125, 1: 0.0416666679084301, 2: 0.02083333395421505, 3: 0.5416666865348816, 4: 0.9583333730697632, 5: 0.3333333432674408, 6: 0.5833333730697632}
+Train accuracy interval:  {0: 0.2916666865348816, 1: 0.2083333432674408, 2: 0.1458333432674408, 3: 0.5833333730697632, 4: 1.0, 5: 0.8958333730697632, 6: 0.5833333730697632}
+  0%|          | 15/5590 [00:15<1:17:10,  1.20it/s]Epoch perc 0.0028622540250447226
+Training epoch 1/1000, step 15: 	 
+Train loss:  2.624385118484497
+Train accuracy:  {0: 0.1458333432674408, 1: 0.1041666716337204, 2: 0.02083333395421505, 3: 0.5416666865348816, 4: 0.9583333730697632, 5: 0.4791666865348816, 6: 0.6875}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.25, 2: 0.1458333432674408, 3: 0.6041666865348816, 4: 1.0, 5: 0.9166666865348816, 6: 0.6875}
+  0%|          | 16/5590 [00:15<1:17:01,  1.21it/s]Epoch perc 0.003041144901610018
+Training epoch 1/1000, step 16: 	 
+Train loss:  2.522681474685669
+Train accuracy:  {0: 0.1666666716337204, 1: 0.0416666679084301, 2: 0.125, 3: 0.5833333730697632, 4: 0.9375, 5: 0.4375, 6: 0.7291666865348816}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.1458333432674408, 2: 0.2916666865348816, 3: 0.6041666865348816, 4: 1.0, 5: 0.9375, 6: 0.7291666865348816}
+  0%|          | 17/5590 [00:16<1:17:49,  1.19it/s]Epoch perc 0.0032200357781753132
+Training epoch 1/1000, step 17: 	 
+Train loss:  2.450655937194824
+Train accuracy:  {0: 0.0416666679084301, 1: 0.0625, 2: 0.0416666679084301, 3: 0.3333333432674408, 4: 1.0, 5: 0.4791666865348816, 6: 0.8333333730697632}
+Train accuracy interval:  {0: 0.375, 1: 0.1666666716337204, 2: 0.1875, 3: 0.4166666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 0.8333333730697632}
+  0%|          | 18/5590 [00:17<1:18:00,  1.19it/s]Epoch perc 0.003398926654740608
+Training epoch 1/1000, step 18: 	 
+Train loss:  2.502875566482544
+Train accuracy:  {0: 0.1041666716337204, 1: 0.1041666716337204, 2: 0.1041666716337204, 3: 0.4375, 4: 1.0, 5: 0.4375, 6: 0.5625}
+Train accuracy interval:  {0: 0.2916666865348816, 1: 0.3125, 2: 0.2291666716337204, 3: 0.4791666865348816, 4: 1.0, 5: 0.9375, 6: 0.5625}
+  0%|          | 19/5590 [00:18<1:17:53,  1.19it/s]Epoch perc 0.0035778175313059034
+Training epoch 1/1000, step 19: 	 
+Train loss:  2.3520121574401855
+Train accuracy:  {0: 0.1041666716337204, 1: 0.0625, 2: 0.0833333358168602, 3: 0.4375, 4: 0.9791666865348816, 5: 0.625, 6: 0.7083333730697632}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.25, 2: 0.1875, 3: 0.4791666865348816, 4: 1.0, 5: 0.9166666865348816, 6: 0.7083333730697632}
+  0%|          | 20/5590 [00:19<1:17:35,  1.20it/s]Epoch perc 0.0037567084078711987
+Training epoch 1/1000, step 20: 	 
+Train loss:  2.473355531692505
+Train accuracy:  {0: 0.0625, 1: 0.0833333358168602, 2: 0.1666666716337204, 3: 0.4583333432674408, 4: 0.9375, 5: 0.3333333432674408, 6: 0.6666666865348816}
+Train accuracy interval:  {0: 0.2291666716337204, 1: 0.1458333432674408, 2: 0.3541666865348816, 3: 0.4791666865348816, 4: 1.0, 5: 0.9166666865348816, 6: 0.6666666865348816}
+  0%|          | 21/5590 [00:20<1:17:56,  1.19it/s]Epoch perc 0.003935599284436494
+Training epoch 1/1000, step 21: 	 
+Train loss:  2.519639730453491
+Train accuracy:  {0: 0.125, 1: 0.0833333358168602, 2: 0.0, 3: 0.375, 4: 1.0, 5: 0.2291666716337204, 6: 0.7083333730697632}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.3333333432674408, 2: 0.1666666716337204, 3: 0.4583333432674408, 4: 1.0, 5: 0.9375, 6: 0.7083333730697632}
+  0%|          | 22/5590 [00:20<1:18:01,  1.19it/s]Epoch perc 0.004114490161001789
+Training epoch 1/1000, step 22: 	 
+Train loss:  2.238640546798706
+Train accuracy:  {0: 0.1458333432674408, 1: 0.0833333358168602, 2: 0.1041666716337204, 3: 0.3958333432674408, 4: 1.0, 5: 0.4583333432674408, 6: 0.5416666865348816}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.2708333432674408, 2: 0.25, 3: 0.5208333730697632, 4: 1.0, 5: 1.0, 6: 0.5416666865348816}
+  0%|          | 23/5590 [00:21<1:18:46,  1.18it/s]Epoch perc 0.004293381037567084
+Training epoch 1/1000, step 23: 	 
+Train loss:  2.36372709274292
+Train accuracy:  {0: 0.0625, 1: 0.0833333358168602, 2: 0.125, 3: 0.4166666865348816, 4: 1.0, 5: 0.3541666865348816, 6: 0.5}
+Train accuracy interval:  {0: 0.2083333432674408, 1: 0.1458333432674408, 2: 0.3541666865348816, 3: 0.5625, 4: 1.0, 5: 1.0, 6: 0.5}
+  0%|          | 24/5590 [00:22<1:18:14,  1.19it/s]Epoch perc 0.004472271914132379
+Training epoch 1/1000, step 24: 	 
+Train loss:  2.3658039569854736
+Train accuracy:  {0: 0.125, 1: 0.02083333395421505, 2: 0.0833333358168602, 3: 0.6041666865348816, 4: 0.9583333730697632, 5: 0.1458333432674408, 6: 0.8333333730697632}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.2083333432674408, 2: 0.3333333432674408, 3: 0.7083333730697632, 4: 1.0, 5: 0.9375, 6: 0.8333333730697632}
+  0%|          | 25/5590 [00:23<1:17:52,  1.19it/s]Epoch perc 0.004651162790697674
+Training epoch 1/1000, step 25: 	 
+Train loss:  2.175509452819824
+Train accuracy:  {0: 0.02083333395421505, 1: 0.0416666679084301, 2: 0.1666666716337204, 3: 0.3958333432674408, 4: 0.9583333730697632, 5: 0.4583333432674408, 6: 0.8541666865348816}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.1666666716337204, 2: 0.3125, 3: 0.4166666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.8541666865348816}
+  0%|          | 26/5590 [00:24<1:17:56,  1.19it/s]Epoch perc 0.00483005366726297
+Training epoch 1/1000, step 26: 	 
+Train loss:  2.232943296432495
+Train accuracy:  {0: 0.1041666716337204, 1: 0.0833333358168602, 2: 0.2291666716337204, 3: 0.5416666865348816, 4: 0.9375, 5: 0.4166666865348816, 6: 0.8541666865348816}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.1666666716337204, 2: 0.375, 3: 0.5625, 4: 1.0, 5: 0.9583333730697632, 6: 0.8541666865348816}
+  0%|          | 27/5590 [00:25<1:18:34,  1.18it/s]Epoch perc 0.005008944543828265
+Training epoch 1/1000, step 27: 	 
+Train loss:  2.1856584548950195
+Train accuracy:  {0: 0.125, 1: 0.0, 2: 0.0833333358168602, 3: 0.4166666865348816, 4: 1.0, 5: 0.4166666865348816, 6: 0.7916666865348816}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.1666666716337204, 2: 0.2083333432674408, 3: 0.4791666865348816, 4: 1.0, 5: 0.9166666865348816, 6: 0.7916666865348816}
+  1%|          | 28/5590 [00:26<1:18:43,  1.18it/s]Epoch perc 0.00518783542039356
+Training epoch 1/1000, step 28: 	 
+Train loss:  2.4524683952331543
+Train accuracy:  {0: 0.1458333432674408, 1: 0.1041666716337204, 2: 0.125, 3: 0.5, 4: 0.9583333730697632, 5: 0.25, 6: 0.5833333730697632}
+Train accuracy interval:  {0: 0.3125, 1: 0.2291666716337204, 2: 0.1875, 3: 0.5208333730697632, 4: 1.0, 5: 0.8958333730697632, 6: 0.5833333730697632}
+  1%|          | 29/5590 [00:26<1:20:40,  1.15it/s]Epoch perc 0.005366726296958855
+Training epoch 1/1000, step 29: 	 
+Train loss:  2.202747106552124
+Train accuracy:  {0: 0.0833333358168602, 1: 0.0625, 2: 0.0625, 3: 0.3541666865348816, 4: 0.9791666865348816, 5: 0.375, 6: 0.625}
+Train accuracy interval:  {0: 0.4375, 1: 0.3125, 2: 0.2291666716337204, 3: 0.3958333432674408, 4: 1.0, 5: 0.9583333730697632, 6: 0.625}
+  1%|          | 30/5590 [00:27<1:20:45,  1.15it/s]Epoch perc 0.00554561717352415
+Training epoch 1/1000, step 30: 	 
+Train loss:  2.052229642868042
+Train accuracy:  {0: 0.0625, 1: 0.0416666679084301, 2: 0.1666666716337204, 3: 0.5208333730697632, 4: 1.0, 5: 0.4583333432674408, 6: 0.875}
+Train accuracy interval:  {0: 0.2291666716337204, 1: 0.125, 2: 0.3125, 3: 0.5208333730697632, 4: 1.0, 5: 1.0, 6: 0.875}
+  1%|          | 31/5590 [00:28<1:20:15,  1.15it/s]Epoch perc 0.005724508050089445
+Training epoch 1/1000, step 31: 	 
+Train loss:  2.124654531478882
+Train accuracy:  {0: 0.0833333358168602, 1: 0.0, 2: 0.1041666716337204, 3: 0.4375, 4: 0.9791666865348816, 5: 0.2916666865348816, 6: 0.7708333730697632}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.125, 2: 0.2291666716337204, 3: 0.4583333432674408, 4: 1.0, 5: 0.9791666865348816, 6: 0.7708333730697632}
+  1%|          | 32/5590 [00:29<1:19:26,  1.17it/s]Epoch perc 0.005903398926654741
+Training epoch 1/1000, step 32: 	 
+Train loss:  2.286746025085449
+Train accuracy:  {0: 0.125, 1: 0.0625, 2: 0.02083333395421505, 3: 0.6041666865348816, 4: 0.9791666865348816, 5: 0.3333333432674408, 6: 0.7291666865348816}
+Train accuracy interval:  {0: 0.3125, 1: 0.1875, 2: 0.1666666716337204, 3: 0.7083333730697632, 4: 1.0, 5: 0.8541666865348816, 6: 0.7291666865348816}
+  1%|          | 33/5590 [00:30<1:21:37,  1.13it/s]Epoch perc 0.006082289803220036
+Training epoch 1/1000, step 33: 	 
+Train loss:  2.1060924530029297
+Train accuracy:  {0: 0.1041666716337204, 1: 0.0416666679084301, 2: 0.1875, 3: 0.625, 4: 0.9791666865348816, 5: 0.3958333432674408, 6: 0.6666666865348816}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.25, 2: 0.25, 3: 0.625, 4: 1.0, 5: 1.0, 6: 0.6666666865348816}
+  1%|          | 34/5590 [00:31<1:20:30,  1.15it/s]Epoch perc 0.006261180679785331
+Training epoch 1/1000, step 34: 	 
+Train loss:  2.058263063430786
+Train accuracy:  {0: 0.0833333358168602, 1: 0.0416666679084301, 2: 0.0833333358168602, 3: 0.6458333730697632, 4: 1.0, 5: 0.3333333432674408, 6: 0.5625}
+Train accuracy interval:  {0: 0.2708333432674408, 1: 0.25, 2: 0.3958333432674408, 3: 0.6458333730697632, 4: 1.0, 5: 0.9583333730697632, 6: 0.5625}
+  1%|          | 35/5590 [00:32<1:20:42,  1.15it/s]Epoch perc 0.0064400715563506265
+Training epoch 1/1000, step 35: 	 
+Train loss:  2.1140213012695312
+Train accuracy:  {0: 0.0833333358168602, 1: 0.1041666716337204, 2: 0.1666666716337204, 3: 0.5833333730697632, 4: 0.9375, 5: 0.3958333432674408, 6: 0.8333333730697632}
+Train accuracy interval:  {0: 0.2916666865348816, 1: 0.3125, 2: 0.3125, 3: 0.625, 4: 1.0, 5: 1.0, 6: 0.8333333730697632}
+  1%|          | 36/5590 [00:33<1:19:41,  1.16it/s]Epoch perc 0.006618962432915921
+Training epoch 1/1000, step 36: 	 
+Train loss:  2.1497385501861572
+Train accuracy:  {0: 0.1041666716337204, 1: 0.1041666716337204, 2: 0.0416666679084301, 3: 0.6666666865348816, 4: 0.9375, 5: 0.5208333730697632, 6: 0.7291666865348816}
+Train accuracy interval:  {0: 0.4375, 1: 0.3541666865348816, 2: 0.1041666716337204, 3: 0.7291666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.7291666865348816}
+  1%|          | 37/5590 [00:33<1:20:39,  1.15it/s]Epoch perc 0.006797853309481216
+Training epoch 1/1000, step 37: 	 
+Train loss:  2.231264352798462
+Train accuracy:  {0: 0.125, 1: 0.1458333432674408, 2: 0.1458333432674408, 3: 0.5833333730697632, 4: 0.9375, 5: 0.2916666865348816, 6: 0.5625}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.2708333432674408, 2: 0.4583333432674408, 3: 0.6666666865348816, 4: 1.0, 5: 0.8125, 6: 0.5625}
+  1%|          | 38/5590 [00:34<1:19:55,  1.16it/s]Epoch perc 0.0069767441860465115
+Training epoch 1/1000, step 38: 	 
+Train loss:  2.2365670204162598
+Train accuracy:  {0: 0.0416666679084301, 1: 0.0625, 2: 0.1458333432674408, 3: 0.5208333730697632, 4: 0.9375, 5: 0.3333333432674408, 6: 0.7083333730697632}
+Train accuracy interval:  {0: 0.1875, 1: 0.1875, 2: 0.4583333432674408, 3: 0.625, 4: 1.0, 5: 0.875, 6: 0.7083333730697632}
+  1%|          | 39/5590 [00:35<1:21:02,  1.14it/s]Epoch perc 0.007155635062611807
+Training epoch 1/1000, step 39: 	 
+Train loss:  1.9463964700698853
+Train accuracy:  {0: 0.0833333358168602, 1: 0.0833333358168602, 2: 0.25, 3: 0.5, 4: 0.9791666865348816, 5: 0.4583333432674408, 6: 0.8541666865348816}
+Train accuracy interval:  {0: 0.2291666716337204, 1: 0.2291666716337204, 2: 0.5, 3: 0.6041666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 0.8541666865348816}
+  1%|          | 40/5590 [00:36<1:20:50,  1.14it/s]Epoch perc 0.007334525939177102
+Training epoch 1/1000, step 40: 	 
+Train loss:  2.1609737873077393
+Train accuracy:  {0: 0.02083333395421505, 1: 0.0416666679084301, 2: 0.1041666716337204, 3: 0.4791666865348816, 4: 0.9583333730697632, 5: 0.2708333432674408, 6: 0.8333333730697632}
+Train accuracy interval:  {0: 0.2916666865348816, 1: 0.125, 2: 0.3125, 3: 0.6041666865348816, 4: 1.0, 5: 0.9166666865348816, 6: 0.8333333730697632}
+  1%|          | 41/5590 [00:37<1:21:14,  1.14it/s]Epoch perc 0.0075134168157423974
+Training epoch 1/1000, step 41: 	 
+Train loss:  1.9651533365249634
+Train accuracy:  {0: 0.125, 1: 0.0625, 2: 0.2083333432674408, 3: 0.5833333730697632, 4: 0.9791666865348816, 5: 0.3958333432674408, 6: 0.7916666865348816}
+Train accuracy interval:  {0: 0.375, 1: 0.2291666716337204, 2: 0.4166666865348816, 3: 0.7083333730697632, 4: 1.0, 5: 0.9375, 6: 0.7916666865348816}
+  1%|          | 42/5590 [00:38<1:19:39,  1.16it/s]Epoch perc 0.007692307692307693
+Training epoch 1/1000, step 42: 	 
+Train loss:  2.0490410327911377
+Train accuracy:  {0: 0.125, 1: 0.1041666716337204, 2: 0.0833333358168602, 3: 0.4791666865348816, 4: 0.9791666865348816, 5: 0.4583333432674408, 6: 0.7708333730697632}
+Train accuracy interval:  {0: 0.2916666865348816, 1: 0.1666666716337204, 2: 0.3125, 3: 0.5208333730697632, 4: 1.0, 5: 0.9375, 6: 0.7708333730697632}
+  1%|          | 43/5590 [00:39<1:18:55,  1.17it/s]Epoch perc 0.007871198568872988
+Training epoch 1/1000, step 43: 	 
+Train loss:  2.015246868133545
+Train accuracy:  {0: 0.0416666679084301, 1: 0.0416666679084301, 2: 0.1666666716337204, 3: 0.5833333730697632, 4: 1.0, 5: 0.4166666865348816, 6: 0.8333333730697632}
+Train accuracy interval:  {0: 0.2708333432674408, 1: 0.375, 2: 0.3333333432674408, 3: 0.6458333730697632, 4: 1.0, 5: 1.0, 6: 0.8333333730697632}
+  1%|          | 44/5590 [00:39<1:17:44,  1.19it/s]Epoch perc 0.008050089445438283
+Training epoch 1/1000, step 44: 	 
+Train loss:  1.9207996129989624
+Train accuracy:  {0: 0.0, 1: 0.0625, 2: 0.2291666716337204, 3: 0.625, 4: 0.9791666865348816, 5: 0.3541666865348816, 6: 0.9375}
+Train accuracy interval:  {0: 0.2291666716337204, 1: 0.2916666865348816, 2: 0.3541666865348816, 3: 0.625, 4: 1.0, 5: 0.9791666865348816, 6: 0.9375}
+  1%|          | 45/5590 [00:40<1:17:15,  1.20it/s]Epoch perc 0.008228980322003579
+Training epoch 1/1000, step 45: 	 
+Train loss:  1.8629039525985718
+Train accuracy:  {0: 0.1041666716337204, 1: 0.1041666716337204, 2: 0.2291666716337204, 3: 0.6666666865348816, 4: 1.0, 5: 0.4166666865348816, 6: 0.875}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.3541666865348816, 2: 0.3958333432674408, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 0.875}
+  1%|          | 46/5590 [00:41<1:16:47,  1.20it/s]Epoch perc 0.008407871198568872
+Training epoch 1/1000, step 46: 	 
+Train loss:  2.091801166534424
+Train accuracy:  {0: 0.0625, 1: 0.02083333395421505, 2: 0.2083333432674408, 3: 0.3125, 4: 0.9375, 5: 0.4791666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.3125, 1: 0.1666666716337204, 2: 0.375, 3: 0.4166666865348816, 4: 1.0, 5: 0.9166666865348816, 6: 0.9583333730697632}
+  1%|          | 47/5590 [00:42<1:18:23,  1.18it/s]Epoch perc 0.008586762075134168
+Training epoch 1/1000, step 47: 	 
+Train loss:  2.050607204437256
+Train accuracy:  {0: 0.02083333395421505, 1: 0.0833333358168602, 2: 0.125, 3: 0.5416666865348816, 4: 0.9791666865348816, 5: 0.2083333432674408, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.2083333432674408, 1: 0.2083333432674408, 2: 0.4166666865348816, 3: 0.5625, 4: 1.0, 5: 0.9791666865348816, 6: 0.9583333730697632}
+  1%|          | 48/5590 [00:43<1:18:20,  1.18it/s]Epoch perc 0.008765652951699463
+Training epoch 1/1000, step 48: 	 
+Train loss:  2.0868642330169678
+Train accuracy:  {0: 0.02083333395421505, 1: 0.0, 2: 0.1041666716337204, 3: 0.6041666865348816, 4: 0.9791666865348816, 5: 0.5416666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.1458333432674408, 1: 0.1458333432674408, 2: 0.5208333730697632, 3: 0.7083333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  1%|          | 49/5590 [00:44<1:18:12,  1.18it/s]Epoch perc 0.008944543828264758
+Training epoch 1/1000, step 49: 	 
+Train loss:  1.985333800315857
+Train accuracy:  {0: 0.1666666716337204, 1: 0.0833333358168602, 2: 0.1458333432674408, 3: 0.2916666865348816, 4: 1.0, 5: 0.4166666865348816, 6: 0.8333333730697632}
+Train accuracy interval:  {0: 0.375, 1: 0.375, 2: 0.3125, 3: 0.2916666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.8333333730697632}
+  1%|          | 50/5590 [00:44<1:18:03,  1.18it/s]Epoch perc 0.009123434704830053
+Training epoch 1/1000, step 50: 	 
+Train loss:  1.7365424633026123
+Train accuracy:  {0: 0.1875, 1: 0.0625, 2: 0.2083333432674408, 3: 0.4375, 4: 1.0, 5: 0.5, 6: 0.9375}
+Train accuracy interval:  {0: 0.5, 1: 0.25, 2: 0.2916666865348816, 3: 0.4375, 4: 1.0, 5: 1.0, 6: 0.9375}
+  1%|          | 51/5590 [00:45<1:17:39,  1.19it/s]Epoch perc 0.009302325581395349
+Training epoch 1/1000, step 51: 	 
+Train loss:  1.8044402599334717
+Train accuracy:  {0: 0.125, 1: 0.1041666716337204, 2: 0.25, 3: 0.5625, 4: 0.9791666865348816, 5: 0.4375, 6: 0.9166666865348816}
+Train accuracy interval:  {0: 0.3125, 1: 0.2916666865348816, 2: 0.4583333432674408, 3: 0.6041666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.9166666865348816}
+  1%|          | 52/5590 [00:46<1:17:32,  1.19it/s]Epoch perc 0.009481216457960644
+Training epoch 1/1000, step 52: 	 
+Train loss:  2.0600597858428955
+Train accuracy:  {0: 0.0625, 1: 0.0, 2: 0.125, 3: 0.5416666865348816, 4: 0.9583333730697632, 5: 0.2708333432674408, 6: 0.8541666865348816}
+Train accuracy interval:  {0: 0.3541666865348816, 1: 0.1458333432674408, 2: 0.25, 3: 0.6666666865348816, 4: 1.0, 5: 0.9166666865348816, 6: 0.8541666865348816}
+  1%|          | 53/5590 [00:47<1:17:44,  1.19it/s]Epoch perc 0.00966010733452594
+Training epoch 1/1000, step 53: 	 
+Train loss:  2.049569606781006
+Train accuracy:  {0: 0.1041666716337204, 1: 0.0833333358168602, 2: 0.1666666716337204, 3: 0.5625, 4: 0.9583333730697632, 5: 0.4375, 6: 0.9375}
+Train accuracy interval:  {0: 0.2916666865348816, 1: 0.2916666865348816, 2: 0.3541666865348816, 3: 0.6458333730697632, 4: 1.0, 5: 0.8958333730697632, 6: 0.9375}
+  1%|          | 54/5590 [00:48<1:17:13,  1.19it/s]Epoch perc 0.009838998211091235
+Training epoch 1/1000, step 54: 	 
+Train loss:  2.0458521842956543
+Train accuracy:  {0: 0.1041666716337204, 1: 0.0416666679084301, 2: 0.1458333432674408, 3: 0.4583333432674408, 4: 0.9583333730697632, 5: 0.2708333432674408, 6: 1.0}
+Train accuracy interval:  {0: 0.2083333432674408, 1: 0.1458333432674408, 2: 0.4375, 3: 0.5416666865348816, 4: 1.0, 5: 0.9166666865348816, 6: 1.0}
+  1%|          | 55/5590 [00:49<1:16:53,  1.20it/s]Epoch perc 0.01001788908765653
+Training epoch 1/1000, step 55: 	 
+Train loss:  2.0171196460723877
+Train accuracy:  {0: 0.1875, 1: 0.1666666716337204, 2: 0.1041666716337204, 3: 0.5833333730697632, 4: 0.8541666865348816, 5: 0.4791666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.2916666865348816, 2: 0.375, 3: 0.6875, 4: 1.0, 5: 0.8333333730697632, 6: 0.9583333730697632}
+  1%|          | 56/5590 [00:49<1:16:48,  1.20it/s]Epoch perc 0.010196779964221825
+Training epoch 1/1000, step 56: 	 
+Train loss:  1.8576158285140991
+Train accuracy:  {0: 0.1041666716337204, 1: 0.0625, 2: 0.125, 3: 0.5416666865348816, 4: 1.0, 5: 0.5625, 6: 0.7708333730697632}
+Train accuracy interval:  {0: 0.2708333432674408, 1: 0.2083333432674408, 2: 0.4166666865348816, 3: 0.5416666865348816, 4: 1.0, 5: 1.0, 6: 0.7708333730697632}
+  1%|          | 57/5590 [00:50<1:16:01,  1.21it/s]Epoch perc 0.01037567084078712
+Training epoch 1/1000, step 57: 	 
+Train loss:  1.984363317489624
+Train accuracy:  {0: 0.1041666716337204, 1: 0.0625, 2: 0.0416666679084301, 3: 0.5, 4: 0.9375, 5: 0.4166666865348816, 6: 0.9166666865348816}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.2708333432674408, 2: 0.2916666865348816, 3: 0.6458333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 0.9166666865348816}
+  1%|          | 58/5590 [00:51<1:17:37,  1.19it/s]Epoch perc 0.010554561717352416
+Training epoch 1/1000, step 58: 	 
+Train loss:  1.8970460891723633
+Train accuracy:  {0: 0.0416666679084301, 1: 0.125, 2: 0.1458333432674408, 3: 0.375, 4: 0.9791666865348816, 5: 0.4791666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.25, 1: 0.2916666865348816, 2: 0.3541666865348816, 3: 0.4166666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.9583333730697632}
+  1%|          | 59/5590 [00:52<1:21:16,  1.13it/s]Epoch perc 0.01073345259391771
+Training epoch 1/1000, step 59: 	 
+Train loss:  1.8419814109802246
+Train accuracy:  {0: 0.1875, 1: 0.1875, 2: 0.1458333432674408, 3: 0.2708333432674408, 4: 0.9375, 5: 0.5, 6: 0.8958333730697632}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.3333333432674408, 2: 0.3333333432674408, 3: 0.3958333432674408, 4: 1.0, 5: 0.9375, 6: 0.8958333730697632}
+  1%|          | 60/5590 [00:53<1:20:50,  1.14it/s]Epoch perc 0.010912343470483005
+Training epoch 1/1000, step 60: 	 
+Train loss:  1.8498295545578003
+Train accuracy:  {0: 0.1458333432674408, 1: 0.1666666716337204, 2: 0.1458333432674408, 3: 0.3125, 4: 0.9791666865348816, 5: 0.5625, 6: 0.9375}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.4166666865348816, 2: 0.4166666865348816, 3: 0.3125, 4: 1.0, 5: 0.9791666865348816, 6: 0.9375}
+  1%|          | 61/5590 [00:54<1:19:56,  1.15it/s]Epoch perc 0.0110912343470483
+Training epoch 1/1000, step 61: 	 
+Train loss:  1.815482497215271
+Train accuracy:  {0: 0.1458333432674408, 1: 0.1041666716337204, 2: 0.1666666716337204, 3: 0.6666666865348816, 4: 0.9375, 5: 0.5208333730697632, 6: 0.9166666865348816}
+Train accuracy interval:  {0: 0.3541666865348816, 1: 0.2291666716337204, 2: 0.4166666865348816, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 0.9166666865348816}
+  1%|          | 62/5590 [00:55<1:19:34,  1.16it/s]Epoch perc 0.011270125223613595
+Training epoch 1/1000, step 62: 	 
+Train loss:  2.0385730266571045
+Train accuracy:  {0: 0.1458333432674408, 1: 0.0416666679084301, 2: 0.2083333432674408, 3: 0.6041666865348816, 4: 0.9166666865348816, 5: 0.3541666865348816, 6: 0.8541666865348816}
+Train accuracy interval:  {0: 0.3541666865348816, 1: 0.2916666865348816, 2: 0.3333333432674408, 3: 0.75, 4: 1.0, 5: 0.8958333730697632, 6: 0.8541666865348816}
+  1%|          | 63/5590 [00:56<1:18:50,  1.17it/s]Epoch perc 0.01144901610017889
+Training epoch 1/1000, step 63: 	 
+Train loss:  1.912959337234497
+Train accuracy:  {0: 0.1875, 1: 0.0625, 2: 0.2083333432674408, 3: 0.5625, 4: 0.9791666865348816, 5: 0.6458333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.4375, 1: 0.25, 2: 0.3958333432674408, 3: 0.6041666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  1%|          | 64/5590 [00:56<1:18:35,  1.17it/s]Epoch perc 0.011627906976744186
+Training epoch 1/1000, step 64: 	 
+Train loss:  1.886177659034729
+Train accuracy:  {0: 0.0833333358168602, 1: 0.1041666716337204, 2: 0.1458333432674408, 3: 0.5208333730697632, 4: 0.9791666865348816, 5: 0.5625, 6: 0.9375}
+Train accuracy interval:  {0: 0.25, 1: 0.3333333432674408, 2: 0.375, 3: 0.5625, 4: 1.0, 5: 1.0, 6: 0.9375}
+  1%|          | 65/5590 [00:57<1:18:41,  1.17it/s]Epoch perc 0.011806797853309481
+Training epoch 1/1000, step 65: 	 
+Train loss:  1.786115050315857
+Train accuracy:  {0: 0.1875, 1: 0.0625, 2: 0.1666666716337204, 3: 0.5625, 4: 1.0, 5: 0.5208333730697632, 6: 0.9166666865348816}
+Train accuracy interval:  {0: 0.25, 1: 0.2916666865348816, 2: 0.375, 3: 0.6041666865348816, 4: 1.0, 5: 1.0, 6: 0.9166666865348816}
+  1%|          | 66/5590 [00:58<1:17:33,  1.19it/s]Epoch perc 0.011985688729874776
+Training epoch 1/1000, step 66: 	 
+Train loss:  1.838683009147644
+Train accuracy:  {0: 0.1041666716337204, 1: 0.0625, 2: 0.1666666716337204, 3: 0.6041666865348816, 4: 0.9583333730697632, 5: 0.625, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.3958333432674408, 1: 0.2916666865348816, 2: 0.3333333432674408, 3: 0.625, 4: 1.0, 5: 0.9583333730697632, 6: 0.9583333730697632}
+  1%|          | 67/5590 [00:59<1:17:28,  1.19it/s]Epoch perc 0.012164579606440072
+Training epoch 1/1000, step 67: 	 
+Train loss:  1.8196138143539429
+Train accuracy:  {0: 0.0833333358168602, 1: 0.0625, 2: 0.2083333432674408, 3: 0.6875, 4: 0.9583333730697632, 5: 0.3541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.375, 1: 0.2916666865348816, 2: 0.4583333432674408, 3: 0.7291666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  1%|          | 68/5590 [01:00<1:16:48,  1.20it/s]Epoch perc 0.012343470483005367
+Training epoch 1/1000, step 68: 	 
+Train loss:  1.8820401430130005
+Train accuracy:  {0: 0.25, 1: 0.1041666716337204, 2: 0.0625, 3: 0.3333333432674408, 4: 0.9791666865348816, 5: 0.5, 6: 0.8958333730697632}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.2916666865348816, 2: 0.1875, 3: 0.3333333432674408, 4: 1.0, 5: 0.9583333730697632, 6: 0.8958333730697632}
+  1%|          | 69/5590 [01:01<1:18:13,  1.18it/s]Epoch perc 0.012522361359570662
+Training epoch 1/1000, step 69: 	 
+Train loss:  1.7828289270401
+Train accuracy:  {0: 0.125, 1: 0.0625, 2: 0.1041666716337204, 3: 0.5416666865348816, 4: 1.0, 5: 0.625, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.3541666865348816, 2: 0.4583333432674408, 3: 0.5833333730697632, 4: 1.0, 5: 0.9583333730697632, 6: 0.9583333730697632}
+  1%|▏         | 70/5590 [01:01<1:18:02,  1.18it/s]Epoch perc 0.012701252236135958
+Training epoch 1/1000, step 70: 	 
+Train loss:  1.875433087348938
+Train accuracy:  {0: 0.125, 1: 0.1041666716337204, 2: 0.2083333432674408, 3: 0.375, 4: 0.8958333730697632, 5: 0.4583333432674408, 6: 0.9375}
+Train accuracy interval:  {0: 0.3958333432674408, 1: 0.3958333432674408, 2: 0.375, 3: 0.4791666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 0.9375}
+  1%|▏         | 71/5590 [01:02<1:19:32,  1.16it/s]Epoch perc 0.012880143112701253
+Training epoch 1/1000, step 71: 	 
+Train loss:  1.9274965524673462
+Train accuracy:  {0: 0.1458333432674408, 1: 0.0833333358168602, 2: 0.2708333432674408, 3: 0.5416666865348816, 4: 0.9375, 5: 0.4375, 6: 0.9166666865348816}
+Train accuracy interval:  {0: 0.3541666865348816, 1: 0.2916666865348816, 2: 0.4375, 3: 0.6041666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 0.9166666865348816}
+  1%|▏         | 72/5590 [01:03<1:19:30,  1.16it/s]Epoch perc 0.013059033989266547
+Training epoch 1/1000, step 72: 	 
+Train loss:  2.044796943664551
+Train accuracy:  {0: 0.0625, 1: 0.0416666679084301, 2: 0.125, 3: 0.6458333730697632, 4: 0.9375, 5: 0.3333333432674408, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.2083333432674408, 1: 0.1666666716337204, 2: 0.3333333432674408, 3: 0.7708333730697632, 4: 1.0, 5: 0.8958333730697632, 6: 0.9791666865348816}
+  1%|▏         | 73/5590 [01:04<1:18:17,  1.17it/s]Epoch perc 0.013237924865831842
+Training epoch 1/1000, step 73: 	 
+Train loss:  1.7827922105789185
+Train accuracy:  {0: 0.1875, 1: 0.1666666716337204, 2: 0.2083333432674408, 3: 0.5833333730697632, 4: 0.9166666865348816, 5: 0.7083333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.375, 2: 0.375, 3: 0.7083333730697632, 4: 1.0, 5: 0.9375, 6: 0.9791666865348816}
+  1%|▏         | 74/5590 [01:05<1:19:08,  1.16it/s]Epoch perc 0.013416815742397137
+Training epoch 1/1000, step 74: 	 
+Train loss:  1.8077548742294312
+Train accuracy:  {0: 0.1458333432674408, 1: 0.0625, 2: 0.1458333432674408, 3: 0.4375, 4: 0.9791666865348816, 5: 0.75, 6: 0.9166666865348816}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.2916666865348816, 2: 0.3333333432674408, 3: 0.4791666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.9166666865348816}
+  1%|▏         | 75/5590 [01:06<1:18:06,  1.18it/s]Epoch perc 0.013595706618962432
+Training epoch 1/1000, step 75: 	 
+Train loss:  1.7162926197052002
+Train accuracy:  {0: 0.0833333358168602, 1: 0.2291666716337204, 2: 0.1458333432674408, 3: 0.5208333730697632, 4: 0.9791666865348816, 5: 0.5416666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.3125, 1: 0.4583333432674408, 2: 0.5, 3: 0.5833333730697632, 4: 1.0, 5: 0.9583333730697632, 6: 0.9791666865348816}
+  1%|▏         | 76/5590 [01:07<1:18:52,  1.17it/s]Epoch perc 0.013774597495527728
+Training epoch 1/1000, step 76: 	 
+Train loss:  1.7386082410812378
+Train accuracy:  {0: 0.1875, 1: 0.1875, 2: 0.2083333432674408, 3: 0.6041666865348816, 4: 0.9791666865348816, 5: 0.5416666865348816, 6: 0.9375}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.4791666865348816, 2: 0.3958333432674408, 3: 0.6875, 4: 1.0, 5: 0.9166666865348816, 6: 0.9375}
+  1%|▏         | 77/5590 [01:08<1:20:26,  1.14it/s]Epoch perc 0.013953488372093023
+Training epoch 1/1000, step 77: 	 
+Train loss:  1.786620020866394
+Train accuracy:  {0: 0.1041666716337204, 1: 0.125, 2: 0.2916666865348816, 3: 0.5208333730697632, 4: 0.9791666865348816, 5: 0.3541666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.3333333432674408, 2: 0.4791666865348816, 3: 0.5833333730697632, 4: 1.0, 5: 0.9583333730697632, 6: 0.9583333730697632}
+  1%|▏         | 78/5590 [01:08<1:20:20,  1.14it/s]Epoch perc 0.014132379248658318
+Training epoch 1/1000, step 78: 	 
+Train loss:  1.9136601686477661
+Train accuracy:  {0: 0.1041666716337204, 1: 0.125, 2: 0.1458333432674408, 3: 0.25, 4: 1.0, 5: 0.2916666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.2708333432674408, 1: 0.3125, 2: 0.4375, 3: 0.3333333432674408, 4: 1.0, 5: 0.9583333730697632, 6: 0.9583333730697632}
+  1%|▏         | 79/5590 [01:09<1:18:54,  1.16it/s]Epoch perc 0.014311270125223614
+Training epoch 1/1000, step 79: 	 
+Train loss:  1.6498606204986572
+Train accuracy:  {0: 0.2708333432674408, 1: 0.0625, 2: 0.2291666716337204, 3: 0.7708333730697632, 4: 0.9375, 5: 0.4166666865348816, 6: 0.9166666865348816}
+Train accuracy interval:  {0: 0.625, 1: 0.4583333432674408, 2: 0.4166666865348816, 3: 0.8541666865348816, 4: 1.0, 5: 0.9375, 6: 0.9166666865348816}
+  1%|▏         | 80/5590 [01:10<1:17:45,  1.18it/s]Epoch perc 0.014490161001788909
+Training epoch 1/1000, step 80: 	 
+Train loss:  1.7549608945846558
+Train accuracy:  {0: 0.1458333432674408, 1: 0.1041666716337204, 2: 0.25, 3: 0.5416666865348816, 4: 0.9583333730697632, 5: 0.5, 6: 0.9166666865348816}
+Train accuracy interval:  {0: 0.4375, 1: 0.3333333432674408, 2: 0.3958333432674408, 3: 0.6458333730697632, 4: 1.0, 5: 0.9375, 6: 0.9166666865348816}
+  1%|▏         | 81/5590 [01:11<1:17:37,  1.18it/s]Epoch perc 0.014669051878354204
+Training epoch 1/1000, step 81: 	 
+Train loss:  1.7157409191131592
+Train accuracy:  {0: 0.0625, 1: 0.1458333432674408, 2: 0.3333333432674408, 3: 0.6041666865348816, 4: 1.0, 5: 0.3541666865348816, 6: 0.9166666865348816}
+Train accuracy interval:  {0: 0.2291666716337204, 1: 0.5, 2: 0.5208333730697632, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 0.9166666865348816}
+  1%|▏         | 82/5590 [01:12<1:19:08,  1.16it/s]Epoch perc 0.0148479427549195
+Training epoch 1/1000, step 82: 	 
+Train loss:  1.6733523607254028
+Train accuracy:  {0: 0.125, 1: 0.1666666716337204, 2: 0.2708333432674408, 3: 0.7083333730697632, 4: 0.9583333730697632, 5: 0.4791666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.2291666716337204, 1: 0.4791666865348816, 2: 0.5625, 3: 0.7291666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 0.9791666865348816}
+  1%|▏         | 83/5590 [01:13<1:20:20,  1.14it/s]Epoch perc 0.015026833631484795
+Training epoch 1/1000, step 83: 	 
+Train loss:  1.5857782363891602
+Train accuracy:  {0: 0.125, 1: 0.1875, 2: 0.4166666865348816, 3: 0.6666666865348816, 4: 1.0, 5: 0.3958333432674408, 6: 0.9375}
+Train accuracy interval:  {0: 0.3125, 1: 0.4375, 2: 0.6458333730697632, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 0.9375}
+  2%|▏         | 84/5590 [01:14<1:21:16,  1.13it/s]Epoch perc 0.01520572450805009
+Training epoch 1/1000, step 84: 	 
+Train loss:  1.6888796091079712
+Train accuracy:  {0: 0.1875, 1: 0.2083333432674408, 2: 0.2083333432674408, 3: 0.6041666865348816, 4: 1.0, 5: 0.4375, 6: 0.8541666865348816}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.4583333432674408, 2: 0.3125, 3: 0.7083333730697632, 4: 1.0, 5: 0.9375, 6: 0.8541666865348816}
+  2%|▏         | 85/5590 [01:14<1:21:50,  1.12it/s]Epoch perc 0.015384615384615385
+Training epoch 1/1000, step 85: 	 
+Train loss:  1.7806930541992188
+Train accuracy:  {0: 0.1041666716337204, 1: 0.125, 2: 0.1666666716337204, 3: 0.5833333730697632, 4: 1.0, 5: 0.375, 6: 1.0}
+Train accuracy interval:  {0: 0.3125, 1: 0.4166666865348816, 2: 0.4166666865348816, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 1.0}
+  2%|▏         | 86/5590 [01:15<1:21:01,  1.13it/s]Epoch perc 0.015563506261180679
+Training epoch 1/1000, step 86: 	 
+Train loss:  1.9547609090805054
+Train accuracy:  {0: 0.0625, 1: 0.0833333358168602, 2: 0.125, 3: 0.6875, 4: 0.9375, 5: 0.3541666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.2708333432674408, 1: 0.3125, 2: 0.5208333730697632, 3: 0.75, 4: 1.0, 5: 0.9583333730697632, 6: 0.9791666865348816}
+  2%|▏         | 87/5590 [01:16<1:20:05,  1.15it/s]Epoch perc 0.015742397137745976
+Training epoch 1/1000, step 87: 	 
+Train loss:  1.771079421043396
+Train accuracy:  {0: 0.125, 1: 0.0416666679084301, 2: 0.25, 3: 0.5833333730697632, 4: 1.0, 5: 0.5833333730697632, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.375, 1: 0.4166666865348816, 2: 0.3541666865348816, 3: 0.625, 4: 1.0, 5: 1.0, 6: 0.9583333730697632}
+  2%|▏         | 88/5590 [01:17<1:18:50,  1.16it/s]Epoch perc 0.01592128801431127
+Training epoch 1/1000, step 88: 	 
+Train loss:  1.6861181259155273
+Train accuracy:  {0: 0.0833333358168602, 1: 0.1666666716337204, 2: 0.25, 3: 0.6458333730697632, 4: 1.0, 5: 0.3541666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.5, 2: 0.4791666865348816, 3: 0.7083333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 0.9583333730697632}
+  2%|▏         | 89/5590 [01:18<1:20:17,  1.14it/s]Epoch perc 0.016100178890876567
+Training epoch 1/1000, step 89: 	 
+Train loss:  1.6810382604599
+Train accuracy:  {0: 0.2291666716337204, 1: 0.0833333358168602, 2: 0.2083333432674408, 3: 0.6875, 4: 0.9791666865348816, 5: 0.4583333432674408, 6: 1.0}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.3958333432674408, 2: 0.4166666865348816, 3: 0.75, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  2%|▏         | 90/5590 [01:19<1:19:07,  1.16it/s]Epoch perc 0.01627906976744186
+Training epoch 1/1000, step 90: 	 
+Train loss:  1.7129603624343872
+Train accuracy:  {0: 0.1875, 1: 0.0833333358168602, 2: 0.2291666716337204, 3: 0.5416666865348816, 4: 1.0, 5: 0.6041666865348816, 6: 0.9375}
+Train accuracy interval:  {0: 0.4375, 1: 0.4375, 2: 0.5, 3: 0.6458333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 0.9375}
+  2%|▏         | 91/5590 [01:20<1:17:48,  1.18it/s]Epoch perc 0.016457960644007157
+Training epoch 1/1000, step 91: 	 
+Train loss:  1.6050081253051758
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2083333432674408, 2: 0.2708333432674408, 3: 0.6875, 4: 1.0, 5: 0.4791666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.5625, 2: 0.4791666865348816, 3: 0.7291666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 0.9583333730697632}
+  2%|▏         | 92/5590 [01:21<1:19:35,  1.15it/s]Epoch perc 0.01663685152057245
+Training epoch 1/1000, step 92: 	 
+Train loss:  1.7452608346939087
+Train accuracy:  {0: 0.1458333432674408, 1: 0.1041666716337204, 2: 0.2291666716337204, 3: 0.5833333730697632, 4: 1.0, 5: 0.6458333730697632, 6: 0.9166666865348816}
+Train accuracy interval:  {0: 0.2708333432674408, 1: 0.3125, 2: 0.4791666865348816, 3: 0.6666666865348816, 4: 1.0, 5: 0.8541666865348816, 6: 0.9166666865348816}
+  2%|▏         | 93/5590 [01:21<1:19:51,  1.15it/s]Epoch perc 0.016815742397137744
+Training epoch 1/1000, step 93: 	 
+Train loss:  1.6942644119262695
+Train accuracy:  {0: 0.1458333432674408, 1: 0.125, 2: 0.125, 3: 0.75, 4: 0.9791666865348816, 5: 0.4583333432674408, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.3541666865348816, 1: 0.3541666865348816, 2: 0.3958333432674408, 3: 0.8125, 4: 1.0, 5: 0.9791666865348816, 6: 0.9583333730697632}
+  2%|▏         | 94/5590 [01:22<1:18:48,  1.16it/s]Epoch perc 0.01699463327370304
+Training epoch 1/1000, step 94: 	 
+Train loss:  1.7463403940200806
+Train accuracy:  {0: 0.1458333432674408, 1: 0.125, 2: 0.2291666716337204, 3: 0.6458333730697632, 4: 0.875, 5: 0.5833333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.3958333432674408, 1: 0.375, 2: 0.5208333730697632, 3: 0.75, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  2%|▏         | 95/5590 [01:23<1:18:32,  1.17it/s]Epoch perc 0.017173524150268335
+Training epoch 1/1000, step 95: 	 
+Train loss:  1.6991719007492065
+Train accuracy:  {0: 0.2291666716337204, 1: 0.125, 2: 0.1666666716337204, 3: 0.7291666865348816, 4: 0.9583333730697632, 5: 0.625, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.2916666865348816, 2: 0.4166666865348816, 3: 0.7916666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 0.9791666865348816}
+  2%|▏         | 96/5590 [01:24<1:19:29,  1.15it/s]Epoch perc 0.017352415026833632
+Training epoch 1/1000, step 96: 	 
+Train loss:  1.6146398782730103
+Train accuracy:  {0: 0.1458333432674408, 1: 0.0833333358168602, 2: 0.2708333432674408, 3: 0.5208333730697632, 4: 0.9791666865348816, 5: 0.6875, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.4375, 2: 0.4791666865348816, 3: 0.6458333730697632, 4: 1.0, 5: 0.9583333730697632, 6: 0.9583333730697632}
+  2%|▏         | 97/5590 [01:25<1:20:03,  1.14it/s]Epoch perc 0.017531305903398926
+Training epoch 1/1000, step 97: 	 
+Train loss:  1.5731974840164185
+Train accuracy:  {0: 0.0416666679084301, 1: 0.1666666716337204, 2: 0.2916666865348816, 3: 0.6041666865348816, 4: 1.0, 5: 0.75, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.3333333432674408, 2: 0.5416666865348816, 3: 0.6666666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  2%|▏         | 98/5590 [01:26<1:20:25,  1.14it/s]Epoch perc 0.017710196779964223
+Training epoch 1/1000, step 98: 	 
+Train loss:  1.6160565614700317
+Train accuracy:  {0: 0.0833333358168602, 1: 0.0833333358168602, 2: 0.1875, 3: 0.5833333730697632, 4: 1.0, 5: 0.7291666865348816, 6: 0.9375}
+Train accuracy interval:  {0: 0.2916666865348816, 1: 0.3125, 2: 0.5833333730697632, 3: 0.5833333730697632, 4: 1.0, 5: 1.0, 6: 0.9375}
+  2%|▏         | 99/5590 [01:27<1:19:13,  1.16it/s]Epoch perc 0.017889087656529516
+Training epoch 1/1000, step 99: 	 
+Train loss:  1.5934717655181885
+Train accuracy:  {0: 0.1458333432674408, 1: 0.0625, 2: 0.2916666865348816, 3: 0.7708333730697632, 4: 0.9791666865348816, 5: 0.7083333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.3541666865348816, 1: 0.3541666865348816, 2: 0.5208333730697632, 3: 0.8125, 4: 1.0, 5: 0.9583333730697632, 6: 0.9791666865348816}
+  2%|▏         | 100/5590 [01:27<1:18:51,  1.16it/s]Epoch perc 0.018067978533094813
+Training epoch 1/1000, step 100: 	 
+Train loss:  1.6004244089126587
+Train accuracy:  {0: 0.2083333432674408, 1: 0.125, 2: 0.2916666865348816, 3: 0.6458333730697632, 4: 0.9583333730697632, 5: 0.5, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.5, 1: 0.4583333432674408, 2: 0.5416666865348816, 3: 0.7083333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 0.9583333730697632}
+  2%|▏         | 101/5590 [01:28<1:19:28,  1.15it/s]Epoch perc 0.018246869409660107
+Training epoch 1/1000, step 101: 	 
+Train loss:  1.7332496643066406
+Train accuracy:  {0: 0.1458333432674408, 1: 0.125, 2: 0.2708333432674408, 3: 0.625, 4: 0.9583333730697632, 5: 0.5, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.375, 1: 0.2708333432674408, 2: 0.5, 3: 0.6458333730697632, 4: 1.0, 5: 0.9375, 6: 0.9791666865348816}
+  2%|▏         | 102/5590 [01:29<1:20:27,  1.14it/s]Epoch perc 0.018425760286225404
+Training epoch 1/1000, step 102: 	 
+Train loss:  1.6309443712234497
+Train accuracy:  {0: 0.0625, 1: 0.125, 2: 0.1875, 3: 0.6875, 4: 0.9583333730697632, 5: 0.625, 6: 1.0}
+Train accuracy interval:  {0: 0.2708333432674408, 1: 0.4166666865348816, 2: 0.4375, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 1.0}
+  2%|▏         | 103/5590 [01:30<1:21:08,  1.13it/s]Epoch perc 0.018604651162790697
+Training epoch 1/1000, step 103: 	 
+Train loss:  1.6354455947875977
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1458333432674408, 2: 0.3125, 3: 0.5833333730697632, 4: 0.9375, 5: 0.5833333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.3125, 1: 0.3958333432674408, 2: 0.6041666865348816, 3: 0.6875, 4: 1.0, 5: 0.9375, 6: 0.9791666865348816}
+  2%|▏         | 104/5590 [01:31<1:21:48,  1.12it/s]Epoch perc 0.018783542039355994
+Training epoch 1/1000, step 104: 	 
+Train loss:  1.5816314220428467
+Train accuracy:  {0: 0.125, 1: 0.0833333358168602, 2: 0.3125, 3: 0.625, 4: 1.0, 5: 0.5625, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.3958333432674408, 1: 0.4375, 2: 0.5, 3: 0.6458333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  2%|▏         | 105/5590 [01:32<1:22:13,  1.11it/s]Epoch perc 0.018962432915921288
+Training epoch 1/1000, step 105: 	 
+Train loss:  1.7066514492034912
+Train accuracy:  {0: 0.125, 1: 0.1041666716337204, 2: 0.1875, 3: 0.625, 4: 0.9791666865348816, 5: 0.6666666865348816, 6: 0.9375}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.2916666865348816, 2: 0.4791666865348816, 3: 0.6666666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.9375}
+  2%|▏         | 106/5590 [01:33<1:20:01,  1.14it/s]Epoch perc 0.01914132379248658
+Training epoch 1/1000, step 106: 	 
+Train loss:  1.5579705238342285
+Train accuracy:  {0: 0.1875, 1: 0.2083333432674408, 2: 0.2708333432674408, 3: 0.5208333730697632, 4: 1.0, 5: 0.6041666865348816, 6: 0.9375}
+Train accuracy interval:  {0: 0.4375, 1: 0.4791666865348816, 2: 0.4791666865348816, 3: 0.5416666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.9375}
+  2%|▏         | 107/5590 [01:34<1:18:28,  1.16it/s]Epoch perc 0.01932021466905188
+Training epoch 1/1000, step 107: 	 
+Train loss:  1.6503560543060303
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1666666716337204, 2: 0.1458333432674408, 3: 0.6666666865348816, 4: 1.0, 5: 0.7291666865348816, 6: 0.7916666865348816}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.4166666865348816, 2: 0.3958333432674408, 3: 0.7083333730697632, 4: 1.0, 5: 0.9375, 6: 0.7916666865348816}
+  2%|▏         | 108/5590 [01:35<1:20:29,  1.14it/s]Epoch perc 0.019499105545617172
+Training epoch 1/1000, step 108: 	 
+Train loss:  1.4847204685211182
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1666666716337204, 2: 0.2291666716337204, 3: 0.5416666865348816, 4: 0.9791666865348816, 5: 0.8125, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.4583333432674408, 2: 0.5833333730697632, 3: 0.5833333730697632, 4: 1.0, 5: 1.0, 6: 0.9583333730697632}
+  2%|▏         | 109/5590 [01:35<1:21:19,  1.12it/s]Epoch perc 0.01967799642218247
+Training epoch 1/1000, step 109: 	 
+Train loss:  1.581390619277954
+Train accuracy:  {0: 0.0833333358168602, 1: 0.125, 2: 0.2291666716337204, 3: 0.7291666865348816, 4: 0.9791666865348816, 5: 0.6041666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.375, 1: 0.3958333432674408, 2: 0.5625, 3: 0.75, 4: 1.0, 5: 1.0, 6: 0.9583333730697632}
+  2%|▏         | 110/5590 [01:36<1:21:47,  1.12it/s]Epoch perc 0.019856887298747763
+Training epoch 1/1000, step 110: 	 
+Train loss:  1.5772870779037476
+Train accuracy:  {0: 0.0833333358168602, 1: 0.1875, 2: 0.375, 3: 0.6041666865348816, 4: 1.0, 5: 0.5208333730697632, 6: 0.9375}
+Train accuracy interval:  {0: 0.375, 1: 0.4375, 2: 0.5625, 3: 0.6458333730697632, 4: 1.0, 5: 1.0, 6: 0.9375}
+  2%|▏         | 111/5590 [01:37<1:20:41,  1.13it/s]Epoch perc 0.02003577817531306
+Training epoch 1/1000, step 111: 	 
+Train loss:  1.7214337587356567
+Train accuracy:  {0: 0.1041666716337204, 1: 0.1041666716337204, 2: 0.2916666865348816, 3: 0.5833333730697632, 4: 0.9791666865348816, 5: 0.7708333730697632, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.4166666865348816, 2: 0.5416666865348816, 3: 0.6458333730697632, 4: 1.0, 5: 0.9375, 6: 0.9583333730697632}
+  2%|▏         | 112/5590 [01:38<1:20:09,  1.14it/s]Epoch perc 0.020214669051878353
+Training epoch 1/1000, step 112: 	 
+Train loss:  1.693091630935669
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1666666716337204, 2: 0.2083333432674408, 3: 0.6041666865348816, 4: 0.9375, 5: 0.5208333730697632, 6: 0.9166666865348816}
+Train accuracy interval:  {0: 0.3125, 1: 0.4583333432674408, 2: 0.4375, 3: 0.6458333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 0.9166666865348816}
+  2%|▏         | 113/5590 [01:39<1:20:12,  1.14it/s]Epoch perc 0.02039355992844365
+Training epoch 1/1000, step 113: 	 
+Train loss:  1.645378828048706
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1666666716337204, 2: 0.2291666716337204, 3: 0.4583333432674408, 4: 0.9583333730697632, 5: 0.7916666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.3541666865348816, 1: 0.3958333432674408, 2: 0.6458333730697632, 3: 0.4583333432674408, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  2%|▏         | 114/5590 [01:40<1:18:55,  1.16it/s]Epoch perc 0.020572450805008944
+Training epoch 1/1000, step 114: 	 
+Train loss:  1.687414288520813
+Train accuracy:  {0: 0.0833333358168602, 1: 0.1666666716337204, 2: 0.2708333432674408, 3: 0.5833333730697632, 4: 0.9583333730697632, 5: 0.4166666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.25, 1: 0.4375, 2: 0.625, 3: 0.625, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  2%|▏         | 115/5590 [01:41<1:19:39,  1.15it/s]Epoch perc 0.02075134168157424
+Training epoch 1/1000, step 115: 	 
+Train loss:  1.388992190361023
+Train accuracy:  {0: 0.1875, 1: 0.1666666716337204, 2: 0.4375, 3: 0.6666666865348816, 4: 0.9791666865348816, 5: 0.6666666865348816, 6: 0.9375}
+Train accuracy interval:  {0: 0.375, 1: 0.4166666865348816, 2: 0.625, 3: 0.6666666865348816, 4: 1.0, 5: 1.0, 6: 0.9375}
+  2%|▏         | 116/5590 [01:42<1:19:06,  1.15it/s]Epoch perc 0.020930232558139535
+Training epoch 1/1000, step 116: 	 
+Train loss:  1.661042332649231
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1875, 2: 0.25, 3: 0.5208333730697632, 4: 0.9166666865348816, 5: 0.6666666865348816, 6: 0.9375}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.4375, 2: 0.4166666865348816, 3: 0.625, 4: 1.0, 5: 0.9375, 6: 0.9375}
+  2%|▏         | 117/5590 [01:42<1:18:30,  1.16it/s]Epoch perc 0.02110912343470483
+Training epoch 1/1000, step 117: 	 
+Train loss:  1.6090260744094849
+Train accuracy:  {0: 0.1041666716337204, 1: 0.1041666716337204, 2: 0.4583333432674408, 3: 0.5833333730697632, 4: 0.9791666865348816, 5: 0.5625, 6: 1.0}
+Train accuracy interval:  {0: 0.25, 1: 0.3541666865348816, 2: 0.7083333730697632, 3: 0.6458333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  2%|▏         | 118/5590 [01:43<1:18:14,  1.17it/s]Epoch perc 0.021288014311270125
+Training epoch 1/1000, step 118: 	 
+Train loss:  1.5795011520385742
+Train accuracy:  {0: 0.1041666716337204, 1: 0.2708333432674408, 2: 0.1458333432674408, 3: 0.75, 4: 1.0, 5: 0.6875, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.5833333730697632, 2: 0.4583333432674408, 3: 0.8541666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  2%|▏         | 119/5590 [01:44<1:19:20,  1.15it/s]Epoch perc 0.02146690518783542
+Training epoch 1/1000, step 119: 	 
+Train loss:  1.714961051940918
+Train accuracy:  {0: 0.1041666716337204, 1: 0.125, 2: 0.25, 3: 0.4375, 4: 1.0, 5: 0.5833333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.2083333432674408, 1: 0.3333333432674408, 2: 0.5625, 3: 0.4791666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  2%|▏         | 120/5590 [01:45<1:19:50,  1.14it/s]Epoch perc 0.021645796064400716
+Training epoch 1/1000, step 120: 	 
+Train loss:  1.602564811706543
+Train accuracy:  {0: 0.1458333432674408, 1: 0.125, 2: 0.25, 3: 0.5833333730697632, 4: 0.9583333730697632, 5: 0.5416666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.3125, 2: 0.6458333730697632, 3: 0.6875, 4: 1.0, 5: 0.9583333730697632, 6: 0.9583333730697632}
+  2%|▏         | 121/5590 [01:46<1:20:54,  1.13it/s]Epoch perc 0.02182468694096601
+Training epoch 1/1000, step 121: 	 
+Train loss:  1.491995930671692
+Train accuracy:  {0: 0.0833333358168602, 1: 0.1458333432674408, 2: 0.3125, 3: 0.7083333730697632, 4: 0.9791666865348816, 5: 0.8541666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.3125, 1: 0.4375, 2: 0.5625, 3: 0.7083333730697632, 4: 1.0, 5: 1.0, 6: 0.9583333730697632}
+  2%|▏         | 122/5590 [01:47<1:21:26,  1.12it/s]Epoch perc 0.022003577817531306
+Training epoch 1/1000, step 122: 	 
+Train loss:  1.587327480316162
+Train accuracy:  {0: 0.1041666716337204, 1: 0.1666666716337204, 2: 0.2708333432674408, 3: 0.6041666865348816, 4: 1.0, 5: 0.5833333730697632, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.4791666865348816, 2: 0.4375, 3: 0.6458333730697632, 4: 1.0, 5: 1.0, 6: 0.9583333730697632}
+  2%|▏         | 123/5590 [01:48<1:20:02,  1.14it/s]Epoch perc 0.0221824686940966
+Training epoch 1/1000, step 123: 	 
+Train loss:  1.736785888671875
+Train accuracy:  {0: 0.0416666679084301, 1: 0.1458333432674408, 2: 0.2083333432674408, 3: 0.625, 4: 0.9583333730697632, 5: 0.6875, 6: 1.0}
+Train accuracy interval:  {0: 0.1875, 1: 0.4375, 2: 0.6458333730697632, 3: 0.6458333730697632, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  2%|▏         | 124/5590 [01:48<1:18:37,  1.16it/s]Epoch perc 0.022361359570661897
+Training epoch 1/1000, step 124: 	 
+Train loss:  1.5336986780166626
+Train accuracy:  {0: 0.1041666716337204, 1: 0.1875, 2: 0.2083333432674408, 3: 0.7291666865348816, 4: 0.9583333730697632, 5: 0.7708333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.3541666865348816, 1: 0.4583333432674408, 2: 0.4583333432674408, 3: 0.7916666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  2%|▏         | 125/5590 [01:49<1:19:51,  1.14it/s]Epoch perc 0.02254025044722719
+Training epoch 1/1000, step 125: 	 
+Train loss:  1.6741890907287598
+Train accuracy:  {0: 0.1041666716337204, 1: 0.1041666716337204, 2: 0.25, 3: 0.5833333730697632, 4: 1.0, 5: 0.6875, 6: 1.0}
+Train accuracy interval:  {0: 0.2916666865348816, 1: 0.4166666865348816, 2: 0.5625, 3: 0.7291666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  2%|▏         | 126/5590 [01:50<1:20:34,  1.13it/s]Epoch perc 0.022719141323792488
+Training epoch 1/1000, step 126: 	 
+Train loss:  1.4810079336166382
+Train accuracy:  {0: 0.2291666716337204, 1: 0.3333333432674408, 2: 0.2708333432674408, 3: 0.6041666865348816, 4: 1.0, 5: 0.6666666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.6458333730697632, 2: 0.5833333730697632, 3: 0.6875, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  2%|▏         | 127/5590 [01:51<1:21:10,  1.12it/s]Epoch perc 0.02289803220035778
+Training epoch 1/1000, step 127: 	 
+Train loss:  1.5668195486068726
+Train accuracy:  {0: 0.0625, 1: 0.0625, 2: 0.2708333432674408, 3: 0.7083333730697632, 4: 1.0, 5: 0.375, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.2291666716337204, 1: 0.2916666865348816, 2: 0.7083333730697632, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  2%|▏         | 128/5590 [01:52<1:20:53,  1.13it/s]Epoch perc 0.023076923076923078
+Training epoch 1/1000, step 128: 	 
+Train loss:  1.6358909606933594
+Train accuracy:  {0: 0.0833333358168602, 1: 0.1041666716337204, 2: 0.3541666865348816, 3: 0.5625, 4: 0.9791666865348816, 5: 0.625, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.3541666865348816, 1: 0.3541666865348816, 2: 0.5833333730697632, 3: 0.5833333730697632, 4: 1.0, 5: 1.0, 6: 0.9583333730697632}
+  2%|▏         | 129/5590 [01:53<1:19:47,  1.14it/s]Epoch perc 0.023255813953488372
+Training epoch 1/1000, step 129: 	 
+Train loss:  1.6897083520889282
+Train accuracy:  {0: 0.1041666716337204, 1: 0.0416666679084301, 2: 0.3125, 3: 0.5833333730697632, 4: 1.0, 5: 0.7083333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.3125, 1: 0.2291666716337204, 2: 0.6458333730697632, 3: 0.625, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  2%|▏         | 130/5590 [01:54<1:19:06,  1.15it/s]Epoch perc 0.02343470483005367
+Training epoch 1/1000, step 130: 	 
+Train loss:  1.58168625831604
+Train accuracy:  {0: 0.2291666716337204, 1: 0.2083333432674408, 2: 0.2083333432674408, 3: 0.6875, 4: 0.9375, 5: 0.5416666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5, 1: 0.4375, 2: 0.5833333730697632, 3: 0.8333333730697632, 4: 1.0, 5: 0.8958333730697632, 6: 0.9791666865348816}
+  2%|▏         | 131/5590 [01:55<1:20:41,  1.13it/s]Epoch perc 0.023613595706618962
+Training epoch 1/1000, step 131: 	 
+Train loss:  1.6730475425720215
+Train accuracy:  {0: 0.125, 1: 0.1875, 2: 0.2083333432674408, 3: 0.6458333730697632, 4: 0.9375, 5: 0.4166666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.3958333432674408, 1: 0.4375, 2: 0.5208333730697632, 3: 0.7083333730697632, 4: 1.0, 5: 0.9583333730697632, 6: 0.9583333730697632}
+  2%|▏         | 132/5590 [01:56<1:19:59,  1.14it/s]Epoch perc 0.023792486583184256
+Training epoch 1/1000, step 132: 	 
+Train loss:  1.5643701553344727
+Train accuracy:  {0: 0.1041666716337204, 1: 0.1458333432674408, 2: 0.2708333432674408, 3: 0.625, 4: 1.0, 5: 0.625, 6: 1.0}
+Train accuracy interval:  {0: 0.3958333432674408, 1: 0.5208333730697632, 2: 0.625, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  2%|▏         | 133/5590 [01:56<1:18:51,  1.15it/s]Epoch perc 0.023971377459749553
+Training epoch 1/1000, step 133: 	 
+Train loss:  1.5732868909835815
+Train accuracy:  {0: 0.125, 1: 0.125, 2: 0.3125, 3: 0.7291666865348816, 4: 0.9791666865348816, 5: 0.6875, 6: 1.0}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.375, 2: 0.5416666865348816, 3: 0.7708333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  2%|▏         | 134/5590 [01:57<1:18:19,  1.16it/s]Epoch perc 0.024150268336314847
+Training epoch 1/1000, step 134: 	 
+Train loss:  1.5190808773040771
+Train accuracy:  {0: 0.1458333432674408, 1: 0.1041666716337204, 2: 0.3958333432674408, 3: 0.7083333730697632, 4: 1.0, 5: 0.5, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.375, 1: 0.4166666865348816, 2: 0.7083333730697632, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  2%|▏         | 135/5590 [01:58<1:17:51,  1.17it/s]Epoch perc 0.024329159212880144
+Training epoch 1/1000, step 135: 	 
+Train loss:  1.5202051401138306
+Train accuracy:  {0: 0.1458333432674408, 1: 0.0625, 2: 0.2916666865348816, 3: 0.5625, 4: 0.9166666865348816, 5: 0.5416666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.3958333432674408, 1: 0.4791666865348816, 2: 0.6458333730697632, 3: 0.625, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  2%|▏         | 136/5590 [01:59<1:18:00,  1.17it/s]Epoch perc 0.024508050089445437
+Training epoch 1/1000, step 136: 	 
+Train loss:  1.7008123397827148
+Train accuracy:  {0: 0.1041666716337204, 1: 0.125, 2: 0.3541666865348816, 3: 0.5208333730697632, 4: 0.8958333730697632, 5: 0.625, 6: 1.0}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.3958333432674408, 2: 0.6041666865348816, 3: 0.5833333730697632, 4: 1.0, 5: 0.875, 6: 1.0}
+  2%|▏         | 137/5590 [02:00<1:17:24,  1.17it/s]Epoch perc 0.024686940966010734
+Training epoch 1/1000, step 137: 	 
+Train loss:  1.5574402809143066
+Train accuracy:  {0: 0.1458333432674408, 1: 0.0625, 2: 0.3125, 3: 0.5208333730697632, 4: 0.9791666865348816, 5: 0.6041666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.3125, 1: 0.3958333432674408, 2: 0.625, 3: 0.5833333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  2%|▏         | 138/5590 [02:01<1:16:42,  1.18it/s]Epoch perc 0.024865831842576028
+Training epoch 1/1000, step 138: 	 
+Train loss:  1.498140573501587
+Train accuracy:  {0: 0.2708333432674408, 1: 0.1666666716337204, 2: 0.3333333432674408, 3: 0.75, 4: 0.9791666865348816, 5: 0.6458333730697632, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.4791666865348816, 2: 0.5416666865348816, 3: 0.8125, 4: 1.0, 5: 0.9583333730697632, 6: 0.9583333730697632}
+  2%|▏         | 139/5590 [02:01<1:16:15,  1.19it/s]Epoch perc 0.025044722719141325
+Training epoch 1/1000, step 139: 	 
+Train loss:  1.392907977104187
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1666666716337204, 2: 0.3541666865348816, 3: 0.7708333730697632, 4: 0.9166666865348816, 5: 0.6041666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.5625, 2: 0.7083333730697632, 3: 0.7916666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 140/5590 [02:02<1:17:14,  1.18it/s]Epoch perc 0.02522361359570662
+Training epoch 1/1000, step 140: 	 
+Train loss:  1.6259124279022217
+Train accuracy:  {0: 0.1875, 1: 0.1458333432674408, 2: 0.2916666865348816, 3: 0.6458333730697632, 4: 0.9791666865348816, 5: 0.7708333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.2916666865348816, 1: 0.4375, 2: 0.5, 3: 0.6666666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  3%|▎         | 141/5590 [02:03<1:16:44,  1.18it/s]Epoch perc 0.025402504472271915
+Training epoch 1/1000, step 141: 	 
+Train loss:  1.4890823364257812
+Train accuracy:  {0: 0.2083333432674408, 1: 0.125, 2: 0.2708333432674408, 3: 0.7083333730697632, 4: 1.0, 5: 0.7083333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5, 1: 0.3541666865348816, 2: 0.5625, 3: 0.7291666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 142/5590 [02:04<1:16:10,  1.19it/s]Epoch perc 0.02558139534883721
+Training epoch 1/1000, step 142: 	 
+Train loss:  1.475347638130188
+Train accuracy:  {0: 0.2708333432674408, 1: 0.125, 2: 0.3333333432674408, 3: 0.7708333730697632, 4: 0.9375, 5: 0.6666666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.5625, 2: 0.5208333730697632, 3: 0.8125, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  3%|▎         | 143/5590 [02:05<1:16:48,  1.18it/s]Epoch perc 0.025760286225402506
+Training epoch 1/1000, step 143: 	 
+Train loss:  1.5168876647949219
+Train accuracy:  {0: 0.2708333432674408, 1: 0.1875, 2: 0.3125, 3: 0.5625, 4: 0.9375, 5: 0.5416666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5, 1: 0.5208333730697632, 2: 0.6666666865348816, 3: 0.5625, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  3%|▎         | 144/5590 [02:06<1:17:11,  1.18it/s]Epoch perc 0.0259391771019678
+Training epoch 1/1000, step 144: 	 
+Train loss:  1.490557074546814
+Train accuracy:  {0: 0.0625, 1: 0.0833333358168602, 2: 0.5625, 3: 0.5, 4: 0.9791666865348816, 5: 0.6875, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.2083333432674408, 1: 0.375, 2: 0.7916666865348816, 3: 0.5208333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  3%|▎         | 145/5590 [02:07<1:19:02,  1.15it/s]Epoch perc 0.026118067978533093
+Training epoch 1/1000, step 145: 	 
+Train loss:  1.500514268875122
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1666666716337204, 2: 0.3333333432674408, 3: 0.625, 4: 1.0, 5: 0.6041666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.4375, 1: 0.4791666865348816, 2: 0.625, 3: 0.7291666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.9583333730697632}
+  3%|▎         | 146/5590 [02:07<1:18:27,  1.16it/s]Epoch perc 0.02629695885509839
+Training epoch 1/1000, step 146: 	 
+Train loss:  1.4985992908477783
+Train accuracy:  {0: 0.2916666865348816, 1: 0.125, 2: 0.4583333432674408, 3: 0.6666666865348816, 4: 1.0, 5: 0.6041666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.5208333730697632, 2: 0.6041666865348816, 3: 0.7291666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 147/5590 [02:08<1:17:28,  1.17it/s]Epoch perc 0.026475849731663684
+Training epoch 1/1000, step 147: 	 
+Train loss:  1.488167405128479
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1875, 2: 0.3125, 3: 0.6458333730697632, 4: 1.0, 5: 0.7291666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.4375, 2: 0.625, 3: 0.6458333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  3%|▎         | 148/5590 [02:09<1:18:42,  1.15it/s]Epoch perc 0.02665474060822898
+Training epoch 1/1000, step 148: 	 
+Train loss:  1.5147799253463745
+Train accuracy:  {0: 0.3125, 1: 0.1458333432674408, 2: 0.2916666865348816, 3: 0.625, 4: 0.9375, 5: 0.4583333432674408, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5, 1: 0.5416666865348816, 2: 0.5833333730697632, 3: 0.6666666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  3%|▎         | 149/5590 [02:10<1:18:38,  1.15it/s]Epoch perc 0.026833631484794274
+Training epoch 1/1000, step 149: 	 
+Train loss:  1.4518519639968872
+Train accuracy:  {0: 0.2291666716337204, 1: 0.2916666865348816, 2: 0.2291666716337204, 3: 0.6458333730697632, 4: 0.9791666865348816, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.3958333432674408, 1: 0.5833333730697632, 2: 0.75, 3: 0.7291666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 150/5590 [02:11<1:18:14,  1.16it/s]Epoch perc 0.02701252236135957
+Training epoch 1/1000, step 150: 	 
+Train loss:  1.4480924606323242
+Train accuracy:  {0: 0.1875, 1: 0.25, 2: 0.2708333432674408, 3: 0.6458333730697632, 4: 0.9583333730697632, 5: 0.6875, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.3541666865348816, 1: 0.5625, 2: 0.6041666865348816, 3: 0.75, 4: 1.0, 5: 0.9375, 6: 0.9791666865348816}
+  3%|▎         | 151/5590 [02:12<1:19:18,  1.14it/s]Epoch perc 0.027191413237924865
+Training epoch 1/1000, step 151: 	 
+Train loss:  1.5203726291656494
+Train accuracy:  {0: 0.1666666716337204, 1: 0.1041666716337204, 2: 0.3333333432674408, 3: 0.6041666865348816, 4: 0.9791666865348816, 5: 0.7083333730697632, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.3958333432674408, 1: 0.4375, 2: 0.7291666865348816, 3: 0.6875, 4: 1.0, 5: 0.9791666865348816, 6: 0.9583333730697632}
+  3%|▎         | 152/5590 [02:13<1:18:52,  1.15it/s]Epoch perc 0.027370304114490162
+Training epoch 1/1000, step 152: 	 
+Train loss:  1.4689662456512451
+Train accuracy:  {0: 0.125, 1: 0.2291666716337204, 2: 0.3125, 3: 0.5833333730697632, 4: 0.9791666865348816, 5: 0.6875, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.5833333730697632, 2: 0.6458333730697632, 3: 0.6458333730697632, 4: 1.0, 5: 0.9583333730697632, 6: 0.9791666865348816}
+  3%|▎         | 153/5590 [02:14<1:18:33,  1.15it/s]Epoch perc 0.027549194991055456
+Training epoch 1/1000, step 153: 	 
+Train loss:  1.4555851221084595
+Train accuracy:  {0: 0.2916666865348816, 1: 0.2291666716337204, 2: 0.25, 3: 0.6041666865348816, 4: 1.0, 5: 0.7916666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.375, 2: 0.6041666865348816, 3: 0.75, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  3%|▎         | 154/5590 [02:14<1:17:00,  1.18it/s]Epoch perc 0.027728085867620753
+Training epoch 1/1000, step 154: 	 
+Train loss:  1.5488660335540771
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1041666716337204, 2: 0.375, 3: 0.6458333730697632, 4: 0.9166666865348816, 5: 0.6041666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.3958333432674408, 1: 0.375, 2: 0.6458333730697632, 3: 0.75, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  3%|▎         | 155/5590 [02:15<1:15:43,  1.20it/s]Epoch perc 0.027906976744186046
+Training epoch 1/1000, step 155: 	 
+Train loss:  1.5003317594528198
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1875, 2: 0.375, 3: 0.7708333730697632, 4: 0.9583333730697632, 5: 0.6875, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.3958333432674408, 1: 0.5208333730697632, 2: 0.6041666865348816, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  3%|▎         | 156/5590 [02:16<1:15:47,  1.19it/s]Epoch perc 0.028085867620751343
+Training epoch 1/1000, step 156: 	 
+Train loss:  1.5260637998580933
+Train accuracy:  {0: 0.1458333432674408, 1: 0.1458333432674408, 2: 0.3958333432674408, 3: 0.5208333730697632, 4: 0.9791666865348816, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.2083333432674408, 1: 0.3125, 2: 0.625, 3: 0.5625, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  3%|▎         | 157/5590 [02:17<1:17:13,  1.17it/s]Epoch perc 0.028264758497316637
+Training epoch 1/1000, step 157: 	 
+Train loss:  1.5240458250045776
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1875, 2: 0.2291666716337204, 3: 0.75, 4: 1.0, 5: 0.6458333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.375, 2: 0.4375, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  3%|▎         | 158/5590 [02:18<1:19:18,  1.14it/s]Epoch perc 0.02844364937388193
+Training epoch 1/1000, step 158: 	 
+Train loss:  1.6155312061309814
+Train accuracy:  {0: 0.0833333358168602, 1: 0.1041666716337204, 2: 0.3541666865348816, 3: 0.625, 4: 0.9791666865348816, 5: 0.6666666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.3125, 1: 0.375, 2: 0.625, 3: 0.6458333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 159/5590 [02:19<1:20:36,  1.12it/s]Epoch perc 0.028622540250447227
+Training epoch 1/1000, step 159: 	 
+Train loss:  1.381653070449829
+Train accuracy:  {0: 0.125, 1: 0.2291666716337204, 2: 0.3333333432674408, 3: 0.75, 4: 1.0, 5: 0.5208333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.3958333432674408, 2: 0.7291666865348816, 3: 0.7708333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 160/5590 [02:20<1:20:55,  1.12it/s]Epoch perc 0.02880143112701252
+Training epoch 1/1000, step 160: 	 
+Train loss:  1.4911328554153442
+Train accuracy:  {0: 0.1041666716337204, 1: 0.25, 2: 0.3333333432674408, 3: 0.6666666865348816, 4: 1.0, 5: 0.7083333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.5208333730697632, 2: 0.625, 3: 0.6666666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 161/5590 [02:21<1:21:26,  1.11it/s]Epoch perc 0.028980322003577818
+Training epoch 1/1000, step 161: 	 
+Train loss:  1.3374862670898438
+Train accuracy:  {0: 0.1666666716337204, 1: 0.1875, 2: 0.3541666865348816, 3: 0.7291666865348816, 4: 0.9791666865348816, 5: 0.7708333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.6666666865348816, 2: 0.6458333730697632, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  3%|▎         | 162/5590 [02:21<1:19:47,  1.13it/s]Epoch perc 0.02915921288014311
+Training epoch 1/1000, step 162: 	 
+Train loss:  1.587257742881775
+Train accuracy:  {0: 0.125, 1: 0.1875, 2: 0.2916666865348816, 3: 0.625, 4: 0.9375, 5: 0.6458333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.5833333730697632, 2: 0.5, 3: 0.6666666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 0.9791666865348816}
+  3%|▎         | 163/5590 [02:22<1:18:23,  1.15it/s]Epoch perc 0.02933810375670841
+Training epoch 1/1000, step 163: 	 
+Train loss:  1.373543381690979
+Train accuracy:  {0: 0.2708333432674408, 1: 0.2083333432674408, 2: 0.3958333432674408, 3: 0.6458333730697632, 4: 0.9791666865348816, 5: 0.6666666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.5, 2: 0.625, 3: 0.6875, 4: 1.0, 5: 0.9791666865348816, 6: 0.9583333730697632}
+  3%|▎         | 164/5590 [02:23<1:18:02,  1.16it/s]Epoch perc 0.029516994633273702
+Training epoch 1/1000, step 164: 	 
+Train loss:  1.556528925895691
+Train accuracy:  {0: 0.0625, 1: 0.125, 2: 0.25, 3: 0.6041666865348816, 4: 0.9583333730697632, 5: 0.6875, 6: 1.0}
+Train accuracy interval:  {0: 0.375, 1: 0.3125, 2: 0.625, 3: 0.6875, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 165/5590 [02:24<1:19:40,  1.13it/s]Epoch perc 0.029695885509839
+Training epoch 1/1000, step 165: 	 
+Train loss:  1.4884036779403687
+Train accuracy:  {0: 0.1666666716337204, 1: 0.1875, 2: 0.375, 3: 0.6875, 4: 0.9583333730697632, 5: 0.6458333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.375, 1: 0.5416666865348816, 2: 0.6458333730697632, 3: 0.8125, 4: 1.0, 5: 0.9583333730697632, 6: 0.9791666865348816}
+  3%|▎         | 166/5590 [02:25<1:18:52,  1.15it/s]Epoch perc 0.029874776386404293
+Training epoch 1/1000, step 166: 	 
+Train loss:  1.593831181526184
+Train accuracy:  {0: 0.125, 1: 0.2083333432674408, 2: 0.25, 3: 0.6875, 4: 1.0, 5: 0.75, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.3541666865348816, 1: 0.5416666865348816, 2: 0.6458333730697632, 3: 0.75, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  3%|▎         | 167/5590 [02:26<1:18:02,  1.16it/s]Epoch perc 0.03005366726296959
+Training epoch 1/1000, step 167: 	 
+Train loss:  1.3854544162750244
+Train accuracy:  {0: 0.1458333432674408, 1: 0.0625, 2: 0.3125, 3: 0.8125, 4: 0.9791666865348816, 5: 0.8333333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.375, 1: 0.3125, 2: 0.6458333730697632, 3: 0.875, 4: 1.0, 5: 1.0, 6: 1.0}
+  3%|▎         | 168/5590 [02:27<1:17:03,  1.17it/s]Epoch perc 0.030232558139534883
+Training epoch 1/1000, step 168: 	 
+Train loss:  1.415879726409912
+Train accuracy:  {0: 0.2083333432674408, 1: 0.125, 2: 0.2916666865348816, 3: 0.5416666865348816, 4: 1.0, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.4583333432674408, 2: 0.6458333730697632, 3: 0.5833333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 169/5590 [02:28<1:24:32,  1.07it/s]Epoch perc 0.03041144901610018
+Training epoch 1/1000, step 169: 	 
+Train loss:  1.241555094718933
+Train accuracy:  {0: 0.2708333432674408, 1: 0.2916666865348816, 2: 0.3958333432674408, 3: 0.75, 4: 1.0, 5: 0.6666666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.6458333730697632, 2: 0.7083333730697632, 3: 0.8333333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  3%|▎         | 170/5590 [02:29<1:23:15,  1.08it/s]Epoch perc 0.030590339892665474
+Training epoch 1/1000, step 170: 	 
+Train loss:  1.3159343004226685
+Train accuracy:  {0: 0.1875, 1: 0.1458333432674408, 2: 0.4583333432674408, 3: 0.7916666865348816, 4: 1.0, 5: 0.6875, 6: 1.0}
+Train accuracy interval:  {0: 0.375, 1: 0.5625, 2: 0.6875, 3: 0.8125, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 171/5590 [02:29<1:21:08,  1.11it/s]Epoch perc 0.03076923076923077
+Training epoch 1/1000, step 171: 	 
+Train loss:  1.4823694229125977
+Train accuracy:  {0: 0.0833333358168602, 1: 0.125, 2: 0.3125, 3: 0.5625, 4: 0.9583333730697632, 5: 0.7708333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.3125, 1: 0.4375, 2: 0.6458333730697632, 3: 0.5833333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  3%|▎         | 172/5590 [02:30<1:20:43,  1.12it/s]Epoch perc 0.030948121645796065
+Training epoch 1/1000, step 172: 	 
+Train loss:  1.5183031558990479
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1666666716337204, 2: 0.375, 3: 0.5625, 4: 0.9791666865348816, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.4166666865348816, 2: 0.6666666865348816, 3: 0.5625, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  3%|▎         | 173/5590 [02:31<1:21:09,  1.11it/s]Epoch perc 0.031127012522361358
+Training epoch 1/1000, step 173: 	 
+Train loss:  1.5766545534133911
+Train accuracy:  {0: 0.2916666865348816, 1: 0.1458333432674408, 2: 0.3333333432674408, 3: 0.6458333730697632, 4: 0.8958333730697632, 5: 0.5625, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.3958333432674408, 1: 0.5416666865348816, 2: 0.625, 3: 0.8541666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  3%|▎         | 174/5590 [02:32<1:21:09,  1.11it/s]Epoch perc 0.03130590339892665
+Training epoch 1/1000, step 174: 	 
+Train loss:  1.4643545150756836
+Train accuracy:  {0: 0.25, 1: 0.2083333432674408, 2: 0.3958333432674408, 3: 0.5416666865348816, 4: 1.0, 5: 0.6666666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.5, 1: 0.5, 2: 0.5625, 3: 0.6041666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.9583333730697632}
+  3%|▎         | 175/5590 [02:33<1:20:54,  1.12it/s]Epoch perc 0.03148479427549195
+Training epoch 1/1000, step 175: 	 
+Train loss:  1.5231584310531616
+Train accuracy:  {0: 0.1458333432674408, 1: 0.1458333432674408, 2: 0.2916666865348816, 3: 0.7083333730697632, 4: 0.9791666865348816, 5: 0.6458333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.4375, 1: 0.5208333730697632, 2: 0.6875, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  3%|▎         | 176/5590 [02:34<1:21:01,  1.11it/s]Epoch perc 0.031663685152057246
+Training epoch 1/1000, step 176: 	 
+Train loss:  1.2212858200073242
+Train accuracy:  {0: 0.3541666865348816, 1: 0.2083333432674408, 2: 0.4791666865348816, 3: 0.6041666865348816, 4: 0.9791666865348816, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.4583333432674408, 2: 0.7083333730697632, 3: 0.625, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 177/5590 [02:35<1:19:35,  1.13it/s]Epoch perc 0.03184257602862254
+Training epoch 1/1000, step 177: 	 
+Train loss:  1.3856970071792603
+Train accuracy:  {0: 0.1458333432674408, 1: 0.1875, 2: 0.3333333432674408, 3: 0.7916666865348816, 4: 0.9791666865348816, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.5208333730697632, 2: 0.6041666865348816, 3: 0.8541666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 178/5590 [02:36<1:18:40,  1.15it/s]Epoch perc 0.03202146690518783
+Training epoch 1/1000, step 178: 	 
+Train loss:  1.393483281135559
+Train accuracy:  {0: 0.25, 1: 0.25, 2: 0.375, 3: 0.6041666865348816, 4: 0.9583333730697632, 5: 0.6875, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.6041666865348816, 1: 0.6875, 2: 0.6458333730697632, 3: 0.625, 4: 1.0, 5: 0.9791666865348816, 6: 0.9583333730697632}
+  3%|▎         | 179/5590 [02:36<1:17:31,  1.16it/s]Epoch perc 0.03220035778175313
+Training epoch 1/1000, step 179: 	 
+Train loss:  1.290663719177246
+Train accuracy:  {0: 0.2083333432674408, 1: 0.25, 2: 0.3333333432674408, 3: 0.7083333730697632, 4: 0.9583333730697632, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.6666666865348816, 2: 0.5833333730697632, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  3%|▎         | 180/5590 [02:37<1:18:29,  1.15it/s]Epoch perc 0.03237924865831843
+Training epoch 1/1000, step 180: 	 
+Train loss:  1.5813920497894287
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1666666716337204, 2: 0.3125, 3: 0.6041666865348816, 4: 0.9166666865348816, 5: 0.5, 6: 1.0}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.4375, 2: 0.8541666865348816, 3: 0.6666666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 181/5590 [02:38<1:18:55,  1.14it/s]Epoch perc 0.03255813953488372
+Training epoch 1/1000, step 181: 	 
+Train loss:  1.4013348817825317
+Train accuracy:  {0: 0.2708333432674408, 1: 0.2916666865348816, 2: 0.3541666865348816, 3: 0.6041666865348816, 4: 0.9791666865348816, 5: 0.6666666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.5833333730697632, 2: 0.625, 3: 0.7708333730697632, 4: 1.0, 5: 0.9583333730697632, 6: 0.9583333730697632}
+  3%|▎         | 182/5590 [02:39<1:18:01,  1.16it/s]Epoch perc 0.032737030411449014
+Training epoch 1/1000, step 182: 	 
+Train loss:  1.526990294456482
+Train accuracy:  {0: 0.2916666865348816, 1: 0.125, 2: 0.3333333432674408, 3: 0.5, 4: 0.9166666865348816, 5: 0.625, 6: 1.0}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.5416666865348816, 2: 0.6666666865348816, 3: 0.5625, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 183/5590 [02:40<1:17:20,  1.17it/s]Epoch perc 0.032915921288014315
+Training epoch 1/1000, step 183: 	 
+Train loss:  1.3317729234695435
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2083333432674408, 2: 0.3125, 3: 0.6666666865348816, 4: 0.9375, 5: 0.6666666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5, 1: 0.5416666865348816, 2: 0.6875, 3: 0.7291666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  3%|▎         | 184/5590 [02:41<1:18:39,  1.15it/s]Epoch perc 0.03309481216457961
+Training epoch 1/1000, step 184: 	 
+Train loss:  1.4340078830718994
+Train accuracy:  {0: 0.1458333432674408, 1: 0.1666666716337204, 2: 0.3125, 3: 0.6875, 4: 0.9791666865348816, 5: 0.6458333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.3958333432674408, 1: 0.4791666865348816, 2: 0.7916666865348816, 3: 0.7291666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 185/5590 [02:42<1:17:49,  1.16it/s]Epoch perc 0.0332737030411449
+Training epoch 1/1000, step 185: 	 
+Train loss:  1.4043047428131104
+Train accuracy:  {0: 0.1666666716337204, 1: 0.2083333432674408, 2: 0.25, 3: 0.8333333730697632, 4: 1.0, 5: 0.6666666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.5416666865348816, 2: 0.6041666865348816, 3: 0.9166666865348816, 4: 1.0, 5: 1.0, 6: 0.9583333730697632}
+  3%|▎         | 186/5590 [02:42<1:16:42,  1.17it/s]Epoch perc 0.033452593917710195
+Training epoch 1/1000, step 186: 	 
+Train loss:  1.4225850105285645
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1666666716337204, 2: 0.3333333432674408, 3: 0.6666666865348816, 4: 0.9583333730697632, 5: 0.6041666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.5208333730697632, 2: 0.625, 3: 0.7083333730697632, 4: 1.0, 5: 0.9375, 6: 0.9791666865348816}
+  3%|▎         | 187/5590 [02:43<1:16:36,  1.18it/s]Epoch perc 0.03363148479427549
+Training epoch 1/1000, step 187: 	 
+Train loss:  1.5052671432495117
+Train accuracy:  {0: 0.25, 1: 0.1666666716337204, 2: 0.3541666865348816, 3: 0.6666666865348816, 4: 0.9583333730697632, 5: 0.7916666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5625, 1: 0.4166666865348816, 2: 0.625, 3: 0.75, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  3%|▎         | 188/5590 [02:44<1:16:45,  1.17it/s]Epoch perc 0.03381037567084079
+Training epoch 1/1000, step 188: 	 
+Train loss:  1.3409762382507324
+Train accuracy:  {0: 0.2916666865348816, 1: 0.1041666716337204, 2: 0.3958333432674408, 3: 0.7291666865348816, 4: 0.9583333730697632, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.5625, 2: 0.5833333730697632, 3: 0.8125, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  3%|▎         | 189/5590 [02:45<1:16:42,  1.17it/s]Epoch perc 0.03398926654740608
+Training epoch 1/1000, step 189: 	 
+Train loss:  1.4302006959915161
+Train accuracy:  {0: 0.1041666716337204, 1: 0.125, 2: 0.2916666865348816, 3: 0.6458333730697632, 4: 1.0, 5: 0.6458333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.2708333432674408, 1: 0.3958333432674408, 2: 0.6458333730697632, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 1.0}
+  3%|▎         | 190/5590 [02:46<1:16:57,  1.17it/s]Epoch perc 0.034168157423971376
+Training epoch 1/1000, step 190: 	 
+Train loss:  1.4030301570892334
+Train accuracy:  {0: 0.1875, 1: 0.2291666716337204, 2: 0.2291666716337204, 3: 0.6875, 4: 1.0, 5: 0.3958333432674408, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.6041666865348816, 2: 0.6875, 3: 0.7083333730697632, 4: 1.0, 5: 0.9375, 6: 0.9791666865348816}
+  3%|▎         | 191/5590 [02:47<1:16:35,  1.17it/s]Epoch perc 0.03434704830053667
+Training epoch 1/1000, step 191: 	 
+Train loss:  1.42133367061615
+Train accuracy:  {0: 0.125, 1: 0.1875, 2: 0.25, 3: 0.6041666865348816, 4: 0.9583333730697632, 5: 0.5625, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.6041666865348816, 2: 0.4375, 3: 0.6041666865348816, 4: 1.0, 5: 1.0, 6: 0.9583333730697632}
+  3%|▎         | 192/5590 [02:48<1:16:08,  1.18it/s]Epoch perc 0.03452593917710197
+Training epoch 1/1000, step 192: 	 
+Train loss:  1.134817361831665
+Train accuracy:  {0: 0.2708333432674408, 1: 0.25, 2: 0.4583333432674408, 3: 0.7083333730697632, 4: 1.0, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.5625, 2: 0.7083333730697632, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  3%|▎         | 193/5590 [02:48<1:17:12,  1.17it/s]Epoch perc 0.034704830053667264
+Training epoch 1/1000, step 193: 	 
+Train loss:  1.3791018724441528
+Train accuracy:  {0: 0.2291666716337204, 1: 0.2083333432674408, 2: 0.3958333432674408, 3: 0.5833333730697632, 4: 0.9583333730697632, 5: 0.625, 6: 1.0}
+Train accuracy interval:  {0: 0.6875, 1: 0.4791666865348816, 2: 0.5, 3: 0.5833333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  3%|▎         | 194/5590 [02:49<1:17:51,  1.16it/s]Epoch perc 0.03488372093023256
+Training epoch 1/1000, step 194: 	 
+Train loss:  1.2560697793960571
+Train accuracy:  {0: 0.2708333432674408, 1: 0.25, 2: 0.375, 3: 0.7083333730697632, 4: 1.0, 5: 0.5208333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5, 1: 0.5833333730697632, 2: 0.7083333730697632, 3: 0.7291666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  3%|▎         | 195/5590 [02:50<1:18:10,  1.15it/s]Epoch perc 0.03506261180679785
+Training epoch 1/1000, step 195: 	 
+Train loss:  1.3373314142227173
+Train accuracy:  {0: 0.3125, 1: 0.1666666716337204, 2: 0.4791666865348816, 3: 0.6666666865348816, 4: 1.0, 5: 0.5625, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.4791666865348816, 2: 0.7083333730697632, 3: 0.75, 4: 1.0, 5: 0.9583333730697632, 6: 0.9791666865348816}
+  4%|▎         | 196/5590 [02:51<1:17:27,  1.16it/s]Epoch perc 0.03524150268336315
+Training epoch 1/1000, step 196: 	 
+Train loss:  1.3965551853179932
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2083333432674408, 2: 0.3125, 3: 0.5625, 4: 1.0, 5: 0.4791666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5, 1: 0.625, 2: 0.6041666865348816, 3: 0.625, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  4%|▎         | 197/5590 [02:52<1:16:39,  1.17it/s]Epoch perc 0.035420393559928445
+Training epoch 1/1000, step 197: 	 
+Train loss:  1.312146782875061
+Train accuracy:  {0: 0.1666666716337204, 1: 0.2291666716337204, 2: 0.3958333432674408, 3: 0.6666666865348816, 4: 1.0, 5: 0.7708333730697632, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.5, 2: 0.75, 3: 0.75, 4: 1.0, 5: 1.0, 6: 0.9583333730697632}
+  4%|▎         | 198/5590 [02:53<1:17:15,  1.16it/s]Epoch perc 0.03559928443649374
+Training epoch 1/1000, step 198: 	 
+Train loss:  1.4017539024353027
+Train accuracy:  {0: 0.1875, 1: 0.2083333432674408, 2: 0.3541666865348816, 3: 0.5208333730697632, 4: 0.9375, 5: 0.75, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.4166666865348816, 2: 0.5833333730697632, 3: 0.5833333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  4%|▎         | 199/5590 [02:54<1:16:25,  1.18it/s]Epoch perc 0.03577817531305903
+Training epoch 1/1000, step 199: 	 
+Train loss:  1.3012722730636597
+Train accuracy:  {0: 0.2708333432674408, 1: 0.3125, 2: 0.375, 3: 0.5625, 4: 1.0, 5: 0.7291666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.6041666865348816, 2: 0.7708333730697632, 3: 0.625, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  4%|▎         | 200/5590 [02:54<1:16:04,  1.18it/s]Epoch perc 0.035957066189624326
+Training epoch 1/1000, step 200: 	 
+Train loss:  1.3241651058197021
+Train accuracy:  {0: 0.1458333432674408, 1: 0.2291666716337204, 2: 0.2708333432674408, 3: 0.75, 4: 1.0, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.4375, 1: 0.625, 2: 0.6041666865348816, 3: 0.8125, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  4%|▎         | 201/5590 [02:55<1:15:59,  1.18it/s]Epoch perc 0.036135957066189626
+Training epoch 1/1000, step 201: 	 
+Train loss:  1.451368808746338
+Train accuracy:  {0: 0.0833333358168602, 1: 0.125, 2: 0.2916666865348816, 3: 0.4583333432674408, 4: 0.9791666865348816, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.375, 1: 0.4583333432674408, 2: 0.5208333730697632, 3: 0.4791666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  4%|▎         | 202/5590 [02:56<1:15:34,  1.19it/s]Epoch perc 0.03631484794275492
+Training epoch 1/1000, step 202: 	 
+Train loss:  1.3794034719467163
+Train accuracy:  {0: 0.25, 1: 0.2083333432674408, 2: 0.4375, 3: 0.6666666865348816, 4: 0.875, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.5833333730697632, 2: 0.7916666865348816, 3: 0.7708333730697632, 4: 1.0, 5: 0.9375, 6: 1.0}
+  4%|▎         | 203/5590 [02:57<1:17:02,  1.17it/s]Epoch perc 0.036493738819320214
+Training epoch 1/1000, step 203: 	 
+Train loss:  1.5648369789123535
+Train accuracy:  {0: 0.0416666679084301, 1: 0.1041666716337204, 2: 0.2916666865348816, 3: 0.6041666865348816, 4: 0.9583333730697632, 5: 0.7291666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.125, 1: 0.3958333432674408, 2: 0.7083333730697632, 3: 0.625, 4: 1.0, 5: 1.0, 6: 1.0}
+  4%|▎         | 204/5590 [02:58<1:16:54,  1.17it/s]Epoch perc 0.03667262969588551
+Training epoch 1/1000, step 204: 	 
+Train loss:  1.5146304368972778
+Train accuracy:  {0: 0.2083333432674408, 1: 0.125, 2: 0.375, 3: 0.8125, 4: 0.9375, 5: 0.6041666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.4375, 1: 0.4375, 2: 0.7708333730697632, 3: 0.9375, 4: 1.0, 5: 0.9166666865348816, 6: 1.0}
+  4%|▎         | 205/5590 [02:59<1:17:11,  1.16it/s]Epoch perc 0.03685152057245081
+Training epoch 1/1000, step 205: 	 
+Train loss:  1.4012482166290283
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1666666716337204, 2: 0.375, 3: 0.6875, 4: 0.9375, 5: 0.625, 6: 1.0}
+Train accuracy interval:  {0: 0.5, 1: 0.4791666865348816, 2: 0.6875, 3: 0.7708333730697632, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  4%|▎         | 206/5590 [03:00<1:19:08,  1.13it/s]Epoch perc 0.0370304114490161
+Training epoch 1/1000, step 206: 	 
+Train loss:  1.4321889877319336
+Train accuracy:  {0: 0.1875, 1: 0.25, 2: 0.3333333432674408, 3: 0.5416666865348816, 4: 0.9583333730697632, 5: 0.7291666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.6458333730697632, 2: 0.5208333730697632, 3: 0.625, 4: 1.0, 5: 1.0, 6: 0.9583333730697632}
+  4%|▎         | 207/5590 [03:01<1:18:15,  1.15it/s]Epoch perc 0.037209302325581395
+Training epoch 1/1000, step 207: 	 
+Train loss:  1.565442442893982
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1875, 2: 0.2916666865348816, 3: 0.6041666865348816, 4: 0.9791666865348816, 5: 0.6458333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.5416666865348816, 2: 0.6458333730697632, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  4%|▎         | 208/5590 [03:01<1:17:23,  1.16it/s]Epoch perc 0.03738819320214669
+Training epoch 1/1000, step 208: 	 
+Train loss:  1.3072617053985596
+Train accuracy:  {0: 0.1666666716337204, 1: 0.2291666716337204, 2: 0.3958333432674408, 3: 0.6875, 4: 0.9791666865348816, 5: 0.7916666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.5416666865348816, 2: 0.6875, 3: 0.7083333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  4%|▎         | 209/5590 [03:02<1:18:36,  1.14it/s]Epoch perc 0.03756708407871199
+Training epoch 1/1000, step 209: 	 
+Train loss:  1.250544786453247
+Train accuracy:  {0: 0.3333333432674408, 1: 0.25, 2: 0.2916666865348816, 3: 0.75, 4: 0.9583333730697632, 5: 0.8333333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.75, 2: 0.75, 3: 0.8333333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  4%|▍         | 210/5590 [03:03<1:17:36,  1.16it/s]Epoch perc 0.03774597495527728
+Training epoch 1/1000, step 210: 	 
+Train loss:  1.3716627359390259
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1458333432674408, 2: 0.3125, 3: 0.7083333730697632, 4: 0.9791666865348816, 5: 0.7291666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.5833333730697632, 2: 0.7916666865348816, 3: 0.7291666865348816, 4: 1.0, 5: 0.9375, 6: 0.9791666865348816}
+  4%|▍         | 211/5590 [03:04<1:18:26,  1.14it/s]Epoch perc 0.037924865831842576
+Training epoch 1/1000, step 211: 	 
+Train loss:  1.4041889905929565
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1875, 2: 0.2916666865348816, 3: 0.6041666865348816, 4: 1.0, 5: 0.75, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5, 1: 0.5416666865348816, 2: 0.6666666865348816, 3: 0.6875, 4: 1.0, 5: 0.9583333730697632, 6: 0.9791666865348816}
+  4%|▍         | 212/5590 [03:05<1:18:19,  1.14it/s]Epoch perc 0.03810375670840787
+Training epoch 1/1000, step 212: 	 
+Train loss:  1.451600193977356
+Train accuracy:  {0: 0.0625, 1: 0.1041666716337204, 2: 0.3333333432674408, 3: 0.6041666865348816, 4: 1.0, 5: 0.75, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5, 1: 0.3541666865348816, 2: 0.7083333730697632, 3: 0.6666666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  4%|▍         | 213/5590 [03:06<1:17:26,  1.16it/s]Epoch perc 0.03828264758497316
+Training epoch 1/1000, step 213: 	 
+Train loss:  1.3212441205978394
+Train accuracy:  {0: 0.2083333432674408, 1: 0.25, 2: 0.375, 3: 0.7291666865348816, 4: 0.9375, 5: 0.6875, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.6041666865348816, 1: 0.5625, 2: 0.6458333730697632, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  4%|▍         | 214/5590 [03:07<1:18:48,  1.14it/s]Epoch perc 0.038461538461538464
+Training epoch 1/1000, step 214: 	 
+Train loss:  1.2971471548080444
+Train accuracy:  {0: 0.1875, 1: 0.2916666865348816, 2: 0.3958333432674408, 3: 0.7083333730697632, 4: 0.9583333730697632, 5: 0.9166666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.5833333730697632, 2: 0.7083333730697632, 3: 0.7708333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  4%|▍         | 215/5590 [03:07<1:18:41,  1.14it/s]Epoch perc 0.03864042933810376
+Training epoch 1/1000, step 215: 	 
+Train loss:  1.2238619327545166
+Train accuracy:  {0: 0.25, 1: 0.1666666716337204, 2: 0.375, 3: 0.75, 4: 0.9791666865348816, 5: 0.5833333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.5625, 2: 0.7291666865348816, 3: 0.7916666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  4%|▍         | 216/5590 [03:08<1:17:14,  1.16it/s]Epoch perc 0.03881932021466905
+Training epoch 1/1000, step 216: 	 
+Train loss:  1.351766586303711
+Train accuracy:  {0: 0.1458333432674408, 1: 0.125, 2: 0.375, 3: 0.7291666865348816, 4: 0.9791666865348816, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.4375, 2: 0.7083333730697632, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  4%|▍         | 217/5590 [03:09<1:18:36,  1.14it/s]Epoch perc 0.038998211091234344
+Training epoch 1/1000, step 217: 	 
+Train loss:  1.293534278869629
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2083333432674408, 2: 0.3333333432674408, 3: 0.7291666865348816, 4: 0.9583333730697632, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.625, 1: 0.5625, 2: 0.6666666865348816, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  4%|▍         | 218/5590 [03:10<1:17:12,  1.16it/s]Epoch perc 0.039177101967799645
+Training epoch 1/1000, step 218: 	 
+Train loss:  1.1704000234603882
+Train accuracy:  {0: 0.1875, 1: 0.2083333432674408, 2: 0.3958333432674408, 3: 0.7083333730697632, 4: 1.0, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.75, 1: 0.5625, 2: 0.6875, 3: 0.7708333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  4%|▍         | 219/5590 [03:11<1:16:13,  1.17it/s]Epoch perc 0.03935599284436494
+Training epoch 1/1000, step 219: 	 
+Train loss:  1.5509573221206665
+Train accuracy:  {0: 0.0833333358168602, 1: 0.0833333358168602, 2: 0.25, 3: 0.7083333730697632, 4: 1.0, 5: 0.625, 6: 1.0}
+Train accuracy interval:  {0: 0.3333333432674408, 1: 0.3541666865348816, 2: 0.6458333730697632, 3: 0.7708333730697632, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  4%|▍         | 220/5590 [03:12<1:15:54,  1.18it/s]Epoch perc 0.03953488372093023
+Training epoch 1/1000, step 220: 	 
+Train loss:  1.3481818437576294
+Train accuracy:  {0: 0.125, 1: 0.1666666716337204, 2: 0.3541666865348816, 3: 0.6875, 4: 1.0, 5: 0.7083333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.4375, 1: 0.3958333432674408, 2: 0.6875, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  4%|▍         | 221/5590 [03:13<1:16:59,  1.16it/s]Epoch perc 0.039713774597495526
+Training epoch 1/1000, step 221: 	 
+Train loss:  1.3762202262878418
+Train accuracy:  {0: 0.25, 1: 0.25, 2: 0.3333333432674408, 3: 0.625, 4: 0.9166666865348816, 5: 0.7083333730697632, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.5625, 2: 0.6458333730697632, 3: 0.7083333730697632, 4: 1.0, 5: 0.9375, 6: 0.9583333730697632}
+  4%|▍         | 222/5590 [03:13<1:16:32,  1.17it/s]Epoch perc 0.039892665474060826
+Training epoch 1/1000, step 222: 	 
+Train loss:  1.3729760646820068
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1666666716337204, 2: 0.3125, 3: 0.5833333730697632, 4: 0.9375, 5: 0.7291666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.375, 2: 0.6666666865348816, 3: 0.6041666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  4%|▍         | 223/5590 [03:14<1:17:32,  1.15it/s]Epoch perc 0.04007155635062612
+Training epoch 1/1000, step 223: 	 
+Train loss:  1.3542649745941162
+Train accuracy:  {0: 0.1875, 1: 0.2708333432674408, 2: 0.4166666865348816, 3: 0.625, 4: 1.0, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.5625, 2: 0.7083333730697632, 3: 0.6666666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  4%|▍         | 224/5590 [03:15<1:19:05,  1.13it/s]Epoch perc 0.04025044722719141
+Training epoch 1/1000, step 224: 	 
+Train loss:  1.4618589878082275
+Train accuracy:  {0: 0.125, 1: 0.1041666716337204, 2: 0.2708333432674408, 3: 0.5625, 4: 0.9583333730697632, 5: 0.6875, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.4791666865348816, 2: 0.7916666865348816, 3: 0.5833333730697632, 4: 1.0, 5: 0.9166666865348816, 6: 0.9791666865348816}
+  4%|▍         | 225/5590 [03:16<1:19:19,  1.13it/s]Epoch perc 0.04042933810375671
+Training epoch 1/1000, step 225: 	 
+Train loss:  1.2502217292785645
+Train accuracy:  {0: 0.375, 1: 0.2708333432674408, 2: 0.3125, 3: 0.6041666865348816, 4: 0.9791666865348816, 5: 0.7708333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.625, 1: 0.625, 2: 0.6666666865348816, 3: 0.6458333730697632, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  4%|▍         | 226/5590 [03:17<1:18:03,  1.15it/s]Epoch perc 0.040608228980322
+Training epoch 1/1000, step 226: 	 
+Train loss:  1.3583498001098633
+Train accuracy:  {0: 0.2291666716337204, 1: 0.2291666716337204, 2: 0.3958333432674408, 3: 0.8125, 4: 0.9375, 5: 0.5208333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.5416666865348816, 2: 0.6666666865348816, 3: 0.8541666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  4%|▍         | 227/5590 [03:18<1:17:31,  1.15it/s]Epoch perc 0.0407871198568873
+Training epoch 1/1000, step 227: 	 
+Train loss:  1.3331043720245361
+Train accuracy:  {0: 0.3125, 1: 0.25, 2: 0.2291666716337204, 3: 0.6458333730697632, 4: 1.0, 5: 0.6458333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.5833333730697632, 2: 0.6458333730697632, 3: 0.8541666865348816, 4: 1.0, 5: 0.8958333730697632, 6: 0.9791666865348816}
+  4%|▍         | 228/5590 [03:19<1:16:08,  1.17it/s]Epoch perc 0.040966010733452594
+Training epoch 1/1000, step 228: 	 
+Train loss:  1.4097206592559814
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1875, 2: 0.3125, 3: 0.6041666865348816, 4: 0.9791666865348816, 5: 0.7083333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.625, 1: 0.5416666865348816, 2: 0.5833333730697632, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  4%|▍         | 229/5590 [03:19<1:15:10,  1.19it/s]Epoch perc 0.04114490161001789
+Training epoch 1/1000, step 229: 	 
+Train loss:  1.2979387044906616
+Train accuracy:  {0: 0.2291666716337204, 1: 0.25, 2: 0.4166666865348816, 3: 0.5416666865348816, 4: 1.0, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.6875, 1: 0.5625, 2: 0.6041666865348816, 3: 0.5416666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  4%|▍         | 230/5590 [03:20<1:14:52,  1.19it/s]Epoch perc 0.04132379248658318
+Training epoch 1/1000, step 230: 	 
+Train loss:  1.2739214897155762
+Train accuracy:  {0: 0.2291666716337204, 1: 0.125, 2: 0.5, 3: 0.5833333730697632, 4: 0.9583333730697632, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.5416666865348816, 2: 0.8125, 3: 0.6041666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  4%|▍         | 231/5590 [03:21<1:15:41,  1.18it/s]Epoch perc 0.04150268336314848
+Training epoch 1/1000, step 231: 	 
+Train loss:  1.3444740772247314
+Train accuracy:  {0: 0.1666666716337204, 1: 0.2083333432674408, 2: 0.2916666865348816, 3: 0.75, 4: 0.9375, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5, 1: 0.4791666865348816, 2: 0.6458333730697632, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  4%|▍         | 232/5590 [03:22<1:16:35,  1.17it/s]Epoch perc 0.041681574239713776
+Training epoch 1/1000, step 232: 	 
+Train loss:  1.2955156564712524
+Train accuracy:  {0: 0.25, 1: 0.1666666716337204, 2: 0.375, 3: 0.6666666865348816, 4: 1.0, 5: 0.7083333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.625, 1: 0.4791666865348816, 2: 0.7083333730697632, 3: 0.6666666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  4%|▍         | 233/5590 [03:23<1:17:23,  1.15it/s]Epoch perc 0.04186046511627907
+Training epoch 1/1000, step 233: 	 
+Train loss:  1.3384801149368286
+Train accuracy:  {0: 0.3958333432674408, 1: 0.2916666865348816, 2: 0.375, 3: 0.5416666865348816, 4: 1.0, 5: 0.6666666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.75, 1: 0.625, 2: 0.5416666865348816, 3: 0.6041666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  4%|▍         | 234/5590 [03:24<1:17:45,  1.15it/s]Epoch perc 0.04203935599284436
+Training epoch 1/1000, step 234: 	 
+Train loss:  1.4160270690917969
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2083333432674408, 2: 0.3541666865348816, 3: 0.6875, 4: 0.9583333730697632, 5: 0.6875, 6: 1.0}
+Train accuracy interval:  {0: 0.4375, 1: 0.4791666865348816, 2: 0.625, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  4%|▍         | 235/5590 [03:25<1:16:58,  1.16it/s]Epoch perc 0.04221824686940966
+Training epoch 1/1000, step 235: 	 
+Train loss:  1.29856276512146
+Train accuracy:  {0: 0.1666666716337204, 1: 0.1458333432674408, 2: 0.3958333432674408, 3: 0.7291666865348816, 4: 1.0, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.5416666865348816, 2: 0.6875, 3: 0.7708333730697632, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  4%|▍         | 236/5590 [03:26<1:17:04,  1.16it/s]Epoch perc 0.04239713774597496
+Training epoch 1/1000, step 236: 	 
+Train loss:  1.1569607257843018
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2916666865348816, 2: 0.4791666865348816, 3: 0.625, 4: 1.0, 5: 0.9166666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5, 1: 0.625, 2: 0.8333333730697632, 3: 0.6458333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  4%|▍         | 237/5590 [03:26<1:18:00,  1.14it/s]Epoch perc 0.04257602862254025
+Training epoch 1/1000, step 237: 	 
+Train loss:  1.2464841604232788
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1041666716337204, 2: 0.4375, 3: 0.8333333730697632, 4: 1.0, 5: 0.8333333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.4583333432674408, 2: 0.6458333730697632, 3: 0.875, 4: 1.0, 5: 1.0, 6: 1.0}
+  4%|▍         | 238/5590 [03:27<1:18:58,  1.13it/s]Epoch perc 0.042754919499105544
+Training epoch 1/1000, step 238: 	 
+Train loss:  1.3318477869033813
+Train accuracy:  {0: 0.2916666865348816, 1: 0.1875, 2: 0.3541666865348816, 3: 0.8541666865348816, 4: 0.9583333730697632, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.5, 2: 0.5416666865348816, 3: 0.8958333730697632, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  4%|▍         | 239/5590 [03:28<1:20:06,  1.11it/s]Epoch perc 0.04293381037567084
+Training epoch 1/1000, step 239: 	 
+Train loss:  1.3314244747161865
+Train accuracy:  {0: 0.1666666716337204, 1: 0.2083333432674408, 2: 0.375, 3: 0.4375, 4: 0.9166666865348816, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.5416666865348816, 2: 0.6875, 3: 0.5, 4: 1.0, 5: 1.0, 6: 1.0}
+  4%|▍         | 240/5590 [03:29<1:20:20,  1.11it/s]Epoch perc 0.04311270125223614
+Training epoch 1/1000, step 240: 	 
+Train loss:  1.21736741065979
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1875, 2: 0.4375, 3: 0.75, 4: 1.0, 5: 0.7708333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.625, 1: 0.5208333730697632, 2: 0.8333333730697632, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  4%|▍         | 241/5590 [03:30<1:20:39,  1.11it/s]Epoch perc 0.04329159212880143
+Training epoch 1/1000, step 241: 	 
+Train loss:  1.4014772176742554
+Train accuracy:  {0: 0.125, 1: 0.0625, 2: 0.4583333432674408, 3: 0.6041666865348816, 4: 1.0, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.4375, 2: 0.7083333730697632, 3: 0.6666666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  4%|▍         | 242/5590 [03:31<1:21:01,  1.10it/s]Epoch perc 0.043470483005366725
+Training epoch 1/1000, step 242: 	 
+Train loss:  1.248999834060669
+Train accuracy:  {0: 0.3125, 1: 0.2291666716337204, 2: 0.4583333432674408, 3: 0.7083333730697632, 4: 0.9166666865348816, 5: 0.8333333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.7083333730697632, 1: 0.5833333730697632, 2: 0.625, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  4%|▍         | 243/5590 [03:32<1:20:16,  1.11it/s]Epoch perc 0.04364937388193202
+Training epoch 1/1000, step 243: 	 
+Train loss:  1.3830811977386475
+Train accuracy:  {0: 0.1458333432674408, 1: 0.1041666716337204, 2: 0.4791666865348816, 3: 0.6041666865348816, 4: 0.9375, 5: 0.6666666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.4583333432674408, 2: 0.8333333730697632, 3: 0.6666666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  4%|▍         | 244/5590 [03:33<1:17:43,  1.15it/s]Epoch perc 0.04382826475849732
+Training epoch 1/1000, step 244: 	 
+Train loss:  1.3752329349517822
+Train accuracy:  {0: 0.125, 1: 0.25, 2: 0.3541666865348816, 3: 0.6458333730697632, 4: 0.9791666865348816, 5: 0.8333333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.4375, 1: 0.4583333432674408, 2: 0.7083333730697632, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 1.0}
+  4%|▍         | 245/5590 [03:34<1:16:12,  1.17it/s]Epoch perc 0.04400715563506261
+Training epoch 1/1000, step 245: 	 
+Train loss:  1.155184030532837
+Train accuracy:  {0: 0.25, 1: 0.2083333432674408, 2: 0.4583333432674408, 3: 0.6458333730697632, 4: 0.9583333730697632, 5: 0.7916666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5625, 1: 0.6458333730697632, 2: 0.75, 3: 0.6666666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  4%|▍         | 246/5590 [03:34<1:16:45,  1.16it/s]Epoch perc 0.044186046511627906
+Training epoch 1/1000, step 246: 	 
+Train loss:  1.3045438528060913
+Train accuracy:  {0: 0.25, 1: 0.1458333432674408, 2: 0.3541666865348816, 3: 0.5, 4: 0.9583333730697632, 5: 0.7291666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5, 1: 0.4375, 2: 0.7708333730697632, 3: 0.5833333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  4%|▍         | 247/5590 [03:35<1:16:01,  1.17it/s]Epoch perc 0.0443649373881932
+Training epoch 1/1000, step 247: 	 
+Train loss:  1.3145225048065186
+Train accuracy:  {0: 0.2916666865348816, 1: 0.2708333432674408, 2: 0.3125, 3: 0.5833333730697632, 4: 0.9375, 5: 0.6875, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.625, 1: 0.5625, 2: 0.7916666865348816, 3: 0.6666666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 0.9791666865348816}
+  4%|▍         | 248/5590 [03:36<1:16:22,  1.17it/s]Epoch perc 0.0445438282647585
+Training epoch 1/1000, step 248: 	 
+Train loss:  1.2148420810699463
+Train accuracy:  {0: 0.3333333432674408, 1: 0.25, 2: 0.3125, 3: 0.6875, 4: 0.9583333730697632, 5: 0.7291666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.625, 1: 0.7708333730697632, 2: 0.6666666865348816, 3: 0.7083333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  4%|▍         | 249/5590 [03:37<1:16:55,  1.16it/s]Epoch perc 0.044722719141323794
+Training epoch 1/1000, step 249: 	 
+Train loss:  1.180869460105896
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1666666716337204, 2: 0.5416666865348816, 3: 0.6666666865348816, 4: 1.0, 5: 0.7083333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.5208333730697632, 2: 0.8333333730697632, 3: 0.6666666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  4%|▍         | 250/5590 [03:38<1:17:36,  1.15it/s]Epoch perc 0.04490161001788909
+Training epoch 1/1000, step 250: 	 
+Train loss:  1.2117692232131958
+Train accuracy:  {0: 0.2083333432674408, 1: 0.25, 2: 0.25, 3: 0.75, 4: 1.0, 5: 0.7708333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.6041666865348816, 1: 0.6458333730697632, 2: 0.7083333730697632, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  4%|▍         | 251/5590 [03:39<1:16:58,  1.16it/s]Epoch perc 0.04508050089445438
+Training epoch 1/1000, step 251: 	 
+Train loss:  1.2568414211273193
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1041666716337204, 2: 0.5208333730697632, 3: 0.625, 4: 0.9583333730697632, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.3541666865348816, 2: 0.7916666865348816, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 252/5590 [03:40<1:17:57,  1.14it/s]Epoch perc 0.045259391771019675
+Training epoch 1/1000, step 252: 	 
+Train loss:  1.3823320865631104
+Train accuracy:  {0: 0.1041666716337204, 1: 0.1875, 2: 0.2916666865348816, 3: 0.8125, 4: 0.9583333730697632, 5: 0.6666666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.5208333730697632, 2: 0.625, 3: 0.9166666865348816, 4: 1.0, 5: 0.9375, 6: 1.0}
+  5%|▍         | 253/5590 [03:41<1:17:42,  1.14it/s]Epoch perc 0.045438282647584975
+Training epoch 1/1000, step 253: 	 
+Train loss:  1.1302162408828735
+Train accuracy:  {0: 0.1458333432674408, 1: 0.2708333432674408, 2: 0.5, 3: 0.8125, 4: 0.9791666865348816, 5: 0.7916666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.5416666865348816, 2: 0.875, 3: 0.8125, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  5%|▍         | 254/5590 [03:41<1:18:22,  1.13it/s]Epoch perc 0.04561717352415027
+Training epoch 1/1000, step 254: 	 
+Train loss:  1.1202776432037354
+Train accuracy:  {0: 0.3541666865348816, 1: 0.2291666716337204, 2: 0.4375, 3: 0.75, 4: 1.0, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.5416666865348816, 2: 0.7916666865348816, 3: 0.7708333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 255/5590 [03:42<1:19:37,  1.12it/s]Epoch perc 0.04579606440071556
+Training epoch 1/1000, step 255: 	 
+Train loss:  1.386778712272644
+Train accuracy:  {0: 0.1458333432674408, 1: 0.2291666716337204, 2: 0.2708333432674408, 3: 0.5416666865348816, 4: 0.9791666865348816, 5: 0.8333333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.4375, 1: 0.4583333432674408, 2: 0.625, 3: 0.5833333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  5%|▍         | 256/5590 [03:43<1:19:28,  1.12it/s]Epoch perc 0.045974955277280856
+Training epoch 1/1000, step 256: 	 
+Train loss:  1.1789886951446533
+Train accuracy:  {0: 0.25, 1: 0.1458333432674408, 2: 0.5208333730697632, 3: 0.7708333730697632, 4: 0.9583333730697632, 5: 0.6875, 6: 1.0}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.5625, 2: 0.7708333730697632, 3: 0.7916666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  5%|▍         | 257/5590 [03:44<1:18:05,  1.14it/s]Epoch perc 0.046153846153846156
+Training epoch 1/1000, step 257: 	 
+Train loss:  1.085452675819397
+Train accuracy:  {0: 0.3958333432674408, 1: 0.1666666716337204, 2: 0.4791666865348816, 3: 0.7291666865348816, 4: 1.0, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.625, 1: 0.7083333730697632, 2: 0.6875, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 258/5590 [03:45<1:16:39,  1.16it/s]Epoch perc 0.04633273703041145
+Training epoch 1/1000, step 258: 	 
+Train loss:  1.3883262872695923
+Train accuracy:  {0: 0.2083333432674408, 1: 0.0833333358168602, 2: 0.3333333432674408, 3: 0.625, 4: 0.9375, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.5, 2: 0.75, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 259/5590 [03:46<1:16:16,  1.16it/s]Epoch perc 0.046511627906976744
+Training epoch 1/1000, step 259: 	 
+Train loss:  1.126587986946106
+Train accuracy:  {0: 0.1875, 1: 0.4375, 2: 0.4166666865348816, 3: 0.6666666865348816, 4: 0.9791666865348816, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.7708333730697632, 2: 0.7291666865348816, 3: 0.6875, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  5%|▍         | 260/5590 [03:47<1:17:58,  1.14it/s]Epoch perc 0.04669051878354204
+Training epoch 1/1000, step 260: 	 
+Train loss:  1.3075515031814575
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1666666716337204, 2: 0.4375, 3: 0.6666666865348816, 4: 0.9583333730697632, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5, 1: 0.5416666865348816, 2: 0.75, 3: 0.7708333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 261/5590 [03:48<1:16:56,  1.15it/s]Epoch perc 0.04686940966010734
+Training epoch 1/1000, step 261: 	 
+Train loss:  1.2132010459899902
+Train accuracy:  {0: 0.2708333432674408, 1: 0.2291666716337204, 2: 0.3541666865348816, 3: 0.75, 4: 0.8958333730697632, 5: 0.5833333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.6875, 1: 0.7291666865348816, 2: 0.6458333730697632, 3: 0.7708333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 262/5590 [03:48<1:15:54,  1.17it/s]Epoch perc 0.04704830053667263
+Training epoch 1/1000, step 262: 	 
+Train loss:  1.3281158208847046
+Train accuracy:  {0: 0.25, 1: 0.1458333432674408, 2: 0.375, 3: 0.5625, 4: 0.9375, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.3958333432674408, 2: 0.6458333730697632, 3: 0.6458333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  5%|▍         | 263/5590 [03:49<1:15:49,  1.17it/s]Epoch perc 0.047227191413237925
+Training epoch 1/1000, step 263: 	 
+Train loss:  1.2158527374267578
+Train accuracy:  {0: 0.2083333432674408, 1: 0.3125, 2: 0.3958333432674408, 3: 0.7291666865348816, 4: 0.9791666865348816, 5: 0.6875, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.7291666865348816, 2: 0.8541666865348816, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 264/5590 [03:50<1:14:57,  1.18it/s]Epoch perc 0.04740608228980322
+Training epoch 1/1000, step 264: 	 
+Train loss:  1.2583420276641846
+Train accuracy:  {0: 0.1666666716337204, 1: 0.25, 2: 0.4791666865348816, 3: 0.7708333730697632, 4: 0.9583333730697632, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.3958333432674408, 1: 0.625, 2: 0.75, 3: 0.7916666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  5%|▍         | 265/5590 [03:51<1:15:36,  1.17it/s]Epoch perc 0.04758497316636851
+Training epoch 1/1000, step 265: 	 
+Train loss:  1.1880189180374146
+Train accuracy:  {0: 0.2708333432674408, 1: 0.25, 2: 0.4791666865348816, 3: 0.6458333730697632, 4: 0.9166666865348816, 5: 0.7291666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.625, 1: 0.5833333730697632, 2: 0.7916666865348816, 3: 0.7916666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  5%|▍         | 266/5590 [03:52<1:17:15,  1.15it/s]Epoch perc 0.04776386404293381
+Training epoch 1/1000, step 266: 	 
+Train loss:  1.1854183673858643
+Train accuracy:  {0: 0.2708333432674408, 1: 0.125, 2: 0.4791666865348816, 3: 0.875, 4: 0.9583333730697632, 5: 0.6041666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.6041666865348816, 2: 0.8333333730697632, 3: 0.9166666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 267/5590 [03:53<1:17:46,  1.14it/s]Epoch perc 0.047942754919499106
+Training epoch 1/1000, step 267: 	 
+Train loss:  1.3616844415664673
+Train accuracy:  {0: 0.2291666716337204, 1: 0.125, 2: 0.4166666865348816, 3: 0.6458333730697632, 4: 0.9791666865348816, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.5208333730697632, 2: 0.6666666865348816, 3: 0.6666666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 268/5590 [03:54<1:16:38,  1.16it/s]Epoch perc 0.0481216457960644
+Training epoch 1/1000, step 268: 	 
+Train loss:  1.2856380939483643
+Train accuracy:  {0: 0.1458333432674408, 1: 0.2916666865348816, 2: 0.3125, 3: 0.625, 4: 1.0, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.5, 2: 0.6458333730697632, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 269/5590 [03:54<1:16:00,  1.17it/s]Epoch perc 0.04830053667262969
+Training epoch 1/1000, step 269: 	 
+Train loss:  1.1956278085708618
+Train accuracy:  {0: 0.2708333432674408, 1: 0.2916666865348816, 2: 0.3333333432674408, 3: 0.7291666865348816, 4: 0.9583333730697632, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.4583333432674408, 2: 0.8125, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 270/5590 [03:55<1:15:26,  1.18it/s]Epoch perc 0.048479427549194994
+Training epoch 1/1000, step 270: 	 
+Train loss:  1.2174208164215088
+Train accuracy:  {0: 0.3958333432674408, 1: 0.2083333432674408, 2: 0.2916666865348816, 3: 0.6875, 4: 0.8958333730697632, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.6041666865348816, 2: 0.6875, 3: 0.7291666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  5%|▍         | 271/5590 [03:56<1:16:43,  1.16it/s]Epoch perc 0.04865831842576029
+Training epoch 1/1000, step 271: 	 
+Train loss:  1.1296418905258179
+Train accuracy:  {0: 0.3541666865348816, 1: 0.2291666716337204, 2: 0.5, 3: 0.7083333730697632, 4: 1.0, 5: 0.8125, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.6875, 1: 0.625, 2: 0.75, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  5%|▍         | 272/5590 [03:57<1:18:13,  1.13it/s]Epoch perc 0.04883720930232558
+Training epoch 1/1000, step 272: 	 
+Train loss:  1.2436769008636475
+Train accuracy:  {0: 0.2708333432674408, 1: 0.2291666716337204, 2: 0.3958333432674408, 3: 0.5625, 4: 0.9791666865348816, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.6041666865348816, 1: 0.5416666865348816, 2: 0.875, 3: 0.6666666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  5%|▍         | 273/5590 [03:58<1:17:33,  1.14it/s]Epoch perc 0.049016100178890874
+Training epoch 1/1000, step 273: 	 
+Train loss:  1.2674397230148315
+Train accuracy:  {0: 0.25, 1: 0.25, 2: 0.4375, 3: 0.7708333730697632, 4: 0.9583333730697632, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.5625, 2: 0.7916666865348816, 3: 0.875, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  5%|▍         | 274/5590 [03:59<1:18:00,  1.14it/s]Epoch perc 0.049194991055456175
+Training epoch 1/1000, step 274: 	 
+Train loss:  1.2412217855453491
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1666666716337204, 2: 0.4166666865348816, 3: 0.7291666865348816, 4: 0.9791666865348816, 5: 0.9166666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.5, 2: 0.75, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 275/5590 [04:00<1:18:08,  1.13it/s]Epoch perc 0.04937388193202147
+Training epoch 1/1000, step 275: 	 
+Train loss:  1.2959319353103638
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1666666716337204, 2: 0.3125, 3: 0.6458333730697632, 4: 1.0, 5: 0.8333333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.5625, 2: 0.625, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 276/5590 [04:00<1:17:10,  1.15it/s]Epoch perc 0.04955277280858676
+Training epoch 1/1000, step 276: 	 
+Train loss:  1.3414943218231201
+Train accuracy:  {0: 0.2916666865348816, 1: 0.25, 2: 0.3541666865348816, 3: 0.5, 4: 0.9166666865348816, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.5, 1: 0.5416666865348816, 2: 0.7083333730697632, 3: 0.6666666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 277/5590 [04:01<1:17:02,  1.15it/s]Epoch perc 0.049731663685152055
+Training epoch 1/1000, step 277: 	 
+Train loss:  1.3474229574203491
+Train accuracy:  {0: 0.1458333432674408, 1: 0.125, 2: 0.375, 3: 0.7083333730697632, 4: 0.9375, 5: 0.7083333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5, 1: 0.4375, 2: 0.6875, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 278/5590 [04:02<1:16:17,  1.16it/s]Epoch perc 0.04991055456171735
+Training epoch 1/1000, step 278: 	 
+Train loss:  1.2405389547348022
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1875, 2: 0.2916666865348816, 3: 0.6875, 4: 1.0, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.625, 1: 0.5, 2: 0.625, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▍         | 279/5590 [04:03<1:17:02,  1.15it/s]Epoch perc 0.05008944543828265
+Training epoch 1/1000, step 279: 	 
+Train loss:  1.1974804401397705
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1875, 2: 0.4166666865348816, 3: 0.625, 4: 0.9791666865348816, 5: 0.8333333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.5208333730697632, 2: 0.7916666865348816, 3: 0.6458333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▌         | 280/5590 [04:04<1:17:06,  1.15it/s]Epoch perc 0.05026833631484794
+Training epoch 1/1000, step 280: 	 
+Train loss:  1.2336138486862183
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2083333432674408, 2: 0.5416666865348816, 3: 0.625, 4: 0.9791666865348816, 5: 0.6666666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.4791666865348816, 2: 0.8125, 3: 0.6875, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  5%|▌         | 281/5590 [04:05<1:16:26,  1.16it/s]Epoch perc 0.05044722719141324
+Training epoch 1/1000, step 281: 	 
+Train loss:  1.2931885719299316
+Train accuracy:  {0: 0.2291666716337204, 1: 0.25, 2: 0.3958333432674408, 3: 0.7083333730697632, 4: 0.9166666865348816, 5: 0.7291666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.5833333730697632, 2: 0.7916666865348816, 3: 0.8541666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  5%|▌         | 282/5590 [04:06<1:16:57,  1.15it/s]Epoch perc 0.05062611806797853
+Training epoch 1/1000, step 282: 	 
+Train loss:  1.1529316902160645
+Train accuracy:  {0: 0.3125, 1: 0.3333333432674408, 2: 0.4583333432674408, 3: 0.6041666865348816, 4: 1.0, 5: 0.8333333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.6875, 1: 0.5416666865348816, 2: 0.6666666865348816, 3: 0.6458333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  5%|▌         | 283/5590 [04:07<1:17:05,  1.15it/s]Epoch perc 0.05080500894454383
+Training epoch 1/1000, step 283: 	 
+Train loss:  1.081205129623413
+Train accuracy:  {0: 0.2291666716337204, 1: 0.2708333432674408, 2: 0.3958333432674408, 3: 0.7291666865348816, 4: 0.9791666865348816, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.6666666865348816, 2: 0.75, 3: 0.8125, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▌         | 284/5590 [04:07<1:18:19,  1.13it/s]Epoch perc 0.050983899821109124
+Training epoch 1/1000, step 284: 	 
+Train loss:  1.2687578201293945
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2916666865348816, 2: 0.375, 3: 0.7291666865348816, 4: 0.9583333730697632, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.6458333730697632, 2: 0.7708333730697632, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▌         | 285/5590 [04:08<1:19:33,  1.11it/s]Epoch perc 0.05116279069767442
+Training epoch 1/1000, step 285: 	 
+Train loss:  1.169887900352478
+Train accuracy:  {0: 0.3958333432674408, 1: 0.2708333432674408, 2: 0.4583333432674408, 3: 0.7083333730697632, 4: 0.9791666865348816, 5: 0.7083333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.6458333730697632, 1: 0.5208333730697632, 2: 0.6875, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▌         | 286/5590 [04:09<1:19:14,  1.12it/s]Epoch perc 0.05134168157423971
+Training epoch 1/1000, step 286: 	 
+Train loss:  1.3164403438568115
+Train accuracy:  {0: 0.1458333432674408, 1: 0.1875, 2: 0.4166666865348816, 3: 0.625, 4: 1.0, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.5, 1: 0.4791666865348816, 2: 0.8125, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▌         | 287/5590 [04:10<1:19:39,  1.11it/s]Epoch perc 0.05152057245080501
+Training epoch 1/1000, step 287: 	 
+Train loss:  1.169405221939087
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2708333432674408, 2: 0.4583333432674408, 3: 0.7708333730697632, 4: 0.9791666865348816, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.5833333730697632, 2: 0.75, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▌         | 288/5590 [04:11<1:18:14,  1.13it/s]Epoch perc 0.051699463327370306
+Training epoch 1/1000, step 288: 	 
+Train loss:  1.4144234657287598
+Train accuracy:  {0: 0.1666666716337204, 1: 0.1458333432674408, 2: 0.3958333432674408, 3: 0.6458333730697632, 4: 0.9375, 5: 0.6458333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.6875, 2: 0.8125, 3: 0.8125, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  5%|▌         | 289/5590 [04:12<1:18:06,  1.13it/s]Epoch perc 0.0518783542039356
+Training epoch 1/1000, step 289: 	 
+Train loss:  1.2423055171966553
+Train accuracy:  {0: 0.1875, 1: 0.125, 2: 0.3541666865348816, 3: 0.5208333730697632, 4: 0.9791666865348816, 5: 0.875, 6: 1.0}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.625, 2: 0.75, 3: 0.625, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▌         | 290/5590 [04:13<1:17:41,  1.14it/s]Epoch perc 0.05205724508050089
+Training epoch 1/1000, step 290: 	 
+Train loss:  1.018088459968567
+Train accuracy:  {0: 0.2291666716337204, 1: 0.3125, 2: 0.3958333432674408, 3: 0.9166666865348816, 4: 1.0, 5: 0.8333333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.625, 1: 0.7708333730697632, 2: 0.8125, 3: 0.9166666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▌         | 291/5590 [04:14<1:16:02,  1.16it/s]Epoch perc 0.052236135957066186
+Training epoch 1/1000, step 291: 	 
+Train loss:  1.058160662651062
+Train accuracy:  {0: 0.375, 1: 0.2291666716337204, 2: 0.4375, 3: 0.7083333730697632, 4: 1.0, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.6458333730697632, 1: 0.7291666865348816, 2: 0.7708333730697632, 3: 0.7708333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▌         | 292/5590 [04:14<1:15:06,  1.18it/s]Epoch perc 0.05241502683363149
+Training epoch 1/1000, step 292: 	 
+Train loss:  1.1297584772109985
+Train accuracy:  {0: 0.1875, 1: 0.25, 2: 0.5416666865348816, 3: 0.6666666865348816, 4: 1.0, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.625, 2: 0.8541666865348816, 3: 0.7708333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  5%|▌         | 293/5590 [04:15<1:14:28,  1.19it/s]Epoch perc 0.05259391771019678
+Training epoch 1/1000, step 293: 	 
+Train loss:  1.170286774635315
+Train accuracy:  {0: 0.2916666865348816, 1: 0.4166666865348816, 2: 0.4166666865348816, 3: 0.7708333730697632, 4: 0.9583333730697632, 5: 0.7291666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.6458333730697632, 1: 0.625, 2: 0.7708333730697632, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  5%|▌         | 294/5590 [04:16<1:15:18,  1.17it/s]Epoch perc 0.052772808586762074
+Training epoch 1/1000, step 294: 	 
+Train loss:  1.434169054031372
+Train accuracy:  {0: 0.0625, 1: 0.2083333432674408, 2: 0.375, 3: 0.7291666865348816, 4: 0.9791666865348816, 5: 0.5833333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.4166666865348816, 1: 0.5625, 2: 0.75, 3: 0.8333333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  5%|▌         | 295/5590 [04:17<1:15:30,  1.17it/s]Epoch perc 0.05295169946332737
+Training epoch 1/1000, step 295: 	 
+Train loss:  1.101214051246643
+Train accuracy:  {0: 0.3333333432674408, 1: 0.2916666865348816, 2: 0.4375, 3: 0.7916666865348816, 4: 1.0, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.6875, 2: 0.7708333730697632, 3: 0.8333333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▌         | 296/5590 [04:18<1:17:28,  1.14it/s]Epoch perc 0.05313059033989267
+Training epoch 1/1000, step 296: 	 
+Train loss:  1.1919028759002686
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1875, 2: 0.3958333432674408, 3: 0.8541666865348816, 4: 0.9791666865348816, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.5833333730697632, 2: 0.7083333730697632, 3: 0.875, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▌         | 297/5590 [04:19<1:16:55,  1.15it/s]Epoch perc 0.05330948121645796
+Training epoch 1/1000, step 297: 	 
+Train loss:  1.1376783847808838
+Train accuracy:  {0: 0.125, 1: 0.2916666865348816, 2: 0.5208333730697632, 3: 0.7916666865348816, 4: 1.0, 5: 0.8958333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.6458333730697632, 2: 0.7916666865348816, 3: 0.8125, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  5%|▌         | 298/5590 [04:20<1:16:12,  1.16it/s]Epoch perc 0.053488372093023255
+Training epoch 1/1000, step 298: 	 
+Train loss:  1.0715936422348022
+Train accuracy:  {0: 0.2708333432674408, 1: 0.3541666865348816, 2: 0.5208333730697632, 3: 0.7083333730697632, 4: 1.0, 5: 0.5416666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.6458333730697632, 1: 0.7916666865348816, 2: 0.8125, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▌         | 299/5590 [04:21<1:17:37,  1.14it/s]Epoch perc 0.05366726296958855
+Training epoch 1/1000, step 299: 	 
+Train loss:  1.1788842678070068
+Train accuracy:  {0: 0.25, 1: 0.3333333432674408, 2: 0.3541666865348816, 3: 0.6666666865348816, 4: 0.9583333730697632, 5: 0.7291666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.625, 2: 0.7708333730697632, 3: 0.7291666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  5%|▌         | 300/5590 [04:22<1:18:29,  1.12it/s]Epoch perc 0.05384615384615385
+Training epoch 1/1000, step 300: 	 
+Train loss:  1.2700108289718628
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2083333432674408, 2: 0.5, 3: 0.6458333730697632, 4: 0.9791666865348816, 5: 0.7083333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.6041666865348816, 2: 0.7708333730697632, 3: 0.6666666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  5%|▌         | 301/5590 [04:22<1:20:03,  1.10it/s]Epoch perc 0.05402504472271914
+Training epoch 1/1000, step 301: 	 
+Train loss:  1.3866130113601685
+Train accuracy:  {0: 0.1666666716337204, 1: 0.1666666716337204, 2: 0.4166666865348816, 3: 0.7291666865348816, 4: 0.9791666865348816, 5: 0.6666666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.3958333432674408, 1: 0.5625, 2: 0.7916666865348816, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▌         | 302/5590 [04:23<1:18:29,  1.12it/s]Epoch perc 0.054203935599284436
+Training epoch 1/1000, step 302: 	 
+Train loss:  1.1810144186019897
+Train accuracy:  {0: 0.2291666716337204, 1: 0.2708333432674408, 2: 0.3958333432674408, 3: 0.8333333730697632, 4: 0.9375, 5: 0.875, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.6041666865348816, 1: 0.6875, 2: 0.6041666865348816, 3: 0.9375, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  5%|▌         | 303/5590 [04:24<1:17:14,  1.14it/s]Epoch perc 0.05438282647584973
+Training epoch 1/1000, step 303: 	 
+Train loss:  1.160017728805542
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2708333432674408, 2: 0.3958333432674408, 3: 0.7291666865348816, 4: 0.9583333730697632, 5: 0.8958333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.6041666865348816, 1: 0.625, 2: 0.6041666865348816, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▌         | 304/5590 [04:25<1:15:55,  1.16it/s]Epoch perc 0.05456171735241502
+Training epoch 1/1000, step 304: 	 
+Train loss:  1.0880050659179688
+Train accuracy:  {0: 0.3125, 1: 0.25, 2: 0.5, 3: 0.7916666865348816, 4: 0.9791666865348816, 5: 0.7083333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.625, 1: 0.625, 2: 0.7916666865348816, 3: 0.8541666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  5%|▌         | 305/5590 [04:26<1:17:31,  1.14it/s]Epoch perc 0.054740608228980324
+Training epoch 1/1000, step 305: 	 
+Train loss:  1.3248292207717896
+Train accuracy:  {0: 0.1666666716337204, 1: 0.1041666716337204, 2: 0.2291666716337204, 3: 0.6875, 4: 0.9583333730697632, 5: 0.9375, 6: 1.0}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.4791666865348816, 2: 0.6458333730697632, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  5%|▌         | 306/5590 [04:27<1:19:01,  1.11it/s]Epoch perc 0.05491949910554562
+Training epoch 1/1000, step 306: 	 
+Train loss:  1.4369741678237915
+Train accuracy:  {0: 0.1041666716337204, 1: 0.2291666716337204, 2: 0.3541666865348816, 3: 0.5208333730697632, 4: 0.9583333730697632, 5: 0.6666666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.4375, 1: 0.5625, 2: 0.7708333730697632, 3: 0.5625, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  5%|▌         | 307/5590 [04:28<1:18:10,  1.13it/s]Epoch perc 0.05509838998211091
+Training epoch 1/1000, step 307: 	 
+Train loss:  1.2818603515625
+Train accuracy:  {0: 0.2083333432674408, 1: 0.125, 2: 0.375, 3: 0.6458333730697632, 4: 0.9583333730697632, 5: 0.9583333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.5416666865348816, 2: 0.75, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 308/5590 [04:29<1:17:44,  1.13it/s]Epoch perc 0.055277280858676205
+Training epoch 1/1000, step 308: 	 
+Train loss:  1.2732410430908203
+Train accuracy:  {0: 0.2291666716337204, 1: 0.2083333432674408, 2: 0.3958333432674408, 3: 0.6875, 4: 0.9583333730697632, 5: 0.625, 6: 1.0}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.6041666865348816, 2: 0.6458333730697632, 3: 0.7291666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  6%|▌         | 309/5590 [04:29<1:17:36,  1.13it/s]Epoch perc 0.055456171735241505
+Training epoch 1/1000, step 309: 	 
+Train loss:  1.1125895977020264
+Train accuracy:  {0: 0.3125, 1: 0.3541666865348816, 2: 0.5208333730697632, 3: 0.6875, 4: 0.9791666865348816, 5: 0.6458333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.6875, 1: 0.7291666865348816, 2: 0.7916666865348816, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 310/5590 [04:30<1:19:26,  1.11it/s]Epoch perc 0.0556350626118068
+Training epoch 1/1000, step 310: 	 
+Train loss:  1.191717267036438
+Train accuracy:  {0: 0.3333333432674408, 1: 0.2291666716337204, 2: 0.375, 3: 0.6458333730697632, 4: 0.9583333730697632, 5: 0.7708333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.7083333730697632, 1: 0.6875, 2: 0.625, 3: 0.7083333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  6%|▌         | 311/5590 [04:31<1:18:36,  1.12it/s]Epoch perc 0.05581395348837209
+Training epoch 1/1000, step 311: 	 
+Train loss:  1.0325429439544678
+Train accuracy:  {0: 0.25, 1: 0.3333333432674408, 2: 0.6041666865348816, 3: 0.7916666865348816, 4: 1.0, 5: 0.9375, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.6041666865348816, 1: 0.7083333730697632, 2: 0.7708333730697632, 3: 0.8333333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  6%|▌         | 312/5590 [04:32<1:17:32,  1.13it/s]Epoch perc 0.055992844364937386
+Training epoch 1/1000, step 312: 	 
+Train loss:  1.2781838178634644
+Train accuracy:  {0: 0.25, 1: 0.125, 2: 0.3125, 3: 0.6875, 4: 0.9583333730697632, 5: 0.875, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.4583333432674408, 2: 0.6875, 3: 0.75, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  6%|▌         | 313/5590 [04:33<1:18:16,  1.12it/s]Epoch perc 0.056171735241502686
+Training epoch 1/1000, step 313: 	 
+Train loss:  1.2097114324569702
+Train accuracy:  {0: 0.2916666865348816, 1: 0.3125, 2: 0.4583333432674408, 3: 0.6458333730697632, 4: 0.9375, 5: 0.7291666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.625, 1: 0.5833333730697632, 2: 0.8333333730697632, 3: 0.7083333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 314/5590 [04:34<1:17:48,  1.13it/s]Epoch perc 0.05635062611806798
+Training epoch 1/1000, step 314: 	 
+Train loss:  1.2456504106521606
+Train accuracy:  {0: 0.25, 1: 0.2083333432674408, 2: 0.5, 3: 0.7916666865348816, 4: 0.9791666865348816, 5: 0.8125, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.6041666865348816, 2: 0.75, 3: 0.8958333730697632, 4: 1.0, 5: 1.0, 6: 0.9583333730697632}
+  6%|▌         | 315/5590 [04:35<1:19:15,  1.11it/s]Epoch perc 0.05652951699463327
+Training epoch 1/1000, step 315: 	 
+Train loss:  1.239752173423767
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1666666716337204, 2: 0.3541666865348816, 3: 0.7291666865348816, 4: 0.9583333730697632, 5: 0.7708333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.6041666865348816, 1: 0.625, 2: 0.7708333730697632, 3: 0.8333333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  6%|▌         | 316/5590 [04:36<1:18:39,  1.12it/s]Epoch perc 0.05670840787119857
+Training epoch 1/1000, step 316: 	 
+Train loss:  1.115584135055542
+Train accuracy:  {0: 0.2916666865348816, 1: 0.2708333432674408, 2: 0.3958333432674408, 3: 0.6666666865348816, 4: 0.9583333730697632, 5: 0.9166666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.625, 2: 0.6875, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 317/5590 [04:37<1:19:11,  1.11it/s]Epoch perc 0.05688729874776386
+Training epoch 1/1000, step 317: 	 
+Train loss:  1.236968755722046
+Train accuracy:  {0: 0.2916666865348816, 1: 0.2708333432674408, 2: 0.5416666865348816, 3: 0.625, 4: 0.9166666865348816, 5: 0.6875, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.7291666865348816, 2: 0.8125, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 318/5590 [04:37<1:17:52,  1.13it/s]Epoch perc 0.05706618962432916
+Training epoch 1/1000, step 318: 	 
+Train loss:  1.3184309005737305
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1875, 2: 0.3541666865348816, 3: 0.7708333730697632, 4: 0.8958333730697632, 5: 0.6458333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.5, 2: 0.75, 3: 0.8333333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 319/5590 [04:38<1:18:22,  1.12it/s]Epoch perc 0.057245080500894455
+Training epoch 1/1000, step 319: 	 
+Train loss:  1.0991976261138916
+Train accuracy:  {0: 0.3125, 1: 0.2708333432674408, 2: 0.3958333432674408, 3: 0.7083333730697632, 4: 1.0, 5: 0.8333333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5625, 1: 0.6041666865348816, 2: 0.8125, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  6%|▌         | 320/5590 [04:39<1:17:37,  1.13it/s]Epoch perc 0.05742397137745975
+Training epoch 1/1000, step 320: 	 
+Train loss:  1.1132781505584717
+Train accuracy:  {0: 0.2708333432674408, 1: 0.3125, 2: 0.4375, 3: 0.7291666865348816, 4: 0.9583333730697632, 5: 0.8958333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.6041666865348816, 2: 0.75, 3: 0.75, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  6%|▌         | 321/5590 [04:40<1:17:08,  1.14it/s]Epoch perc 0.05760286225402504
+Training epoch 1/1000, step 321: 	 
+Train loss:  1.3329200744628906
+Train accuracy:  {0: 0.125, 1: 0.1041666716337204, 2: 0.2916666865348816, 3: 0.6458333730697632, 4: 0.9166666865348816, 5: 0.6458333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.6041666865348816, 1: 0.5, 2: 0.7291666865348816, 3: 0.75, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  6%|▌         | 322/5590 [04:41<1:17:48,  1.13it/s]Epoch perc 0.05778175313059034
+Training epoch 1/1000, step 322: 	 
+Train loss:  1.1830614805221558
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2916666865348816, 2: 0.3333333432674408, 3: 0.7916666865348816, 4: 0.9791666865348816, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.5625, 2: 0.6875, 3: 0.875, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  6%|▌         | 323/5590 [04:42<1:16:57,  1.14it/s]Epoch perc 0.057960644007155636
+Training epoch 1/1000, step 323: 	 
+Train loss:  1.2173906564712524
+Train accuracy:  {0: 0.1458333432674408, 1: 0.2083333432674408, 2: 0.4375, 3: 0.7708333730697632, 4: 0.9583333730697632, 5: 0.8125, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.4375, 1: 0.5833333730697632, 2: 0.8125, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  6%|▌         | 324/5590 [04:43<1:17:19,  1.14it/s]Epoch perc 0.05813953488372093
+Training epoch 1/1000, step 324: 	 
+Train loss:  1.2647359371185303
+Train accuracy:  {0: 0.1875, 1: 0.125, 2: 0.4583333432674408, 3: 0.625, 4: 0.9583333730697632, 5: 0.8333333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.6041666865348816, 2: 0.75, 3: 0.7083333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  6%|▌         | 325/5590 [04:44<1:16:25,  1.15it/s]Epoch perc 0.05831842576028622
+Training epoch 1/1000, step 325: 	 
+Train loss:  1.1728250980377197
+Train accuracy:  {0: 0.2083333432674408, 1: 0.25, 2: 0.3958333432674408, 3: 0.6458333730697632, 4: 0.9375, 5: 0.75, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5625, 1: 0.5833333730697632, 2: 0.7291666865348816, 3: 0.7083333730697632, 4: 1.0, 5: 0.9375, 6: 0.9791666865348816}
+  6%|▌         | 326/5590 [04:45<1:18:03,  1.12it/s]Epoch perc 0.058497316636851523
+Training epoch 1/1000, step 326: 	 
+Train loss:  1.204458475112915
+Train accuracy:  {0: 0.3333333432674408, 1: 0.125, 2: 0.4166666865348816, 3: 0.625, 4: 0.9583333730697632, 5: 0.8541666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.6666666865348816, 2: 0.7708333730697632, 3: 0.7083333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  6%|▌         | 327/5590 [04:45<1:16:18,  1.15it/s]Epoch perc 0.05867620751341682
+Training epoch 1/1000, step 327: 	 
+Train loss:  1.1750764846801758
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1875, 2: 0.3958333432674408, 3: 0.6666666865348816, 4: 0.9791666865348816, 5: 0.875, 6: 1.0}
+Train accuracy interval:  {0: 0.5, 1: 0.4791666865348816, 2: 0.7708333730697632, 3: 0.6666666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 328/5590 [04:46<1:15:36,  1.16it/s]Epoch perc 0.05885509838998211
+Training epoch 1/1000, step 328: 	 
+Train loss:  1.3056727647781372
+Train accuracy:  {0: 0.2708333432674408, 1: 0.1666666716337204, 2: 0.5208333730697632, 3: 0.5625, 4: 0.9791666865348816, 5: 0.6458333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.625, 2: 0.6875, 3: 0.6666666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  6%|▌         | 329/5590 [04:47<1:15:57,  1.15it/s]Epoch perc 0.059033989266547404
+Training epoch 1/1000, step 329: 	 
+Train loss:  1.1817052364349365
+Train accuracy:  {0: 0.3333333432674408, 1: 0.2083333432674408, 2: 0.375, 3: 0.7916666865348816, 4: 0.9375, 5: 0.7291666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.6875, 1: 0.6458333730697632, 2: 0.6875, 3: 0.8333333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  6%|▌         | 330/5590 [04:48<1:16:41,  1.14it/s]Epoch perc 0.059212880143112705
+Training epoch 1/1000, step 330: 	 
+Train loss:  1.2705585956573486
+Train accuracy:  {0: 0.1666666716337204, 1: 0.1666666716337204, 2: 0.5, 3: 0.5, 4: 0.9583333730697632, 5: 0.875, 6: 1.0}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.4583333432674408, 2: 0.8958333730697632, 3: 0.5625, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  6%|▌         | 331/5590 [04:49<1:17:34,  1.13it/s]Epoch perc 0.059391771019678
+Training epoch 1/1000, step 331: 	 
+Train loss:  1.2109835147857666
+Train accuracy:  {0: 0.3125, 1: 0.1666666716337204, 2: 0.4375, 3: 0.7083333730697632, 4: 0.9791666865348816, 5: 0.625, 6: 1.0}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.5833333730697632, 2: 0.6875, 3: 0.7708333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 332/5590 [04:50<1:17:03,  1.14it/s]Epoch perc 0.05957066189624329
+Training epoch 1/1000, step 332: 	 
+Train loss:  1.1619008779525757
+Train accuracy:  {0: 0.25, 1: 0.2916666865348816, 2: 0.375, 3: 0.625, 4: 0.9375, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.6041666865348816, 2: 0.8541666865348816, 3: 0.7083333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 333/5590 [04:51<1:16:35,  1.14it/s]Epoch perc 0.059749552772808585
+Training epoch 1/1000, step 333: 	 
+Train loss:  1.2322431802749634
+Train accuracy:  {0: 0.2291666716337204, 1: 0.2291666716337204, 2: 0.4166666865348816, 3: 0.5625, 4: 0.9791666865348816, 5: 0.7708333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.4375, 1: 0.625, 2: 0.8333333730697632, 3: 0.5833333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 334/5590 [04:52<1:18:04,  1.12it/s]Epoch perc 0.05992844364937388
+Training epoch 1/1000, step 334: 	 
+Train loss:  1.0691792964935303
+Train accuracy:  {0: 0.2916666865348816, 1: 0.25, 2: 0.3958333432674408, 3: 0.7291666865348816, 4: 0.9791666865348816, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.6458333730697632, 1: 0.5, 2: 0.8333333730697632, 3: 0.8125, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 335/5590 [04:52<1:16:42,  1.14it/s]Epoch perc 0.06010733452593918
+Training epoch 1/1000, step 335: 	 
+Train loss:  1.319701910018921
+Train accuracy:  {0: 0.1666666716337204, 1: 0.0625, 2: 0.4791666865348816, 3: 0.7708333730697632, 4: 0.8333333730697632, 5: 0.7708333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.6458333730697632, 1: 0.375, 2: 0.875, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 336/5590 [04:53<1:16:04,  1.15it/s]Epoch perc 0.06028622540250447
+Training epoch 1/1000, step 336: 	 
+Train loss:  1.218658208847046
+Train accuracy:  {0: 0.25, 1: 0.2083333432674408, 2: 0.375, 3: 0.7916666865348816, 4: 0.9166666865348816, 5: 0.8333333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.5625, 2: 0.7083333730697632, 3: 0.8333333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  6%|▌         | 337/5590 [04:54<1:16:05,  1.15it/s]Epoch perc 0.06046511627906977
+Training epoch 1/1000, step 337: 	 
+Train loss:  1.084907054901123
+Train accuracy:  {0: 0.3125, 1: 0.375, 2: 0.4791666865348816, 3: 0.7083333730697632, 4: 0.8958333730697632, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.625, 1: 0.6666666865348816, 2: 0.8125, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 338/5590 [04:55<1:14:59,  1.17it/s]Epoch perc 0.06064400715563506
+Training epoch 1/1000, step 338: 	 
+Train loss:  1.0906462669372559
+Train accuracy:  {0: 0.25, 1: 0.375, 2: 0.4791666865348816, 3: 0.7083333730697632, 4: 0.9166666865348816, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.7083333730697632, 1: 0.625, 2: 0.8541666865348816, 3: 0.7083333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 339/5590 [04:56<1:15:30,  1.16it/s]Epoch perc 0.06082289803220036
+Training epoch 1/1000, step 339: 	 
+Train loss:  1.0199869871139526
+Train accuracy:  {0: 0.25, 1: 0.2083333432674408, 2: 0.6041666865348816, 3: 0.8125, 4: 1.0, 5: 0.875, 6: 1.0}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.6666666865348816, 2: 0.9166666865348816, 3: 0.8125, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 340/5590 [04:57<1:16:54,  1.14it/s]Epoch perc 0.061001788908765654
+Training epoch 1/1000, step 340: 	 
+Train loss:  1.138956904411316
+Train accuracy:  {0: 0.25, 1: 0.3958333432674408, 2: 0.4583333432674408, 3: 0.7916666865348816, 4: 0.8958333730697632, 5: 0.9166666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.6666666865348816, 2: 0.8125, 3: 0.8333333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 341/5590 [04:58<1:17:39,  1.13it/s]Epoch perc 0.06118067978533095
+Training epoch 1/1000, step 341: 	 
+Train loss:  1.1671606302261353
+Train accuracy:  {0: 0.25, 1: 0.1875, 2: 0.3125, 3: 0.7708333730697632, 4: 1.0, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.6458333730697632, 2: 0.7708333730697632, 3: 0.8125, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 342/5590 [04:59<1:16:27,  1.14it/s]Epoch perc 0.06135957066189624
+Training epoch 1/1000, step 342: 	 
+Train loss:  1.201019287109375
+Train accuracy:  {0: 0.2708333432674408, 1: 0.2291666716337204, 2: 0.5208333730697632, 3: 0.7291666865348816, 4: 0.8333333730697632, 5: 0.7083333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.5416666865348816, 2: 0.8333333730697632, 3: 0.8125, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 343/5590 [04:59<1:16:43,  1.14it/s]Epoch perc 0.06153846153846154
+Training epoch 1/1000, step 343: 	 
+Train loss:  1.2117894887924194
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1875, 2: 0.4583333432674408, 3: 0.6666666865348816, 4: 0.9166666865348816, 5: 0.7708333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.625, 1: 0.6875, 2: 0.75, 3: 0.8125, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 344/5590 [05:00<1:16:44,  1.14it/s]Epoch perc 0.061717352415026835
+Training epoch 1/1000, step 344: 	 
+Train loss:  1.2275946140289307
+Train accuracy:  {0: 0.1875, 1: 0.2291666716337204, 2: 0.375, 3: 0.6458333730697632, 4: 0.9791666865348816, 5: 0.6666666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.625, 2: 0.75, 3: 0.6875, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  6%|▌         | 345/5590 [05:01<1:15:51,  1.15it/s]Epoch perc 0.06189624329159213
+Training epoch 1/1000, step 345: 	 
+Train loss:  1.2089557647705078
+Train accuracy:  {0: 0.1458333432674408, 1: 0.1458333432674408, 2: 0.3333333432674408, 3: 0.5833333730697632, 4: 0.9791666865348816, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.625, 2: 0.7916666865348816, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▌         | 346/5590 [05:02<1:17:04,  1.13it/s]Epoch perc 0.06207513416815742
+Training epoch 1/1000, step 346: 	 
+Train loss:  1.2640715837478638
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2291666716337204, 2: 0.3958333432674408, 3: 0.6666666865348816, 4: 0.9583333730697632, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.4791666865348816, 2: 0.8333333730697632, 3: 0.8333333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  6%|▌         | 347/5590 [05:03<1:16:46,  1.14it/s]Epoch perc 0.062254025044722716
+Training epoch 1/1000, step 347: 	 
+Train loss:  1.1347332000732422
+Train accuracy:  {0: 0.4583333432674408, 1: 0.2291666716337204, 2: 0.4583333432674408, 3: 0.7291666865348816, 4: 0.9166666865348816, 5: 0.7291666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.75, 1: 0.625, 2: 0.7916666865348816, 3: 0.8125, 4: 1.0, 5: 0.9791666865348816, 6: 0.9583333730697632}
+  6%|▌         | 348/5590 [05:04<1:16:33,  1.14it/s]Epoch perc 0.06243291592128802
+Training epoch 1/1000, step 348: 	 
+Train loss:  1.136543869972229
+Train accuracy:  {0: 0.3958333432674408, 1: 0.1875, 2: 0.4791666865348816, 3: 0.75, 4: 0.9166666865348816, 5: 0.7291666865348816, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.6666666865348816, 2: 0.6875, 3: 0.8541666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  6%|▌         | 349/5590 [05:05<1:15:26,  1.16it/s]Epoch perc 0.0626118067978533
+Training epoch 1/1000, step 349: 	 
+Train loss:  1.0189745426177979
+Train accuracy:  {0: 0.25, 1: 0.3541666865348816, 2: 0.4166666865348816, 3: 0.8333333730697632, 4: 1.0, 5: 0.8958333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.6458333730697632, 1: 0.6666666865348816, 2: 0.7916666865348816, 3: 0.8541666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▋         | 350/5590 [05:05<1:15:38,  1.15it/s]Epoch perc 0.06279069767441861
+Training epoch 1/1000, step 350: 	 
+Train loss:  1.0555522441864014
+Train accuracy:  {0: 0.3333333432674408, 1: 0.25, 2: 0.5, 3: 0.8125, 4: 0.9791666865348816, 5: 0.875, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.6041666865348816, 2: 0.7916666865348816, 3: 0.8958333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  6%|▋         | 351/5590 [05:06<1:15:13,  1.16it/s]Epoch perc 0.0629695885509839
+Training epoch 1/1000, step 351: 	 
+Train loss:  1.123429298400879
+Train accuracy:  {0: 0.2916666865348816, 1: 0.2708333432674408, 2: 0.4583333432674408, 3: 0.7291666865348816, 4: 0.9583333730697632, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.6875, 1: 0.7291666865348816, 2: 0.7916666865348816, 3: 0.8125, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▋         | 352/5590 [05:07<1:16:11,  1.15it/s]Epoch perc 0.0631484794275492
+Training epoch 1/1000, step 352: 	 
+Train loss:  1.2541240453720093
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1875, 2: 0.4166666865348816, 3: 0.625, 4: 0.9791666865348816, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.5833333730697632, 2: 0.8541666865348816, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▋         | 353/5590 [05:08<1:17:38,  1.12it/s]Epoch perc 0.06332737030411449
+Training epoch 1/1000, step 353: 	 
+Train loss:  1.1394155025482178
+Train accuracy:  {0: 0.2291666716337204, 1: 0.3125, 2: 0.4791666865348816, 3: 0.7083333730697632, 4: 1.0, 5: 0.6458333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.6041666865348816, 1: 0.625, 2: 0.8333333730697632, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▋         | 354/5590 [05:09<1:19:13,  1.10it/s]Epoch perc 0.06350626118067978
+Training epoch 1/1000, step 354: 	 
+Train loss:  1.2547250986099243
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2083333432674408, 2: 0.3541666865348816, 3: 0.8125, 4: 0.8958333730697632, 5: 0.625, 6: 1.0}
+Train accuracy interval:  {0: 0.625, 1: 0.5625, 2: 0.8125, 3: 0.8541666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  6%|▋         | 355/5590 [05:10<1:20:34,  1.08it/s]Epoch perc 0.06368515205724508
+Training epoch 1/1000, step 355: 	 
+Train loss:  1.0780446529388428
+Train accuracy:  {0: 0.3333333432674408, 1: 0.2708333432674408, 2: 0.4375, 3: 0.6875, 4: 0.9583333730697632, 5: 0.7708333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.6875, 1: 0.6458333730697632, 2: 0.8541666865348816, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▋         | 356/5590 [05:11<1:19:36,  1.10it/s]Epoch perc 0.06386404293381037
+Training epoch 1/1000, step 356: 	 
+Train loss:  1.1014249324798584
+Train accuracy:  {0: 0.25, 1: 0.2291666716337204, 2: 0.5208333730697632, 3: 0.6666666865348816, 4: 0.9375, 5: 0.7708333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.625, 1: 0.6666666865348816, 2: 0.8541666865348816, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▋         | 357/5590 [05:12<1:17:52,  1.12it/s]Epoch perc 0.06404293381037567
+Training epoch 1/1000, step 357: 	 
+Train loss:  0.9773512482643127
+Train accuracy:  {0: 0.25, 1: 0.3125, 2: 0.4375, 3: 0.75, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.6041666865348816, 2: 0.9166666865348816, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▋         | 358/5590 [05:13<1:18:21,  1.11it/s]Epoch perc 0.06422182468694096
+Training epoch 1/1000, step 358: 	 
+Train loss:  1.0678430795669556
+Train accuracy:  {0: 0.25, 1: 0.2083333432674408, 2: 0.5208333730697632, 3: 0.7291666865348816, 4: 0.9791666865348816, 5: 0.7708333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.75, 1: 0.6041666865348816, 2: 0.8125, 3: 0.7708333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  6%|▋         | 359/5590 [05:14<1:17:18,  1.13it/s]Epoch perc 0.06440071556350627
+Training epoch 1/1000, step 359: 	 
+Train loss:  1.1258056163787842
+Train accuracy:  {0: 0.3333333432674408, 1: 0.2291666716337204, 2: 0.3958333432674408, 3: 0.7291666865348816, 4: 0.9791666865348816, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.6458333730697632, 1: 0.5833333730697632, 2: 0.6875, 3: 0.7916666865348816, 4: 1.0, 5: 0.9583333730697632, 6: 1.0}
+  6%|▋         | 360/5590 [05:14<1:15:56,  1.15it/s]Epoch perc 0.06457960644007156
+Training epoch 1/1000, step 360: 	 
+Train loss:  1.180135726928711
+Train accuracy:  {0: 0.2291666716337204, 1: 0.2708333432674408, 2: 0.4166666865348816, 3: 0.7083333730697632, 4: 0.9583333730697632, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.625, 2: 0.75, 3: 0.8125, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  6%|▋         | 361/5590 [05:15<1:15:14,  1.16it/s]Epoch perc 0.06475849731663685
+Training epoch 1/1000, step 361: 	 
+Train loss:  1.235277771949768
+Train accuracy:  {0: 0.2291666716337204, 1: 0.25, 2: 0.3541666865348816, 3: 0.7083333730697632, 4: 0.9791666865348816, 5: 0.6875, 6: 1.0}
+Train accuracy interval:  {0: 0.6041666865348816, 1: 0.6041666865348816, 2: 0.8333333730697632, 3: 0.7291666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  6%|▋         | 362/5590 [05:16<1:15:16,  1.16it/s]Epoch perc 0.06493738819320215
+Training epoch 1/1000, step 362: 	 
+Train loss:  1.0762755870819092
+Train accuracy:  {0: 0.375, 1: 0.375, 2: 0.3125, 3: 0.7708333730697632, 4: 0.9791666865348816, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.7291666865348816, 1: 0.7916666865348816, 2: 0.7291666865348816, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  6%|▋         | 363/5590 [05:17<1:16:25,  1.14it/s]Epoch perc 0.06511627906976744
+Training epoch 1/1000, step 363: 	 
+Train loss:  1.1963000297546387
+Train accuracy:  {0: 0.1666666716337204, 1: 0.2083333432674408, 2: 0.4583333432674408, 3: 0.6666666865348816, 4: 0.8958333730697632, 5: 0.7708333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.75, 1: 0.5416666865348816, 2: 0.75, 3: 0.7083333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 364/5590 [05:18<1:17:54,  1.12it/s]Epoch perc 0.06529516994633273
+Training epoch 1/1000, step 364: 	 
+Train loss:  1.2438108921051025
+Train accuracy:  {0: 0.2291666716337204, 1: 0.3333333432674408, 2: 0.3958333432674408, 3: 0.6875, 4: 0.9791666865348816, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.7291666865348816, 2: 0.6458333730697632, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 365/5590 [05:19<1:17:47,  1.12it/s]Epoch perc 0.06547406082289803
+Training epoch 1/1000, step 365: 	 
+Train loss:  1.202670693397522
+Train accuracy:  {0: 0.125, 1: 0.1875, 2: 0.4166666865348816, 3: 0.75, 4: 0.9791666865348816, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.5, 2: 0.8541666865348816, 3: 0.7708333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 366/5590 [05:20<1:16:35,  1.14it/s]Epoch perc 0.06565295169946332
+Training epoch 1/1000, step 366: 	 
+Train loss:  1.1158860921859741
+Train accuracy:  {0: 0.1875, 1: 0.3125, 2: 0.4791666865348816, 3: 0.8333333730697632, 4: 0.9583333730697632, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.6041666865348816, 1: 0.6875, 2: 0.8125, 3: 0.875, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  7%|▋         | 367/5590 [05:21<1:16:33,  1.14it/s]Epoch perc 0.06583184257602863
+Training epoch 1/1000, step 367: 	 
+Train loss:  1.059458613395691
+Train accuracy:  {0: 0.2916666865348816, 1: 0.3125, 2: 0.375, 3: 0.75, 4: 1.0, 5: 0.8958333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.6458333730697632, 2: 0.6875, 3: 0.8333333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 368/5590 [05:21<1:16:00,  1.14it/s]Epoch perc 0.06601073345259392
+Training epoch 1/1000, step 368: 	 
+Train loss:  1.2781426906585693
+Train accuracy:  {0: 0.125, 1: 0.1875, 2: 0.3541666865348816, 3: 0.6666666865348816, 4: 0.9375, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.4375, 1: 0.4791666865348816, 2: 0.6875, 3: 0.7291666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  7%|▋         | 369/5590 [05:22<1:16:38,  1.14it/s]Epoch perc 0.06618962432915922
+Training epoch 1/1000, step 369: 	 
+Train loss:  1.0819027423858643
+Train accuracy:  {0: 0.3125, 1: 0.2291666716337204, 2: 0.5, 3: 0.7083333730697632, 4: 0.9583333730697632, 5: 0.8333333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.7708333730697632, 1: 0.6875, 2: 0.7083333730697632, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  7%|▋         | 370/5590 [05:23<1:17:02,  1.13it/s]Epoch perc 0.06636851520572451
+Training epoch 1/1000, step 370: 	 
+Train loss:  1.130480408668518
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2083333432674408, 2: 0.4375, 3: 0.7916666865348816, 4: 0.9791666865348816, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.6458333730697632, 1: 0.5208333730697632, 2: 0.8333333730697632, 3: 0.8333333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 371/5590 [05:24<1:16:31,  1.14it/s]Epoch perc 0.0665474060822898
+Training epoch 1/1000, step 371: 	 
+Train loss:  1.0382548570632935
+Train accuracy:  {0: 0.2708333432674408, 1: 0.2708333432674408, 2: 0.5416666865348816, 3: 0.7708333730697632, 4: 0.9791666865348816, 5: 0.875, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.625, 2: 0.7708333730697632, 3: 0.8541666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  7%|▋         | 372/5590 [05:25<1:16:18,  1.14it/s]Epoch perc 0.0667262969588551
+Training epoch 1/1000, step 372: 	 
+Train loss:  1.0113879442214966
+Train accuracy:  {0: 0.25, 1: 0.2708333432674408, 2: 0.4375, 3: 0.8958333730697632, 4: 0.9791666865348816, 5: 0.8125, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.6875, 1: 0.7083333730697632, 2: 0.8541666865348816, 3: 0.8958333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  7%|▋         | 373/5590 [05:26<1:15:23,  1.15it/s]Epoch perc 0.06690518783542039
+Training epoch 1/1000, step 373: 	 
+Train loss:  1.0297694206237793
+Train accuracy:  {0: 0.3333333432674408, 1: 0.3541666865348816, 2: 0.5208333730697632, 3: 0.7083333730697632, 4: 1.0, 5: 0.8333333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.5833333730697632, 2: 0.7708333730697632, 3: 0.7916666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  7%|▋         | 374/5590 [05:27<1:15:36,  1.15it/s]Epoch perc 0.06708407871198568
+Training epoch 1/1000, step 374: 	 
+Train loss:  1.1911207437515259
+Train accuracy:  {0: 0.1666666716337204, 1: 0.1875, 2: 0.4583333432674408, 3: 0.7708333730697632, 4: 0.9583333730697632, 5: 0.8125, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5, 1: 0.5625, 2: 0.875, 3: 0.7708333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  7%|▋         | 375/5590 [05:28<1:14:33,  1.17it/s]Epoch perc 0.06726296958855098
+Training epoch 1/1000, step 375: 	 
+Train loss:  0.9841791987419128
+Train accuracy:  {0: 0.3958333432674408, 1: 0.2916666865348816, 2: 0.4791666865348816, 3: 0.875, 4: 1.0, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.7083333730697632, 1: 0.7083333730697632, 2: 0.875, 3: 0.875, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  7%|▋         | 376/5590 [05:28<1:13:53,  1.18it/s]Epoch perc 0.06744186046511629
+Training epoch 1/1000, step 376: 	 
+Train loss:  1.130061388015747
+Train accuracy:  {0: 0.3125, 1: 0.0833333358168602, 2: 0.5625, 3: 0.6875, 4: 0.9166666865348816, 5: 0.7708333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.6875, 1: 0.4791666865348816, 2: 0.7916666865348816, 3: 0.8125, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  7%|▋         | 377/5590 [05:29<1:13:13,  1.19it/s]Epoch perc 0.06762075134168158
+Training epoch 1/1000, step 377: 	 
+Train loss:  0.8714272379875183
+Train accuracy:  {0: 0.2916666865348816, 1: 0.3958333432674408, 2: 0.5, 3: 0.9166666865348816, 4: 1.0, 5: 0.875, 6: 1.0}
+Train accuracy interval:  {0: 0.6041666865348816, 1: 0.7708333730697632, 2: 0.75, 3: 0.9166666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 378/5590 [05:30<1:14:08,  1.17it/s]Epoch perc 0.06779964221824687
+Training epoch 1/1000, step 378: 	 
+Train loss:  0.9737915992736816
+Train accuracy:  {0: 0.2708333432674408, 1: 0.2916666865348816, 2: 0.6041666865348816, 3: 0.7291666865348816, 4: 0.9791666865348816, 5: 0.8333333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.625, 1: 0.6458333730697632, 2: 0.875, 3: 0.7708333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 379/5590 [05:31<1:15:35,  1.15it/s]Epoch perc 0.06797853309481217
+Training epoch 1/1000, step 379: 	 
+Train loss:  1.05235755443573
+Train accuracy:  {0: 0.2083333432674408, 1: 0.375, 2: 0.5625, 3: 0.75, 4: 0.8958333730697632, 5: 0.75, 6: 1.0}
+Train accuracy interval:  {0: 0.6041666865348816, 1: 0.6875, 2: 0.8125, 3: 0.8125, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  7%|▋         | 380/5590 [05:32<1:17:03,  1.13it/s]Epoch perc 0.06815742397137746
+Training epoch 1/1000, step 380: 	 
+Train loss:  0.9497100114822388
+Train accuracy:  {0: 0.2291666716337204, 1: 0.4791666865348816, 2: 0.4375, 3: 0.7708333730697632, 4: 1.0, 5: 0.875, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.6875, 1: 0.6875, 2: 0.7708333730697632, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  7%|▋         | 381/5590 [05:33<1:18:03,  1.11it/s]Epoch perc 0.06833631484794275
+Training epoch 1/1000, step 381: 	 
+Train loss:  1.1449649333953857
+Train accuracy:  {0: 0.1666666716337204, 1: 0.2916666865348816, 2: 0.4583333432674408, 3: 0.75, 4: 1.0, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5208333730697632, 1: 0.5833333730697632, 2: 0.7291666865348816, 3: 0.75, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 382/5590 [05:34<1:16:21,  1.14it/s]Epoch perc 0.06851520572450805
+Training epoch 1/1000, step 382: 	 
+Train loss:  1.1343072652816772
+Train accuracy:  {0: 0.2916666865348816, 1: 0.1875, 2: 0.3958333432674408, 3: 0.6666666865348816, 4: 0.9791666865348816, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.5416666865348816, 2: 0.7916666865348816, 3: 0.7708333730697632, 4: 1.0, 5: 0.9791666865348816, 6: 1.0}
+  7%|▋         | 383/5590 [05:35<1:20:47,  1.07it/s]Epoch perc 0.06869409660107334
+Training epoch 1/1000, step 383: 	 
+Train loss:  1.1426719427108765
+Train accuracy:  {0: 0.2708333432674408, 1: 0.2291666716337204, 2: 0.4791666865348816, 3: 0.6041666865348816, 4: 0.9791666865348816, 5: 0.9166666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5, 1: 0.5833333730697632, 2: 0.8125, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 384/5590 [05:36<1:19:33,  1.09it/s]Epoch perc 0.06887298747763863
+Training epoch 1/1000, step 384: 	 
+Train loss:  1.1481423377990723
+Train accuracy:  {0: 0.1875, 1: 0.2083333432674408, 2: 0.5, 3: 0.5833333730697632, 4: 0.9791666865348816, 5: 0.7708333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.6458333730697632, 1: 0.625, 2: 0.7916666865348816, 3: 0.75, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  7%|▋         | 385/5590 [05:37<1:20:05,  1.08it/s]Epoch perc 0.06905187835420394
+Training epoch 1/1000, step 385: 	 
+Train loss:  1.0986543893814087
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2708333432674408, 2: 0.4166666865348816, 3: 0.8125, 4: 0.8958333730697632, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.4791666865348816, 1: 0.6875, 2: 0.8541666865348816, 3: 0.8333333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 386/5590 [05:37<1:20:11,  1.08it/s]Epoch perc 0.06923076923076923
+Training epoch 1/1000, step 386: 	 
+Train loss:  1.0085312128067017
+Train accuracy:  {0: 0.3125, 1: 0.2291666716337204, 2: 0.625, 3: 0.8958333730697632, 4: 0.9583333730697632, 5: 0.8333333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.6666666865348816, 1: 0.6666666865348816, 2: 0.8333333730697632, 3: 0.9375, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 387/5590 [05:38<1:17:43,  1.12it/s]Epoch perc 0.06940966010733453
+Training epoch 1/1000, step 387: 	 
+Train loss:  1.1546478271484375
+Train accuracy:  {0: 0.375, 1: 0.25, 2: 0.3541666865348816, 3: 0.625, 4: 1.0, 5: 0.7916666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.6875, 1: 0.5416666865348816, 2: 0.75, 3: 0.7708333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 388/5590 [05:39<1:16:18,  1.14it/s]Epoch perc 0.06958855098389982
+Training epoch 1/1000, step 388: 	 
+Train loss:  1.109943151473999
+Train accuracy:  {0: 0.1666666716337204, 1: 0.1875, 2: 0.5, 3: 0.6666666865348816, 4: 1.0, 5: 0.8958333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.6875, 2: 0.7916666865348816, 3: 0.75, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  7%|▋         | 389/5590 [05:40<1:16:24,  1.13it/s]Epoch perc 0.06976744186046512
+Training epoch 1/1000, step 389: 	 
+Train loss:  1.0999631881713867
+Train accuracy:  {0: 0.375, 1: 0.3333333432674408, 2: 0.4791666865348816, 3: 0.5833333730697632, 4: 0.9791666865348816, 5: 0.8125, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.6458333730697632, 1: 0.6458333730697632, 2: 0.75, 3: 0.7291666865348816, 4: 1.0, 5: 0.9791666865348816, 6: 0.9791666865348816}
+  7%|▋         | 390/5590 [05:41<1:17:06,  1.12it/s]Epoch perc 0.06994633273703041
+Training epoch 1/1000, step 390: 	 
+Train loss:  0.9310639500617981
+Train accuracy:  {0: 0.3125, 1: 0.4166666865348816, 2: 0.5208333730697632, 3: 0.875, 4: 0.9791666865348816, 5: 0.9166666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.6875, 2: 0.7916666865348816, 3: 0.8958333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 391/5590 [05:42<1:16:03,  1.14it/s]Epoch perc 0.0701252236135957
+Training epoch 1/1000, step 391: 	 
+Train loss:  1.087231993675232
+Train accuracy:  {0: 0.1875, 1: 0.2708333432674408, 2: 0.375, 3: 0.75, 4: 0.9791666865348816, 5: 0.8333333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.6458333730697632, 2: 0.875, 3: 0.7708333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 392/5590 [05:43<1:14:41,  1.16it/s]Epoch perc 0.070304114490161
+Training epoch 1/1000, step 392: 	 
+Train loss:  0.9593409299850464
+Train accuracy:  {0: 0.3958333432674408, 1: 0.25, 2: 0.5625, 3: 0.7708333730697632, 4: 0.9791666865348816, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.7708333730697632, 1: 0.7708333730697632, 2: 0.8541666865348816, 3: 0.8333333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 393/5590 [05:43<1:15:26,  1.15it/s]Epoch perc 0.0704830053667263
+Training epoch 1/1000, step 393: 	 
+Train loss:  1.1306155920028687
+Train accuracy:  {0: 0.1666666716337204, 1: 0.1875, 2: 0.5208333730697632, 3: 0.6875, 4: 1.0, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5, 1: 0.6666666865348816, 2: 0.9166666865348816, 3: 0.7916666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 394/5590 [05:44<1:14:46,  1.16it/s]Epoch perc 0.0706618962432916
+Training epoch 1/1000, step 394: 	 
+Train loss:  1.2621819972991943
+Train accuracy:  {0: 0.2083333432674408, 1: 0.2291666716337204, 2: 0.3541666865348816, 3: 0.7916666865348816, 4: 0.9375, 5: 0.8333333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.7083333730697632, 1: 0.5833333730697632, 2: 0.7708333730697632, 3: 0.8333333730697632, 4: 1.0, 5: 1.0, 6: 0.9791666865348816}
+  7%|▋         | 395/5590 [05:45<1:13:43,  1.17it/s]Epoch perc 0.07084078711985689
+Training epoch 1/1000, step 395: 	 
+Train loss:  1.1794999837875366
+Train accuracy:  {0: 0.2708333432674408, 1: 0.1458333432674408, 2: 0.4583333432674408, 3: 0.5208333730697632, 4: 0.9375, 5: 0.8958333730697632, 6: 1.0}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.5416666865348816, 2: 0.8125, 3: 0.6666666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 396/5590 [05:46<1:13:36,  1.18it/s]Epoch perc 0.07101967799642218
+Training epoch 1/1000, step 396: 	 
+Train loss:  0.9836450219154358
+Train accuracy:  {0: 0.1666666716337204, 1: 0.3333333432674408, 2: 0.5833333730697632, 3: 0.8125, 4: 1.0, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5833333730697632, 1: 0.7291666865348816, 2: 0.8333333730697632, 3: 0.8541666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 397/5590 [05:47<1:13:46,  1.17it/s]Epoch perc 0.07119856887298748
+Training epoch 1/1000, step 397: 	 
+Train loss:  1.1134982109069824
+Train accuracy:  {0: 0.3125, 1: 0.1875, 2: 0.3541666865348816, 3: 0.875, 4: 1.0, 5: 0.9166666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.5416666865348816, 1: 0.6041666865348816, 2: 0.5833333730697632, 3: 0.9166666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 398/5590 [05:48<1:31:01,  1.05s/it]Epoch perc 0.07137745974955277
+Training epoch 1/1000, step 398: 	 
+Train loss:  1.2066519260406494
+Train accuracy:  {0: 0.2291666716337204, 1: 0.2708333432674408, 2: 0.375, 3: 0.6458333730697632, 4: 0.9375, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.4583333432674408, 1: 0.5, 2: 0.875, 3: 0.7083333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 399/5590 [05:50<1:36:48,  1.12s/it]Epoch perc 0.07155635062611806
+Training epoch 1/1000, step 399: 	 
+Train loss:  1.1515896320343018
+Train accuracy:  {0: 0.25, 1: 0.1041666716337204, 2: 0.4166666865348816, 3: 0.7083333730697632, 4: 1.0, 5: 0.8541666865348816, 6: 1.0}
+Train accuracy interval:  {0: 0.6458333730697632, 1: 0.4166666865348816, 2: 0.8125, 3: 0.7291666865348816, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 400/5590 [05:51<1:37:23,  1.13s/it]Epoch perc 0.07173524150268336
+Training epoch 1/1000, step 400: 	 
+Train loss:  1.1490767002105713
+Train accuracy:  {0: 0.1666666716337204, 1: 0.1875, 2: 0.375, 3: 0.6875, 4: 0.9583333730697632, 5: 0.875, 6: 1.0}
+Train accuracy interval:  {0: 0.5625, 1: 0.625, 2: 0.7291666865348816, 3: 0.6875, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 401/5590 [05:52<1:34:23,  1.09s/it]Epoch perc 0.07191413237924865
+Training epoch 1/1000, step 401: 	 
+Train loss:  1.0727816820144653
+Train accuracy:  {0: 0.3541666865348816, 1: 0.1875, 2: 0.4375, 3: 0.8125, 4: 0.9166666865348816, 5: 0.8333333730697632, 6: 0.9791666865348816}
+Train accuracy interval:  {0: 0.7916666865348816, 1: 0.6041666865348816, 2: 0.7708333730697632, 3: 0.8333333730697632, 4: 1.0, 5: 0.9583333730697632, 6: 0.9791666865348816}
+  7%|▋         | 402/5590 [05:53<1:31:56,  1.06s/it]Epoch perc 0.07209302325581396
+Training epoch 1/1000, step 402: 	 
+Train loss:  1.0995248556137085
+Train accuracy:  {0: 0.2083333432674408, 1: 0.1875, 2: 0.4166666865348816, 3: 0.75, 4: 1.0, 5: 0.8125, 6: 1.0}
+Train accuracy interval:  {0: 0.6875, 1: 0.6041666865348816, 2: 0.7916666865348816, 3: 0.8333333730697632, 4: 1.0, 5: 1.0, 6: 1.0}
+  7%|▋         | 403/5590 [05:54<1:39:19,  1.15s/it]Epoch perc 0.07227191413237925
+Training epoch 1/1000, step 403: 	 
+Train loss:  1.089208960533142
+Train accuracy:  {0: 0.2291666716337204, 1: 0.1875, 2: 0.4375, 3: 0.8541666865348816, 4: 1.0, 5: 0.7916666865348816, 6: 0.9583333730697632}
+Train accuracy interval:  {0: 0.6875, 1: 0.6458333730697632, 2: 0.7916666865348816, 3: 0.9375, 4: 1.0, 5: 1.0, 6: 0.9583333730697632}
+  7%|▋         | 404/5590 [05:55<1:40:19,  1.16s/it]

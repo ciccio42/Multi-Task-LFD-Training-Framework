@@ -29,20 +29,21 @@ def seed_everything(seed=42):
 def main(cfg):
     if cfg.debug:
         import debugpy
-        debugpy.listen(('0.0.0.0', 5679))
+        debugpy.listen(('0.0.0.0', 5678))
         print("Waiting for debugger attach")
         debugpy.wait_for_client()
 
     seed_everything(seed=42)
 
     from train_any import Workspace as W
-    all_tasks_cfgs = [cfg.tasks_cfgs.nut_assembly, cfg.tasks_cfgs.door, cfg.tasks_cfgs.drawer,
-                      cfg.tasks_cfgs.button, cfg.tasks_cfgs.pick_place, cfg.tasks_cfgs.stack_block, cfg.tasks_cfgs.basketball]
+    all_tasks_cfgs = cfg.tasks_cfgs
 
     if cfg.task_names:
-        cfg.tasks = [
-            tsk for tsk in all_tasks_cfgs if tsk.name in cfg.task_names]
-
+        cfg.tasks = []
+        for task_name in cfg.task_names:
+            if task_name in all_tasks_cfgs.keys():
+                cfg.tasks.append(all_tasks_cfgs[task_name])       
+        
     if cfg.use_all_tasks:
         print("Loading all 7 tasks to the dataset!  obs_T: {} demo_T: {}".format(
             cfg.dataset_cfg.obs_T, cfg.dataset_cfg.demo_T))

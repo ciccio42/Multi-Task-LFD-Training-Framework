@@ -25,8 +25,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.film_efficientnet.pretrained_efficientnet_encoder import EfficientNetEncoder
-from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.tokenizers.token_learner import TokenLearnerModule
+from multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.film_efficientnet.pretrained_efficientnet_encoder import EfficientNetEncoder
+from multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.tokenizers.token_learner import TokenLearnerModule
 
 class RT1ImageTokenizer(nn.Module):
     def __init__(self,

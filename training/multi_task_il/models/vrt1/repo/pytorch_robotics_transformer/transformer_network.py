@@ -17,10 +17,10 @@
 
 # You can find the original code from here[https://github.com/google-research/robotics_transformer].
 
-from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.tokenizers import action_tokenizer
-from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.tokenizers import image_tokenizer
-from multi_task_il.models.rt1.repo.pytorch_robotics_transformer import transformer
-from multi_task_il.models.rt1.repo.pytorch_robotics_transformer.film_efficientnet import preprocessors
+from multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.tokenizers import action_tokenizer
+from multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.tokenizers import image_tokenizer
+from multi_task_il.models.vrt1.repo.pytorch_robotics_transformer import transformer
+from multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.film_efficientnet import preprocessors
 
 from typing import Optional, Tuple, Union, Any, Dict, List
 import numpy as np

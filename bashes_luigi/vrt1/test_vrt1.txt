@@ -1,0 +1,1702 @@
+pybullet build time: Sep  9 2023 15:14:45
+Exception raised during import
+5590
+Appending saved step 5590
+Testing model /user/frosa/multi_task_lfd/checkpoint_save_folder/luigi_checkpoint/RT1-From_Scratch_Simulated_Only-Human_224x224-Batch8/model_save-5590.pt
+Result dir /user/frosa/multi_task_lfd/checkpoint_save_folder/luigi_checkpoint/RT1-From_Scratch_Simulated_Only-Human_224x224-Batch8/results_pick_place/run_1
+loading model from saved training step 5590
+Made new path for results at: /user/frosa/multi_task_lfd/checkpoint_save_folder/luigi_checkpoint/RT1-From_Scratch_Simulated_Only-Human_224x224-Batch8/results_pick_place/run_1/step-5590
+Multi-task dataset, tasks used:  [{'name': 'asu_table_top_delta', 'crop': [0, 35, 0, 0], 'image_channel_format': 'RGB', 'demo_per_subtask': 2, 'subsample': False}, {'name': 'berkeley_autolab_ur5_delta', 'crop': [0, 0, 0, 0], 'image_channel_format': 'RGB', 'demo_per_subtask': 2, 'subsample': False}, {'name': 'iamlab_cmu_pickup_insert_delta', 'crop': [0, 0, 0, 0], 'image_channel_format': 'RGB', 'subsample': False, 'demo_per_subtask': 2}, {'name': 'taco_play_delta', 'crop': [0, 0, 0, 0], 'image_channel_format': 'RGB', 'subsample': False, 'demo_per_subtask': 2}, {'name': 'sim_ur5e_pick_place_delta', 'crop': [20, 25, 80, 75], 'image_channel_format': 'RGB', 'subsample': False, 'demo_per_subtask': 2}, {'name': 'real_ur5e_rgb_pick_place_delta', 'n_tasks': 16, 'crop': [0, 30, 120, 120], 'image_channel_format': 'RGB', 'subsample': False, 'demo_per_subtask': 2}, {'name': 'sim_panda_pick_place_converted_delta', 'crop': [20, 25, 80, 75], 'image_channel_format': 'RGB', 'subsample': False, 'demo_per_subtask': 2}, {'name': 'human_rgb_pick_place', 'n_tasks': 16, 'crop': [0, 30, 120, 120], 'image_channel_format': 'RGB', 'subsample': False, 'demo_per_subtask': 2}]
+/raid/home/frosa_Loc/conda/envs/multi_task_lfd_rt1/lib/python3.9/site-packages/gym/spaces/box.py:127: UserWarning: [33mWARN: Box bound precision lowered by casting to float32[0m
+  logger.warn(f"Box bound precision lowered by casting to {self.dtype}")
+Found 1 GPU devices, using 4 parallel workers for evaluating 16 total trajectories
+
+Renderer is using size (200, 360) 
+
+Loading video backbone r2plus1d_18.....
+Loading pretrained weights for r2plus1d_18
+Exception raised during import
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_00, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 189.11it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_01, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 459.23it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_02, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 529.69it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_03, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 407.06it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_04, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 241.01it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_05, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 269.42it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_06, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 249.52it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_07, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 190.73it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_08, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 209.53it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_09, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 199.33it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_10, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 269.00it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_11, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 268.86it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_12, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 851.57it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_13, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 968.57it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_14, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 277.80it/s]
+Reading samples for dataset: sim_ur5e_pick_place_delta, variation: task_15, max demos: 1
+0it [00:00, ?it/s]10it [00:00, 510.34it/s]
+Dataset val loaded, total frames: 2444
+---- Testing model multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond ----
+2025-06-19 15:58:29.643468: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:485] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2025-06-19 15:58:29.663091: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:8454] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2025-06-19 15:58:29.668901: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1452] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2025-06-19 15:58:29.683703: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2025-06-19 15:58:30.944579: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+2025-06-19 15:58:31.013947: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:485] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2025-06-19 15:58:31.033671: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:8454] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2025-06-19 15:58:31.039665: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1452] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2025-06-19 15:58:31.054472: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2025-06-19 15:58:31.098008: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:485] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2025-06-19 15:58:31.117874: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:8454] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2025-06-19 15:58:31.123670: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1452] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2025-06-19 15:58:31.138298: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2025-06-19 15:58:31.219840: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:485] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2025-06-19 15:58:31.243165: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:8454] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2025-06-19 15:58:31.250674: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1452] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2025-06-19 15:58:31.266418: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2025-06-19 15:58:32.244708: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+2025-06-19 15:58:32.494838: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+2025-06-19 15:58:32.519523: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+pybullet build time: Sep  9 2023 15:14:45
+Found 8 GPUs for rendering. Using device 3.
+pybullet build time: Sep  9 2023 15:14:45
+Found 8 GPUs for rendering. Using device 3.
+pybullet build time: Sep  9 2023 15:14:45
+Found 8 GPUs for rendering. Using device 3.
+pybullet build time: Sep  9 2023 15:14:45
+Found 8 GPUs for rendering. Using device 3.
+Exception raised during import
+Model GPU id 0
+Seed: 939042955
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+Exception raised during import
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 2, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09653787107657123
+Evaluated traj #20, task#2, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 999270936
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 2, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08842028213652554
+Evaluated traj #21, task#2, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2170484433
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 2, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08611768602535425
+Evaluated traj #22, task#2, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2585650756
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 2, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.0874547895216784
+Evaluated traj #23, task#2, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 113971123
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 2, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08113343352513598
+Evaluated traj #24, task#2, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2410529190
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 2, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.07918164430075134
+Evaluated traj #25, task#2, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 854001193
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 2, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.07752937512681973
+Evaluated traj #26, task#2, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3075280817
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': True, 'picked': False, 'variation_id': 2, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09656854970565695
+Evaluated traj #27, task#2, reached? True picked? False success? False 
+Model GPU id 0
+Seed: 2791232393
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 2, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08816013115131302
+Evaluated traj #28, task#2, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3012167820
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 2, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09085077323660945
+Evaluated traj #29, task#2, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3460967357
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 4, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08687406975701945
+Evaluated traj #40, task#4, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 685731524
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 4, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08564758142888151
+Evaluated traj #41, task#4, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2998485882
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 4, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09278397844327206
+Evaluated traj #42, task#4, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1815115025
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Exception raised during import
+Model GPU id 0
+Seed: 2340505846
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+Exception raised during import
+{'success': False, 'reached': True, 'picked': False, 'variation_id': 3, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09670872719872077
+Evaluated traj #30, task#3, reached? True picked? False success? False 
+Model GPU id 0
+Seed: 1801823908
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 3, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09598638206128253
+Evaluated traj #31, task#3, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 946785248
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': True, 'picked': False, 'variation_id': 3, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08641167034376536
+Evaluated traj #32, task#3, reached? True picked? False success? False 
+Model GPU id 0
+Seed: 1929338154
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 3, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08048344132126561
+Evaluated traj #33, task#3, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2530876844
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': True, 'picked': False, 'variation_id': 3, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.07798606038883032
+Evaluated traj #34, task#3, reached? True picked? False success? False 
+Model GPU id 0
+Seed: 1194819984
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 3, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08099855650339695
+Evaluated traj #35, task#3, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3476477323
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 3, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.07416697685292226
+Evaluated traj #36, task#3, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3733616459
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 3, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09686974973868061
+Evaluated traj #37, task#3, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 27911967
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 3, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08911888330977484
+Evaluated traj #38, task#3, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3259052811
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 3, 'reached_wrong': 1.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08648769587081
+Evaluated traj #39, task#3, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1445662585
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 5, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09357370761846075
+Evaluated traj #50, task#5, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 438989805
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 5, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08136415481567383
+Evaluated traj #51, task#5, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 398340369
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': True, 'picked': False, 'variation_id': 5, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09105987422513646
+Evaluated traj #52, task#5, reached? True picked? False success? False 
+Model GPU id 0
+Seed: 1631775357
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Exception raised during import
+Model GPU id 0
+Seed: 2746317213
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+Exception raised during import
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 0, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.10176389580530835
+Evaluated traj #0, task#0, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 478163327
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 0, 'reached_wrong': 1.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09124411494526642
+Evaluated traj #1, task#0, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 107420369
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 0, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08856435485233534
+Evaluated traj #2, task#0, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3184935163
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 0, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08672773759096664
+Evaluated traj #3, task#0, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1181241943
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 0, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.07805148655215637
+Evaluated traj #4, task#0, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1051802512
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 0, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08148611933979767
+Evaluated traj #5, task#0, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 958682846
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 0, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.07532569272628684
+Evaluated traj #6, task#0, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 599310825
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 0, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.1013749372090725
+Evaluated traj #7, task#0, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3163119785
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 0, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08527598475778339
+Evaluated traj #8, task#0, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 440213415
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 0, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08776232896261657
+Evaluated traj #9, task#0, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3466589567
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 6, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08530310447642345
+Evaluated traj #60, task#6, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 186618211
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 6, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08367394927321681
+Evaluated traj #61, task#6, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3134174160
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 6, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09755706471323178
+Evaluated traj #62, task#6, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1973214822
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Exception raised during import
+Model GPU id 0
+Seed: 2906402157
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+Exception raised during import
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 1, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09863249987166449
+Evaluated traj #10, task#1, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3181143731
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 1, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08821422690587329
+Evaluated traj #11, task#1, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3831882064
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 1, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09095855264474224
+Evaluated traj #12, task#1, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2342331444
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 1, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08278472218292439
+Evaluated traj #13, task#1, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 373399426
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 1, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.0809962402116384
+Evaluated traj #14, task#1, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2536146025
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 1, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08514124983983325
+Evaluated traj #15, task#1, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1812140441
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 1, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.0792104092654803
+Evaluated traj #16, task#1, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 136505587
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': True, 'picked': False, 'variation_id': 1, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.0971387316849058
+Evaluated traj #17, task#1, reached? True picked? False success? False 
+Model GPU id 0
+Seed: 127978094
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 1, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.0894717870169128
+Evaluated traj #18, task#1, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 402418010
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 1, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.0927188696450745
+Evaluated traj #19, task#1, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2370996465
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 7, 'reached_wrong': 1.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08505130287827245
+Evaluated traj #70, task#7, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1259191105
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 7, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08160795281264956
+Evaluated traj #71, task#7, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3562265906
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 7, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09380860360252936
+Evaluated traj #72, task#7, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2699987374
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 4, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08149879499776475
+Evaluated traj #43, task#4, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1461364854
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 4, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08044260542913778
+Evaluated traj #44, task#4, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1193448329
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 4, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08328709381305618
+Evaluated traj #45, task#4, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 667779376
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 4, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08488533512645999
+Evaluated traj #46, task#4, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 924765563
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 4, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.07864747615839472
+Evaluated traj #47, task#4, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 4111198819
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 4, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09031567668283222
+Evaluated traj #48, task#4, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3279182318
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 4, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08876476224684557
+Evaluated traj #49, task#4, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3026113008
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': True, 'picked': False, 'variation_id': 8, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08746389679561388
+Evaluated traj #80, task#8, reached? True picked? False success? False 
+Model GPU id 0
+Seed: 298737106
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': True, 'picked': False, 'variation_id': 8, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08997571231513624
+Evaluated traj #81, task#8, reached? True picked? False success? False 
+Model GPU id 0
+Seed: 196814233
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 8, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.10708454744705301
+Evaluated traj #82, task#8, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2840104345
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 8, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.1049129410295297
+Evaluated traj #83, task#8, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 978815630
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 8, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.11119984948871942
+Evaluated traj #84, task#8, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3320303242
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': True, 'picked': False, 'variation_id': 8, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08732564401942373
+Evaluated traj #85, task#8, reached? True picked? False success? False 
+Model GPU id 0
+Seed: 1242911821
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 6, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08072100254084101
+Evaluated traj #63, task#6, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2303082117
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 6, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.07704300912010749
+Evaluated traj #64, task#6, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 536124280
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': True, 'picked': False, 'variation_id': 6, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08628487429081999
+Evaluated traj #65, task#6, reached? True picked? False success? False 
+Model GPU id 0
+Seed: 4179500364
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 6, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08578355107086384
+Evaluated traj #66, task#6, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3961228449
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 6, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.07399632599180107
+Evaluated traj #67, task#6, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1625792787
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 6, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.0926092713084442
+Evaluated traj #68, task#6, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 338444264
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': True, 'picked': False, 'variation_id': 6, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09105817845325596
+Evaluated traj #69, task#6, reached? True picked? False success? False 
+Model GPU id 0
+Seed: 999829240
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 9, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08376570884755116
+Evaluated traj #90, task#9, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3721519026
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 9, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08981174191102287
+Evaluated traj #91, task#9, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 433797840
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 9, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.11009869670236347
+Evaluated traj #92, task#9, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1632629719
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': True, 'picked': False, 'variation_id': 9, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.10308803785715671
+Evaluated traj #93, task#9, reached? True picked? False success? False 
+Model GPU id 0
+Seed: 1193887545
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 9, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.11361199972645336
+Evaluated traj #94, task#9, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1947382419
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 9, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08626691868763096
+Evaluated traj #95, task#9, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2730243887
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 5, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.07958284277000174
+Evaluated traj #53, task#5, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 415393687
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 5, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.07669608166675694
+Evaluated traj #54, task#5, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1541804686
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 5, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08296281928258227
+Evaluated traj #55, task#5, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3639960595
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 5, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08894767350708412
+Evaluated traj #56, task#5, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1477278577
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 5, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.07747465569451945
+Evaluated traj #57, task#5, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2592983555
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 5, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09175848487197169
+Evaluated traj #58, task#5, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1136108454
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': True, 'picked': False, 'variation_id': 5, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09510453647335633
+Evaluated traj #59, task#5, reached? True picked? False success? False 
+Model GPU id 0
+Seed: 1589915144
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 10, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08657819387928539
+Evaluated traj #100, task#10, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1525876051
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 10, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09079338383200942
+Evaluated traj #101, task#10, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 899825838
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 10, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.1058742194775714
+Evaluated traj #102, task#10, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2878380452
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 10, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.10955987229252494
+Evaluated traj #103, task#10, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1146660997
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 10, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.11517605876291034
+Evaluated traj #104, task#10, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3014295294
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 10, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08313227173508397
+Evaluated traj #105, task#10, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 4022900809
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 7, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.07957375444323811
+Evaluated traj #73, task#7, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2656522106
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 7, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08257156807855265
+Evaluated traj #74, task#7, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3802986287
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 7, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.07724566807020579
+Evaluated traj #75, task#7, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 3701002945
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 7, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08561472229610216
+Evaluated traj #76, task#7, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1553210608
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 7, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.07838695728226214
+Evaluated traj #77, task#7, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2479708607
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 7, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.09373121387911158
+Evaluated traj #78, task#7, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 825873196
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 7, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.0917079464489261
+Evaluated traj #79, task#7, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2616197747
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 11, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08320284363449804
+Evaluated traj #110, task#11, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2727210979
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 11, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08015461473275494
+Evaluated traj #111, task#11, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 735034881
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 11, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.10108733808757453
+Evaluated traj #112, task#11, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 2294113287
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': True, 'picked': False, 'variation_id': 11, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.10492344249952708
+Evaluated traj #113, task#11, reached? True picked? False success? False 
+Model GPU id 0
+Seed: 3131575764
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 11, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.11217310097043877
+Evaluated traj #114, task#11, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 1051454923
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+{'success': False, 'reached': False, 'picked': False, 'variation_id': 11, 'reached_wrong': 0.0, 'picked_wrong': 0.0, 'place_wrong': 0.0, 'place_wrong_correct_obj': 0.0, 'place_wrong_wrong_obj': 0.0, 'place_correct_bin_wrong_obj': 0.0}
+Mean elapsed time 0.08994469895268119
+Evaluated traj #115, task#11, reached? False picked? False success? False 
+Model GPU id 0
+Seed: 701808367
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+GPU-ID 3
+UR5e_PickPlaceDistractor
+Render GPU id 3
+Object set 2
+Model name multi_task_il.models.vrt1.repo.pytorch_robotics_transformer.rt1_video_cond.RT1_video_cond
+Max-t 150
+/raid/home/frosa_Loc/conda/envs/multi_task_lfd_rt1/lib/python3.9/multiprocessing/resource_tracker.py:216: UserWarning: resource_tracker: There appear to be 7 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

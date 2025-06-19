@@ -172,6 +172,7 @@ bashes_luigi/video_encoder/images_and_stuff
 bashes_luigi/video_encoder/training_logs
 bashes_luigi/vrt1/outputs
 bashes_luigi/vrt1/wandb
+bashes_luigi/vrt1/logs
 bashes_luigi/vrt1/images_and_stuff
 bashes_luigi/vrt1/training_logs
 bashes_luigi/*.txt

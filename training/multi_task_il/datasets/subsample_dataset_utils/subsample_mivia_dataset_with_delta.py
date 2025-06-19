@@ -61,6 +61,7 @@ if __name__ == '__main__':
     
     parser.add_argument("--change_image_from_bgr_to_rgb", action='store_true', help="Whether or not convert the images from BGR to RGB")
     parser.add_argument("--transform_from_world_to_base_link", action='store_true', help="Whether or not convert simulated dataset")
+    parser.add_argument("--min_delta_distance", type=float, default=0.05, help="Minimum distance between two consecutive actions to be considered as a valid action")
     
     parser.add_argument("--debug", action='store_true', help="Whether or not attach the debugger")
     
@@ -117,7 +118,7 @@ if __name__ == '__main__':
                     
                     distance = np.linalg.norm(current_pos - previous_pos)
                     
-                    if distance > 0.05 and gripper_state == previous_gripper_state:
+                    if distance > args.min_delta_distance and gripper_state == previous_gripper_state:
                         action = np.zeros(7)
                         
                         action_delta = current_pos - previous_pos

@@ -408,7 +408,8 @@ def make_demo(dataset, traj, task_name, human_demo=False):
                 processed = dataset.frame_aug(obs, 
                                               task_name,
                                               perform_aug=False,
-                                              perform_scale_resize=True)
+                                              perform_scale_resize=True,
+                                              agent=False)
             frames.append(processed)
             if not hasattr(dataset, 'vrt1_dataset') and getattr(dataset, 'aug_twice', False):
                 cp_frames.append(dataset.frame_aug(

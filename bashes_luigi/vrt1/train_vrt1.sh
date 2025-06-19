@@ -10,15 +10,15 @@ export PYTHONPATH=${PYTHONPATH}:/raid/home/frosa_Loc/Multi-Task-LFD-Framework/re
 echo "pythonpath: " $PYTHONPATH
 
 export HYDRA_FULL_ERROR=1
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=2
 
 #! modify section >>>
 SAVE_PATH="/user/frosa/multi_task_lfd/checkpoint_save_folder/luigi_checkpoint"
-# COND_MODULE_PATH='/user/frosa/multi_task_lfd/checkpoint_save_folder/luigi_checkpoint/Video_Encoder_Only_Human_224x224-Batch64/model_save-975.pt'
-COND_MODULE_PATH="/user/frosa/multi_task_lfd/checkpoint_save_folder/luigi_checkpoint/Video_Encoder_All_But_Human_224x224-Batch64/model_save-517.pt"
-# COUPLE_PATHS_JSON='/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes_luigi/training_json/finetuning_sim' # '/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes_luigi/video_encoder/training_json/all_but_human/'
-COUPLE_PATHS_JSON="/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes_luigi/training_json/pretraining"
-DEVICE=0 #! select GPU
+COND_MODULE_PATH='/user/frosa/multi_task_lfd/checkpoint_save_folder/luigi_checkpoint/Video_Encoder_Only_Human_224x224-Batch64/model_save-975.pt'
+# COND_MODULE_PATH="/user/frosa/multi_task_lfd/checkpoint_save_folder/luigi_checkpoint/Video_Encoder_All_But_Human_224x224-Batch64/model_save-517.pt"
+COUPLE_PATHS_JSON='/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes_luigi/training_json/finetuning_sim'
+# COUPLE_PATHS_JSON="/raid/home/frosa_Loc/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes_luigi/training_json/pretraining"
+DEVICE=2 #! select GPU
 #! <<<
 
 POLICY='${rt1_video_cond}'
@@ -26,10 +26,10 @@ POLICY='${rt1_video_cond}'
 SAVE_FREQ=10
 LOG_FREQ=10
 VAL_FREQ=-1
-DEBUG=true
-WANDB_LOG=false
+DEBUG=false
+WANDB_LOG=true
 ROLLOUT=false
-EPOCH=1000
+EPOCH=100
 LOADER_WORKERS=8
 CONFIG_PATH=../experiments/vrt1
 CONFIG_NAME=config_vrt1.yaml
@@ -49,10 +49,10 @@ HEIGHT=224
 WIDTH=224
 
 # TASK_str=[asu_table_top_delta,berkeley_autolab_ur5_delta,iamlab_cmu_pickup_insert_delta,taco_play_delta,sim_panda_pick_place_converted_delta]
-TASK_str=[asu_table_top_delta,berkeley_autolab_ur5_delta,iamlab_cmu_pickup_insert_delta,taco_play_delta,sim_ur5e_pick_place_delta,real_ur5e_rgb_pick_place_delta,sim_panda_pick_place_converted_delta,human_rgb_pick_place]
-# TASK_str=[human_rgb_pick_place]
+# TASK_str=[asu_table_top_delta,berkeley_autolab_ur5_delta,iamlab_cmu_pickup_insert_delta,taco_play_delta,sim_ur5e_pick_place_delta,real_ur5e_rgb_pick_place_delta,sim_panda_pick_place_converted_delta,human_rgb_pick_place]
+TASK_str=[sim_ur5e_pick_place_delta]
 #[asu_table_top_delta,berkeley_autolab_ur5_delta,iamlab_cmu_pickup_insert_delta,taco_play_delta,sim_ur5e_pick_place_delta,sim_panda_pick_place_converted_delta,human_rgb_pick_place]
-EXP_NAME="RT1-From_Scratch_Simulated_Only-Human_${HEIGHT}x${WIDTH}"
+EXP_NAME="RT1-From-Scratch-Simulated-Only-Human-${HEIGHT}x${WIDTH}"
 PROJECT_NAME=${EXP_NAME}
 
 python -u ../../training/train_scripts/train_any.py \

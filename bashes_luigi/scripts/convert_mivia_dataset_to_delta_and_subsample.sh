@@ -10,6 +10,8 @@ CONVERT_REAL_DATASET=true #! if true, executes the 2nd script
 SIM_UR5E_DATASET_PATH="/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/ur5e_pick_place"
 OUTPUT_SIM_UR5E_DATASET_PATH="/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta"
 
+MIN_DELTA_DISTANCE=0.05 #! minimum distance to consider a delta valid, default is 0.05 that is 5 cm
+
 if [ $CONVERT_SIMULATED_DATASET == true ]; then 
     echo "Converting simulated dataset"
 
@@ -17,6 +19,7 @@ if [ $CONVERT_SIMULATED_DATASET == true ]; then
     --dataset_path=${SIM_UR5E_DATASET_PATH} \
     --ouput_path=${OUTPUT_SIM_UR5E_DATASET_PATH} \
     --transform_from_world_to_base_link \
+    --min_delta_distance=${MIN_DELTA_DISTANCE} \
     # --debug
 
 fi
@@ -31,6 +34,7 @@ if [ $CONVERT_REAL_DATASET == true ]; then
     --dataset_path=${REAL_UR5E_DATASET_PATH} \
     --ouput_path=${OUTPUT_REAL_UR5E_DATASET_PATH} \
     --change_image_from_bgr_to_rgb \
+    --min_delta_distance=${MIN_DELTA_DISTANCE} \
     # --debug
 
 fi

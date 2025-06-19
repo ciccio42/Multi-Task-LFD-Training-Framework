@@ -634,7 +634,7 @@ if __name__ == '__main__':
         color = args.color
         variation = args.variation
         seed = args.seed
-        max_T = 150 # 30
+        max_T = 30 # 30 #! to modify
 
         dataset = None
         if args.test_gt:
@@ -657,11 +657,11 @@ if __name__ == '__main__':
         # if human_demo, load the dataset and generate the seeds for demo files
         if args.human_demo:
             from hydra.utils import instantiate
-            config.EXPERT_DATA = "/home/rsofnc000/dataset/opt_dataset"
+            # config.EXPERT_DATA = "/home/rsofnc000/dataset/opt_dataset"
             config.dataset_cfg.mode = "val"
             config.dataset_cfg.agent_name="ur5e"
             config.dataset_cfg.demo_name="human_rgb"
-            config.dataset_cfg.num_demo = 1 # takes only one demo per task, in our case 10 test per task
+            config.dataset_cfg.max_demo_for_variation = 1 # takes only one demo per task, in our case 10 test per task
             
             dataset = instantiate(config.get('dataset_cfg', None))
             
@@ -669,7 +669,12 @@ if __name__ == '__main__':
             try:
                 demo_files = dataset.demo_files['pick_place']
             except:
-                demo_files = dataset.demo_files['sim_ur5e_pick_place_delta_subsample']
+                demo_files = dataset.demo_files['sim_ur5e_pick_place_delta']
+            # #! REMOVE THIS >>>
+            # for task in demo_files.keys():
+            #     for i, path in enumerate(demo_files[task]):
+            #         demo_files[task][i] = demo_files[task][i].replace("traj005", "traj000")
+            # #! <<<
             pkl_file_list = []
             for task_id in demo_files.keys():
                 for pkl_file in demo_files[task_id]:

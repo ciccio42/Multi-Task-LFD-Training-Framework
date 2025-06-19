@@ -79,6 +79,7 @@ if __name__ == '__main__':
                 dx_bins[dx_bin] += 1
                 dy_bins[dy_bin] += 1
                 dz_bins[dz_bin] += 1
+                
                 num_frame += 1
 
     print(f"Total frames processed: {num_frame}")
@@ -86,4 +87,3 @@ if __name__ == '__main__':
     plot_action_bin_histograms(dx_bins, os.path.join(args.dataset_path, 'dx_histogram.png'))
     plot_action_bin_histograms(dy_bins, os.path.join(args.dataset_path, 'dy_histogram.png'))
     plot_action_bin_histograms(dz_bins, os.path.join(args.dataset_path, 'dz_histogram.png'))
-    

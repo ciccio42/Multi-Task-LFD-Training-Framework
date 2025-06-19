@@ -89,6 +89,7 @@ class VRT1_Dataset(Dataset):
 
         self.indx_to_sample = dict()
         self.dataset_to_indx = dict()
+        self.demo_files = dict()
         self.sample_cnt = 0
         self.frame_cnt = 0
         
@@ -99,6 +100,7 @@ class VRT1_Dataset(Dataset):
             
             if dataset_name not in self.dataset_to_indx:
                 self.dataset_to_indx[dataset_name] = dict()
+                self.demo_files[dataset_name] = dict()
             
             # for each variation in the given dataset    
             for variation_name in self.pkl_paths_dict[dataset_name]:
@@ -107,7 +109,8 @@ class VRT1_Dataset(Dataset):
                     # some dataset have 3 level dictionary structure
                     for sub_variation in self.pkl_paths_dict[dataset_name][variation_name]:
                         if sub_variation not in self.dataset_to_indx[dataset_name]:
-                            self.dataset_to_indx[dataset_name][f"{variation_name}_{sub_variation}"] = []    
+                            self.dataset_to_indx[dataset_name][f"{variation_name}_{sub_variation}"] = []
+                            self.demo_files[dataset_name][f"{variation_name}_{sub_variation}"] = []   
                         self._read_sample(dataset_name=dataset_name, 
                                           variation_name=f"{variation_name}_{sub_variation}", 
                                           samples=self.pkl_paths_dict[dataset_name][variation_name][sub_variation])
@@ -115,6 +118,7 @@ class VRT1_Dataset(Dataset):
                 else:
                     if variation_name not in self.dataset_to_indx[dataset_name]:
                         self.dataset_to_indx[dataset_name][variation_name] = []
+                        self.demo_files[dataset_name][variation_name] = []
                     
                     self._read_sample(dataset_name=dataset_name, 
                                     variation_name=variation_name, 
@@ -124,9 +128,17 @@ class VRT1_Dataset(Dataset):
         for spec in self.dataset_samples_spec:
             spec = self.dataset_samples_spec[spec]
             name = spec.get('name', None)
-            if spec.get('crop', None) is not None:
-                self.task_crops[name] = spec.get('crop', [0,0,0,0])
-
+            self.task_crops[name] = dict()
+            if spec.get('agent_crop', None) is not None:
+                self.task_crops[name]['agent_crop'] = spec.get('agent_crop', [0,0,0,0])
+            else:
+                raise ValueError(f"Task {name} does not have agent crop defined in the dataset samples spec.")
+            
+            if spec.get('demo_crop', None) is not None:
+                self.task_crops[name]['demo_crop'] = spec.get('demo_crop', [0,0,0,0])
+            else:
+                raise ValueError(f"Task {name} does not have demo crop defined in the dataset samples spec.")
+        
         self.frame_aug = DataAugmentation(
             config=self.data_augs,
             crop_config=self.task_crops,
@@ -148,7 +160,8 @@ class VRT1_Dataset(Dataset):
             if previous_demo_file != demo_file and max_demo_for_variation > 0:
                 previous_demo_file = demo_file
                 max_demo_for_variation -= 1
-            elif max_demo_for_variation <= 0:
+            
+            if max_demo_for_variation <= 0:
                 return
             
             agent_file = sample[1]
@@ -163,6 +176,7 @@ class VRT1_Dataset(Dataset):
                 print(f"Error loading agent file {agent_file}: {e}")
                 continue    
             self.indx_to_sample[self.sample_cnt] = (f"{dataset_name}", f"{variation_name}", demo_file, agent_file, trj_len)
+            self.demo_files[dataset_name][variation_name].append(demo_file)
             self.dataset_to_indx[dataset_name][variation_name].append(self.sample_cnt)
             self.sample_cnt += 1
 

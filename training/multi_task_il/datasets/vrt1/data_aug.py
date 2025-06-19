@@ -37,7 +37,12 @@ class DataAugmentation:
         ])
 
     def __call__(self, task_name, obs, second=False, bb=None, class_frame=None, perform_aug=True, frame_number=-1, perform_scale_resize=True, agent=False, sim_crop=False):
-        crop_params = self.crop_config.get(task_name, None)
+        
+        if agent:
+            crop_params = self.crop_config[task_name]['agent_crop']
+        else:
+            crop_params = self.crop_config[task_name]['demo_crop']
+        
         top = crop_params[0]
         left = crop_params[2]
         img_height = obs.shape[0]

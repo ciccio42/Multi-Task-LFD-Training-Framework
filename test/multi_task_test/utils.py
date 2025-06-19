@@ -584,7 +584,8 @@ def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, ima
                 embedding = cond_module_instance(context)
                 
                 out, _ = model(images=i_t,
-                                states=s_t,
+                               demo=context[0],
+                                # states=s_t,
                                 cond_embedding=embedding,
                                 actions=None,
                                 bsize=1
@@ -642,7 +643,7 @@ def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, ima
         new_action = np.zeros(7)
         new_action[:3] = next_pos
         new_action[3:6] = quat2axisangle(next_quat)
-        new_action[6] = -1 if action[6]>0.90 else 1
+        new_action[6] = action[6] # -1 if action[6]>0.90 else 1
               
         return new_action, predicted_prob, target_obj_embedding, out.get('activation_map', None), out.get('target_obj_prediction', None), out.get('predicted_bb', None)
                

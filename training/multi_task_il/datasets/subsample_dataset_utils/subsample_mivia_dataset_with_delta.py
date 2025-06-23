@@ -49,10 +49,10 @@ def transform_eef_pos_and_eef_quat_from_world_to_base_link(eef_pos, eef_quat):
     return new_eef_pos, new_eef_quat
 
 
-# gripper_state_dict = {
-#     'open': -1.0,
-#     'closed': 1.0
-# }
+def change_action(traj, t, new_action):
+    obs_t, reward_t, done_t, info_t, action_t = traj._data[t]
+    traj._data[t] = obs_t, reward_t, done_t, info_t, new_action
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -61,6 +61,7 @@ if __name__ == '__main__':
     
     parser.add_argument("--change_image_from_bgr_to_rgb", action='store_true', help="Whether or not convert the images from BGR to RGB")
     parser.add_argument("--transform_from_world_to_base_link", action='store_true', help="Whether or not convert simulated dataset")
+    parser.add_argument("--shift_action", action='store_true', help="Whether or not shift action of the simulated dataset")
     parser.add_argument("--min_delta_distance", type=float, default=0.05, help="Minimum distance between two consecutive actions to be considered as a valid action")
     
     parser.add_argument("--debug", action='store_true', help="Whether or not attach the debugger")
@@ -91,107 +92,130 @@ if __name__ == '__main__':
             traj = data['traj']
             new_traj = Trajectory()
             
+            # shifting action
+            if args.shift_action:
+                for t in range(len(traj)):
+                    try:
+                        next_action = deepcopy(traj[t+1]['action'])
+                    except:
+                        next_action = deepcopy(traj[t]['action'])
+                    
+                    change_action(traj=traj,
+                                  t=t,
+                                  new_action=next_action)
+            
+            # DA NOI 1 è APERTO E 0 è CHIUSO
+            # IN SIMULATO 1 è CHIUSO E -1 è APERTO 
+            
             for t in range(len(traj)):
                 
                 if t == 0:
-                    previous_t = t
-                    previous_pos = traj[t]['obs']['eef_pos']
-                    previous_quat = traj[t]['obs']['eef_quat']
-                    previous_gripper_state = traj[t+1]['action'][-1]
-                    
-                    # converting position and quaternion if the dataset is simulated
-                    if args.transform_from_world_to_base_link:
-                        previous_pos, previous_quat = transform_eef_pos_and_eef_quat_from_world_to_base_link(previous_pos, previous_quat)
-                    
-                else:
-                    # compute distance between current and previous position
+                    current_t = t
                     current_pos = traj[t]['obs']['eef_pos']
                     current_quat = traj[t]['obs']['eef_quat']
-                    try:
-                        gripper_state = traj[t-1]['action'][-1]
-                    except:
-                        gripper_state = traj[t]['action'][-1]
+                    current_gripper_state = traj[t+1]['action'][-1] # taking action of the second step only for the first step 
                     
                     # converting position and quaternion if the dataset is simulated
                     if args.transform_from_world_to_base_link:
                         current_pos, current_quat = transform_eef_pos_and_eef_quat_from_world_to_base_link(current_pos, current_quat)
                     
-                    distance = np.linalg.norm(current_pos - previous_pos)
+                else:
+                    # compute distance between current and current position
+                    next_pos = traj[t]['obs']['eef_pos']
+                    next_quat = traj[t]['obs']['eef_quat']
+                    next_gripper_state = traj[t]['action'][-1]
                     
-                    if distance > args.min_delta_distance and gripper_state == previous_gripper_state:
+                    # converting position and quaternion if the dataset is simulated
+                    if args.transform_from_world_to_base_link:
+                        next_pos, next_quat = transform_eef_pos_and_eef_quat_from_world_to_base_link(next_pos, next_quat)
+                    
+                    distance = np.linalg.norm(next_pos - current_pos)
+                    
+                    if distance > args.min_delta_distance and next_gripper_state == current_gripper_state:
                         action = np.zeros(7)
                         
-                        action_delta = current_pos - previous_pos
-                        action_rot = mat2euler(quat2mat(current_quat))
-                        gripper_action = traj[t-1]['action'][-1]
+                        delta_pos = next_pos - current_pos
+                        action_rot = mat2euler(quat2mat(next_quat))
+                        next_gripper_state = traj[t]['action'][-1]
                         
-                        action[:3] = action_delta
+                        action[:3] = delta_pos
                         action[3:6] = action_rot
-                        action[6] = gripper_action
+                        if args.transform_from_world_to_base_link:
+                            if next_gripper_state == 1:
+                                action[6] = 0.0
+                            else:
+                                action[6] = 1.0
+                        else:
+                            action[6] = next_gripper_state
                     
                         new_camera_front_image = deepcopy(traj[t]['obs']['camera_front_image'])
                         if args.change_image_from_bgr_to_rgb:
                             new_camera_front_image = new_camera_front_image[:, :, ::-1]
                         
-                        new_obs = {'eef_pos': deepcopy(previous_pos),
-                                   'eef_quat': deepcopy(previous_quat),
-                                   'joint_pos': deepcopy(traj[previous_t]['obs']['joint_pos']),
-                                   'joint_vel': deepcopy(traj[previous_t]['obs']['joint_vel']),
+                        new_obs = {'eef_pos': deepcopy(current_pos),
+                                   'eef_quat': deepcopy(current_quat),
+                                   'joint_pos': deepcopy(traj[current_t]['obs']['joint_pos']),
+                                   'joint_vel': deepcopy(traj[current_t]['obs']['joint_vel']),
                                    'camera_front_image': new_camera_front_image,
-                                   'obj_bb': deepcopy(traj[previous_t]['obs']['obj_bb'])
+                                   'obj_bb': deepcopy(traj[current_t]['obs']['obj_bb'])
                                     }
                         
                         new_traj.append(new_obs, 
-                                        traj[previous_t].get('reward', 0), 
-                                        traj[previous_t].get('done', False),
-                                        traj[previous_t]['info'], 
+                                        traj[current_t].get('reward', 0), 
+                                        traj[current_t].get('done', False),
+                                        traj[current_t]['info'], 
                                         action)
                         
-                        previous_pos = current_pos
-                        previous_quat = current_quat
-                        previous_t = t
+                        current_pos = next_pos
+                        current_quat = next_quat
+                        current_t = t
                         
-                    elif gripper_state != previous_gripper_state:
+                    elif next_gripper_state != current_gripper_state:
                         action = np.zeros(7)
                         
-                        action_delta = current_pos - previous_pos
-                        action_rot = mat2euler(quat2mat(current_quat))
-                        gripper_action = traj[t-1]['action'][-1]
+                        delta_pos = next_pos - current_pos
+                        action_rot = mat2euler(quat2mat(next_quat))
+                        next_gripper_state = traj[t]['action'][-1]
                         
-                        action[:3] = action_delta
+                        action[:3] = delta_pos
                         action[3:6] = action_rot
-                        action[6] = gripper_action
+                        if args.transform_from_world_to_base_link:
+                            if next_gripper_state == 1:
+                                action[6] = 0.0
+                            else:
+                                action[6] = 1.0
+                        else:
+                            action[6] = next_gripper_state
 
                         new_camera_front_image = deepcopy(traj[t]['obs']['camera_front_image'])
                         if args.change_image_from_bgr_to_rgb:
                             new_camera_front_image = new_camera_front_image[:, :, ::-1]
                         
-                        new_obs = {'eef_pos': deepcopy(previous_pos),
-                                   'eef_quat': deepcopy(previous_quat),
-                                   'joint_pos': deepcopy(traj[previous_t]['obs']['joint_pos']),
-                                   'joint_vel': deepcopy(traj[previous_t]['obs']['joint_vel']),
+                        new_obs = {'eef_pos': deepcopy(current_pos),
+                                   'eef_quat': deepcopy(current_quat),
+                                   'joint_pos': deepcopy(traj[current_t]['obs']['joint_pos']),
+                                   'joint_vel': deepcopy(traj[current_t]['obs']['joint_vel']),
                                    'camera_front_image': new_camera_front_image,
-                                   'obj_bb': deepcopy(traj[previous_t]['obs']['obj_bb'])
+                                   'obj_bb': deepcopy(traj[current_t]['obs']['obj_bb'])
                                     }
                         
                         new_traj.append(new_obs, 
-                                        traj[previous_t].get('reward', 0), 
-                                        traj[previous_t].get('done', False), 
-                                        traj[previous_t]['info'], 
+                                        traj[current_t].get('reward', 0), 
+                                        traj[current_t].get('done', False), 
+                                        traj[current_t]['info'], 
                                         action)
                         
-                        previous_pos = current_pos
-                        previous_quat = current_quat
-                        previous_t = t
-                        previous_gripper_state = gripper_state
+                        current_t = t
+                        current_pos = next_pos
+                        current_quat = next_quat
+                        current_gripper_state = next_gripper_state
             
             if len(new_traj) < 10:
                 print(f'[Warning] Trajectory {traj_name} is too short ({len(new_traj)} steps)')
-                
+            
             # save the new trajectory
             os.makedirs(os.path.join(args.ouput_path, task_name), exist_ok=True)
             new_trj_path = os.path.join(args.ouput_path, task_name, traj_name)
             
             with open(new_trj_path, 'wb') as f:
                 pkl.dump({'traj': new_traj}, f)
-            # print(f'\t\tSaved {new_trj_path}')

@@ -30,6 +30,7 @@ import time
 from copy import deepcopy
 from PIL import Image
 from torchvision.transforms import ToTensor, Normalize
+from torchvision.utils import save_image
 
 
 _TIME_COUNTER_ = 0
@@ -576,13 +577,11 @@ def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, ima
                     # reset memory at the start of every subtask
                     model.rt1_memory = None
                 
-                # RT1 inference (states is not used)
-                # pil_image = Image.fromarray(np.array(np.moveaxis(
-                #             images[0][0][:, :, :].cpu().numpy()*255, 0, -1), dtype=np.uint8))
-                # pil_image.save('debug_before_inferene.png')
-                # model.eval()
+                save_image(context[0], "images/PIL_cond_module_input.png")
+                
                 embedding = cond_module_instance(context)
                 
+                save_image(i_t[0], "images/PIL_RT1_input.png")
                 out, _ = model(images=i_t,
                                demo=context[0],
                                 # states=s_t,
@@ -591,22 +590,12 @@ def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, ima
                                 bsize=1
                                 )
                 
-                # demo_dir = 'test_demo_sim_inference'
-                # os.mkdir(demo_dir)
-                # for t,step_img in enumerate(context[0].cpu().detach().numpy()):
-                #     cv2.imwrite(f'{demo_dir}/step_{t}.png', np.moveaxis(
-                #                 step_img*255, 0, -1))
+                print(f"\nAction predicted at step {t}:")
+                print(f"\tX delta: {out['world_vector'][0][0]}")
+                print(f"\tY delta: {out['world_vector'][0][1]}")
+                print(f"\tZ delta: {out['world_vector'][0][2]}")
+                print(f"\tGripper state: {out['gripper_closedness_action'][0][0]}")
                 
-            
-                # test_i_t = i_t[0][0].cpu().numpy()
-                # cv2.imwrite("i_t_2.png", np.moveaxis(
-                #     test_i_t*255, 0, -1)[:,:,::-1])
-                
-                
-                # if t == 0: # only at first step
-                #     with torch.no_grad():
-                #         cond_embedding = model.cond_module(context) # 15GB for the computation graph -> 4GB with torch no grad
-                  
                 temp_action_dict = out
                 temp_action_list = []
                 for k in temp_action_dict.keys():
@@ -643,7 +632,13 @@ def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, ima
         new_action = np.zeros(7)
         new_action[:3] = next_pos
         new_action[3:6] = quat2axisangle(next_quat)
-        new_action[6] = action[6] # -1 if action[6]>0.90 else 1
+        new_action[6] = -1.0 if action[6] < 0 else 1.0 # -1 if action[6]>0.90 else 1
+        
+        print(f"Action post conversion at step {t}:")
+        print(f"\tX delta converted: {new_action[0]}")
+        print(f"\tY delta converted: {new_action[1]}")
+        print(f"\tZ delta converted: {new_action[2]}")
+        print(f"\tGripper state converted: {new_action[6]}")
               
         return new_action, predicted_prob, target_obj_embedding, out.get('activation_map', None), out.get('target_obj_prediction', None), out.get('predicted_bb', None)
                
@@ -722,7 +717,7 @@ def set_obj_pos(env_name, dest_env, src_env, obs):
                 gt_obj.joints[0], np.concatenate([obj_pos, obj_quat]))
 
 
-def startup_env(model, env, gt_env, context, gpu_id, variation_id, baseline=None, bb_flag=False, gt_file=None):
+def startup_env(model, env, gt_env, context, gpu_id, variation_id, baseline=None, bb_flag=False, gt_traj=None):
 
     done, states, images = False, [], []
     if baseline is None:
@@ -736,15 +731,16 @@ def startup_env(model, env, gt_env, context, gpu_id, variation_id, baseline=None
     while True:
         try:
             obs = env.reset()
-            cv2.imwrite("pre_set.jpg", obs['camera_front_image'])
-            if gt_file is not None:
-                # gt_file obs
+            Image.fromarray(obs['camera_front_image']).save("images/PIL_pre_set.png")
+            # cv2.imwrite("pre_set.jpg", obs['camera_front_image'])
+            if gt_traj is not None:
+                # gt_traj obs
+                cv2.imwrite("pre_set.jpg", obs['camera_front_image'])
                 set_obj_pos(env_name=env.env_name,
                             dest_env=env,
                             src_env=None,
-                            obs=gt_file['traj'].get(1)['obs'])
-                cv2.imwrite("post_set.jpg", obs['camera_front_image'])
-                cv2.imwrite("gt_traj.jpg", gt_file['traj'].get(1)[
+                            obs=gt_traj['traj'].get(1)['obs'])
+                cv2.imwrite("gt_traj.jpg", gt_traj['traj'].get(1)[
                             'obs']['camera_front_image'])
             # make a "null step" to stabilize all objects
             current_gripper_position = env.sim.data.site_xpos[env.robots[0].eef_site_id]
@@ -752,7 +748,8 @@ def startup_env(model, env, gt_env, context, gpu_id, variation_id, baseline=None
                 env.sim.data.site_xmat[env.robots[0].eef_site_id], (3, 3))))
             current_gripper_pose = np.concatenate(
                 (current_gripper_position, current_gripper_orientation, np.array([-1])), axis=-1)
-            obs, reward, env_done, info = env.step(current_gripper_pose)
+            obs, reward, env_done, info = env.step(current_gripper_pose)           
+            cv2.imwrite("post_set.jpg", obs['camera_front_image'])
 
             break
         except:
@@ -1655,27 +1652,9 @@ def build_tvf_formatter_obj_detector(config, env_name):
         # ---- Resized crop ----#
         img = resized_crop(img, top=top, left=left, height=box_h,
                            width=box_w, size=(config.dataset_cfg.height, config.dataset_cfg.width))
-        
-        # if config.dataset_cfg.height == 224 and  config.dataset_cfg.width ==  224:
-        #     img = Normalize(
-        #         mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(img)
-        
-        # transforms_pipe = transforms.Compose([
-        #     transforms.ColorJitter(
-        #         brightness=list(config.augs.get(
-        #             "brightness", [0.875, 1.125])),
-        #         contrast=list(config.augs.get(
-        #             "contrast", [0.5, 1.5])),
-        #         saturation=list(config.augs.get(
-        #             "contrast", [0.5, 1.5])),
-        #         hue=list(config.augs.get("hue", [-0.05, 0.05]))
-        #     ),
-        # ])
-        # img = transforms_pipe(img)
 
-        cv2.imwrite("resized_target_obj.png", np.moveaxis(
-            img.numpy()*255, 0, -1))
-
+        save_image(img, "images/PIL_resized_target_obj.png")
+        
         if bb is not None:
             from multi_task_il.datasets.utils import adjust_bb
             bb = adjust_bb(dataset_loader=config.dataset_cfg,
@@ -1688,15 +1667,6 @@ def build_tvf_formatter_obj_detector(config, env_name):
                            box_w=box_w,
                            box_h=box_h)
 
-            # image = cv2.rectangle(np.ascontiguousarray(np.array(np.moveaxis(
-            #     img.numpy()*255, 0, -1), dtype=np.uint8)),
-            #     (bb[0][0],
-            #      bb[0][1]),
-            #     (bb[0][2],
-            #      bb[0][3]),
-            #     color=(0, 0, 255),
-            #     thickness=1)
-            # cv2.imwrite("bb_cropped.png", image)
             return img, bb
 
         return img
@@ -1808,20 +1778,17 @@ def build_env_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights
         assert isinstance(teacher_expert_rollout, Trajectory)
         context = select_random_frames(  # 4 frames
             teacher_expert_rollout, T_context, sample_sides=True, random_frames=random_frames)
-    # else:
-    #     import pickle as pkl
-    #     panda_pick_place_single_demo_dataset_path = '/user/frosa/multi_task_lfd/datasets/panda_pick_place_1_demo'
-    #     load_demo_path = f'{panda_pick_place_single_demo_dataset_path}/task_{variation:02d}/traj000.pkl'
-    #     print(f'[SKIP TEACHER] loading demo from {load_demo_path}')
-    #     with open(load_demo_path, "rb") as f:
-    #         teacher_expert_rollout = pkl.load(f)['traj']
-    #     context = select_random_frames( # 4 frames
-    #         teacher_expert_rollout, T_context, sample_sides=True, random_frames=random_frames)
-        
-    # convert BGR context image to RGB and scale to 0-1
+    
     for i, img in enumerate(context):
-        cv2.imwrite(f"context_{i}.png", np.array(img))
+        os.makedirs(f"images/", exist_ok=True)
+        Image.fromarray(img).save(f"images/PIL_context_{i}.png")
+        # cv2.imwrite(f"context_{i}.png", np.array(img))
+    
     context = [img_formatter(i)[None] for i in context]
+    
+    for i, img in enumerate(context):
+        save_image(img, f"images/PIL_context_{i}_after_crop.png")
+
     # assert len(context ) == 6
     if isinstance(context[0], np.ndarray):
         context = torch.from_numpy(np.concatenate(context, 0))[None]
@@ -1933,11 +1900,9 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
             obs['camera_front_image'])[None]) # RGB
     else:
         img_aug, bb_t_aug = img_formatter(
-            obs['camera_front_image'], bb_t) # RGB
+            obs['camera_front_image'], bb_t, agent=True) # RGB
         images.append(img_aug[None])
-        # debug_img = np.array(np.moveaxis(
-        #     img_aug[:, :, :].cpu().numpy()*255, 0, -1), dtype=np.uint8)
-        # cv2.imwrite("debug.png", debug_img)
+
         if getattr(model, "_object_detector", None) is not None or predict_gt_bb:
             bb.append(bb_t_aug[None][None])
             gt_classes.append(torch.from_numpy(
@@ -2142,15 +2107,12 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
         # color = (0,0,255)
         # thickness = 2
         # image = cv2.circle(image, center_coordinates, radius, color, thickness) 
-            
-        cv2.imwrite(
-            f"step_test_prova.png",  image)
-        # if controller is not None and gt_env is not None:
-        #     gt_action, gt_status = controller.act(gt_obs)
-        #     gt_obs, gt_reward, gt_env_done, gt_info = gt_env.step(
-        #         gt_action)
-        #     cv2.imwrite(
-        #         f"gt_step_test.png", gt_obs['camera_front_image'])
+
+        os.makedirs("images/steps", exist_ok=True)
+        Image.fromarray(image).save(f"images/steps/PIL_step_{n_steps}.png")
+        # cv2.imwrite(
+        #     f"step_test_prova.png",  image)
+
     except Exception as e:
         print(f"Exception during step {e}")
         return obs, 0, None, action, False, elapsed_time

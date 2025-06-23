@@ -745,15 +745,15 @@ class Trainer:
                             model_inputs, task_to_idx = prepare_inputs(val_inputs, self._device_list[local_rank])
                             with torch.no_grad():
                                 cond_embedding = cond_model(model_inputs['demo'])
-                            _, tmp_loss, tmp_bin_acc, tmp_bin_acc_interval = model(
-                                images = model_inputs['images'],
-                                demo = model_inputs['demo'],
-                                cond_embedding = cond_embedding,
-                                actions = model_inputs['actions'],
-                                bsize = model_inputs['images'].shape[0])
-                            loss.append(tmp_loss.item())
-                            bin_acc.append(tmp_bin_acc)
-                            bin_acc_interval.append(tmp_bin_acc_interval)
+                                _, tmp_loss, tmp_bin_acc, tmp_bin_acc_interval = model(
+                                    images = model_inputs['images'],
+                                    demo = model_inputs['demo'],
+                                    cond_embedding = cond_embedding,
+                                    actions = model_inputs['actions'],
+                                    bsize = model_inputs['images'].shape[0])
+                                loss.append(tmp_loss.item())
+                                bin_acc.append(tmp_bin_acc)
+                                bin_acc_interval.append(tmp_bin_acc_interval)
                     else:
                         use_daml = self.config.get("use_daml", False)
                         if use_daml:  # allow grad!

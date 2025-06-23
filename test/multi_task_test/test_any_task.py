@@ -190,6 +190,9 @@ def rollout_imitation(model, config, ctr,
     if "vima" not in model_name:
         if "CondPolicy" not in model_name and config.augs.get("old_aug", True):
             img_formatter = build_tvf_formatter(config, env_name)
+        elif "RT1_video_cond" in config.policy._target_:
+            img_formatter = build_tvf_formatter_obj_detector(config=config,
+                                                             env_name="sim_ur5e_pick_place_delta")
         else:
             img_formatter = build_tvf_formatter_obj_detector(config=config,
                                                              env_name=env_name)
@@ -563,7 +566,10 @@ if __name__ == '__main__':
                         f"Testing model on variation {config['tasks_cfgs'][args.env].get('skip_ids', [])}")
 
             else:
-                args.N = int(args.eval_each_task*len(args.variation))
+                try:
+                    args.N = int(args.eval_each_task*len(args.variation))
+                except:
+                    args.N = int(args.eval_each_task * args.variation)
 
         assert args.N, "Need pre-define how many trajs to test for each env"
         print('Found {} GPU devices, using {} parallel workers for evaluating {} total trajectories\n'.format(
@@ -634,7 +640,7 @@ if __name__ == '__main__':
         color = args.color
         variation = args.variation
         seed = args.seed
-        max_T = 30 # 30 #! to modify
+        max_T = 200 # 30 150 #! to modify
 
         dataset = None
         if args.test_gt:
@@ -670,13 +676,16 @@ if __name__ == '__main__':
                 demo_files = dataset.demo_files['pick_place']
             except:
                 demo_files = dataset.demo_files['sim_ur5e_pick_place_delta']
-            # #! REMOVE THIS >>>
+                
+            # # ! REMOVE THIS >>>
             # for task in demo_files.keys():
             #     for i, path in enumerate(demo_files[task]):
             #         demo_files[task][i] = demo_files[task][i].replace("traj005", "traj000")
-            # #! <<<
+            # # #! <<<
             pkl_file_list = []
+            agent_file_list = []
             for task_id in demo_files.keys():
+                indx_list = dataset.dataset_to_indx['sim_ur5e_pick_place_delta'][task_id]
                 for pkl_file in demo_files[task_id]:
                     for i in range(args.eval_each_task): # 10 test for each demo
                         if isinstance(task_id, str):
@@ -684,9 +693,16 @@ if __name__ == '__main__':
                                 task_id = int(task_id.split('_')[-1].lstrip('0'))
                             else:
                                 task_id = 0
+                        # get agent pkl path
+                        sample_indx = indx_list[i%len(indx_list)]
+                        agent_pkl_path = dataset.indx_to_sample[sample_indx][3]
+                        # /user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/ur5e_pick_place
+                        agent_pkl_path = agent_pkl_path.replace('/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta',
+                                               '/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/ur5e_pick_place')
                         variation.append(task_id)
                         pkl_file_list.append(pkl_file)
-            
+                        agent_file_list.append(agent_pkl_path)
+                        
             args.N = len(pkl_file_list)
 
         parallel = args.num_workers > 1
@@ -731,7 +747,7 @@ if __name__ == '__main__':
                 for i in range(args.N):
                     seeds.append((random.getrandbits(32),
                                 i,
-                                None, # agent path, not used
+                                None, # agent_file_list[i % len(agent_file_list)], # agent path, not used
                                 pkl_file_list[i % len(pkl_file_list)])) # demo path
             else:
                 seeds = [(random.getrandbits(32), i, None) for i in range(args.N)]

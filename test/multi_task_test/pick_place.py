@@ -230,7 +230,7 @@ def pick_place_eval_vima(model, env, gpu_id, variation_id, target_obj_dec=None, 
 
 def pick_place_eval_demo_cond(model, env, context, gpu_id, variation_id, img_formatter, max_T=85, concat_bb=False, baseline=False, action_ranges=[], gt_env=None, controller=None, task_name=None, config=None, gt_traj=None, perform_augs=True, predict_gt_bb=False, sub_action=False, gt_action=4, real=True, place=False, convert_action=False, cond_module_instance = None):
 
-    if gt_traj is None:
+    if True: #gt_traj is None:
         start_up_env_return = \
             startup_env(model=model,
                         env=env,
@@ -239,7 +239,8 @@ def pick_place_eval_demo_cond(model, env, context, gpu_id, variation_id, img_for
                         gpu_id=gpu_id,
                         variation_id=variation_id,
                         baseline=baseline,
-                        bb_flag=concat_bb
+                        bb_flag=concat_bb,
+                        gt_traj=gt_traj
                         )
         if concat_bb:
             done, states, images, context, obs, traj, tasks, bb, gt_classes, gt_obs, current_gripper_pose = start_up_env_return

@@ -29,7 +29,7 @@ VAL_FREQ=-1
 DEBUG=false
 WANDB_LOG=true
 ROLLOUT=false
-EPOCH=100
+EPOCHS=100
 LOADER_WORKERS=8
 CONFIG_PATH=../experiments/vrt1
 CONFIG_NAME=config_vrt1.yaml
@@ -39,7 +39,7 @@ LIMIT_NUMBER_DEMO=2
 
 RESUME=false
 FINETUNE=false
-BSIZE=8
+BSIZE=16
 
 SET_SAME_N=-1
 
@@ -69,7 +69,7 @@ python -u ../../training/train_scripts/train_any.py \
     val_freq=${VAL_FREQ} \
     bsize=${BSIZE} \
     vsize=${BSIZE} \
-    epochs=${EPOCH} \
+    epochs=${EPOCHS} \
     rollout=${ROLLOUT} \
     debug=${DEBUG} \
     wandb_log=${WANDB_LOG} \

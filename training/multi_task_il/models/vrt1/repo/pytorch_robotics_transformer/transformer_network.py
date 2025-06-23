@@ -507,7 +507,7 @@ class TransformerNetwork(nn.Module):
                 bin_accuracies[dim_idx] = torch.mean(torch.where(self._aux_info['action_labels'][:,:,dim_idx] == self._aux_info['action_predictions'][:,:,dim_idx], 1.0, 0.0)).detach().item()
         
             # interval accuracy
-            range_int = 3
+            range_int = 1 #! 3
             bin_accuracies_interval = {}
             for dim_idx in range(self._aux_info['action_labels'].shape[-1]): # action dimension
                 bin_accuracies_interval[dim_idx] = torch.mean(

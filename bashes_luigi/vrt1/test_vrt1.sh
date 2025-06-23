@@ -10,17 +10,18 @@ export CUDA_VISIBLE_DEVICES=0
 NUM_WORKERS=1
 GPU_ID=0
 EVAL_EACH_TASK=1 # ! change eval_each_task when testing
+VARIATION=16
 
 BASE_PATH=/raid/home/frosa_Loc/Multi-Task-LFD-Framework
 CKP_FOLDER=/user/frosa/multi_task_lfd/checkpoint_save_folder/luigi_checkpoint
 
-PROJECT_NAME=RT1-From_Scratch_Simulated_Only-Human_224x224
+PROJECT_NAME=RT1-From-Scratch-Simulated-Only-Human-224x224_NO_SUBSAMPLE
 BATCH=8
 MODEL_PATH=${CKP_FOLDER}/${PROJECT_NAME}-Batch${BATCH}
 CONTROLLER_PATH=$BASE_PATH/repo/Multi-Task-LFD-Training-Framework/tasks/multi_task_robosuite_env/controllers/config/osc_pose.json
 
 for MODEL in ${MODEL_PATH}; do
-    for STEP_NUM in 58136; do # 5590 58136 # ! change step when testing
+    for STEP_NUM in 159200; do # 57440; do # 5590 58136 # ! change step when testing
         for TASK_NAME in pick_place; do
             for COUNT in 1; do # 2 3; do
                 SAVE_PATH=${MODEL_PATH}/results_${TASK_NAME}/run_${COUNT}
@@ -29,6 +30,7 @@ for MODEL in ${MODEL_PATH}; do
                 --env ${TASK_NAME} \
                 --saved_step ${STEP_NUM} \
                 --eval_each_task ${EVAL_EACH_TASK} \
+                --variation=${VARIATION} \
                 --num_workers ${NUM_WORKERS} \
                 --project_name ${PROJECT_NAME} \
                 --controller_path ${CONTROLLER_PATH} \
@@ -36,7 +38,7 @@ for MODEL in ${MODEL_PATH}; do
                 --human_demo \
                 --save_path ${SAVE_PATH} \
                 --save_files \
-                --debug \
+                # --debug \
                 # --wandb_log \
             done
         done

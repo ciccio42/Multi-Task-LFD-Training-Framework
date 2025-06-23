@@ -221,8 +221,8 @@ class VRT1_Dataset(Dataset):
         ret_dict = {}
 
         end = len(traj)
-        if(start_frame == 0):
-            start_frame = 1
+        # if(start_frame == 0):
+        #     start_frame = 1
         start = start_frame if start_frame + self._obs_T < end else start_frame - (self._obs_T - (end - 1 - start_frame))
         
         

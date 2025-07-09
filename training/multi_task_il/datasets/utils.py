@@ -1114,6 +1114,10 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                                 action=trasform_from_world_to_bl(action),
                                 n_action_bin=dataset_loader._n_action_bin,
                                 action_ranges=dataset_loader._normalization_ranges)
+                #! not used
+                # action[0] *= 10
+                # action[1] *= 10
+                # action[2] *= 10
                 action_list.append(action)
 
             actions.append(action_list)

@@ -5,7 +5,7 @@ import hydra
 import os
 
 os.environ['MASTER_ADDR'] = 'localhost' 
-os.environ['MASTER_PORT'] = '9958' 
+os.environ['MASTER_PORT'] = '9958'
 torch.autograd.set_detect_anomaly(True)
 # from torch.utils.tensorboard import SummaryWriter
 # writer = SummaryWriter()

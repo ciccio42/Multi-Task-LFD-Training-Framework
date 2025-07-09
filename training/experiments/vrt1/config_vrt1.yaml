@@ -118,7 +118,7 @@ dataset_cfg:
   demo_name: 'human_rgb'
   pick_next: False
   normalize_action: False
-  max_demo_for_variation: 2
+  max_demo_for_variation: 1
   split: [0.9, 0.1] # (train, val) split
 
 
@@ -194,10 +194,10 @@ rt1_video_cond:
       high_psi: 6.28
     ###### END ABSOLUTE SIM DATASET RANGE
     gripper_closedness_action:
-      # low: 0.0 # 0.0 chiuso
-      # high: 1.0 # 1.0 aperto
-      low: -1.0 # -1.0 aperto (nel dataset originale)
-      high: 1.0 # 1.0 chiuso
+      low: 0.0 # 0.0 chiuso
+      high: 1.0 # 1.0 aperto
+      # low: -1.0 # -1.0 aperto (nel dataset originale)
+      # high: 1.0 # 1.0 chiuso
       shape: [1]
       dtype: numpy.float32
   train_step_counter: 0

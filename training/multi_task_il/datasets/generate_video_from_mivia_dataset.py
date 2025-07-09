@@ -60,6 +60,15 @@ if __name__ == '__main__':
                     img = traj[t]['obs']['image']
                 except:
                     img = traj[t]['obs']['camera_front_image']
+                
+                # converting from numpy to PIL, adding text, then reconverting from PIL to numpy
+                img = Image.fromarray(img)
+                draw = ImageDraw.Draw(img)
+                # img_string = f"Frame: {t+1}/{len(traj)}   Action: {traj[t]['action']}"
+                draw.text((10, 10), f"Frame: {t+1}/{len(traj)}", fill=(255, 0, 0))
+                draw.text((10, 20), f"Action xyz: {round(traj[t]['action'][0], 3)} {round(traj[t]['action'][1], 3)} {round(traj[t]['action'][2], 3)}", fill=(255, 0, 0))
+                draw.text((10, 30), f"Action gripper: {traj[t]['action'][-1]}", fill=(255, 0, 0))
+                img = np.asarray(img)
                     
                 video.write(cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
                 

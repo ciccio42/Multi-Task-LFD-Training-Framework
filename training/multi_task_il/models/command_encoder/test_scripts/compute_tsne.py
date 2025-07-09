@@ -26,6 +26,38 @@ def seed_everything(seed=42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
+
+mivia_task_to_color = {
+    "human_rgb_pick_place/task_00": (0.0/255, 100.0/255, 0.0/255),       # verde scuro
+    "human_rgb_pick_place/task_01": (34.0/255, 139.0/255, 34.0/255),     # verde foresta
+    "human_rgb_pick_place/task_02": (50.0/255, 205.0/255, 50.0/255),     # limegreen
+    "human_rgb_pick_place/task_03": (124.0/255, 252.0/255, 0.0/255),     # verde prato
+    "human_rgb_pick_place/task_04": (255.0/255, 215.0/255, 0.0/255),     # oro
+    "human_rgb_pick_place/task_05": (255.0/255, 165.0/255, 0.0/255),     # arancione
+    "human_rgb_pick_place/task_06": (255.0/255, 255.0/255, 0.0/255),     # giallo classico
+    "human_rgb_pick_place/task_07": (240.0/255, 230.0/255, 140.0/255),   # khaki
+    "human_rgb_pick_place/task_08": (0.0/255, 0.0/255, 139.0/255),       # blu scuro
+    "human_rgb_pick_place/task_09": (0.0/255, 0.0/255, 205.0/255),       # blu medio
+    "human_rgb_pick_place/task_10": (30.0/255, 144.0/255, 255.0/255),    # dodgerblue
+    "human_rgb_pick_place/task_11": (135.0/255, 206.0/255, 250.0/255),   # azzurro
+    "human_rgb_pick_place/task_12": (139.0/255, 0.0/255, 0.0/255),       # rosso scuro
+    "human_rgb_pick_place/task_13": (178.0/255, 34.0/255, 34.0/255),     # firebrick
+    "human_rgb_pick_place/task_14": (255.0/255, 69.0/255, 0.0/255),      # orangered
+    "human_rgb_pick_place/task_15": (255.0/255, 99.0/255, 71.0/255),     # tomato
+}
+
+
+def get_color_variations(base_color, n_variations, s_range=(0.5, 1.0), v_range=(0.7, 1.0)):
+    """Generate variations of a base color in HSV space."""
+    h, s, v = colorsys.rgb_to_hsv(*base_color)
+    variations = []
+    for i in range(n_variations):
+        sat = s_range[0] + (s_range[1] - s_range[0]) * (i / max(n_variations - 1, 1))
+        val = v_range[0] + (v_range[1] - v_range[0]) * (i / max(n_variations - 1, 1))
+        variations.append(colorsys.hsv_to_rgb(h, sat, val))
+    return variations
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--debug', action='store_true', help='Debug mode') 
@@ -113,111 +145,6 @@ if __name__ == '__main__':
 
         # Save to NPZ file
         np.savez(os.path.join(save_path, 'predictions.npz'), **npz_dict)
-    
-    elif args.compute_tsne:
-        # --- Compute t-SNE ---
-        save_path = os.path.join(args.model_path, f'prediction_{split}_{args.ckpt}')
-        npz_path = os.path.join(save_path, 'predictions.npz')
-
-        loaded = np.load(npz_path)
-
-        labels = []
-        embeddings = []
-        markers = []
-        groups = []
-
-        dataset_labels = []
-
-        for key, embedding in loaded.items():
-            embeddings.append(embedding.flatten())
-            marker_type = "text" if "text_embedding" in key else "demo"
-            markers.append(marker_type)
-            group = "/".join(key.split('/')[:2])  # task_name/variation_name
-            if 'panda_' in group:
-                group = group.split('panda_')[1]
-            groups.append(group)
-            labels.append(key)
-            dataset_labels.append(key.split('/')[0])
-
-        # Remove duplicates
-        unique_dataset_labels = sorted(set(dataset_labels))
-        
-        embeddings = np.stack(embeddings)
-        # cosine_dist = cosine_distances(embeddings)
-        perplexity = 50
-        tsne = TSNE(n_components=2, metric='cosine', init='random', perplexity=perplexity, random_state=42)
-        tsne_result = tsne.fit_transform(embeddings)
-
-        tsne_x = tsne_result[:, 0]
-        tsne_y = tsne_result[:, 1]
-
-        # Map tasks to their groups
-        task_to_variations = defaultdict(list)
-        for group in groups:
-            task_name = group.split('/')[0]
-            task_to_variations[task_name].append(group)
-
-        # --- Assign specific base colors for known tasks ---
-        def get_color_variations(base_color, n_variations, s_range=(0.5, 1.0), v_range=(0.7, 1.0)):
-            """Generate variations of a base color in HSV space."""
-            h, s, v = colorsys.rgb_to_hsv(*base_color)
-            variations = []
-            for i in range(n_variations):
-                sat = s_range[0] + (s_range[1] - s_range[0]) * (i / max(n_variations - 1, 1))
-                val = v_range[0] + (v_range[1] - v_range[0]) * (i / max(n_variations - 1, 1))
-                variations.append(colorsys.hsv_to_rgb(h, sat, val))
-            return variations
-
-        # Manually set base RGB colors
-        task_base_colors = {
-            "pick_place": (0.0, 0.0, 1.0),       # Blue
-            "nut_assembly": (1.0, 0.0, 0.0),     # Red
-            "stack_block": (0.0, 1.0, 0.0),     # Green
-            "button": (1.0, 1.0, 0),     # Yellow
-        }
-
-        # Group variations under tasks
-        task_to_variations = defaultdict(set)
-        for group in groups:
-            task_name = group.split('/')[0]
-            if 'panda_' in task_name:
-                task_name = task_name.split('panda_')[1]
-            task_to_variations[task_name].add(group)
-
-        # Generate color variations
-        group_to_color = {}
-        for task, variation_list in task_to_variations.items():
-            base_color = task_base_colors.get(task, (0.7, 0.7, 0.7))  # default gray if unknown task
-            unique_variations = sorted(set(variation_list))
-            color_variants = get_color_variations(base_color, len(unique_variations))
-            for group, color in zip(unique_variations, color_variants):
-                group_to_color[group] = color
-
-        # --- Plot ---
-        plt.figure(figsize=(10, 8))
-        plotted_legend_labels = set()
-
-        for x, y, marker_type, group in zip(tsne_x, tsne_y, markers, groups):
-            color = group_to_color.get(group, (0.5, 0.5, 0.5))  # fallback gray
-            if marker_type == "text":
-                try:
-                    variation_label = int(group.split('_')[-1])
-                except Exception:
-                    variation_label = "?"
-                plt.text(x + 0.5, y, variation_label, fontsize=9, weight='bold', color=color)
-                
-                plt.scatter(x, y, c=[color], marker='*', s=150)
-            else:
-                if group not in plotted_legend_labels:
-                    plt.scatter(x, y, c=[color], marker='o', s=60, label=group)
-                    plotted_legend_labels.add(group)
-                else:
-                    plt.scatter(x, y, c=[color], marker='o', s=60)
-
-        plt.title("Cosine Similarity between Predicted Embeddings")
-        plt.legend(title="Task/Variation", bbox_to_anchor=(1.05, 1), loc='upper left')
-        plt.tight_layout()
-        plt.savefig(os.path.join(save_path, f'tsne_plot_perplexity_{perplexity}.png'))
 
     if args.all_dataset_plot:
         print("Plotting all datasets")
@@ -233,6 +160,7 @@ if __name__ == '__main__':
         groups = []
 
         dataset_labels = []
+        task_labels = []
 
         for key, embedding in loaded.items():
             embeddings.append(embedding.flatten())
@@ -244,14 +172,20 @@ if __name__ == '__main__':
             groups.append(group)
             labels.append(key)
             dataset_labels.append(key.split('/')[0])
+            task_labels.append(key.split('/')[1])
 
         # Remove duplicates
         unique_dataset_labels = sorted(set(dataset_labels))
+        unique_task_labels = sorted(set(task_labels))
         
         embeddings = np.stack(embeddings)
         # cosine_dist = cosine_distances(embeddings)
-        perplexity = 20
-        tsne = TSNE(n_components=2, metric='cosine', init='random', perplexity=perplexity, random_state=42)
+        perplexity = 3
+        tsne = TSNE(n_components=2,
+                    metric='cosine',
+                    init='random',
+                    perplexity=perplexity,
+                    random_state=42)
         tsne_result = tsne.fit_transform(embeddings)
 
         tsne_x = tsne_result[:, 0]
@@ -264,15 +198,6 @@ if __name__ == '__main__':
             task_to_variations[task_name].append(group)
 
         # --- Assign specific base colors for known tasks ---
-        def get_color_variations(base_color, n_variations, s_range=(0.5, 1.0), v_range=(0.7, 1.0)):
-            """Generate variations of a base color in HSV space."""
-            h, s, v = colorsys.rgb_to_hsv(*base_color)
-            variations = []
-            for i in range(n_variations):
-                sat = s_range[0] + (s_range[1] - s_range[0]) * (i / max(n_variations - 1, 1))
-                val = v_range[0] + (v_range[1] - v_range[0]) * (i / max(n_variations - 1, 1))
-                variations.append(colorsys.hsv_to_rgb(h, sat, val))
-            return variations
 
         # Manually set base RGB colors
         task_base_colors = {
@@ -304,7 +229,10 @@ if __name__ == '__main__':
         plotted_legend_labels = set()
 
         for x, y, marker_type, group in zip(tsne_x, tsne_y, markers, groups):
-            color = group_to_color.get(group, (0.5, 0.5, 0.5))  # fallback gray
+            if "human_rgb" in group:
+                color = mivia_task_to_color.get(group) 
+            else:
+                color = group_to_color.get(group, (0.5, 0.5, 0.5))  # fallback gray
             if marker_type == "text":
                 try:
                     variation_label = int(group.split('_')[-1])
@@ -323,9 +251,5 @@ if __name__ == '__main__':
         plt.title("Cosine Similarity between Predicted Embeddings")
         plt.legend(title="Task/Variation", bbox_to_anchor=(1.05, 1), loc='upper left')
         plt.tight_layout()
-        plt.savefig(os.path.join(save_path, f'tsne_plot_perplexity_{perplexity}.png'))
-
-    
-        
-
+        plt.savefig(os.path.join(save_path, f'tsne_plot_with_perplexity_{perplexity}.png'))
     

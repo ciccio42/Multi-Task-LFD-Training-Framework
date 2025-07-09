@@ -27,7 +27,7 @@ if __name__ == '__main__':
     parser.add_argument("--dataset_path", type=str, required=True, help="Path to the VRT1 dataset.")
     
     parser.add_argument("--number_of_bins", type=int, default=256, help="Number of bins for histogram.")
-    parser.add_argument("--normalization_range", type=float, nargs=2, default=[-0.25, 0.25], help="Normalization range for the histogram.")
+    parser.add_argument("--normalization_range", type=float, nargs=2, default=[-1, 1], help="Normalization range for the histogram.")
     
     parser.add_argument("--debug", action='store_true', help="Enable debug mode.")
     args = parser.parse_args()
@@ -71,6 +71,11 @@ if __name__ == '__main__':
                     continue
                 
                 dx, dy, dz = action[:3]
+                
+                #! times 10
+                # dx *= 10
+                # dy *= 10
+                # dz *= 10
                 
                 dx_bin = compute_bin_index(dx, normalization_lower_bound, normalization_upper_bound, number_of_bins)
                 dy_bin = compute_bin_index(dy, normalization_lower_bound, normalization_upper_bound, number_of_bins)

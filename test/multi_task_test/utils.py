@@ -590,6 +590,22 @@ def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, ima
                                 bsize=1
                                 )
                 
+                # if  out['world_vector'][0][1] < 0.0:
+                #     out['world_vector'][0][1] = 0.0    
+                
+                #! converting back to original delta size by dividing by 10
+                # out['world_vector'][0][0] /= 10
+                # out['world_vector'][0][1] /= 10
+                # out['world_vector'][0][2] /= 10
+                
+                # def round_action(out):
+                #     out['world_vector'][0][0] =  torch.round(out['world_vector'][0][0], decimals=2)
+                #     out['world_vector'][0][1] =  torch.round(out['world_vector'][0][1], decimals=2)
+                #     out['world_vector'][0][2] =  torch.round(out['world_vector'][0][2], decimals=2)
+                #     return out
+                # 
+                # out = round_action(out=out)
+                
                 print(f"\nAction predicted at step {t}:")
                 print(f"\tX delta: {out['world_vector'][0][0]}")
                 print(f"\tY delta: {out['world_vector'][0][1]}")
@@ -632,13 +648,17 @@ def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, ima
         new_action = np.zeros(7)
         new_action[:3] = next_pos
         new_action[3:6] = quat2axisangle(next_quat)
-        new_action[6] = -1.0 if action[6] < 0 else 1.0 # -1 if action[6]>0.90 else 1
+        if t < max_T - 3:
+            new_action[6] = -1.0 if action[6] > 0.9 else 1.0 # -1 if action[6]>0.90 else 1
+        else:
+            print("Last steps, opening gripper.")
+            new_action[6] = -1.0
         
-        print(f"Action post conversion at step {t}:")
-        print(f"\tX delta converted: {new_action[0]}")
-        print(f"\tY delta converted: {new_action[1]}")
-        print(f"\tZ delta converted: {new_action[2]}")
-        print(f"\tGripper state converted: {new_action[6]}")
+        # print(f"Action post conversion at step {t}:")
+        # print(f"\tX delta converted: {new_action[0]}")
+        # print(f"\tY delta converted: {new_action[1]}")
+        # print(f"\tZ delta converted: {new_action[2]}")
+        # print(f"\tGripper state converted: {new_action[6]}")
               
         return new_action, predicted_prob, target_obj_embedding, out.get('activation_map', None), out.get('target_obj_prediction', None), out.get('predicted_bb', None)
                
@@ -748,8 +768,9 @@ def startup_env(model, env, gt_env, context, gpu_id, variation_id, baseline=None
                 env.sim.data.site_xmat[env.robots[0].eef_site_id], (3, 3))))
             current_gripper_pose = np.concatenate(
                 (current_gripper_position, current_gripper_orientation, np.array([-1])), axis=-1)
-            obs, reward, env_done, info = env.step(current_gripper_pose)           
-            cv2.imwrite("post_set.jpg", obs['camera_front_image'])
+            for i in range(5):
+                obs, reward, env_done, info = env.step(current_gripper_pose)
+            Image.fromarray(obs['camera_front_image']).save("images/PIL_post_set.png")
 
             break
         except:
@@ -1779,15 +1800,15 @@ def build_env_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights
         context = select_random_frames(  # 4 frames
             teacher_expert_rollout, T_context, sample_sides=True, random_frames=random_frames)
     
-    for i, img in enumerate(context):
-        os.makedirs(f"images/", exist_ok=True)
-        Image.fromarray(img).save(f"images/PIL_context_{i}.png")
-        # cv2.imwrite(f"context_{i}.png", np.array(img))
+    # for i, img in enumerate(context):
+    #     os.makedirs(f"images/", exist_ok=True)
+    #     Image.fromarray(img).save(f"images/PIL_context_{i}.png")
+    #     # cv2.imwrite(f"context_{i}.png", np.array(img))
     
     context = [img_formatter(i)[None] for i in context]
     
-    for i, img in enumerate(context):
-        save_image(img, f"images/PIL_context_{i}_after_crop.png")
+    # for i, img in enumerate(context):
+    #     save_image(img, f"images/PIL_context_{i}_after_crop.png")
 
     # assert len(context ) == 6
     if isinstance(context[0], np.ndarray):
@@ -1961,12 +1982,14 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
         prediction = prediction_internal_obj
 
     try:
-        if sub_action:
+        if sub_action: #sub_action:
             if n_steps < gt_action:
-                action, _ = controller.act(obs)
+                gt_action, _ = controller.act(obs)
+                obs, reward, env_done, info = env.step(gt_action)
+        else:
+            obs, reward, env_done, info = env.step(action)
         # action = clip_action(action, prev_action)
         # prev_action = action
-        obs, reward, env_done, info = env.step(action)
         if concat_bb and not predict_gt_bb:
 
             # get predicted bb from prediction

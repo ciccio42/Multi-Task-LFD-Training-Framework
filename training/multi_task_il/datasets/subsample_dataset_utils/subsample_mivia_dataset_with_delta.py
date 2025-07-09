@@ -100,6 +100,9 @@ if __name__ == '__main__':
                     except:
                         next_action = deepcopy(traj[t]['action'])
                     
+                    if t == len(traj) - 1: # last action, open gripper
+                        next_action[-1] = -1.0
+                    
                     change_action(traj=traj,
                                   t=t,
                                   new_action=next_action)

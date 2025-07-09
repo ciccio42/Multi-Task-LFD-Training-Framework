@@ -664,7 +664,7 @@ if __name__ == '__main__':
         if args.human_demo:
             from hydra.utils import instantiate
             # config.EXPERT_DATA = "/home/rsofnc000/dataset/opt_dataset"
-            config.dataset_cfg.mode = "val"
+            config.dataset_cfg.mode = "val" # "val"
             config.dataset_cfg.agent_name="ur5e"
             config.dataset_cfg.demo_name="human_rgb"
             config.dataset_cfg.max_demo_for_variation = 1 # takes only one demo per task, in our case 10 test per task
@@ -676,12 +676,14 @@ if __name__ == '__main__':
                 demo_files = dataset.demo_files['pick_place']
             except:
                 demo_files = dataset.demo_files['sim_ur5e_pick_place_delta']
-                
-            # # ! REMOVE THIS >>>
-            # for task in demo_files.keys():
-            #     for i, path in enumerate(demo_files[task]):
-            #         demo_files[task][i] = demo_files[task][i].replace("traj005", "traj000")
-            # # #! <<<
+
+            # ! REMOVE THIS >>>
+            # for task in demo_files.keys():
+            #     for i, path in enumerate(demo_files[task]):
+            #         # demo_files[task][i] = demo_files[task][i].replace("traj005.pkl", "traj000.pkl")
+            #         demo_files[task][i] = demo_files[task][i].replace("task_00/traj005.pkl", "task_05/traj000.pkl")
+            #! <<<
+
             pkl_file_list = []
             agent_file_list = []
             for task_id in demo_files.keys():
@@ -697,12 +699,13 @@ if __name__ == '__main__':
                         sample_indx = indx_list[i%len(indx_list)]
                         agent_pkl_path = dataset.indx_to_sample[sample_indx][3]
                         # /user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/ur5e_pick_place
-                        agent_pkl_path = agent_pkl_path.replace('/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta',
+                        agent_pkl_path = agent_pkl_path.replace('/user/frosa/multi_task_lfd/datasets/datasets_delta/sim_ur5e_pick_place_delta_subsampled_1cm',
                                                '/user/frosa/multi_task_lfd/ur_multitask_dataset/pick_place/ur5e_pick_place')
-                        variation.append(task_id)
-                        pkl_file_list.append(pkl_file)
-                        agent_file_list.append(agent_pkl_path)
-                        
+                        if pkl_file not in pkl_file_list or True:
+                            variation.append(task_id)
+                            pkl_file_list.append(pkl_file)
+                            agent_file_list.append(agent_pkl_path)
+        
             args.N = len(pkl_file_list)
 
         parallel = args.num_workers > 1

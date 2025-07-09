@@ -13,19 +13,19 @@ CKPT=975 # ! modify here to the checkpoint you want to use
 # CKPT=517 # ! modify here to the checkpoint you want to use
 SPLIT="val" # or "train"
 
-echo "Compute embeddings"
+# echo "Compute embeddings"
+# python ../../training/multi_task_il/models/command_encoder/test_scripts/compute_tsne.py \
+#     --model_path ${MODEL_PATH} \
+#     --ckpt ${CKPT} \
+#     --compute_embeddings \
+#     --split ${SPLIT} \
+#     --debug
+
+echo "Compute tsne and plot for all datasets"
 python ../../training/multi_task_il/models/command_encoder/test_scripts/compute_tsne.py \
     --model_path ${MODEL_PATH} \
     --ckpt ${CKPT} \
-    --compute_embeddings \
     --split ${SPLIT} \
-    --debug
-
-# echo "Compute tsne and plot for all datasets"
-# python ../../training/multi_task_il/models/command_encoder/test_scripts/compute_tsne.py \
-#     --model_path ${MODEL_PATH} \
-#     --ckpt ${CKPT} \
-#     --split ${SPLIT} \
-#     --all_dataset_plot \
-#     # --debug
-# echo "Done"
+    --all_dataset_plot \
+    # --debug
+echo "Done"

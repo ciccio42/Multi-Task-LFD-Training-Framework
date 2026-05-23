@@ -66,6 +66,10 @@ class MultiTaskPairedKeypointDetectionDataset(Dataset):
             mix_sim_real=False,
             dagger=False,
             validation_on_skipped_task=False,
+            enable_traj_cache=True,
+            traj_cache_size=2048,
+            enable_demo_cache=True,
+            demo_cache_size=1024,
             ** params):
 
         self.task_crops = OrderedDict()
@@ -109,6 +113,12 @@ class MultiTaskPairedKeypointDetectionDataset(Dataset):
         self._perform_augs = perform_augs
         self._mix_demo_agent = mix_demo_agent
         self._mix_sim_real = mix_sim_real
+        self._enable_traj_cache = enable_traj_cache
+        self._traj_cache_size = traj_cache_size
+        self._enable_demo_cache = enable_demo_cache
+        self._demo_cache_size = demo_cache_size
+        self._traj_cache = OrderedDict()
+        self._demo_data_cache = OrderedDict()
 
         self.select_random_frames = select_random_frames
         self.compute_obj_distribution = compute_obj_distribution
@@ -158,7 +168,39 @@ class MultiTaskPairedKeypointDetectionDataset(Dataset):
                                           demo_crop=self.demo_crop,
                                           agent_crop=self.agent_crop
                                           )
-        
+    
+    def _lru_get(self, cache, key):
+        value = cache.get(key)
+        if value is None:
+            return None
+        cache.move_to_end(key)
+        return value
+
+    def _lru_put(self, cache, key, value, max_size):
+        cache[key] = value
+        cache.move_to_end(key)
+        while len(cache) > max_size:
+            cache.popitem(last=False)
+
+    def _load_traj_cached(self, file_path):
+        if self._enable_traj_cache:
+            cached = self._lru_get(self._traj_cache, file_path)
+            if cached is not None:
+                return cached
+        loaded = load_traj(file_path)
+        if self._enable_traj_cache:
+            self._lru_put(self._traj_cache, file_path, loaded, self._traj_cache_size)
+        return loaded
+
+    def _get_demo_data_cached(self, demo_file, demo_traj, task_name, human_demo=False):
+        if self._enable_demo_cache:
+            cached = self._lru_get(self._demo_data_cache, demo_file)
+            if cached is not None:
+                return cached
+        demo_data = make_demo(self, demo_traj, task_name, human_demo=human_demo)
+        if self._enable_demo_cache:
+            self._lru_put(self._demo_data_cache, demo_file, demo_data, self._demo_cache_size)
+        return demo_data
 
     def __len__(self):
         """NOTE: we should count total possible demo-agent pairs, not just single-file counts
@@ -179,7 +221,8 @@ class MultiTaskPairedKeypointDetectionDataset(Dataset):
         if "real_new" not in agent_file:
             sim_crop = True
         
-        demo_traj, agent_traj = load_traj(demo_file), load_traj(agent_file)
+        demo_traj = self._load_traj_cached(demo_file)
+        agent_traj = self._load_traj_cached(agent_file)
 
         agent_task_id = agent_file.split('/')[-2].split('_')[-1].lstrip('0')
         if agent_task_id == '':
@@ -189,7 +232,12 @@ class MultiTaskPairedKeypointDetectionDataset(Dataset):
 
         # start_demo = time.time()
         
-        demo_data = make_demo(self, demo_traj[0], task_name, human_demo='human' in demo_file)
+        demo_data = self._get_demo_data_cached(
+            demo_file=demo_file,
+            demo_traj=demo_traj[0],
+            task_name=task_name,
+            human_demo='human' in demo_file
+        )
         # end_demo = time.time()
         # print(f"Demo-time {end_demo-start_demo}")
 

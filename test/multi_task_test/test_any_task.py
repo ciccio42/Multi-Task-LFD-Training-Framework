@@ -396,6 +396,7 @@ if __name__ == '__main__':
         '--sub_action', action='store_true')
     parser.add_argument('--gt_action', default=4, type=int)
     parser.add_argument('--human_demo', action='store_true')
+    parser.add_argument('--validate_on_train_ids', action='store_true')
 
     args = parser.parse_args()
 
@@ -475,7 +476,7 @@ if __name__ == '__main__':
         model_saved_step = model_saved_step[0][:-3]
         print("loading model from saved training step %s" %
               model_saved_step)
-        results_dir = os.path.join(results_dir, 'step-'+model_saved_step)
+        results_dir = os.path.join(results_dir, f"val_train_ids_{args.validate_on_train_ids}",'step-'+model_saved_step)
         os.makedirs(results_dir, exist_ok=True)
         print("Made new path for results at: %s" % results_dir)
         config_path = os.path.expanduser(args.config) if args.config else os.path.join(
@@ -595,10 +596,22 @@ if __name__ == '__main__':
         # if human_demo, load the dataset and generate the seeds for demo files
         if args.human_demo:
             from hydra.utils import instantiate
-            config.EXPERT_DATA = "/home/rsofnc000/dataset/opt_dataset"
+            config.EXPERT_DATA = "/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset"
             config.dataset_cfg.mode = "val"
             config.dataset_cfg.agent_name="ur5e"
             config.dataset_cfg.demo_name="human_rgb"
+            if len(config.tasks_cfgs.pick_place.skip_ids) != 0 and not args.validate_on_train_ids:
+                # all_task = set(config.tasks_cfgs.pick_place.task_ids)
+                # train_skip_tasks = set(config.tasks_cfgs.pick_place.skip_ids)
+                # val_skip_tasks = list(all_task - train_skip_tasks)
+                # config.tasks_cfgs.pick_place.skip_ids = val_skip_tasks
+
+                config.dataset_cfg.validation_on_skipped_task = True
+                print("Evaluating on human demos on tasks: ", list(config.tasks_cfgs.pick_place.skip_ids))
+            elif len(config.tasks_cfgs.pick_place.skip_ids) != 0 and args.validate_on_train_ids:
+                print("Evaluating on human demos on tasks: ", list(set(config.tasks_cfgs.pick_place.task_ids) - set(config.tasks_cfgs.pick_place.skip_ids)))
+                config.dataset_cfg.validation_on_skipped_task = False
+                
             
             dataset = instantiate(config.get('dataset_cfg', None))
             
@@ -660,9 +673,9 @@ if __name__ == '__main__':
                 seeds = [(random.getrandbits(32), i, None) for i in range(args.N)]
 
         # saving seeds for reproducibility
-        # with open(os.path.join(results_dir, 'seeds.txt'), 'w') as f:
-        #     for seed in seeds:
-        #         f.write(f"{seed[0]}\n")
+        with open(os.path.join(results_dir, 'seeds.txt'), 'w') as file_save:
+            for seed in seeds:
+                file_save.write(f"{seed[0]}\n")
         
         if parallel:
             with Pool(args.num_workers) as p:

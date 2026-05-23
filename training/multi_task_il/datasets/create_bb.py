@@ -15,6 +15,7 @@ import robosuite.utils.transform_utils as T
 import functools
 from multiprocessing import Pool, cpu_count
 import glob
+from PIL import Image, ImageDraw
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 logger = logging.getLogger("BB-Creator")
@@ -65,11 +66,12 @@ def plot_bb(img, obj_bb):
         img = cv2.rectangle(
             img, upper_left_corner,
             bottom_right_corner, (255, 0, 0), 1)
-    cv2.imwrite("test_bb.png", img)
+    # cv2.imwrite("test_bb.png", img)
     # cv2.imshow("Test", img)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
-
+    pil_img = Image.fromarray(img)
+    pil_img.save("test_bb.png")
 
 def overwrite_pkl_file(pkl_file_path, sample, traj_obj_bb):
     # get trajectory from sample
@@ -301,22 +303,24 @@ def write_bb(pkl_file_path):
         traj_bb.append(obj_bb)
 
     # save sample with objects bb
-    overwrite_pkl_file(pkl_file_path=pkl_file_path,
-                       sample=sample,
-                       traj_obj_bb=traj_bb)
+    # overwrite_pkl_file(pkl_file_path=pkl_file_path,
+    #                    sample=sample,
+    #                    traj_obj_bb=traj_bb)
 
 
 if __name__ == '__main__':
-    import debugpy
-    debugpy.listen(('0.0.0.0', 5678))
-    print("Waiting for debugger attach")
-    debugpy.wait_for_client()
     import argparse
+    import debugpy
+    
     parser = argparse.ArgumentParser()
     parser.add_argument('--task_path', default="/", help="Path to task")
     parser.add_argument('--task_name', default="/", help="Name of the task")
     parser.add_argument('--robot_name', default="/", help="Name of the robot")
     args = parser.parse_args()
+
+    print("Waiting for debugger attach")
+    debugpy.listen(('0.0.0.0', 5678))
+    debugpy.wait_for_client()
 
     # 1. Load the dataset
     folder_path = os.path.join(

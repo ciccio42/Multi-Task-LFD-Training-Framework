@@ -31,6 +31,7 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 import itertools
 from multi_task_il.models.command_encoder.cond_module import CondModule
+from PIL import Image
 
 logging.basicConfig(
     level=logging.INFO,
@@ -793,7 +794,7 @@ def adjust_bb(dataset_loader, bb, obs, img_width=360, img_height=200, top=0, lef
                 y1 = dataset_loader.height
             if y2 > dataset_loader.height:
                 y2 = dataset_loader.height
-            cv2.imwrite("bb_cropped.png", image)
+            Image.fromarray(np.asarray(image, dtype=np.uint8)).save("bb_cropped.png")
 
         # replace with new bb
         bb[obj_indx] = np.array([[x1, y1, x2, y2]])
@@ -946,8 +947,8 @@ def create_data_aug(dataset_loader=object):
         if dataset_loader.use_strong_augs and second:
             augmented = dataset_loader.strong_augs(obs)
             if DEBUG:
-                cv2.imwrite("strong_augmented.png", np.moveaxis(
-                    augmented.numpy()*255, 0, -1))
+                Image.fromarray(np.asarray(np.moveaxis(
+                    augmented.numpy()*255, 0, -1), dtype=np.uint8)).save("strong_augmented.png")
         else:
             if perform_aug:
                 aug_prob = dataset_loader.data_augs.get('p', 0.1)
@@ -959,11 +960,11 @@ def create_data_aug(dataset_loader=object):
                 augmented = obs
             if DEBUG:
                 if agent:
-                    cv2.imwrite("weak_augmented.png", np.moveaxis(
-                        augmented.numpy()*255, 0, -1))
+                    Image.fromarray(np.asarray(np.moveaxis(
+                        augmented.numpy()*255, 0, -1), dtype=np.uint8)).save("weak_augmented.png")
             if DEBUG:
-                cv2.imwrite(f"debug_crop_weak_aug/{task_name}_prova_resized_augmented_{frame_number}.png", np.moveaxis(
-                    augmented.numpy()*255, 0, -1))
+                Image.fromarray(np.asarray(np.moveaxis(
+                    augmented.numpy()*255, 0, -1), dtype=np.uint8)).save(f"debug_crop_weak_aug/{task_name}_prova_resized_augmented_{frame_number}.png")
         assert augmented.shape == obs.shape
 
         if bb is not None:
@@ -981,10 +982,9 @@ def create_data_aug(dataset_loader=object):
                                               thickness=1)
                     except:
                         print("Exception")
-                cv2.imwrite("bb_cropped_after_aug.png", image)
+                Image.fromarray(np.asarray(image, dtype=np.uint8)).save("bb_cropped_after_aug.png")
             return augmented, bb, class_frame
         else:
             return augmented
     return frame_aug
-
 

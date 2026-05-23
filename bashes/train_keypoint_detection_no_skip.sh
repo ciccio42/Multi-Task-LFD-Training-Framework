@@ -1,9 +1,8 @@
 #!/bin/bash
 
-#SBATCH -A hpc_default
+#SBATCH -A did_robot_learning_359
 #SBATCH --partition=gpuq
-#SBATCH --exclude=gnode02,gnode03
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=32
@@ -14,8 +13,8 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 
 export HYDRA_FULL_ERROR=1
-EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder/variation_generalization
+EXPERT_DATA=/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset
+SAVE_PATH=/mnt/beegfs/frosa/checkpoint_save_folder/checkpoint_save_folder/iros
 POLICY='${cond_target_obj_detector}'
 DATASET_TARGET=multi_task_il.datasets.multi_task_keypoint_dataset.MultiTaskPairedKeypointDetectionDataset
 
@@ -41,7 +40,7 @@ RESUME="${5:-false}"
 DEMO_NAME="${6:-panda}" # [human_rgb or panda]
 SAVE_PATH="${7:-/home/rsofnc000/checkpoint_save_folder/100_180_new}"
 echo "Task Name is: $TASK_NAME"
-echo "Resume Folder is: $RESUME_FOLDER"
+echo "Resume Path is: $RESUME_PATH"
 echo "Resume Step is: $RESUME_STEP"
 echo "Finetune is: $FINETUNE"
 echo "Resume is: $RESUME"
@@ -98,9 +97,9 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     TASK_str="pick_place"
-    EXP_NAME=1Task-${TASK_str}-COD-RGB
+    EXP_NAME=1Task-${TASK_str}-Simulated-Agent-Human-Demonstration-UR5e-Agent-COD
     PROJECT_NAME=${EXP_NAME}
-    SET_SAME_N=2
+    SET_SAME_N=5
 elif [ "$TASK_NAME" == 'multi' ]; then
     echo "Multi Task"
     TASK_str=["pick_place","nut_assembly","stack_block","press_button_close_after_reaching"]

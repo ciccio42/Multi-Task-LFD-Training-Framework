@@ -18,6 +18,7 @@ import sys
 from multi_task_il.datasets.savers import _compress_obs
 import os
 from multi_task_il.datasets.utils import OBJECTS_POS_DIM
+from PIL import Image
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 logger = logging.getLogger("BB-Creator")
@@ -27,7 +28,7 @@ KEY_INTEREST = ["joint_pos", "joint_vel", "eef_pos",
                 "target-box-id", "target-object", "obj_bb",
                 "extent", "zfar", "znear", "eef_point", "ee_aa", "target-peg"]
 OFFSET = 0.0
-WORKERS = 1
+WORKERS = cpu_count()
 
 
 def crop_resize_img(task_cfg, task_name, obs, bb):
@@ -39,7 +40,7 @@ def crop_resize_img(task_cfg, task_name, obs, bb):
         crop_params[1], img_width - left - crop_params[3]
 
     cropped_img = obs[top:box_h, left:box_w]
-    cv2.imwrite("cropped.jpg", cropped_img)
+    Image.fromarray(np.asarray(cropped_img, dtype=np.uint8)).save("cropped.jpg")
 
     img_res = cv2.resize(cropped_img, (180, 100))
     adj_bb = None
@@ -288,7 +289,9 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
                             color=(255, 0, 0),
                             thickness=2,
                             radius=1)
-                        cv2.imwrite("prova_bin_points.jpg", image)
+                        #cv2.imwrite("prova_bin_points.jpg", image)
+                        pil_img = Image.fromarray(image)
+                        pil_img.save("prova_bin_points.png")
                         p_x_corner_list = []
                         p_y_corner_list = []
                         # 3.1 create a box around the object
@@ -410,8 +413,11 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
                             (x_max, y_max),
                             color=(255, 0, 0),
                             thickness=2)
-                        if t == len(sample['traj'])-1:
-                            cv2.imwrite("prova_bin_bb.jpg", image)
+                        pil_img = Image.fromarray(image)
+                        pil_img.save(f"prova_bin_bb_{t}_bin_{bin_indx}.png")
+                        
+                        # if t == len(sample['traj'])-1:
+                        #     cv2.imwrite("prova_bin_bb.jpg", image)
             elif 'press_button' in task_name:
                 for camera_name in ["camera_front"]:
                     last_bb_all_obj = last_bb_for_all_cameras[camera_name]
@@ -494,7 +500,7 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
                                            radius=1,
                                            color=(255, 0, 0),
                                            thickness=1)
-                        cv2.imwrite(f"prova_bin_points_{obj_name}.jpg", image)
+                        Image.fromarray(np.asarray(image, dtype=np.uint8)).save(f"prova_bin_points_{obj_name}.jpg")
 
         if "real" in pkl_file_path or args.real:
             gripper = sample['traj'].get(t)['action'][-1]
@@ -517,7 +523,7 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
                 img = sample['traj'].get(t)['obs'].get(
                     f"{camera_name}_image", None)
                 if img is not None:
-                    cv2.imwrite("original.png", img)
+                    Image.fromarray(np.asarray(img, dtype=np.uint8)).save("original.png")
                     bb_dict = sample['traj'].get(
                         t)['obs'].get("obj_bb", None)
                     bb = None
@@ -540,7 +546,7 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
                                             adj_bb[obj_name]['bottom_right_corner'],
                                             (0, 255, 0),
                                             1)
-                    cv2.imwrite("prova.png", img)
+                    Image.fromarray(np.asarray(img, dtype=np.uint8)).save("prova.png")
                     # print("prova image")
 
     trj_name = pkl_file_path.split('/')[-1]

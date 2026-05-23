@@ -61,7 +61,10 @@ class DataAugmentation:
         ])
 
         self.affine_transform = A.Compose([
-            A.ShiftScaleRotate(shift_limit=0.1, rotate_limit=0, scale_limit=0, p=self.data_augs.get("affine_p", 9.0))
+            A.ShiftScaleRotate(shift_limit=0.3, 
+                               rotate_limit=0, 
+                               scale_limit=0, 
+                               p=self.data_augs.get("affine_p", 0.0))
         ])
         # A.HorizontalFlip(p=self.data_augs.get("horizontal_flip_p", 0.0))
 
@@ -124,8 +127,8 @@ class DataAugmentation:
                                width=box_w, 
                                size=(self.height, self.width))
             if DEBUG:
-                cv2.imwrite(f"prova_resized_{frame_number}.png", np.moveaxis(
-                    obs.numpy()*255, 0, -1))
+                Image.fromarray(np.asarray(np.moveaxis(
+                    obs.numpy()*255, 0, -1), dtype=np.uint8)).save(f"prova_resized_{frame_number}.png")
             if bb is not None and class_frame is not None:
                 bb = adjust_bb(dataset_loader=self,
                                bb=bb,
@@ -191,7 +194,7 @@ class DataAugmentation:
             augmented = self._apply_random_black_patches(augmented)
 
         if DEBUG:
-            cv2.imwrite("augmented_debug.png", np.moveaxis(augmented.numpy()*255, 0, -1))
+            Image.fromarray(np.asarray(np.moveaxis(augmented.numpy()*255, 0, -1), dtype=np.uint8)).save("augmented_debug.png")
 
         # obs_pil = np.moveaxis(augmented.numpy()*255, 0, -1).astype(np.uint8)
         # obs_pil = Image.fromarray(obs_pil)

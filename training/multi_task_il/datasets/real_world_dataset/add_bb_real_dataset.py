@@ -10,6 +10,7 @@ import glob
 import os
 import debugpy
 import utils
+from PIL import Image
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 logger = logging.getLogger("BB-Creator")
@@ -146,7 +147,7 @@ def plot_bb(img, obj_bb, show_image=False):
         indx += 1
     assert indx == NUM_OBJ, "Number of bounding box must be equal to number of objects"
     if show_image:
-        cv2.imwrite("test_bb.png", img)
+        Image.fromarray(img).save("test_bb.png")
         # cv2.imshow("Test", img)
         # cv2.waitKey(0)
         # cv2.destroyAllWindows()

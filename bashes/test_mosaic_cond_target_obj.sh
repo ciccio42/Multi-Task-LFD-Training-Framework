@@ -1,12 +1,11 @@
 #!/bin/bash
 
-#SBATCH -A hpc_default
-#SBATCH --exclude=tnode[01-17]
-#SBATCH --exclude=gnode07
+#SBATCH -A did_robot_learning_359
 #SBATCH --partition=gpuq
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
+#SBATCH --cpus-per-task=32
 #SBATCH --export=ALL
 
 export MUJOCO_PY_MUJOCO_PATH="/home/rsofnc000/.mujoco/mujoco210"
@@ -16,24 +15,38 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3
 
 echo $1
 TASK_NAME="$1"
-NUM_WORKERS=32
+NUM_WORKERS=1
 GPU_ID=0
 
-BASE_PATH=/home/rsofnc000/Multi-Task-LFD-Framework
-CKP_FOLDER=/home/rsofnc000/checkpoint_save_folder/100_180_new
+BASE_PATH=/mnt/beegfs/frosa/Multi-Task-LFD-Framework
+CKP_FOLDER=/mnt/beegfs/frosa/checkpoint_save_folder/checkpoint_save_folder/iros
 if [ "$TASK_NAME" == 'pick_place' ]; then
 
-    PROJECT_NAME=1Task-pick_place-Double-Policy-State_true_Convert_Action_true_DEMO_panda_CONCAT_DEMO_ACT_false_CONCAT_DEMO_EMB_false
-    BATCH=32 #32
+    PROJECT_NAME=1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-COD-SKIP-0-5-10-15
+    #1Task-pick_place-Simulated-Agent-Human-Demonstration-PANDA-Agent-COD
+    BATCH=60
     MODEL_PATH=${CKP_FOLDER}/${PROJECT_NAME}-Batch${BATCH}
     CONTROLLER_PATH=$BASE_PATH/repo/Multi-Task-LFD-Training-Framework/tasks/multi_task_robosuite_env/controllers/config/osc_pose.json
     for MODEL in ${MODEL_PATH}; do
-        for S in 30 40 50 60 70; do #81000 89100; do
+        for S in 5 10 15 20; do #81000 89100; do
             for TASK in pick_place; do
                 for COUNT in 1; do
                     if [ $COUNT -eq 1 ]; then
                         SAVE_PATH=${MODEL_PATH}/results_${TASK}/run_${COUNT}
-                        srun --output=test_${PROJECT_NAME}.txt --job-name=test_${PROJECT_NAME} python -u $BASE_PATH/repo/Multi-Task-LFD-Training-Framework/test/multi_task_test/test_any_task.py $MODEL --env $TASK --saved_step $S --eval_each_task 10 --num_workers ${NUM_WORKERS} --project_name ${PROJECT_NAME} --controller_path ${CONTROLLER_PATH} --gpu_id ${GPU_ID} --save_path ${SAVE_PATH} --save_files --wandb_log
+                        srun python -u $BASE_PATH/repo/Multi-Task-LFD-Training-Framework/test/multi_task_test/test_any_task.py $MODEL \
+                                                        --env $TASK \
+                                                        --saved_step $S \
+                                                        --eval_each_task 5 \
+                                                        --num_workers ${NUM_WORKERS} \
+                                                        --project_name ${PROJECT_NAME} \
+                                                        --controller_path ${CONTROLLER_PATH} \
+                                                        --gpu_id ${GPU_ID} \
+                                                        --human_demo \
+                                                        --save_path ${SAVE_PATH} \
+                                                        --save_files \
+                                                        --wandb_log \
+                                                        --validate_on_train_ids
+                                                        #--debug
                     else
                         SAVE_PATH=${MODEL_PATH}/results_${TASK}/run_${COUNT}
                         srun --output=test_${PROJECT_NAME}.txt --job-name=test_${PROJECT_NAME} python -u $BASE_PATH/repo/Multi-Task-LFD-Training-Framework/test/multi_task_test/test_any_task.py $MODEL --env $TASK --saved_step $S --eval_each_task 3 --num_workers ${NUM_WORKERS} --project_name ${PROJECT_NAME} --controller_path ${CONTROLLER_PATH} --gpu_id ${GPU_ID} --human_demo --wandb_log

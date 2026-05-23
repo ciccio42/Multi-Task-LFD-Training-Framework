@@ -1,4 +1,4 @@
-debug: False
+debug: false
 EXPERT_DATA:    null 
 save_path:      null
 wandb_log: True 
@@ -76,7 +76,7 @@ defaults:
   - tasks_cfgs:  7_tasks
 
 # dataset/loader/samplers
-loader_workers:   20
+loader_workers:   16
 samplers:        
   batch_size:         ${bsize}
   drop_last:          False
@@ -107,7 +107,7 @@ dataset_cfg:
   compute_obj_distribution: False
   validation_on_skipped_task: False
   agent_name: 'ur5e'
-  demo_name: 'panda'
+  demo_name: 'human_rgb'
   load_action: false
   load_state: false
   state_spec: [action]
@@ -139,8 +139,8 @@ augs:
   hue: [-0.05, 0.05] #[0.0, 0.0]
   p: 0.5 
   horizontal_flip_p: 0.5
-  affine: False
-  affine_p: 0.0
+  affine: True
+  affine_p: 0.5
   black_patch_prob: 0.0
   black_patch_params:
     num_patches: 1

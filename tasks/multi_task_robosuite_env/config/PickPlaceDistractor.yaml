@@ -2,6 +2,8 @@
 
 # Mount type
 mount_types: null
+# Default initial qpos: None
+initial_qpos: [null] #[[ 2.24, -1.78, 1.64, -2.02, 4.71, 0.0]]
 
 # Gripper type
 gripper_types: "default"

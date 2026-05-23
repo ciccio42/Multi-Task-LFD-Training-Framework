@@ -210,7 +210,7 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
     train_loader = DataLoader(
         dataset,
         batch_sampler=train_sampler,
-        num_workers=config.get('loader_workers', cpu_count()),
+        num_workers=2, # config.get('loader_workers', cpu_count()),
         collate_fn=collate_by_task,
         pin_memory=True,
         prefetch_factor=2,
@@ -257,7 +257,7 @@ def make_data_loaders(config, dataset_cfg, num_replicas: int = 1, global_rank: i
         val_loader = DataLoader(
             val_dataset,
             batch_sampler=val_sampler,
-            num_workers=config.get('loader_workers', cpu_count()),
+            num_workers=2, # config.get('loader_workers', cpu_count()),
             collate_fn=collate_by_task,
             pin_memory=False,
             prefetch_factor=2,

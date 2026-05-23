@@ -1029,9 +1029,8 @@ def get_predicted_bb(prediction, pred_flags, perform_augs, model, formatted_img,
         scale_factor = model.get_scale_factors()
         # image = np.array(np.moveaxis(
         #     formatted_img[:, :, :].cpu().numpy(), 0, -1), dtype=np.uint8)
-        formatted_img = denormalize(formatted_img).cpu().numpy()
-        image = np.array(np.moveaxis(
-             formatted_img, 0, -1)*255, dtype=np.uint8)
+        # formatted_img = denormalize(formatted_img).cpu().numpy()
+        image = np.array(np.moveaxis(formatted_img[:, :, :].cpu().numpy(), 0, -1)*255, dtype=np.uint8)
         predicted_bb = project_bboxes(bboxes=prediction['proposals'][0][None][None],
                                       width_scale_factor=scale_factor[0],
                                       height_scale_factor=scale_factor[1],
@@ -1932,7 +1931,9 @@ def build_env_context(img_formatter, T_context=4, ctr=0, env_name='nut', heights
         
     # convert BGR context image to RGB and scale to 0-1
     for i, img in enumerate(context):
-        cv2.imwrite(f"context_{i}.png", np.array(img))
+        #cv2.imwrite(f"context_{i}.png", np.array(img))
+        pil_img = Image.fromarray(img)
+        pil_img.save(f"context_{i}.png")
     context = [img_formatter(i)[None] for i in context] # [:,:,::-1]
     # assert len(context ) == 6
     if isinstance(context[0], np.ndarray):

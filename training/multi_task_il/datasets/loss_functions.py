@@ -1,7 +1,7 @@
 import torch
 from multi_task_il.models.discrete_logistic import DiscreteMixLogistic
 from torchvision.ops import box_iou
-from multi_task_il.models.cond_target_obj_detector.utils import project_bboxes
+# from multi_task_il.models.cond_target_obj_detector.utils import project_bboxes
 from torchmetrics.classification import Accuracy
 import torch.nn.functional as F
 import torch.nn as nn

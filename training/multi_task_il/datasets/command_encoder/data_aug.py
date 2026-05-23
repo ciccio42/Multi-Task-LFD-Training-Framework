@@ -128,16 +128,16 @@ class DataAugmentation:
             obs = resized_crop(obs, top=top, left=left, height=box_h,
                                width=box_w, size=(self.height, self.width))
             if DEBUG:
-                cv2.imwrite(f"prova_resized_{frame_number}.png", np.moveaxis(
-                    obs.numpy()*255, 0, -1))
+                Image.fromarray(np.asarray(np.moveaxis(
+                    obs.numpy()*255, 0, -1), dtype=np.uint8)).save(f"prova_resized_{frame_number}.png")
 
             
         # ---- Augmentation ----#
         if self.use_strong_augs and second:
             augmented = self.strong_augs(obs)
             if DEBUG:
-                cv2.imwrite("strong_augmented.png", np.moveaxis(
-                    augmented.numpy()*255, 0, -1))
+                Image.fromarray(np.asarray(np.moveaxis(
+                    augmented.numpy()*255, 0, -1), dtype=np.uint8)).save("strong_augmented.png")
         else:
             if perform_aug:
                 augmented = self.transforms(obs)
@@ -145,8 +145,8 @@ class DataAugmentation:
                 augmented = obs
             if DEBUG:
                 if agent:
-                    cv2.imwrite("weak_augmented.png", np.moveaxis(
-                        augmented.numpy()*255, 0, -1))
+                    Image.fromarray(np.asarray(np.moveaxis(
+                        augmented.numpy()*255, 0, -1), dtype=np.uint8)).save("weak_augmented.png")
         assert augmented.shape == obs.shape
             
 

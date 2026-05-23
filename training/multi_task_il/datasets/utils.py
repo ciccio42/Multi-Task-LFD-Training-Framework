@@ -416,7 +416,7 @@ def make_demo(dataset, traj, task_name, human_demo=False):
             processed = dataset.frame_aug(
                 task_name,
                 obs,
-                perform_aug=False,
+                perform_aug=True,
                 frame_number=i,
                 perform_scale_resize=True)
             frames.append(processed)
@@ -538,7 +538,7 @@ def adjust_bb(dataset_loader, bb, obs, img_width=360, img_height=200, top=0, lef
                 color=(0, 0, 255),
                 thickness=1)
             
-            cv2.imwrite("bb_cropped.png", image)    
+            Image.fromarray(np.asarray(image, dtype=np.uint8)).save("bb_cropped.png")
 
         # replace with new bb
         bb[obj_indx] = np.array([[x1, y1, x2, y2]])
@@ -651,9 +651,17 @@ def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, comm
             elif i == 3 and distractor:
                 object_name = no_place_obj_name
         try:
+            
+            if 'bin' in object_name and task_name == 'pick_place':
+                top_left = step_t['obs']['obj_bb']["camera_front"][object_name]['bottom_right_corner'] #step_t['obs']['obj_bb']["camera_front"][object_name]['bottom_right_corner']
+                bottom_right = step_t['obs']['obj_bb']["camera_front"][object_name]['upper_left_corner'] #step_t['obs']['obj_bb']["camera_front"][object_name]['upper_left_corner']
+            else:
+                top_left = step_t['obs']['obj_bb']["camera_front"][object_name]['bottom_right_corner']
+                bottom_right = step_t['obs']['obj_bb']["camera_front"][object_name]['upper_left_corner']
+            
             # if not getattr(dataset_loader, "real", False):
-            top_left = step_t['obs']['obj_bb']["camera_front"][object_name]['bottom_right_corner']
-            bottom_right = step_t['obs']['obj_bb']["camera_front"][object_name]['upper_left_corner']
+            #     top_left = step_t['obs']['obj_bb']["camera_front"][object_name]['bottom_right_corner']
+            #     bottom_right = step_t['obs']['obj_bb']["camera_front"][object_name]['upper_left_corner']
             # else:
             #     top_left = step_t['obs']['obj_bb']["camera_front"][object_name]['upper_left_corner']
             #     bottom_right = step_t['obs']['obj_bb']["camera_front"][object_name]['bottom_right_corner']
@@ -686,7 +694,7 @@ def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, comm
                                   color=color,
                                   thickness=1)
             if DEBUG:
-                cv2.imwrite("GT_bb_prova.png", image)
+                Image.fromarray(np.asarray(image, dtype=np.uint8)).save("GT_bb_prova.png")
 
         bb.append([top_left_x, top_left_y,
                    bottom_right_x, bottom_right_y])
@@ -720,7 +728,7 @@ def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, comm
                                    int(single_bb[3])),
                                   color=color,
                                   thickness=1)
-        cv2.imwrite("GT_bb_prova_full_bb.png", image)
+        Image.fromarray(np.asarray(image, dtype=np.uint8)).save("GT_bb_prova_full_bb.png")
 
     return np.array(bb), np.array(cl)
 
@@ -844,7 +852,7 @@ def create_gt_bb_all_obj(dataset_loader, traj, step_t, task_name, distractor=Fal
                                   color=color,
                                   thickness=1)
             if DEBUG:
-                cv2.imwrite("GT_bb_prova.png", image)
+                Image.fromarray(np.asarray(image, dtype=np.uint8)).save("GT_bb_prova.png")
 
         bb.append([top_left_x, top_left_y,
                    bottom_right_x, bottom_right_y])
@@ -977,7 +985,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                         step_t['obs']['camera_front_image'][:,:,::-1])
 
         if DEBUG:
-            cv2.imwrite("original_image.png", image)
+            Image.fromarray(np.asarray(image, dtype=np.uint8)).save("original_image.png")
 
         # Create GT BB
         bb_time = time.time()
@@ -1051,7 +1059,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                     step_t['obs']['camera_front_image'][:, :, ::-1], dtype=np.uint8)
                 image_point = cv2.circle(cv2.UMat(image_point), (step_t['obs']['eef_point'][1], step_t['obs']['eef_point'][0]), radius=1, color=(
                     0, 0, 255), thickness=1)
-                cv2.imwrite("gt_point.png", cv2.UMat(image_point))
+                Image.fromarray(cv2.UMat(image_point).get()).save("gt_point.png")
 
             points.append(np.array(
                 adjust_points(step_t['obs']['eef_point'],
@@ -1065,7 +1073,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                     processed.numpy()*255, 0, -1), dtype=np.uint8)
                 image = cv2.circle(cv2.UMat(image), (points[-1][0][1], points[-1][0][0]), radius=1, color=(
                     0, 0, 255), thickness=1)
-                cv2.imwrite("adjusted_point.png", cv2.UMat(image))
+                Image.fromarray(cv2.UMat(image).get()).save("adjusted_point.png")
             logger.debug(f"EEF point: {time.time()-eef_point_time}")
 
         if load_action and (j >= 1 or ("real" in dataset_loader.agent_name and not dataset_loader.pick_next)):
@@ -1169,9 +1177,8 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                                   color=(0, 0, 255),
                                   thickness=1)
             # print(f"Command {command}")
-            cv2.imwrite("GT_bb_after_aug.png", image)
+            Image.fromarray(np.asarray(image, dtype=np.uint8)).save("GT_bb_after_aug.png")
     end_time_sample = time.time()
     logger.debug(f"Sample time {end_time_sample-time_sample}")
     return images, images_cp, bb, obj_classes, actions, states, points
-
 

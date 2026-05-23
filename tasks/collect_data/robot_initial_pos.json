@@ -1,0 +1,742 @@
+{
+    "ur5e_pick_place": {
+        "0": {
+            "eef_pos": [
+                -0.26,
+                -0.05,
+                0.95
+            ],
+            "eef_quat": [
+                -0.52,
+                0.86,
+                -0.03,
+                -0.01
+            ],
+            "joint_pos": [
+                -0.48,
+                -1.76,
+                2.45,
+                -2.3,
+                -1.62,
+                -0.0
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        },
+        "1": {
+            "eef_pos": [
+                -0.28,
+                -0.01,
+                0.92
+            ],
+            "eef_quat": [
+                -0.53,
+                0.85,
+                0.04,
+                -0.02
+            ],
+            "joint_pos": [
+                -0.46,
+                -1.72,
+                2.49,
+                -2.25,
+                -1.57,
+                -0.0
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        },
+        "2": {
+            "eef_pos": [
+                -0.29,
+                -0.01,
+                0.91
+            ],
+            "eef_quat": [
+                -0.53,
+                0.84,
+                0.04,
+                -0.04
+            ],
+            "joint_pos": [
+                -0.45,
+                -1.68,
+                2.5,
+                -2.29,
+                -1.6,
+                -0.0
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        },
+        "3": {
+            "eef_pos": [
+                -0.27,
+                -0.03,
+                0.94
+            ],
+            "eef_quat": [
+                -0.52,
+                0.85,
+                -0.0,
+                -0.01
+            ],
+            "joint_pos": [
+                -0.47,
+                -1.74,
+                2.47,
+                -2.29,
+                -1.58,
+                -0.01
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        },
+        "4": {
+            "eef_pos": [
+                -0.28,
+                -0.02,
+                0.93
+            ],
+            "eef_quat": [
+                -0.54,
+                0.84,
+                0.01,
+                -0.03
+            ],
+            "joint_pos": [
+                -0.46,
+                -1.74,
+                2.48,
+                -2.27,
+                -1.6,
+                -0.02
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        },
+        "5": {
+            "eef_pos": [
+                -0.28,
+                -0.03,
+                0.93
+            ],
+            "eef_quat": [
+                -0.51,
+                0.86,
+                0.01,
+                -0.01
+            ],
+            "joint_pos": [
+                -0.49,
+                -1.75,
+                2.49,
+                -2.28,
+                -1.58,
+                0.01
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        },
+        "6": {
+            "eef_pos": [
+                -0.27,
+                -0.02,
+                0.94
+            ],
+            "eef_quat": [
+                -0.53,
+                0.85,
+                0.0,
+                -0.0
+            ],
+            "joint_pos": [
+                -0.46,
+                -1.75,
+                2.47,
+                -2.28,
+                -1.58,
+                -0.0
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        },
+        "7": {
+            "eef_pos": [
+                -0.26,
+                -0.02,
+                0.93
+            ],
+            "eef_quat": [
+                -0.53,
+                0.85,
+                0.02,
+                -0.0
+            ],
+            "joint_pos": [
+                -0.47,
+                -1.71,
+                2.46,
+                -2.28,
+                -1.56,
+                -0.01
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        },
+        "8": {
+            "eef_pos": [
+                -0.3,
+                -0.03,
+                0.91
+            ],
+            "eef_quat": [
+                -0.5,
+                0.86,
+                0.04,
+                -0.03
+            ],
+            "joint_pos": [
+                -0.51,
+                -1.71,
+                2.51,
+                -2.27,
+                -1.59,
+                0.01
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        },
+        "9": {
+            "eef_pos": [
+                -0.29,
+                -0.03,
+                0.93
+            ],
+            "eef_quat": [
+                -0.51,
+                0.86,
+                0.01,
+                -0.03
+            ],
+            "joint_pos": [
+                -0.49,
+                -1.75,
+                2.5,
+                -2.28,
+                -1.61,
+                0.02
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        },
+        "10": {
+            "eef_pos": [
+                -0.27,
+                -0.03,
+                0.94
+            ],
+            "eef_quat": [
+                -0.53,
+                0.85,
+                0.0,
+                -0.01
+            ],
+            "joint_pos": [
+                -0.48,
+                -1.73,
+                2.46,
+                -2.29,
+                -1.58,
+                -0.03
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        },
+        "11": {
+            "eef_pos": [
+                -0.28,
+                -0.05,
+                0.94
+            ],
+            "eef_quat": [
+                -0.49,
+                0.87,
+                -0.0,
+                -0.02
+            ],
+            "joint_pos": [
+                -0.53,
+                -1.75,
+                2.48,
+                -2.28,
+                -1.61,
+                0.01
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        },
+        "12": {
+            "eef_pos": [
+                -0.3,
+                -0.0,
+                0.91
+            ],
+            "eef_quat": [
+                -0.54,
+                0.84,
+                0.03,
+                -0.03
+            ],
+            "joint_pos": [
+                -0.44,
+                -1.74,
+                2.53,
+                -2.27,
+                -1.58,
+                -0.01
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        },
+        "13": {
+            "eef_pos": [
+                -0.28,
+                -0.02,
+                0.93
+            ],
+            "eef_quat": [
+                -0.54,
+                0.84,
+                0.02,
+                -0.03
+            ],
+            "joint_pos": [
+                -0.46,
+                -1.73,
+                2.48,
+                -2.26,
+                -1.6,
+                -0.04
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        },
+        "14": {
+            "eef_pos": [
+                -0.29,
+                -0.02,
+                0.92
+            ],
+            "eef_quat": [
+                -0.52,
+                0.85,
+                0.03,
+                -0.03
+            ],
+            "joint_pos": [
+                -0.47,
+                -1.74,
+                2.5,
+                -2.25,
+                -1.59,
+                0.01
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        },
+        "15": {
+            "eef_pos": [
+                -0.28,
+                -0.03,
+                0.94
+            ],
+            "eef_quat": [
+                -0.51,
+                0.86,
+                0.01,
+                -0.02
+            ],
+            "joint_pos": [
+                -0.49,
+                -1.74,
+                2.47,
+                -2.27,
+                -1.59,
+                0.0
+            ],
+            "robot0_eye_in_hand_image": true,
+            "robot0_eye_in_hand_depth": true
+        }
+    },
+    "real_new_ur5e_pick_place": {
+        "0": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": false,
+            "eye_in_hand_depth": false
+        },
+        "1": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": true,
+            "eye_in_hand_depth": true
+        },
+        "2": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": true,
+            "eye_in_hand_depth": true
+        },
+        "3": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": true,
+            "eye_in_hand_depth": true
+        },
+        "4": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": true,
+            "eye_in_hand_depth": true
+        },
+        "5": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": true,
+            "eye_in_hand_depth": true
+        },
+        "6": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": true,
+            "eye_in_hand_depth": true
+        },
+        "7": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": true,
+            "eye_in_hand_depth": true
+        },
+        "8": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": true,
+            "eye_in_hand_depth": true
+        },
+        "9": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": true,
+            "eye_in_hand_depth": true
+        },
+        "10": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": true,
+            "eye_in_hand_depth": true
+        },
+        "11": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": true,
+            "eye_in_hand_depth": true
+        },
+        "12": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": true,
+            "eye_in_hand_depth": true
+        },
+        "13": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": true,
+            "eye_in_hand_depth": true
+        },
+        "14": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": true,
+            "eye_in_hand_depth": true
+        },
+        "15": {
+            "eef_pos": [
+                -0.16,
+                0.35,
+                0.15
+            ],
+            "eef_quat": [
+                1.0,
+                0.03,
+                0.0,
+                0.01
+            ],
+            "joint_pos": [
+                2.24,
+                -1.78,
+                1.64,
+                -2.02,
+                4.71,
+                0.0
+            ],
+            "eye_in_hand_image": true,
+            "eye_in_hand_depth": true
+        }
+    }
+}

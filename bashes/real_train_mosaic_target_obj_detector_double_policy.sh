@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#SBATCH -A hpc_default
-#SBATCH -w gnode02
+#SBATCH -A did_robot_learning_359
 #SBATCH --partition=gpuq
+#SBATCH --exclude=gnode09,gnode04
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
@@ -19,7 +19,7 @@ export HYDRA_FULL_ERROR=1
 echo $1
 TASK_NAME="$1"
 
-EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset/
+EXPERT_DATA=/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset
 POLICY='${mosaic}'
 TARGET='multi_task_il.models.mt_rep_double_policy.VideoImitation'
 TASKS_CONFIG=7_tasks_real
@@ -32,7 +32,7 @@ FINETUNE="${4:-false}"
 RESUME="${5:-false}"
 DEMO_NAME="${6:-panda}" # [human_rgb or panda]
 SAVE_PATH="${7:-/home/rsofnc000/checkpoint_save_folder/100_180_new}"
-W=${8:-"gnode01"}
+MAX_EPOCHS="${8:-500}"
 echo "Task Name is: $TASK_NAME"
 echo "Resume Folder is: $RESUME_PATH"
 echo "Resume Step is: $RESUME_STEP"
@@ -40,6 +40,7 @@ echo "Finetune is: $FINETUNE"
 echo "Resume is: $RESUME"
 echo "Demo Name is: $DEMO_NAME"
 echo "Save Path is: $SAVE_PATH"
+echo "Max Epochs is: $MAX_EPOCHS"
 
 SAVE_FREQ=-1
 LOG_FREQ=10
@@ -48,7 +49,7 @@ DEVICE=0
 DEBUG=false
 WANDB_LOG=true
 ROLLOUT=false
-EPOCH=180
+EPOCH=${MAX_EPOCHS}
 LOADER_WORKERS=16
 CONFIG_PATH=../experiments
 CONFIG_NAME=config_real.yaml
@@ -225,12 +226,12 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
 
-    TARGET_OBJ_DETECTOR_STEP=26
-    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/Real-KP-COD-pick_place-Demo-human_rgb-Finetune-true-NORMALIZE-false-Batch32
+    TARGET_OBJ_DETECTOR_STEP=89
+    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-COD-SKIP-0-5-10-15-Batch60
     # Real-1Task-pick_place-Demo-panda-KP-RGB-Finetune-Batch32
     # Real-1Task-pick_place-Demo-human_rgb-KP-RGB-Finetune-Batch32
 
-    BSIZE=32
+    BSIZE=24
     COMPUTE_OBJ_DISTRIBUTION=false
     # Policy 1: At each slot is assigned a RandomSampler
     BALANCING_POLICY=0
@@ -255,7 +256,7 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     COSINE_ANNEALING=false
 
     TASK_str="pick_place"
-    EXP_NAME=Real-1Task-pick_place-${DEMO_NAME}-MOSAIC-KP_State_${CONCAT_STATE}_Finetued_${FINETUNE}_LR_${LR}
+    EXP_NAME=Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-MOSAIC-COD-SKIP-0-5-10-15
     PROJECT_NAME=${EXP_NAME}
 
 elif [ "$TASK_NAME" == 'multi' ]; then

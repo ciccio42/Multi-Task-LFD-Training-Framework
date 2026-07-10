@@ -1,6 +1,5 @@
 #!/bin/bash
-
-#SBATCH -A hpc_default
+#SBATCH -A did_robot_learning_359
 #SBATCH --partition=gpuq
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
@@ -13,7 +12,7 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 export HYDRA_FULL_ERROR=1
 
-EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
+EXPERT_DATA=/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset
 
 POLICY='${cond_target_obj_detector}'
 DATASET_TARGET=multi_task_il.datasets.multi_task_keypoint_dataset.MultiTaskPairedKeypointDetectionDataset
@@ -115,9 +114,9 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     TASK_str="pick_place"
-    EXP_NAME=Real-KP-COD-${TASK_str}-Demo-${DEMO_NAME}-Finetune-${FINETUNE}-NORMALIZE-${NORMALIZE_IMG}
+    EXP_NAME=Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-COD-SKIP-0-5-10-15
     PROJECT_NAME=${EXP_NAME}
-    SET_SAME_N=2
+    SET_SAME_N=5
     RESUME_PATH=${RESUME_FOLDER}
     RESUME_STEP=${RESUME_STEP}
 elif [ "$TASK_NAME" == 'multi' ]; then

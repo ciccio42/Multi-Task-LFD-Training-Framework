@@ -4,15 +4,15 @@ import re
 import time
 import argparse
 
-BASH_SCRIPT = "/mnt/beegfs/frosa/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/train_keypoint_detection_skip.sh"
+BASH_SCRIPT = "/mnt/beegfs/frosa/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/real_train_mosaic_target_obj_detector_double_policy.sh" #"/mnt/beegfs/frosa/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/train_mosaic_target_obj_detector_double_policy.sh"
 FINETUNE = False
-RESUME = False
-CHECKPOINT_FOLDER = "/mnt/beegfs/frosa/checkpoint_save_folder/checkpoint_save_folder/iros/1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-COD-SKIP-0-5-10-15-Batch60"
-RESUME_STEP = -1
+RESUME = True
+CHECKPOINT_FOLDER = "/mnt/beegfs/frosa/checkpoint_save_folder/checkpoint_save_folder/iros/Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-MOSAIC-COD-SKIP-0-5-10-15-Batch24"
+RESUME_STEP = 499
 DEMO_NAME = 'human_rgb'
 SAVE_PATH = '/mnt/beegfs/frosa/checkpoint_save_folder/checkpoint_save_folder/iros'
-BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}", f"{DEMO_NAME}", f"{SAVE_PATH}"]
-MAX_EPOCHS = 90  # Set your maximum number of epochs here
+MAX_EPOCHS = 1000  # Set your maximum number of epochs here
+BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}", f"{DEMO_NAME}", f"{SAVE_PATH}", f"{MAX_EPOCHS}"]
 
 def get_highest_epoch(folder):
     highest_epoch = -1
@@ -67,7 +67,7 @@ def run_bash_script():
           
         RESUME_STEP = highest_epoch
         RESUME=True
-        BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}", f"{DEMO_NAME}", f"{SAVE_PATH}"]
+        BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}", f"{DEMO_NAME}", f"{SAVE_PATH}", f"{MAX_EPOCHS}"]
         
         if highest_epoch >= MAX_EPOCHS or highest_epoch >= MAX_EPOCHS-1:
             print("Reached the maximum number of epochs. Exiting.")
@@ -101,7 +101,7 @@ if __name__ == "__main__":
         print(f"Highest epoch reached: {highest_epoch}")
         RESUME_STEP = highest_epoch
         RESUME=True
-        BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}",  f"{DEMO_NAME}", f"{SAVE_PATH}"]
+        BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}",  f"{DEMO_NAME}", f"{SAVE_PATH}", f"{MAX_EPOCHS}"]
     
     
     run_bash_script()

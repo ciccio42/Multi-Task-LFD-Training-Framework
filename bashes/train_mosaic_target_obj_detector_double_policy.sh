@@ -1,23 +1,23 @@
 #!/bin/bash
 
-#SBATCH -A hpc_default
-#SBATCH --exclude=tnode[01-17]
+#SBATCH -A did_robot_learning_359
 #SBATCH --partition=gpuq
+#SBATCH --exclude=gnode09
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=32
 #SBATCH --export=ALL
 
+
 export MUJOCO_PY_MUJOCO_PATH=/home/rsofnc000/.mujoco/mujoco210
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 export HYDRA_FULL_ERROR=1
-EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
 
 export HYDRA_FULL_ERROR=1
 
-EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset/
+EXPERT_DATA=/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset
 POLICY='${mosaic}'
 TARGET='multi_task_il.models.mt_rep_double_policy.VideoImitation'
 
@@ -33,9 +33,9 @@ LOADER_WORKERS=16
 CONFIG_PATH=../experiments
 CONFIG_NAME=config.yaml
 CONCAT_IMG_EMB=true
-CONCAT_DEMO_EMB=false
-CONCAT_STATE=true
-CONVERT_ACTION=true
+CONCAT_DEMO_EMB=true
+CONCAT_STATE=false
+CONVERT_ACTION=false
 
 CONCAT_BB=true
 LOAD_TARGET_OBJ_DETECTOR=true
@@ -241,10 +241,10 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     RESUME_PATH=${RESUME_FOLDER}
     RESUME_STEP=${RESUME_STEP}
 
-    TARGET_OBJ_DETECTOR_STEP=26
-    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/1Task-pick_place-COD-RGB-Batch32
+    TARGET_OBJ_DETECTOR_STEP=40
+    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-COD-SKIP-12-13-14-15-Batch60
 
-    BSIZE=32 #32 #128 #64 #32
+    BSIZE=24 #32 #128 #64 #32
     COMPUTE_OBJ_DISTRIBUTION=false
     # Policy 1: At each slot is assigned a RandomSampler
     BALANCING_POLICY=0
@@ -293,7 +293,7 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     COSINE_ANNEALING=false
 
     TASK_str="pick_place" #[pick_place,nut_assembly,stack_block,button]
-    EXP_NAME=1Task-${TASK_str}-Double-Policy-State_${CONCAT_STATE}_Convert_Action_${CONVERT_ACTION}_DEMO_${DEMO_NAME}_CONCAT_DEMO_ACT_${CONCAT_DEMO_ACT}_CONCAT_DEMO_EMB_${CONCAT_DEMO_EMB}
+    EXP_NAME=1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-MOSAIC-COD-SKIP-12-13-14-15
     PROJECT_NAME=${EXP_NAME}
 
 elif [ "$TASK_NAME" == 'multi' ]; then
@@ -361,7 +361,7 @@ elif [ "$TASK_NAME" == 'multi' ]; then
     PROJECT_NAME=${EXP_NAME}
 fi
 
-srun --output=training_${EXP_NAME}.txt --job-name=training_${TASK_NAME} python -u ../training/train_scripts/train_any.py \
+srun python -u ../training/train_scripts/train_any.py \
     --config-path ${CONFIG_PATH} \
     --config-name ${CONFIG_NAME} \
     policy=${POLICY} \

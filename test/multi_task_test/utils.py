@@ -640,7 +640,7 @@ def get_action(model, target_obj_dec, bb, predict_gt_bb, gt_classes, states, ima
                 action = torch.cat(temp_action_list).cpu().numpy()
                 
     
-    CHANGE_FROM_BL_TO_WORLD = True
+    CHANGE_FROM_BL_TO_WORLD = False
     DELTA_NO_CONV = False
     FIX_ROT = False
     ROUND = False
@@ -2256,8 +2256,9 @@ def task_run_action(traj, obs, task_name, env, real, gpu_id, config, images, img
         # thickness = 2
         # image = cv2.circle(image, center_coordinates, radius, color, thickness) 
             
-        cv2.imwrite(
-            f"step_test_prova.png",  image)
+        # PIL
+        pil_img = Image.fromarray(image)
+        pil_img.save(f"step_test_prova.png")
         # if controller is not None and gt_env is not None:
         #     gt_action, gt_status = controller.act(gt_obs)
         #     gt_obs, gt_reward, gt_env_done, gt_info = gt_env.step(

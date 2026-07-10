@@ -206,7 +206,6 @@ class _StackedAttnLayers(nn.Module):
                     count += np.prod(param.shape)
         return count
 
-
 class _TransformerFeatures(nn.Module):
     """
     Transformer-like module for computing self-attention on convolution features
@@ -364,7 +363,6 @@ class _TransformerFeatures(nn.Module):
 
         return pe_features, no_pe_features
 
-
 class _LSTMOneMany(nn.Module):
 
     def __init__(self, input_dim, hidden_dim, layer_dim, output_dim, forward_t):
@@ -410,7 +408,6 @@ class _LSTMOneMany(nn.Module):
             predictions[:, t, :] = torch.clone(output)
 
         return predictions
-
 
 class _DiscreteLogHead(nn.Module):
     def __init__(self, in_dim, out_dim, n_mixtures, const_var=True, sep_var=False, lstm=False, lstm_config=None):
@@ -533,7 +530,6 @@ class _DiscreteLogHead(nn.Module):
 
         return (mu, ln_scale, logit_prob)
 
-
 class VideoImitation(nn.Module):
     """ The imitation policy model  """
 
@@ -646,7 +642,7 @@ class VideoImitation(nn.Module):
             concat_demo_act, concat_demo_head))
 
         print(f"Concat state: {concat_state} - State dim {sdim}")
-        if "KP" not in target_obj_detector_path:
+        if "KP" not in target_obj_detector_path and "COD" not in target_obj_detector_path:
             ac_in_dim = int(latent_dim + float(concat_demo_act)
                             * latent_dim + float(concat_bb) * 4 * self._bb_sequence + float(concat_state) * sdim)
         else:

@@ -517,7 +517,7 @@ if __name__ == '__main__':
         loaded = torch.load(model_path, map_location=torch.device('cpu'))
         model.load_state_dict(loaded)
 
-        place_bb_flag = True if "KP" in model_path else False
+        place_bb_flag = True if ("KP" in model_path or "COD" in model_path) else False
         model = model.eval()  # .cuda()
         n_success = 0
         size = args.size
@@ -554,7 +554,7 @@ if __name__ == '__main__':
         config.dataset_cfg.mode = "val"
         config.dataset_cfg.agent_name = "real_new_ur5e"
         config.dataset_cfg.change_command_epoch = False
-        config.dataset_cfg.root_dir = "/home/rsofnc000/dataset/opt_dataset"
+        config.dataset_cfg.root_dir = "/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset"
         config.dataset_cfg.mix_demo_agent = False
         config.dataset_cfg.mix_sim_real = False
         dataset = instantiate(config.get('dataset_cfg', None))

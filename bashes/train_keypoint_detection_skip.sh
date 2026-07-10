@@ -97,7 +97,7 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     TASK_str="pick_place"
-    EXP_NAME=1Task-${TASK_str}-Simulated-Agent-Human-Demonstration-UR5e-Agent-COD-SKIP-0-5-10-15
+    EXP_NAME=1Task-${TASK_str}-Simulated-Agent-Human-Demonstration-UR5e-Agent-COD-SKIP-12-13-14-15
     PROJECT_NAME=${EXP_NAME}
     SET_SAME_N=5
 elif [ "$TASK_NAME" == 'multi' ]; then

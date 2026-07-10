@@ -56,6 +56,7 @@ class MultiTaskPairedDataset(Dataset):
             mix_sim_real=False,
             convert_action=False,
             dagger=False,
+            validation_on_skipped_task=False,
             ** params):
 
         self.task_crops = OrderedDict()
@@ -76,6 +77,7 @@ class MultiTaskPairedDataset(Dataset):
         self.mode = mode
         self.pick_next = pick_next
         self.split_pick_place = split_pick_place
+        self.validation_on_skipped_task = validation_on_skipped_task
 
         self.select_random_frames = select_random_frames
         self.balance_target_obj_pos = balance_target_obj_pos
@@ -111,13 +113,15 @@ class MultiTaskPairedDataset(Dataset):
         self._frame_distribution = OrderedDict()
         self._mix_demo_agent = False
         count, pairs_cnt = create_train_val_dict(self,
-                                      agent_name,
-                                      demo_name,
-                                      root_dir,
-                                      tasks_spec,
-                                      split,
-                                      allow_train_skip,
-                                      allow_val_skip)
+                                      agent_name=agent_name,
+                                      demo_name=demo_name,
+                                      root_dir=root_dir,
+                                      task_spec=tasks_spec,
+                                      split=split,
+                                      allow_train_skip=allow_train_skip,
+                                      allow_val_skip=allow_val_skip,
+                                      mode=mode,
+                                      validation_on_skipped_task=validation_on_skipped_task)
 
         self.pairs_cnt = pairs_cnt
         self.step_cnt = count

@@ -619,10 +619,23 @@ if __name__ == '__main__':
             demo_files = dataset.demo_files['pick_place']
             pkl_file_list = []
             for task_id in demo_files.keys():
+                
+                if len(demo_files[task_id]) < args.eval_each_task:
+                    print(f"Task {task_id} has only {len(demo_files[task_id])} demo files, which is less than eval_each_task {args.eval_each_task}. Using all available demo files for this task.")
+                    # repeat demo files until we have enough for eval_each_task
+                    repeat_times = (args.eval_each_task + len(demo_files[task_id]) - 1) // len(demo_files[task_id])  # ceiling division
+                    demo_files[task_id] = demo_files[task_id] * repeat_times
+                    if len(demo_files[task_id]) > args.eval_each_task:
+                        demo_files[task_id] = demo_files[task_id][:args.eval_each_task]
+                        print(f"Task {task_id} truncated to {len(demo_files[task_id])} demo files.")
+                else:
+                    # sample 10 demo files for each task
+                    demo_files[task_id] = random.sample(demo_files[task_id], args.eval_each_task)
+                
                 for pkl_file in demo_files[task_id]:
-                    for i in range(args.eval_each_task): # 10 test for each demo
-                        variation.append(task_id)
-                        pkl_file_list.append(pkl_file)
+                    #for i in range(args.eval_each_task): # 10 test for each demo
+                    variation.append(task_id)
+                    pkl_file_list.append(pkl_file)
             
             args.N = len(pkl_file_list)
 

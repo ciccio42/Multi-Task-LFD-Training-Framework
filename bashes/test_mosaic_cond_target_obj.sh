@@ -35,8 +35,8 @@ if [ "$TASK_NAME" == 'pick_place' ]; then
                         SAVE_PATH=${MODEL_PATH}/results_${TASK}/run_${COUNT}
                         srun python -u $BASE_PATH/repo/Multi-Task-LFD-Training-Framework/test/multi_task_test/test_any_task.py $MODEL \
                                                         --env $TASK \
-                                                        --saved_step $S \
-                                                        --eval_each_task 5 \
+                                                        --   $S \
+                                                        --eval_each_task 10 \
                                                         --num_workers ${NUM_WORKERS} \
                                                         --project_name ${PROJECT_NAME} \
                                                         --controller_path ${CONTROLLER_PATH} \

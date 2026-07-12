@@ -14,7 +14,6 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 export HYDRA_FULL_ERROR=1
 
-EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
 export HYDRA_FULL_ERROR=1
 echo $1
 TASK_NAME="$1"
@@ -23,7 +22,7 @@ EXPERT_DATA=/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset
 POLICY='${mosaic}'
 TARGET='multi_task_il.models.mt_rep_double_policy.VideoImitation'
 TASKS_CONFIG=7_tasks_real
-AGENT_NAME=real_new_ur5e
+AGENT_NAME=real_eye_in_hand_ur5e
 
 TASK_NAME="${1}"
 RESUME_PATH="${2}"
@@ -78,6 +77,7 @@ LOAD_TARGET_OBJ_DETECTOR=true
 PRETRAINED=true
 CONCAT_STATE=false
 DAGGER=false
+USE_WRIST_IMG=true
 # 5000 when image is 100,180
 MAX_LEN=5000
 DROP_DIM=4      # 2    # 3
@@ -256,7 +256,7 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     COSINE_ANNEALING=false
 
     TASK_str="pick_place"
-    EXP_NAME=Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-MOSAIC-COD-SKIP-0-5-10-15
+    EXP_NAME=Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-MOSAIC-COD-SKIP-0-5-10-15-EYE-IN-HAND-
     PROJECT_NAME=${EXP_NAME}
 
 elif [ "$TASK_NAME" == 'multi' ]; then
@@ -367,6 +367,7 @@ srun --output=training_${EXP_NAME}.txt --job-name=training_${TASK_NAME} python -
     attn.img_cfg.pretrained=${PRETRAINED} \
     actions.adim=${ACTION_DIM} \
     actions.n_mixtures=${N_MIXTURES} \
+    actions.use_wrist_img=${USE_WRIST_IMG} \
     actions.out_dim=${OUT_DIM} \
     actions.concat_img_emb=${CONCAT_IMG_EMB} \
     actions.concat_demo_emb=${CONCAT_DEMO_EMB} \

@@ -7,8 +7,8 @@ import argparse
 BASH_SCRIPT = "/mnt/beegfs/frosa/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/real_train_mosaic_target_obj_detector_double_policy.sh" #"/mnt/beegfs/frosa/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/train_mosaic_target_obj_detector_double_policy.sh"
 FINETUNE = False
 RESUME = True
-CHECKPOINT_FOLDER = "/mnt/beegfs/frosa/checkpoint_save_folder/checkpoint_save_folder/iros/Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-MOSAIC-COD-SKIP-0-5-10-15-Batch24"
-RESUME_STEP = 499
+CHECKPOINT_FOLDER = "/mnt/beegfs/frosa/checkpoint_save_folder/checkpoint_save_folder/iros/Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-MOSAIC-COD-SKIP-0-5-10-15-EYE-IN-HAND--Batch24"
+RESUME_STEP = 8
 DEMO_NAME = 'human_rgb'
 SAVE_PATH = '/mnt/beegfs/frosa/checkpoint_save_folder/checkpoint_save_folder/iros'
 MAX_EPOCHS = 1000  # Set your maximum number of epochs here

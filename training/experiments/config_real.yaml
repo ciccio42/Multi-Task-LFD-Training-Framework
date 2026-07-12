@@ -224,6 +224,7 @@ actions:
   concat_demo_act:    True
   concat_img_emb: True
   concat_demo_emb: True
+  use_wrist_img:    False
   demo_mean:        ${policy.demo_mean}
 
 attn:

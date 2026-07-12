@@ -177,7 +177,7 @@ class MultiTaskPairedDataset(Dataset):
         demo_traj, agent_traj = load_traj(demo_file), load_traj(agent_file)
         
         sim_crop = False
-        if "real_new" not in agent_file:
+        if "real" not in agent_file:
             sim_crop = True
         
         end = time.time()
@@ -244,7 +244,7 @@ class MultiTaskPairedDataset(Dataset):
                     for indx, step in enumerate(range(step_change+1-self._obs_T, step_change+1)):
                         chosen_t[indx] = torch.tensor(step)
 
-        images, images_cp, bb, obj_classes, action, states, points = create_sample(
+        images, images_cp, wrist_images, bb, obj_classes, action, states, points = create_sample(
             dataset_loader=self,
             traj=traj,
             chosen_t=chosen_t,
@@ -262,6 +262,9 @@ class MultiTaskPairedDataset(Dataset):
 
         if self.aug_twice:
             ret_dict['images_cp'] = torch.stack(images_cp)
+
+        if len(wrist_images) == len(images):
+            ret_dict['wrist_images'] = torch.stack(wrist_images)
 
         ret_dict['gt_bb'] = torch.stack(bb)
         ret_dict['gt_classes'] = torch.stack(obj_classes)

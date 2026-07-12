@@ -84,23 +84,29 @@ class DataAugmentation:
         return img
 
 
-    def __call__(self, task_name, obs, second=False, bb=None, class_frame=None, perform_aug=True, frame_number=-1, perform_scale_resize=True, agent=False, sim_crop=False):
+    def __call__(self, task_name, obs, second=False, bb=None, class_frame=None, perform_aug=True, frame_number=-1, perform_scale_resize=True, agent=False, sim_crop=False, wrist_crop=False):
 
         if perform_scale_resize:
             img_height, img_width = obs.shape[:2]
             """applies to every timestep's RGB obs['camera_front_image']"""
-            if len(self.demo_crop) != 0 and not agent:
-                crop_params = self.demo_crop.get(
-                    task_name, [0, 0, 0, 0])
-            if len(self.agent_crop) != 0 and agent and not sim_crop:
-                crop_params = self.agent_crop.get(
-                    task_name, [0, 0, 0, 0])
-            if len(self.agent_sim_crop) != 0 and agent and sim_crop:
-                crop_params = self.agent_sim_crop.get(
-                    task_name, [0, 0, 0, 0])
-            if len(self.task_crops) != 0:
-                crop_params = self.task_crops.get(
-                    task_name, [0, 0, 0, 0])
+            crop_params = [0, 0, 0, 0]
+            if wrist_crop:
+                # wrist (eye-in-hand) view has no crop calibration: skip cropping
+                # entirely, just resize to the target size below
+                crop_params = [0, 0, 0, 0]
+            else:
+                if len(self.demo_crop) != 0 and not agent:
+                    crop_params = self.demo_crop.get(
+                        task_name, [0, 0, 0, 0])
+                if len(self.agent_crop) != 0 and agent and not sim_crop:
+                    crop_params = self.agent_crop.get(
+                        task_name, [0, 0, 0, 0])
+                if len(self.agent_sim_crop) != 0 and agent and sim_crop:
+                    crop_params = self.agent_sim_crop.get(
+                        task_name, [0, 0, 0, 0])
+                if len(self.task_crops) != 0:
+                    crop_params = self.task_crops.get(
+                        task_name, [0, 0, 0, 0])
 
             top, left = crop_params[0], crop_params[2]
             img_height, img_width = obs.shape[0], obs.shape[1]
@@ -155,7 +161,7 @@ class DataAugmentation:
                     bb[obj_indx] = np.array([[x1, y1, x2, y2]])
 
         # ---- Affine Transformation ----#
-        if self.data_augs.get('affine', False) and agent:
+        if self.data_augs.get('affine', False) and agent and bb is not None:
             obs_to_affine = np.array(np.moveaxis(
                 obs.numpy()*255, 0, -1), dtype=np.uint8)
             norm_bb = A.augmentations.bbox_utils.normalize_bboxes(

@@ -299,7 +299,7 @@ class MultiTaskPairedKeypointDetectionDataset(Dataset):
             chosen_t = [j + start for j in range(self._obs_T)]
 
         # start_create_sample = time.time()
-        images, images_cp, bb, obj_classes, actions, states, points = create_sample(
+        images, images_cp, _wrist_images, bb, obj_classes, actions, states, points = create_sample(
             dataset_loader=self,
             traj=traj,
             chosen_t=chosen_t,

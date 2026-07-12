@@ -944,6 +944,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
 
     images = []
     images_cp = []
+    wrist_images = []
     bb = []
     obj_classes = []
     actions = []
@@ -987,6 +988,17 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
         if DEBUG:
             Image.fromarray(np.asarray(image, dtype=np.uint8)).save("original_image.png")
 
+        wrist_image = step_t['obs'].get('eye_in_hand_image', None)
+        assert wrist_image is not None, "Wrist camera is not supported in the current version of the dataset loader. Please set 'eye_in_hand_image' to None in the dataset."
+        if wrist_image is not None:
+            wrist_image = copy.copy(wrist_image)
+            if getattr(dataset_loader, "real", False) and not sim_crop:
+                wrist_image = wrist_image[:, :, ::-1]
+        if DEBUG:
+            if wrist_image is not None:
+                Image.fromarray(np.asarray(wrist_image, dtype=np.uint8)).save("original_wrist_image.png")
+
+        
         # Create GT BB
         bb_time = time.time()
         if getattr(dataset_loader, '_bbs_T', 1) == 1:
@@ -1039,6 +1051,20 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
 
         bb.append(torch.from_numpy(bb_aug.astype(np.int32)))
         obj_classes.append((torch.from_numpy(class_frame.astype(np.int32))))
+
+        if wrist_image is not None:
+            # no crop calibration exists for the wrist camera: skip cropping but
+            # still resize to the target size and go through the same aug/normalize
+            # pipeline as the front camera
+            wrist_processed = dataset_loader.frame_aug(
+                task_name,
+                wrist_image,
+                False,
+                perform_scale_resize=True,
+                agent=True,
+                sim_crop=sim_crop,
+                wrist_crop=True)
+            wrist_images.append(wrist_processed)
 
         if dataset_loader.aug_twice:
             aug_twice_time = time.time()
@@ -1180,5 +1206,5 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
             Image.fromarray(np.asarray(image, dtype=np.uint8)).save("GT_bb_after_aug.png")
     end_time_sample = time.time()
     logger.debug(f"Sample time {end_time_sample-time_sample}")
-    return images, images_cp, bb, obj_classes, actions, states, points
+    return images, images_cp, wrist_images, bb, obj_classes, actions, states, points
 

@@ -25,6 +25,7 @@ logger = logging.getLogger("BB-Creator")
 
 KEY_INTEREST = ["joint_pos", "joint_vel", "eef_pos",
                 "eef_quat", "gripper_qpos", "gripper_qvel", "camera_front_image",
+                "eye_in_hand_image",
                 "target-box-id", "target-object", "obj_bb",
                 "extent", "zfar", "znear", "eef_point", "ee_aa", "target-peg"]
 OFFSET = 0.0
@@ -194,7 +195,30 @@ def overwrite_pkl_file(pkl_file_path, sample, traj_obj_bb):
         'task_id': sample['task_id']}, open(pkl_file_path, 'wb'))
 
 
-def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
+def save_debug_images(debug_dir, t, camera_front_image, eye_in_hand_image, camera_front_bb):
+    """Save camera_front_image with bounding-boxes drawn and eye_in_hand_image untouched."""
+    os.makedirs(debug_dir, exist_ok=True)
+
+    front_img = np.asarray(camera_front_image, dtype=np.uint8).copy()
+    if camera_front_bb:
+        for obj_name, bb in camera_front_bb.items():
+            upper_left = tuple(int(v) for v in bb['upper_left_corner'])
+            bottom_right = tuple(int(v) for v in bb['bottom_right_corner'])
+            front_img = cv2.rectangle(front_img,
+                                      upper_left,
+                                      bottom_right,
+                                      color=(0, 255, 0),
+                                      thickness=1)
+    Image.fromarray(cv2.cvtColor(front_img, cv2.COLOR_BGR2RGB)).save(
+        os.path.join(debug_dir, f"camera_front_t{t}.png"))
+
+    if eye_in_hand_image is not None:
+        eye_in_hand_img = np.asarray(eye_in_hand_image, dtype=np.uint8)
+        Image.fromarray(cv2.cvtColor(eye_in_hand_img, cv2.COLOR_BGR2RGB)).save(
+            os.path.join(debug_dir, f"eye_in_hand_t{t}.png"))
+
+
+def opt_traj(task_name, task_spec, out_path, rescale_bb, real, save_trj, pkl_file_path):
     # pkl_file_path = os.path.join(task_path, pkl_file_path)
     # logger.info(f"Task id {dir} - Trajectory {pkl_file_path}")
     # 2. Load pickle file
@@ -507,6 +531,18 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
             if start_pick_t == 0 and gripper == 1.0:
                 start_pick_t = t
 
+    task_dir = os.path.basename(os.path.dirname(pkl_file_path))
+    trj_name_noext = os.path.splitext(os.path.basename(pkl_file_path))[0]
+    debug_dir = os.path.join(".", "debug_images", task_dir, trj_name_noext)
+    for t in range(len(sample['traj'])):
+        obs = sample['traj'].get(t)['obs']
+        camera_front_bb = obs.get('obj_bb', {}).get('camera_front', None)
+        save_debug_images(debug_dir,
+                          t,
+                          obs.get('camera_front_image', None),
+                          obs.get('eye_in_hand_image', None),
+                          camera_front_bb)
+
     if ("real" in pkl_file_path or args.real) and "task_00" in pkl_file_path:
         sampled_trj = list()
         sampled_trj.extend(sample['traj']._data[:1])
@@ -549,11 +585,12 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
                     Image.fromarray(np.asarray(img, dtype=np.uint8)).save("prova.png")
                     # print("prova image")
 
-    trj_name = pkl_file_path.split('/')[-1]
-    out_pkl_file_path = os.path.join(out_path, trj_name)
-    with open(out_pkl_file_path, "wb") as f:
-        print(out_pkl_file_path)
-        pickle.dump(sample, f)
+    if save_trj:
+        trj_name = pkl_file_path.split('/')[-1]
+        out_pkl_file_path = os.path.join(out_path, trj_name)
+        with open(out_pkl_file_path, "wb") as f:
+            print(out_pkl_file_path)
+            pickle.dump(sample, f)
 
 
 if __name__ == '__main__':
@@ -570,6 +607,8 @@ if __name__ == '__main__':
     parser.add_argument('--rescale_bb', action='store_true')
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--real', action='store_true')
+    parser.add_argument('--save_trj', action='store_true',
+                        help="Save the optimized trajectories (.pkl) to out_path")
 
     args = parser.parse_args()
 
@@ -590,7 +629,7 @@ if __name__ == '__main__':
     else:
         out_path = os.path.join(args.out_path,
                                 f"{args.task_name}_opt",
-                                f"{args.robot_name}_{args.task_name}")
+                                f"{args.robot_name}_{args.task_name}_eye_in_hand")
 
     os.makedirs(name=out_path, exist_ok=True)
 
@@ -621,6 +660,7 @@ if __name__ == '__main__':
                                       task_conf,
                                       out_task,
                                       args.rescale_bb,
-                                      args.real
+                                      args.real,
+                                      args.save_trj
                                       )
                 p.map(f, trj_list)

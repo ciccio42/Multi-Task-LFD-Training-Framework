@@ -405,6 +405,10 @@ def calculate_task_loss(config, train_cfg, device, model, task_inputs, val=False
     else:
         if "VideoImitation" in config.policy._target_:
             # assert model_inputs['images'].shape[0] == 12, f"Batch input {model_inputs['images'].shape[0]}"
+            extra_kwargs = {}
+            if "mt_rep_double_policy" in config.policy._target_ and 'wrist_images' in model_inputs:
+                extra_kwargs['wrist_images'] = copy.deepcopy(
+                    model_inputs['wrist_images'])
             out = model(
                 images=copy.deepcopy(model_inputs['images']),
                 images_cp=copy.deepcopy(model_inputs['images_cp']),
@@ -415,7 +419,8 @@ def calculate_task_loss(config, train_cfg, device, model, task_inputs, val=False
                 gt_classes=copy.deepcopy(model_inputs['gt_classes']),
                 ret_dist=False,
                 actions=copy.deepcopy(model_inputs['actions']),
-                first_phase=copy.deepcopy(model_inputs.get('first_phase', None)))
+                first_phase=copy.deepcopy(model_inputs.get('first_phase', None)),
+                **extra_kwargs)
         elif "CondPolicy" in config.policy._target_:
             out = model(
                 inputs=model_inputs,

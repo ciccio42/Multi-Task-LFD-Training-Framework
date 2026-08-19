@@ -2,11 +2,11 @@
 
 #SBATCH -A did_robot_learning_359
 #SBATCH --partition=gpuq
-#SBATCH --exclude=gnode09,gnode04
+#SBATCH --exclude=gnode10,gnode09
 #SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=32
+#SBATCH --cpus-per-task=16
 #SBATCH --export=ALL
 
 export MUJOCO_PY_MUJOCO_PATH=/home/rsofnc000/.mujoco/mujoco210
@@ -22,7 +22,6 @@ EXPERT_DATA=/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset
 POLICY='${mosaic}'
 TARGET='multi_task_il.models.mt_rep_double_policy.VideoImitation'
 TASKS_CONFIG=7_tasks_real
-AGENT_NAME=real_eye_in_hand_ur5e
 
 TASK_NAME="${1}"
 RESUME_PATH="${2}"
@@ -32,6 +31,9 @@ RESUME="${5:-false}"
 DEMO_NAME="${6:-panda}" # [human_rgb or panda]
 SAVE_PATH="${7:-/home/rsofnc000/checkpoint_save_folder/100_180_new}"
 MAX_EPOCHS="${8:-500}"
+AGENT_NAME="${9:-real_eye_in_hand_ur5e}" # [real_eye_in_hand_ur5e or real_new_ur5e]
+PROJECT_NAME="${10:-Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-MOSAIC-COD-SKIP-0-5-10-15-Batch24}"
+USE_WRIST_IMG="${11:-false}" # [true or false] True if using eye-in-hand camera, False if using front camera
 echo "Task Name is: $TASK_NAME"
 echo "Resume Folder is: $RESUME_PATH"
 echo "Resume Step is: $RESUME_STEP"
@@ -40,6 +42,9 @@ echo "Resume is: $RESUME"
 echo "Demo Name is: $DEMO_NAME"
 echo "Save Path is: $SAVE_PATH"
 echo "Max Epochs is: $MAX_EPOCHS"
+echo "Agent Name is: $AGENT_NAME"
+echo "Project Name is: $PROJECT_NAME"
+echo "Eye-in-Hand is: $EYE_IN_HAND"
 
 SAVE_FREQ=-1
 LOG_FREQ=10
@@ -77,7 +82,6 @@ LOAD_TARGET_OBJ_DETECTOR=true
 PRETRAINED=true
 CONCAT_STATE=false
 DAGGER=false
-USE_WRIST_IMG=true
 # 5000 when image is 100,180
 MAX_LEN=5000
 DROP_DIM=4      # 2    # 3
@@ -226,7 +230,7 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
 
-    TARGET_OBJ_DETECTOR_STEP=89
+    TARGET_OBJ_DETECTOR_STEP=199
     TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-COD-SKIP-0-5-10-15-Batch60
     # Real-1Task-pick_place-Demo-panda-KP-RGB-Finetune-Batch32
     # Real-1Task-pick_place-Demo-human_rgb-KP-RGB-Finetune-Batch32
@@ -256,8 +260,9 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     COSINE_ANNEALING=false
 
     TASK_str="pick_place"
-    EXP_NAME=Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-MOSAIC-COD-SKIP-0-5-10-15-EYE-IN-HAND-
-    PROJECT_NAME=${EXP_NAME}
+    EXP_NAME=${PROJECT_NAME}
+    #Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-MOSAIC-COD-SKIP-0-5-10-15-EYE-IN-HAND-
+    PROJECT_NAME=${PROJECT_NAME}
 
 elif [ "$TASK_NAME" == 'multi' ]; then
     echo "Multi Task"

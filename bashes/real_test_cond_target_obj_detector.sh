@@ -14,11 +14,11 @@ PROJECT_NAME=Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agen
 BATCH=60
 NUM_WORKERS=16
 GPU_ID=0
-MODEL_PATH=/mnt/beegfs/frosa/checkpoint_save_folder/checkpoint_save_folder/iros/${PROJECT_NAME}-Batch${BATCH}/
+MODEL_PATH=/mnt/beegfs/frosa/checkpoint_save_folder/iros_finetune_v2/${PROJECT_NAME}-Batch${BATCH}/
 CONTROLLER_PATH=$BASE_PATH/repo/Multi-Task-LFD-Training-Framework/tasks/multi_task_robosuite_env/controllers/config/osc_pose.json
 
 for MODEL in ${MODEL_PATH}; do
-    for S in 89; do #81000 89100; do
+    for S in 45; do #81000 89100; do
         for TASK in pick_place; do
             for COUNT in 1; do
                 SAVE_PATH=${MODEL}/results_${TASK}/run_${COUNT}

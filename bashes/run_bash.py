@@ -4,15 +4,22 @@ import re
 import time
 import argparse
 
-BASH_SCRIPT = "/mnt/beegfs/frosa/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/real_train_mosaic_target_obj_detector_double_policy.sh" #"/mnt/beegfs/frosa/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/train_mosaic_target_obj_detector_double_policy.sh"
+BASH_SCRIPT = "/mnt/beegfs/frosa/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/bashes/real_train_mosaic_target_obj_detector_double_policy.sh"
 FINETUNE = False
-RESUME = True
-CHECKPOINT_FOLDER = "/mnt/beegfs/frosa/checkpoint_save_folder/checkpoint_save_folder/iros/Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-MOSAIC-COD-SKIP-0-5-10-15-EYE-IN-HAND--Batch24"
-RESUME_STEP = 8
+RESUME = True  
+PROJECT_NAME = "Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-MOSAIC-COD-SKIP-0-5-10-15" 
+CHECKPOINT_FOLDER = f"/mnt/beegfs/frosa/checkpoint_save_folder/checkpoint_save_folder/iros/{PROJECT_NAME}-Batch24"
+RESUME_STEP = 564   # latest model_save-*.pt actually present in CHECKPOINT_FOLDER
 DEMO_NAME = 'human_rgb'
 SAVE_PATH = '/mnt/beegfs/frosa/checkpoint_save_folder/checkpoint_save_folder/iros'
-MAX_EPOCHS = 1000  # Set your maximum number of epochs here
-BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}", f"{DEMO_NAME}", f"{SAVE_PATH}", f"{MAX_EPOCHS}"]
+MAX_EPOCHS = 1000
+# this checkpoint's own resolved config.yaml records agent_name: real_new_ur5e (front-camera-only
+# data) - real_train_keypoint_detection.sh's AGENT_NAME default (real_eye_in_hand_ur5e) is a
+# DIFFERENT dataset dir; must pass this explicitly ($9) or resuming would silently train on the
+# wrong real robot data.
+AGENT_NAME = 'real_eye_in_hand_ur5e'  # [real_eye_in_hand_ur5e or real_new_ur5e]
+USE_WRIST_IMG = False  # True if using eye-in-hand camera, False if using front camera
+BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}", f"{DEMO_NAME}", f"{SAVE_PATH}", f"{MAX_EPOCHS}", f"{AGENT_NAME}", f"{PROJECT_NAME}", f"{USE_WRIST_IMG}"]
 
 def get_highest_epoch(folder):
     highest_epoch = -1
@@ -67,7 +74,7 @@ def run_bash_script():
           
         RESUME_STEP = highest_epoch
         RESUME=True
-        BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}", f"{DEMO_NAME}", f"{SAVE_PATH}", f"{MAX_EPOCHS}"]
+        BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}", f"{DEMO_NAME}", f"{SAVE_PATH}", f"{MAX_EPOCHS}", f"{AGENT_NAME}", f"{PROJECT_NAME}", f"{USE_WRIST_IMG}"]
         
         if highest_epoch >= MAX_EPOCHS or highest_epoch >= MAX_EPOCHS-1:
             print("Reached the maximum number of epochs. Exiting.")
@@ -101,7 +108,7 @@ if __name__ == "__main__":
         print(f"Highest epoch reached: {highest_epoch}")
         RESUME_STEP = highest_epoch
         RESUME=True
-        BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}",  f"{DEMO_NAME}", f"{SAVE_PATH}", f"{MAX_EPOCHS}"]
+        BASH_ARGUMENTS = ["pick_place", f"{CHECKPOINT_FOLDER}", f"{RESUME_STEP}", f"{FINETUNE}", f"{RESUME}",  f"{DEMO_NAME}", f"{SAVE_PATH}", f"{MAX_EPOCHS}", f"{AGENT_NAME}", f"{PROJECT_NAME}", f"{USE_WRIST_IMG}"]
     
     
     run_bash_script()

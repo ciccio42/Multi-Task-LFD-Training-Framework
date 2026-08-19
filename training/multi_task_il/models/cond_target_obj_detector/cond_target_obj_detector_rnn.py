@@ -492,7 +492,7 @@ class AgentModule(nn.Module):
                     torch.tensor(self.height_scale_factor, dtype=float),
                     mode='p2a').float()
 
-                positive_anc_ind, negative_anc_ind, GT_conf_scores, GT_offsets, GT_class_pos, positive_anc_coords, negative_anc_coords, positive_anc_ind_sep = get_req_anchors(
+                positive_anc_ind, negative_anc_ind, GT_conf_scores, GT_offsets, GT_class_pos, positive_anc_coords, negative_anc_coords, positive_anc_ind_sep, _ = get_req_anchors(
                     anc_boxes_all.to(agent_obs.get_device()),
                     gt_bboxes_proj.to(agent_obs.get_device()),
                     gt_classes.to(agent_obs.get_device()),

@@ -1,6 +1,6 @@
 import torch
 from multi_task_il.models.discrete_logistic import DiscreteMixLogistic
-from torchvision.ops import box_iou
+from torchvision.ops import box_iou, generalized_box_iou_loss
 # from multi_task_il.models.cond_target_obj_detector.utils import project_bboxes
 from torchmetrics.classification import Accuracy
 import torch.nn.functional as F
@@ -39,7 +39,7 @@ def calculate_maml_loss(config, device, meta_model, model_inputs):
     return torch.cat(bc_loss, dim=0), torch.cat(aux_loss, dim=0)
 
 
-def loss_func_bb(config, train_cfg, device, model, inputs, w_conf=1, w_reg=5, val=False):
+def loss_func_bb(config, train_cfg, device, model, inputs, w_conf=1, w_reg=5, w_reg2=5, w_giou=2, val=False):
 
     def compute_average_iou(gt_bb, pred_bb, batch_size):
         iou_t = box_iou(boxes1=torch.from_numpy(
@@ -62,6 +62,14 @@ def loss_func_bb(config, train_cfg, device, model, inputs, w_conf=1, w_reg=5, va
         loss = F.smooth_l1_loss(reg_offsets_pos, gt_offsets,
                                 reduction='mean')
         return loss
+
+    def calc_giou_loss(pred_boxes, gt_boxes):
+        # scale-invariant, directly optimizes IoU rather than raw
+        # coordinate deltas -- helpful given anchors here span a wide
+        # range of sizes/aspect-ratios
+        if pred_boxes.shape[0] == 0:
+            return torch.zeros((), device=pred_boxes.device)
+        return generalized_box_iou_loss(pred_boxes, gt_boxes, reduction='mean')
 
     def calc_classification_loss(cls_scores, gt_cls):
         # compute cross entropy loss
@@ -142,6 +150,17 @@ def loss_func_bb(config, train_cfg, device, model, inputs, w_conf=1, w_reg=5, va
                                          predictions_dict['offsets_pos'],
                                          traj['images'].shape[0]*traj['images'].shape[1])
 
+        # second-stage (Fast-R-CNN-style) box-regression loss: refines
+        # each RPN proposal towards its matched gt box
+        bb_reg_loss_2nd = calc_bbox_reg_loss(predictions_dict['GT_offsets_2nd'],
+                                             predictions_dict['offsets_pos_2nd'],
+                                             traj['images'].shape[0]*traj['images'].shape[1])
+
+        # IoU-based loss on the final (stage-2-refined) box, directly
+        # optimizing localization quality rather than a coordinate proxy
+        giou_loss = calc_giou_loss(predictions_dict['refined_boxes'],
+                                   predictions_dict['GT_bboxes_pos'])
+
         # compute classification loss
         classification_loss = calc_classification_loss(predictions_dict['cls_scores'],
                                                        predictions_dict['GT_class_pos']
@@ -149,9 +168,11 @@ def loss_func_bb(config, train_cfg, device, model, inputs, w_conf=1, w_reg=5, va
 
         all_losses["cls_loss"] = cls_loss
         all_losses["bb_reg_loss"] = bb_reg_loss
+        all_losses["bb_reg_loss_2nd"] = bb_reg_loss_2nd
+        all_losses["giou_loss"] = giou_loss
         all_losses["classification_loss"] = classification_loss
-        all_losses["loss_sum"] = w_conf*cls_loss + \
-            w_reg*bb_reg_loss + classification_loss
+        all_losses["loss_sum"] = w_conf*cls_loss + w_reg*bb_reg_loss + \
+            w_reg2*bb_reg_loss_2nd + w_giou*giou_loss + classification_loss
 
         # compute acccuracy
         class_accuracy = compute_classification_accuracy(

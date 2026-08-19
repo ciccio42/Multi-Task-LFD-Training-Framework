@@ -103,7 +103,7 @@ dataset_cfg:
   aug_twice:       False
   allow_val_skip:   ${val_skip}
   allow_train_skip: ${train_skip}
-  use_strong_augs:  False 
+  use_strong_augs:  True
   select_random_frames: True
   compute_obj_distribution: False
   agent_name: 'ur5e'
@@ -145,8 +145,15 @@ augs:
   horizontal_flip_p: 0.5
   affine: True
   affine_p: 0.5
+  shift_limit: 0.3
+  # rotate_limit/scale_limit were previously hardcoded to 0 in data_aug.py (shift-only "affine",
+  # despite the name) - no coverage for camera angle/distance changes between train and test.
+  # +/-15deg and +/-10% scale jitter around the fixed camera pose; GT bounding boxes are
+  # transformed consistently (same Albumentations ShiftScaleRotate call, not a separate step).
+  rotate_limit: 15
+  scale_limit: 0.1
   normalize: False
-  black_patch_prob: 0.0
+  black_patch_prob: 0.4
   black_patch_params:
     num_patches: 1
     min_size: 5
@@ -175,8 +182,19 @@ cond_target_obj_detector_cfg:
   agent_backbone_name: resnet18
   cond_video: True
   pretrained: True
-  anc_scales: [1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 6.0] 
-  anc_ratios: [0.2, 0.5, 0.8, 1, 1.2, 1.5, 2.0]
+  # anc_scales/anc_ratios re-fit from measured gt_bb sizes on the real
+  # pick_place data (camera_front, 672x376 native -> rescaled to the actual
+  # training resolution height/width=100/180, conv_drop_dim=4, stride ~7).
+  # This detector localizes BOTH the target object (cube, ~0.8-2.5 feature
+  # units) and the target place/bin (~4.2-5.8 feature units, measured
+  # separately from the 4 bin_* regions) -- an earlier version of this grid
+  # only covered the cube range and, despite training, never produced a
+  # single bin detection across a 40-trajectory eval (no anchor was even
+  # close to bin-sized, so no positive training signal ever reached that
+  # class). Both size regimes share a similar aspect ratio (~0.5-1.3), so
+  # only the scale range needs to span both.
+  anc_scales: [0.75, 1.0, 1.5, 2.0, 2.5, 3.5, 4.5, 5.5]
+  anc_ratios: [0.5, 0.7, 0.85, 1.0, 1.3]
   dim_H: 14
   dim_W: 14
   n_channels: 256
@@ -188,6 +206,16 @@ cond_target_obj_detector_cfg:
   n_classes: 2
   x_offset: 2.0
   y_offset: 1.5
+  # RPN positive-match threshold raised from 0.4: since the model now has a
+  # second-stage refinement head, the RPN no longer needs to accept loose
+  # (low-IoU) matches as positives just to have a usable final box.
+  pos_thresh: 0.5
+  neg_thresh: 0.3
+  conf_thresh: 0.7
+  nms_thresh: 0.5
+  # ROI-align sampling resolution (was an effectively-1x1 roi_pool via
+  # AvgPool2d(roi_size) collapsing all spatial signal before the FC head)
+  roi_size: [7, 7]
 
 actions:
   adim: 7

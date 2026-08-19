@@ -969,7 +969,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                     step_t['obs']['camera_front_image'])
             else:
                 image = copy.copy(
-                    step_t['obs']['camera_front_image'])
+                    step_t['obs']['camera_front_image'][:,:,::-1])
         else:
             if step_t['obs'].get('camera_front_image_full_size', None) is not None:
                 image = copy.copy(
@@ -977,7 +977,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
             else:
                 if not human_demo and (dataset_loader.width != 224 and dataset_loader.height != 224):
                     image = copy.copy(
-                        step_t['obs']['camera_front_image'][:,:,::-1])
+                        step_t['obs']['camera_front_image'])#[:,:,::-1])
                 elif not human_demo and (dataset_loader.width == 224 and dataset_loader.height == 224):
                     image = copy.copy(
                         step_t['obs']['camera_front_image'][:,:,::-1])
@@ -988,12 +988,13 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
         if DEBUG:
             Image.fromarray(np.asarray(image, dtype=np.uint8)).save("original_image.png")
 
-        wrist_image = step_t['obs'].get('eye_in_hand_image', None)
+        
+        wrist_image = step_t['obs'].get('eye_in_hand_image', None)[:, :, ::-1] if step_t['obs'].get('eye_in_hand_image', None) is not None else None
         assert wrist_image is not None, "Wrist camera is not supported in the current version of the dataset loader. Please set 'eye_in_hand_image' to None in the dataset."
         if wrist_image is not None:
             wrist_image = copy.copy(wrist_image)
             if getattr(dataset_loader, "real", False) and not sim_crop:
-                wrist_image = wrist_image[:, :, ::-1]
+                wrist_image = wrist_image
         if DEBUG:
             if wrist_image is not None:
                 Image.fromarray(np.asarray(wrist_image, dtype=np.uint8)).save("original_wrist_image.png")

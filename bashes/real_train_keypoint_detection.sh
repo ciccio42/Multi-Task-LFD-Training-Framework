@@ -17,7 +17,6 @@ EXPERT_DATA=/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset
 POLICY='${cond_target_obj_detector}'
 DATASET_TARGET=multi_task_il.datasets.multi_task_keypoint_dataset.MultiTaskPairedKeypointDetectionDataset
 TASKS_CONFIG=7_tasks_real
-AGENT_NAME=real_new_ur5e
 
 TASK_NAME="${1}"
 RESUME_FOLDER="${2}"
@@ -26,6 +25,13 @@ FINETUNE="${4:-false}"
 RESUME="${5:-false}"
 DEMO_NAME="${6:-panda}" # [human_rgb or panda]
 SAVE_PATH="${7:-/home/rsofnc000/checkpoint_save_folder/100_180_new}"
+MAX_EPOCHS="${8:-1000}" # default to 1000 if not provided
+# was hardcoded to real_eye_in_hand_ur5e - made overridable ($9, not $8 since run_bash.py already
+# passes MAX_EPOCHS as its 8th positional arg - unread by this script before, kept that way) since
+# resuming a checkpoint trained with a DIFFERENT agent_name (e.g. real_new_ur5e, a separate
+# front-camera-only dataset dir) would silently switch the real robot data source mid-training
+# otherwise. Default preserved for existing callers that don't pass $9.
+AGENT_NAME="${9:-real_eye_in_hand_ur5e}"
 echo "Task Name is: $TASK_NAME"
 echo "Resume Folder is: $RESUME_FOLDER"
 echo "Resume Step is: $RESUME_STEP"
@@ -51,13 +57,13 @@ DEVICE=-1
 DEBUG=false
 WANDB_LOG=true
 
-EPOCH=90 # start from 16
+EPOCH=${MAX_EPOCHS} # start from 16
 BSIZE=32 #16 #32
 
 COMPUTE_OBJ_DISTRIBUTION=false
 CONFIG_PATH=../experiments/
 CONFIG_NAME=config_cond_target_obj_detector_real.yaml
-LOADER_WORKERS=16
+LOADER_WORKERS=1
 BALANCING_POLICY=0
 OBS_T=7
 

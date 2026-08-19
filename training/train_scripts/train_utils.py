@@ -98,6 +98,20 @@ def make_model(config, local_rank):
                 for key in state_dict_keys:
                     if '_object_detector' in key or '_cond_backbone' in key or '_agent_backbone' in key:
                         state_dict.pop(key)
+        # strict=False only tolerates missing/extra keys, not shape
+        # mismatches -- drop any checkpoint tensor whose shape no longer
+        # matches the current model (e.g. after changing the number of
+        # RPN anchors, or adding a new head) so the rest can still warm
+        # start instead of erroring out.
+        own_state = model.state_dict()
+        shape_mismatch = [k for k in state_dict.keys()
+                          if k in own_state and state_dict[k].shape != own_state[k].shape]
+        if shape_mismatch:
+            print('Skipping {} checkpoint tensor(s) with a shape mismatch '
+                  '(will be randomly initialized instead): {}'.format(
+                      len(shape_mismatch), shape_mismatch))
+            for k in shape_mismatch:
+                state_dict.pop(k)
         model.load_state_dict(state_dict,strict=False)
         optimizer_state_dict = None
         if resume:

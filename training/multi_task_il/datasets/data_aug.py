@@ -60,10 +60,13 @@ class DataAugmentation:
             ),
         ])
 
+        # shift_limit/rotate_limit/scale_limit default to the previous hardcoded values (shift
+        # only, no rotation/scale) so existing configs that don't set these new keys keep training
+        # identically - only configs that explicitly opt in get camera-angle/distance jitter.
         self.affine_transform = A.Compose([
-            A.ShiftScaleRotate(shift_limit=0.3, 
-                               rotate_limit=0, 
-                               scale_limit=0, 
+            A.ShiftScaleRotate(shift_limit=self.data_augs.get("shift_limit", 0.3),
+                               rotate_limit=self.data_augs.get("rotate_limit", 0),
+                               scale_limit=self.data_augs.get("scale_limit", 0),
                                p=self.data_augs.get("affine_p", 0.0))
         ])
         # A.HorizontalFlip(p=self.data_augs.get("horizontal_flip_p", 0.0))
@@ -175,15 +178,15 @@ class DataAugmentation:
                                                                                rows=obs_to_affine.shape[0],
                                                                                cols=obs_to_affine.shape[1]
                                                                                ))
-            for obj_indx, obj_bb in enumerate(bb_denorm):
-                if bb_denorm[obj_indx][0] > obs_to_affine.shape[1]:
-                    bb_denorm[obj_indx][0] = obs_to_affine.shape[1]
-                if bb_denorm[obj_indx][1] > obs_to_affine.shape[0]:
-                    bb_denorm[obj_indx][1] = obs_to_affine.shape[0]
-                if bb_denorm[obj_indx][2] > obs_to_affine.shape[1]:
-                    bb_denorm[obj_indx][2] = obs_to_affine.shape[1]
-                if bb_denorm[obj_indx][3] > obs_to_affine.shape[0]:
-                    bb_denorm[obj_indx][3] = obs_to_affine.shape[0]
+            # clamp to the visible frame on BOTH ends - shift/rotate/scale can push a corner
+            # negative (previously unclamped: only the >max side was handled, which shift-only
+            # jitter could already hit near the top/left edge, and rotate/scale make it more
+            # likely) as well as beyond width/height.
+            img_w, img_h = obs_to_affine.shape[1], obs_to_affine.shape[0]
+            bb_denorm[:, 0] = np.clip(bb_denorm[:, 0], 0, img_w)
+            bb_denorm[:, 1] = np.clip(bb_denorm[:, 1], 0, img_h)
+            bb_denorm[:, 2] = np.clip(bb_denorm[:, 2], 0, img_w)
+            bb_denorm[:, 3] = np.clip(bb_denorm[:, 3], 0, img_h)
             bb = bb_denorm
         
         # ---- Augmentation ----#

@@ -12,13 +12,13 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 BASE_PATH=/mnt/beegfs/frosa/Multi-Task-LFD-Framework
 PROJECT_NAME=Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-COD-SKIP-0-5-10-15
 BATCH=60
-NUM_WORKERS=16
+NUM_WORKERS=32
 GPU_ID=0
 MODEL_PATH=/mnt/beegfs/frosa/checkpoint_save_folder/iros_finetune_v2/${PROJECT_NAME}-Batch${BATCH}/
 CONTROLLER_PATH=$BASE_PATH/repo/Multi-Task-LFD-Training-Framework/tasks/multi_task_robosuite_env/controllers/config/osc_pose.json
 
 for MODEL in ${MODEL_PATH}; do
-    for S in 45; do #81000 89100; do
+    for S in 93; do #81000 89100; do
         for TASK in pick_place; do
             for COUNT in 1; do
                 SAVE_PATH=${MODEL}/results_${TASK}/run_${COUNT}
@@ -33,6 +33,8 @@ for MODEL in ${MODEL_PATH}; do
                                             --save_path ${SAVE_PATH} \
                                             --save_files \
                                             --wandb_log
+                                            # --debug
+                                            #
 
             done
         done

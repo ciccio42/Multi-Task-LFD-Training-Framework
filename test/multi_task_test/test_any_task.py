@@ -579,18 +579,36 @@ if __name__ == '__main__':
         dataset = None
         if args.test_gt:
             from hydra.utils import instantiate
-            from torch.utils.data import DataLoader
-            from multiprocessing import cpu_count
-            from multi_task_il.datasets.utils import DIYBatchSampler, collate_by_task
             config.dataset_cfg.mode = "train"
-            config.EXPERT_DATA = "/raid/home/frosa_Loc/no_opt_dataset"
+            # Leave config.EXPERT_DATA as loaded from the checkpoint's own config.yaml
+            # (already the correct, current dataset root -- e.g. .../opt_dataset -- that
+            # this same checkpoint was actually trained against, with agent/demo subdirs
+            # named to match dataset_cfg.agent_name/demo_name). The previous hardcoded
+            # override pointed at .../no_opt_dataset, an older dataset copy whose demo-side
+            # directory is named "human_dataset" instead of "{demo_name}_{task_name}",
+            # which made every subtask's demo_files glob come up empty.
             dataset = instantiate(config.get('dataset_cfg', None))
-            pkl_file_dict = dataset.agent_files
+            # object_detection_inference's gt_file branch indexes gt_file[1]/[2]/[3] as
+            # (task_name, context_pkl_path, traj_pkl_path) -- build that tuple here by
+            # pairing each agent (trajectory-to-replay) file with a demo (context) file
+            # from the same (task_name, task_id) subtask, both already split to mode="train"
+            # by create_train_val_dict. Previously this just appended bare agent_files
+            # paths, which _proc/object_detection_inference then tried to index as a
+            # 4-tuple (gt_file[1], gt_file[2]...) -- indexing into single characters of a
+            # path string and crashing on pickle.load of a one-character "filename".
             pkl_file_list = []
-            for task_name in pkl_file_dict.keys():
-                for task_id in pkl_file_dict[task_name].keys():
-                    for pkl_file in pkl_file_dict[task_name][task_id]:
-                        pkl_file_list.append(pkl_file)
+            for task_name, task_dict in dataset.agent_files.items():
+                for task_id, agent_paths in task_dict.items():
+                    demo_paths = dataset.demo_files.get(task_name, {}).get(task_id, [])
+                    if not agent_paths or not demo_paths:
+                        continue
+                    # cap per-subtask samples at eval_each_task, same as the human_demo
+                    # branch does, so a full training-set replay doesn't explode into
+                    # thousands of rollouts by default.
+                    sampled_agent_paths = agent_paths[:args.eval_each_task]
+                    for i, agent_path in enumerate(sampled_agent_paths):
+                        demo_path = demo_paths[i % len(demo_paths)]
+                        pkl_file_list.append((task_id, task_name, demo_path, agent_path))
             args.N = len(pkl_file_list)
 
         # if human_demo, load the dataset and generate the seeds for demo files

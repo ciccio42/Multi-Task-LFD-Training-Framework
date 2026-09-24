@@ -66,6 +66,7 @@ class MultiTaskPairedKeypointDetectionDataset(Dataset):
             mix_sim_real=False,
             dagger=False,
             validation_on_skipped_task=False,
+            trajectory_manifest=None,
             enable_traj_cache=True,
             traj_cache_size=2048,
             enable_demo_cache=True,
@@ -142,7 +143,8 @@ class MultiTaskPairedKeypointDetectionDataset(Dataset):
                               allow_val_skip,
                               mix_sim_real=self._mix_sim_real,
                               mode=mode,
-                              validation_on_skipped_task=validation_on_skipped_task)
+                              validation_on_skipped_task=validation_on_skipped_task,
+                              trajectory_manifest=trajectory_manifest)
 
         self.pairs_count = count
         self.task_count = len(tasks_spec)

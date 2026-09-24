@@ -142,13 +142,25 @@ def collate_by_task(batch):
     return per_task_data
 
 
-def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_name: str = "panda", root_dir: str = "", task_spec=None, split: list = [0.9, 0.1], allow_train_skip: bool = False, allow_val_skip: bool = False, mix_variations: bool = False, mode='train', mix_sim_real=False, validation_on_skipped_task=False):
+def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_name: str = "panda", root_dir: str = "", task_spec=None, split: list = [0.9, 0.1], allow_train_skip: bool = False, allow_val_skip: bool = False, mix_variations: bool = False, mode='train', mix_sim_real=False, validation_on_skipped_task=False, trajectory_manifest=None):
 
     sample_indx = 0
     agent_file_cnt = 0
     demo_file_cnt = 0
     count = 0
     pair_cnt = 0
+
+    # Optional spawn-region-restricted (or otherwise trajectory-restricted) training subset: a
+    # manifest JSON of the form {"task_00": ["/abs/path/.../task_00/traj004.pkl", ...], ...} - the
+    # same format open_x_embodiment's TFDS builders (ur5e_pick_place.py) already write per
+    # spawn-region dataset variant to record which raw trajectories belong to that variant. Only
+    # basenames are used below (matched against whatever agent_dir this call resolves to), since
+    # the manifest's absolute paths may point at a different on-disk copy of the dataset than
+    # root_dir resolves to (both copies share identical traj000.pkl.. numbering per task).
+    manifest = None
+    if trajectory_manifest is not None:
+        with open(trajectory_manifest, 'r') as f:
+            manifest = json.load(f)
 
     for spec in task_spec:
         
@@ -202,7 +214,13 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
             task_id = 'task_{:02d}'.format(_id)
             task_dir = expanduser(join(agent_dir,  task_id, '*.pkl'))
             agent_files = sorted(glob.glob(task_dir))
-            
+
+            if manifest is not None:
+                allowed_basenames = {os.path.basename(p) for p in manifest.get(task_id, [])}
+                agent_files = [p for p in agent_files if os.path.basename(p) in allowed_basenames]
+                assert len(agent_files) != 0, "trajectory_manifest {!r} matched no files for task {}, subtask {} in dir {}".format(
+                    trajectory_manifest, name, _id, task_dir)
+
             if 'real' in task_dir and dataset_loader._mix_sim_real:
                 task_dir_sim = task_dir.replace(agent_name, agent_name.replace('real_new_', ''))
                 agent_files.extend(sorted(glob.glob(task_dir_sim)))
@@ -461,9 +479,10 @@ def make_demo(dataset, traj, task_name, human_demo=False):
                         break
                 n = start_moving + int((end_moving-start_moving)/2)
 
-            # convert from BGR to RGB and scale to 0-1 range
+            # camera_front_image is already stored as RGB (verified against
+            # raw human_rgb demo pkls) -- flipping here corrupts it into BGR.
             obs = copy.copy(
-                traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
+                traj.get(n)['obs']['camera_front_image'])
 
             processed = dataset.frame_aug(task_name,
                                           obs,
@@ -960,41 +979,41 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
             pass
         step_t = traj.get(t)
 
+        # This used to gate the flip on `human_demo`, which is derived from
+        # the DEMO file path ("human" in demo_file) -- nothing to do with
+        # the AGENT frame being loaded right here. Since every production
+        # config uses DEMO_NAME=human_rgb, human_demo was always True,
+        # collapsing every branch below to "flip" regardless of real vs sim.
+        # That happened to match real agent data (verified: raw
+        # real_eye_in_hand_ur5e_pick_place camera_front_image is BGR) but
+        # silently corrupted sim agent data (verified: raw ur5e_pick_place
+        # camera_front_image is already RGB). Gate on the agent's actual
+        # source (the same real/sim_crop split already used above) instead.
         if not getattr(dataset_loader, "real", False) or (getattr(dataset_loader, "real", False) and sim_crop):
-            if not human_demo and (dataset_loader.width != 224 and dataset_loader.height != 224):
-                image = copy.copy(
-                    step_t['obs']['camera_front_image'])#[:, :, ::-1]
-            elif not human_demo and (dataset_loader.width == 224 and dataset_loader.height == 224):
-                image = copy.copy(
-                    step_t['obs']['camera_front_image'])
-            else:
-                image = copy.copy(
-                    step_t['obs']['camera_front_image'][:,:,::-1])
+            # sim-sourced camera_front_image is already RGB
+            image = copy.copy(step_t['obs']['camera_front_image'])
         else:
             if step_t['obs'].get('camera_front_image_full_size', None) is not None:
                 image = copy.copy(
                 cv2.imdecode(step_t['obs']['camera_front_image_full_size'], cv2.IMREAD_COLOR))
             else:
-                if not human_demo and (dataset_loader.width != 224 and dataset_loader.height != 224):
-                    image = copy.copy(
-                        step_t['obs']['camera_front_image'])#[:,:,::-1])
-                elif not human_demo and (dataset_loader.width == 224 and dataset_loader.height == 224):
-                    image = copy.copy(
-                        step_t['obs']['camera_front_image'][:,:,::-1])
-                else:
-                    image = copy.copy(
-                        step_t['obs']['camera_front_image'][:,:,::-1])
+                # real-sourced camera_front_image is stored BGR (unlike the
+                # human demo videos, which are RGB -- see make_demo())
+                image = copy.copy(
+                    step_t['obs']['camera_front_image'][:,:,::-1])
 
         if DEBUG:
             Image.fromarray(np.asarray(image, dtype=np.uint8)).save("original_image.png")
 
         
-        wrist_image = step_t['obs'].get('eye_in_hand_image', None)[:, :, ::-1] if step_t['obs'].get('eye_in_hand_image', None) is not None else None
-        assert wrist_image is not None, "Wrist camera is not supported in the current version of the dataset loader. Please set 'eye_in_hand_image' to None in the dataset."
+        # Real eye_in_hand_image is stored BGR (needs the flip); sim's is
+        # already RGB (rendered by the same backend as camera_front_image,
+        # which needs no flip either) -- flipping it would corrupt colors.
+        wrist_image = step_t['obs'].get('eye_in_hand_image', None)
         if wrist_image is not None:
+            if getattr(dataset_loader, "real", False):
+                wrist_image = wrist_image[:, :, ::-1]
             wrist_image = copy.copy(wrist_image)
-            if getattr(dataset_loader, "real", False) and not sim_crop:
-                wrist_image = wrist_image
         if DEBUG:
             if wrist_image is not None:
                 Image.fromarray(np.asarray(wrist_image, dtype=np.uint8)).save("original_wrist_image.png")

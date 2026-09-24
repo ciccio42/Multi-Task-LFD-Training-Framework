@@ -14,6 +14,10 @@ import copy
 
 # from multi_task_il.utils import normalize_action
 from multi_task_il.datasets.utils import *
+# create_data_aug lives in command_encoder/utils.py, not datasets/utils.py - the wildcard import
+# above doesn't reach it, which otherwise makes __init__'s self.frame_aug = create_data_aug(self)
+# raise NameError unconditionally (pre-existing repo drift, unrelated to any dataset_cfg option).
+from multi_task_il.datasets.command_encoder.utils import create_data_aug
 # import robosuite.utils.transform_utils as T
 # from multiprocessing import Pool, cpu_count
 # import functools
@@ -64,6 +68,7 @@ class CondTargetObjDetectorDataset(Dataset):
             load_eef_point=False,
             mix_sim_real=False,
             dagger=False,
+            trajectory_manifest=None,
             ** params):
 
         self.task_crops = OrderedDict()
@@ -127,7 +132,8 @@ class CondTargetObjDetectorDataset(Dataset):
                               split,
                               allow_train_skip,
                               allow_val_skip,
-                              mode=mode)
+                              mode=mode,
+                              trajectory_manifest=trajectory_manifest)
 
         self.pairs_count = count
         self.task_count = len(tasks_spec)
@@ -143,6 +149,20 @@ class CondTargetObjDetectorDataset(Dataset):
 
         self.use_strong_augs = use_strong_augs
         self.data_augs = data_augs
+        self.frame_aug = create_data_aug(self)
+
+    def __getstate__(self):
+        # create_data_aug's frame_aug is a local closure (not a top-level function/class), so it
+        # can't be pickled as-is - DataLoader workers need this when num_workers>0 under torch's
+        # 'spawn' multiprocessing start method (forced by DDP's torch.multiprocessing.spawn for
+        # CUDA safety, so plain 'fork' semantics - no pickling needed - aren't available here).
+        # Drop it here and rebuild it per-worker in __setstate__ instead of forcing loader_workers=0.
+        state = self.__dict__.copy()
+        state.pop('frame_aug', None)
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
         self.frame_aug = create_data_aug(self)
 
     def __len__(self):

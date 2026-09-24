@@ -7,12 +7,14 @@
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=16
+#SBATCH --time=00:10:00
 #SBATCH --export=ALL
 
 export MUJOCO_PY_MUJOCO_PATH=/home/rsofnc000/.mujoco/mujoco210
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 export HYDRA_FULL_ERROR=1
+export DATA_AUG_DEBUG=true
 
 export HYDRA_FULL_ERROR=1
 echo $1
@@ -47,11 +49,11 @@ echo "Project Name is: $PROJECT_NAME"
 echo "Eye-in-Hand is: $EYE_IN_HAND"
 
 SAVE_FREQ=-1
-LOG_FREQ=10
+LOG_FREQ=1
 VAL_FREQ=-1
 DEVICE=0
 DEBUG=false
-WANDB_LOG=true
+WANDB_LOG=false
 ROLLOUT=false
 EPOCH=${MAX_EPOCHS}
 LOADER_WORKERS=16
@@ -333,7 +335,7 @@ elif [ "$TASK_NAME" == 'multi' ]; then
     PROJECT_NAME=${EXP_NAME}
 fi
 
-srun --output=training_${EXP_NAME}.txt --job-name=training_${TASK_NAME} python -u ../training/train_scripts/train_any.py \
+srun --output=smoke_test_rgb_bgr.txt --job-name=smoke_test_rgb_bgr python -u ../training/train_scripts/train_any.py \
     --config-path ${CONFIG_PATH} \
     --config-name ${CONFIG_NAME} \
     policy=${POLICY} \

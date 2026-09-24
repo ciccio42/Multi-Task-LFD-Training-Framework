@@ -1,0 +1,200 @@
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
+  launcher:
+    _target_: hydra._internal.core_plugins.basic_launcher.BasicLauncher
+  sweeper:
+    _target_: hydra._internal.core_plugins.basic_sweeper.BasicSweeper
+    max_batch_size: null
+    params: null
+  help:
+    app_name: ${hydra.job.name}
+    header: '${hydra.help.app_name} is powered by Hydra.
+
+      '
+    footer: 'Powered by Hydra (https://hydra.cc)
+
+      Use --hydra-help to view Hydra specific help
+
+      '
+    template: '${hydra.help.header}
+
+      == Configuration groups ==
+
+      Compose your configuration from those groups (group=option)
+
+
+      $APP_CONFIG_GROUPS
+
+
+      == Config ==
+
+      Override anything in the config (foo.bar=value)
+
+
+      $CONFIG
+
+
+      ${hydra.help.footer}
+
+      '
+  hydra_help:
+    template: 'Hydra (${hydra.runtime.version})
+
+      See https://hydra.cc for more info.
+
+
+      == Flags ==
+
+      $FLAGS_HELP
+
+
+      == Configuration groups ==
+
+      Compose your configuration from those groups (For example, append hydra/job_logging=disabled
+      to command line)
+
+
+      $HYDRA_CONFIG_GROUPS
+
+
+      Use ''--cfg hydra'' to Show the Hydra config.
+
+      '
+    hydra_help: ???
+  hydra_logging:
+    version: 1
+    formatters:
+      simple:
+        format: '[%(asctime)s][HYDRA] %(message)s'
+    handlers:
+      console:
+        class: logging.StreamHandler
+        formatter: simple
+        stream: ext://sys.stdout
+    root:
+      level: INFO
+      handlers:
+      - console
+    loggers:
+      logging_example:
+        level: DEBUG
+    disable_existing_loggers: false
+  job_logging:
+    version: 1
+    formatters:
+      simple:
+        format: '[%(asctime)s][%(name)s][%(levelname)s] - %(message)s'
+    handlers:
+      console:
+        class: logging.StreamHandler
+        formatter: simple
+        stream: ext://sys.stdout
+      file:
+        class: logging.FileHandler
+        formatter: simple
+        filename: ${hydra.runtime.output_dir}/${hydra.job.name}.log
+    root:
+      level: INFO
+      handlers:
+      - console
+      - file
+    disable_existing_loggers: false
+  env: {}
+  mode: RUN
+  searchpath: []
+  callbacks: {}
+  output_subdir: .hydra
+  overrides:
+    hydra:
+    - hydra.mode=RUN
+    task:
+    - policy=${cond_target_obj_detector}
+    - device=0
+    - task_names=pick_place
+    - set_same_n=7
+    - rollout=false
+    - exp_name=smoke_test
+    - save_freq=-1
+    - log_freq=20
+    - val_freq=-1
+    - print_freq=20
+    - bsize=80
+    - vsize=80
+    - epochs=1
+    - dataset_cfg.obs_T=7
+    - dataset_cfg.non_sequential=true
+    - dataset_cfg.compute_obj_distribution=false
+    - dataset_cfg.first_frames=true
+    - dataset_cfg.only_first_frame=false
+    - dataset_cfg.height=100
+    - dataset_cfg.width=180
+    - dataset_cfg.perform_augs=true
+    - +dataset_cfg.trajectory_manifest=/mnt/beegfs/frosa/Multi-Task-LFD-Framework/repo/open_x_embodiment/datasets/ur5e_pick_place_removed_spawn_regions/new_trj_removed_spawn_regions.json
+    - tasks_cfgs.pick_place.skip_ids=[]
+    - samplers.balancing_policy=0
+    - early_stopping_cfg.patience=10
+    - cond_target_obj_detector_cfg.height=100
+    - cond_target_obj_detector_cfg.width=180
+    - cond_target_obj_detector_cfg.dim_H=13
+    - cond_target_obj_detector_cfg.dim_W=23
+    - cond_target_obj_detector_cfg.n_channels=128
+    - cond_target_obj_detector_cfg.conv_drop_dim=4
+    - cond_target_obj_detector_cfg.n_classes=2
+    - project_name=smoke_test
+    - EXPERT_DATA=/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset
+    - save_path=/tmp/cod_smoke_test
+    - resume_path=none
+    - resume_step=-1
+    - optimizer=AdamW
+    - train_cfg.lr=0.00001
+    - train_cfg.weight_decay=5
+    - train_cfg.lr_schedule=ReduceLROnPlateau
+    - debug=false
+    - wandb_log=false
+    - resume=false
+    - loader_workers=2
+  job:
+    name: train_any
+    chdir: null
+    override_dirname: +dataset_cfg.trajectory_manifest=/mnt/beegfs/frosa/Multi-Task-LFD-Framework/repo/open_x_embodiment/datasets/ur5e_pick_place_removed_spawn_regions/new_trj_removed_spawn_regions.json,EXPERT_DATA=/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset,bsize=80,cond_target_obj_detector_cfg.conv_drop_dim=4,cond_target_obj_detector_cfg.dim_H=13,cond_target_obj_detector_cfg.dim_W=23,cond_target_obj_detector_cfg.height=100,cond_target_obj_detector_cfg.n_channels=128,cond_target_obj_detector_cfg.n_classes=2,cond_target_obj_detector_cfg.width=180,dataset_cfg.compute_obj_distribution=false,dataset_cfg.first_frames=true,dataset_cfg.height=100,dataset_cfg.non_sequential=true,dataset_cfg.obs_T=7,dataset_cfg.only_first_frame=false,dataset_cfg.perform_augs=true,dataset_cfg.width=180,debug=false,device=0,early_stopping_cfg.patience=10,epochs=1,exp_name=smoke_test,loader_workers=2,log_freq=20,optimizer=AdamW,policy=${cond_target_obj_detector},print_freq=20,project_name=smoke_test,resume=false,resume_path=none,resume_step=-1,rollout=false,samplers.balancing_policy=0,save_freq=-1,save_path=/tmp/cod_smoke_test,set_same_n=7,task_names=pick_place,tasks_cfgs.pick_place.skip_ids=[],train_cfg.lr=0.00001,train_cfg.lr_schedule=ReduceLROnPlateau,train_cfg.weight_decay=5,val_freq=-1,vsize=80,wandb_log=false
+    id: ???
+    num: ???
+    config_name: config_cond_target_obj_detector.yaml
+    env_set: {}
+    env_copy: []
+    config:
+      override_dirname:
+        kv_sep: '='
+        item_sep: ','
+        exclude_keys: []
+  runtime:
+    version: 1.3.2
+    version_base: '1.3'
+    cwd: /mnt/beegfs/frosa/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/training
+    config_sources:
+    - path: hydra.conf
+      schema: pkg
+      provider: hydra
+    - path: /mnt/beegfs/frosa/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/training/experiments
+      schema: file
+      provider: main
+    - path: ''
+      schema: structured
+      provider: schema
+    output_dir: /mnt/beegfs/frosa/Multi-Task-LFD-Framework/repo/Multi-Task-LFD-Training-Framework/training/outputs/2026-09-18/16-45-07
+    choices:
+      tasks_cfgs: 7_tasks
+      hydra/env: default
+      hydra/callbacks: null
+      hydra/job_logging: default
+      hydra/hydra_logging: default
+      hydra/hydra_help: default
+      hydra/help: default
+      hydra/sweeper: basic
+      hydra/launcher: basic
+      hydra/output: default
+  verbose: false

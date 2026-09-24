@@ -10,7 +10,11 @@ import cv2
 from multi_task_il.datasets.utils import adjust_bb
 from PIL import Image
 import torch
-DEBUG = False
+import os
+# Env-driven so a smoke test can dump augmented_debug.png / agent_augmented.png
+# without editing this file (and without affecting already-running training
+# processes, which have this constant baked in at import time).
+DEBUG = os.environ.get('DATA_AUG_DEBUG', 'false').lower() == 'true'
 
 JITTER_FACTORS = {'brightness': 0.4,
                   'contrast': 0.4, 'saturation': 0.4, 'hue': 0.1}
@@ -202,31 +206,44 @@ class DataAugmentation:
         if agent:
             augmented = self._apply_random_black_patches(augmented)
 
-        if DEBUG:
-            Image.fromarray(np.asarray(np.moveaxis(augmented.numpy()*255, 0, -1), dtype=np.uint8)).save("augmented_debug.png")
-
-        # obs_pil = np.moveaxis(augmented.numpy()*255, 0, -1).astype(np.uint8)
-        # obs_pil = Image.fromarray(obs_pil)
-        # obs_pil.save(f"agent_augmented.png")
-        if DEBUG and bb is not None:
-            # Convert augmented tensor to numpy image
-            obs_pil = np.ascontiguousarray(np.moveaxis(augmented.numpy()*255, 0, -1).astype(np.uint8))
-
-            # Draw each bounding box
-            for single_bb in bb:
-                x1, y1, x2, y2 = map(int, single_bb)
-                obs_pil = cv2.rectangle(obs_pil, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=2)
-
-            # Save the image for debugging
-            obs_pil = Image.fromarray(obs_pil)
-            obs_pil.save(f"agent_augmented.png")
-
         # ---- Normalization ----
         if self.normalize_flag:
             augmented = self.normalize(augmented)
-        
+
+        # Tag by caller so concurrent dataloader workers writing agent-front,
+        # agent-wrist and demo frames don't clobber the same filename.
+        if wrist_crop:
+            _debug_tag = "wrist"
+        elif agent:
+            _debug_tag = "agent_front"
+        else:
+            _debug_tag = "demo"
+
+        if DEBUG:
+            # Saved at the very end of this function, i.e. exactly what gets
+            # returned to the model. Undo mean/std normalization first (if
+            # applied) so the dump is still a viewable 0-255 RGB image.
+            vis = augmented
+            if self.normalize_flag:
+                mean = torch.tensor(self.normalize.mean).view(3, 1, 1)
+                std = torch.tensor(self.normalize.std).view(3, 1, 1)
+                vis = vis * std + mean
+            vis_np = np.asarray(np.clip(np.moveaxis(vis.numpy() * 255, 0, -1), 0, 255), dtype=np.uint8)
+
+            Image.fromarray(vis_np).save(f"augmented_debug_{_debug_tag}.png")
+
+            if bb is not None:
+                obs_pil = np.ascontiguousarray(vis_np)
+                # Draw each bounding box
+                for single_bb in bb:
+                    x1, y1, x2, y2 = map(int, single_bb)
+                    obs_pil = cv2.rectangle(obs_pil, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=2)
+
+                # Save the image for debugging
+                Image.fromarray(obs_pil).save(f"agent_augmented_{_debug_tag}.png")
+
         if bb is not None:
-            return augmented, bb, class_frame  
+            return augmented, bb, class_frame
         else: 
             return augmented
         

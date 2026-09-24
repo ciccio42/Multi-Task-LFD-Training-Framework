@@ -5,15 +5,24 @@ import cv2
 import os
 import glob
 
-# In-place overwrite: the subsampled trajectories are written back to the
-# same dataset directory they are read from.
-DATASET_PATH = '/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset/pick_place/real_eye_in_hand_ur5e_pick_place'
-OUT_PATH = DATASET_PATH
+# In-place overwrite by default: the subsampled trajectories are written
+# back to the same dataset directory they are read from. Override via env
+# vars (e.g. to re-subsample from a pre-existing raw backup into the real
+# target dir) without changing the normal single-pass behavior.
+DATASET_PATH = os.environ.get(
+    'SUB_SAMPLE_DATASET_PATH',
+    '/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset/pick_place/real_eye_in_hand_ur5e_pick_place')
+OUT_PATH = os.environ.get('SUB_SAMPLE_OUT_PATH', DATASET_PATH)
 
 # Directory where the debug visualizations (camera_front_image +
 # eye_in_hand_image side by side, annotated with the action) are written.
-# Kept outside of DATASET_PATH so it never gets picked up as trajectory data.
-VIS_PATH = DATASET_PATH.rstrip('/') + '_subsample_vis'
+# Kept outside of OUT_PATH so it never gets picked up as trajectory data.
+# Derived from OUT_PATH (not DATASET_PATH): the images describe the
+# subsampled result, so they belong alongside where it's actually written
+# -- otherwise re-subsampling from a different input path (e.g. a raw
+# backup) than the output silently leaves the vis images under the input
+# path's name instead of the dataset they actually document.
+VIS_PATH = OUT_PATH.rstrip('/') + '_subsample_vis'
 
 # Minimum end-effector displacement (in meters) required between two
 # successively kept frames.
@@ -111,6 +120,24 @@ if __name__ == '__main__':
                         previous_pos = current_pos
                         previous_t = t
                         previous_gripper_state = gripper_state
+
+            # The loop above only keeps a frame when the movement/gripper
+            # condition fires *during* iteration, so the true final frame
+            # (commonly the post-release, gripper-open, settling state) is
+            # silently dropped whenever nothing triggers a keep exactly at
+            # the trajectory's end -- the last kept sample then pairs a
+            # stale pre-transition observation with the final action.
+            # Always flush the real last frame so it's never lost.
+            last_t = len(traj) - 1
+            if previous_t != last_t:
+                new_traj.append(traj[last_t]['obs'],
+                                 traj[last_t]['reward'],
+                                 traj[last_t]['done'],
+                                 traj[last_t]['info'],
+                                 traj[last_t]['action'])
+                _save_vis_image(traj[last_t]['obs'], traj[last_t]['action'],
+                                 task_name, traj_name, step_idx)
+                step_idx += 1
 
             if len(new_traj) < 10:
                 print(f'\t\tWarning: Trajectory {traj_name} is too short ({len(new_traj)} steps)')

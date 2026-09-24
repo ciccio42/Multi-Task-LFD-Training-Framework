@@ -773,7 +773,27 @@ class VideoImitation(nn.Module):
             target_obj_detector_path,
             f"model_save-{target_obj_detector_step}.pt"),
             map_location=torch.device(gpu_id))
-        self._object_detector.load_state_dict(weights)
+        # Plain strict load breaks on any older detector checkpoint saved
+        # before an architecture change (e.g. a new head, a different
+        # anchor count): the checkpoint's own config.yaml only reproduces
+        # the shapes it was trained with, while the current model class
+        # may unconditionally construct additional layers (e.g. the
+        # second-stage regression head added later). Drop only the
+        # tensors that don't match by name/shape so the rest still
+        # warm-starts, matching the same tolerant-load pattern used for
+        # resuming the main policy checkpoint in train_utils.py.
+        own_state = self._object_detector.state_dict()
+        shape_mismatch = [k for k in weights.keys()
+                          if k in own_state and weights[k].shape != own_state[k].shape]
+        if shape_mismatch:
+            print('Skipping {} target-obj-detector tensor(s) with a shape '
+                  'mismatch (will be randomly initialized instead): {}'.format(
+                      len(shape_mismatch), shape_mismatch))
+            for k in shape_mismatch:
+                weights.pop(k)
+        missing_keys, unexpected_keys = self._object_detector.load_state_dict(weights, strict=False)
+        if missing_keys:
+            print('Target-obj-detector missing key(s) (randomly initialized): {}'.format(missing_keys))
         # self._object_detector.to("cuda:0")
         self._object_detector.eval()
 

@@ -858,23 +858,28 @@ def create_data_aug(dataset_loader=object):
                     bb[obj_indx] = np.array([[x1_new, y1, x2_new, y2]])
         return obs, bb
 
-    def frame_aug(task_name, obs, second=False, bb=None, class_frame=None, perform_aug=True, frame_number=-1, perform_scale_resize=True, agent=False, sim_crop=False):
+    def frame_aug(task_name, obs, second=False, bb=None, class_frame=None, perform_aug=True, frame_number=-1, perform_scale_resize=True, agent=False, sim_crop=False, wrist_crop=False):
 
         if perform_scale_resize:
             img_height, img_width = obs.shape[:2]
             """applies to every timestep's RGB obs['camera_front_image']"""
-            if len(getattr(dataset_loader, "demo_crop", OrderedDict())) != 0 and not agent:
-                crop_params = dataset_loader.demo_crop.get(
-                    task_name, [0, 0, 0, 0])
-            if len(getattr(dataset_loader, "agent_crop", OrderedDict())) != 0 and agent and not sim_crop:
-                crop_params = dataset_loader.agent_crop.get(
-                    task_name, [0, 0, 0, 0])
-            if len(getattr(dataset_loader, "agent_sim_crop", OrderedDict())) != 0 and agent and sim_crop:
-                crop_params = dataset_loader.agent_sim_crop.get(
-                    task_name, [0, 0, 0, 0])
-            if len(getattr(dataset_loader, "task_crops", OrderedDict())) != 0:
-                crop_params = dataset_loader.task_crops.get(
-                    task_name, [0, 0, 0, 0])
+            if wrist_crop:
+                # no crop calibration exists for the wrist/eye_in_hand camera (see create_sample's
+                # own comment, datasets/utils.py) - skip cropping, still resize+aug+normalize below.
+                crop_params = [0, 0, 0, 0]
+            else:
+                if len(getattr(dataset_loader, "demo_crop", OrderedDict())) != 0 and not agent:
+                    crop_params = dataset_loader.demo_crop.get(
+                        task_name, [0, 0, 0, 0])
+                if len(getattr(dataset_loader, "agent_crop", OrderedDict())) != 0 and agent and not sim_crop:
+                    crop_params = dataset_loader.agent_crop.get(
+                        task_name, [0, 0, 0, 0])
+                if len(getattr(dataset_loader, "agent_sim_crop", OrderedDict())) != 0 and agent and sim_crop:
+                    crop_params = dataset_loader.agent_sim_crop.get(
+                        task_name, [0, 0, 0, 0])
+                if len(getattr(dataset_loader, "task_crops", OrderedDict())) != 0:
+                    crop_params = dataset_loader.task_crops.get(
+                        task_name, [0, 0, 0, 0])
 
             top, left = crop_params[0], crop_params[2]
             img_height, img_width = obs.shape[0], obs.shape[1]
@@ -919,7 +924,10 @@ def create_data_aug(dataset_loader=object):
                     bb[obj_indx] = np.array([[x1, y1, x2, y2]])
 
         # ---- Affine Transformation ----#
-        if dataset_loader.data_augs.get('affine', False) and agent:
+        # bb is None for the wrist/eye_in_hand camera call (wrist_crop=True, datasets/utils.py's
+        # create_sample - no bounding boxes apply to that view), so affine (which remaps bboxes)
+        # must be skipped there rather than crash on normalize_bboxes(None, ...).
+        if dataset_loader.data_augs.get('affine', False) and agent and bb is not None:
             obs_to_affine = np.array(np.moveaxis(
                 obs.numpy()*255, 0, -1), dtype=np.uint8)
             norm_bb = A.augmentations.bbox_utils.normalize_bboxes(

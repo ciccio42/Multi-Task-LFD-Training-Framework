@@ -949,7 +949,17 @@ def get_gt_bb(env=None, traj=None, obs=None, task_name=None, t=0, real=True, pla
                 place_name = ENV_OBJECTS[task_name]["peg_names"]
             if 'pick_place' == task_name:
                 agent_target_place_id = traj.get(t)['obs']['target-box-id']
-                place_name = ENV_OBJECTS[task_name]["bin_names"]
+                if env is None:
+                    # Replaying a recorded trajectory loaded from disk (gt_file/--test_gt
+                    # path) rather than a live env: the per-step obj_bb dict logged at
+                    # collection time keys bins as single_bin_0..single_bin_3 (0-indexed),
+                    # not TASK_MAP's bin_box_1..bin_box_4 (which only matches obj_bb built
+                    # fresh by the live robosuite env in new_pp.py). Confirmed by loading a
+                    # real training pkl directly and inspecting obs['obj_bb']['camera_front'].
+                    place_name = ['single_bin_0', 'single_bin_1',
+                                 'single_bin_2', 'single_bin_3']
+                else:
+                    place_name = ENV_OBJECTS[task_name]["bin_names"]
             if 'button' == task_name:
                 agent_target_place_id = f"{traj.get(t)['obs']['target-object']}_final"
                 place_name = ENV_OBJECTS[task_name]["place_names"]

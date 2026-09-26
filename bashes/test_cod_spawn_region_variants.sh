@@ -10,6 +10,12 @@
 #   epoch:   the model_save-<epoch>.pt to load
 #   test_gt: pass the literal string "test_gt" as a 3rd arg to replay real training-split
 #            trajectories (dataset_cfg.mode=train) instead of random env rollouts.
+#
+# test_any_task.py itself now saves one mp4 per trajectory alongside its traj{n}.pkl/
+# .json (via save_rollout_video(), reusing utils/create_video_from_pkl.py's write_frame),
+# with both the model's predicted box(es) (green=target, yellow=place) and ground truth
+# (blue) drawn on camera_front -- crop params come from the checkpoint's own config
+# (tasks_cfgs.pick_place.crop), not a hardcoded constant.
 
 #SBATCH -A did_robot_learning_359
 #SBATCH --partition=gpuq
@@ -42,7 +48,9 @@ else
     SAVE_PATH=${MODEL_PATH}/results_pick_place/smoke_test
 fi
 
-/mnt/beegfs/frosa/.conda/envs/multi_task_lfd_cuda_12_8/bin/python -u \
+PY=/mnt/beegfs/frosa/.conda/envs/multi_task_lfd_cuda_12_8/bin/python
+
+$PY -u \
     $BASE_PATH/repo/Multi-Task-LFD-Training-Framework/test/multi_task_test/test_any_task.py \
     "$MODEL_PATH" \
     --env pick_place \

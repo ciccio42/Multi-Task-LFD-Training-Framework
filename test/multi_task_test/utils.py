@@ -1383,6 +1383,7 @@ def object_detection_inference(model, env, context, gpu_id, variation_id, img_fo
             bb_t, gt_t = get_gt_bb(traj=traj,
                                    obs=obs,
                                    task_name=task_name,
+                                   env=env,
                                    real=real,
                                    place=place_bb_flag,
                                    expert_traj=expert_traj,
@@ -1531,7 +1532,12 @@ def object_detection_inference(model, env, context, gpu_id, variation_id, img_fo
         fn_array = list()
         iou_array = list()
         n_steps = len(gt_traj)
-        for t in range(len(gt_traj)):
+        # t=0 is the reset frame recorded before any bbox annotation is computed at
+        # collection time (verified: obs['obj_bb']['camera_front'] at t=0 has only the
+        # bare object entries, none of the single_bin_N keys that appear from t=1 on) --
+        # skip it rather than crashing on the missing key, matching the live-rollout path
+        # where obs['predicted_bb']/obs['gt_bb'] are also None at the initial reset step.
+        for t in range(1, len(gt_traj)):
             if True:  # t == 1:
                 # agent_obs = gt_traj[t]['obs']['camera_front_image']
                 agent_obs = gt_traj[t]['obs']['camera_front_image'][:, :, ::-1]

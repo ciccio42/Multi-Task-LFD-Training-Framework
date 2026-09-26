@@ -27,6 +27,10 @@ from multi_task_test.utils import *
 from multi_task_test import *
 import re
 from colorama import Back
+import sys
+sys.path.insert(0, "/mnt/beegfs/frosa/Multi-Task-LFD-Framework/utils")
+from create_video_from_pkl import (open_h264_rgb_writer, close_video_writer,
+                                   write_frame as _write_video_frame)
 
 
 def seed_everything(seed=42):
@@ -252,6 +256,58 @@ def rollout_imitation(model, config, ctr,
         return traj, info
 
 
+def _context_strip(context):
+    """context: the same [1, T, C, H, W] (or [T, C, H, W]) float 0-1 tensor saved as
+    demo{n}.pkl -- the T conditioning frames the model was actually shown, already
+    cropped/resized by build_tvf_formatter_obj_detector (no Normalize applied, see that
+    function -- it's commented out -- so *255 is the correct, only denormalization
+    needed). Stacks the T frames vertically into one uint8 RGB strip for the video's
+    left panel, so the conditioning context is visible alongside the rollout it drove."""
+    if context is None:
+        return None
+    if hasattr(context, 'detach'):
+        context = context.detach().cpu().numpy()
+    if context.ndim == 5:
+        context = context[0]
+    frames = []
+    for i in range(context.shape[0]):
+        img = np.moveaxis(context[i], 0, -1)
+        img = np.clip(img * 255, 0, 255).astype(np.uint8)
+        frames.append(np.ascontiguousarray(img))
+    max_w = max(f.shape[1] for f in frames)
+    frames = [np.pad(f, ((0, 0), (0, max_w - f.shape[1]), (0, 0))) if f.shape[1] < max_w
+             else f for f in frames]
+    return np.concatenate(frames, axis=0)
+
+
+def save_rollout_video(rollout, video_path, config, env_name, context=None, camera_name='camera_front'):
+    """Renders one mp4 straight from a finished rollout, drawing predicted (green=target,
+    yellow=place) and ground-truth (blue) boxes per frame via create_video_from_pkl.py's
+    write_frame -- reused as-is rather than duplicated so both video paths (this direct one
+    and utils/stage_rollouts_for_video.py's post-hoc one) stay in sync. crop_params come
+    from this eval's own config (tasks_cfgs[env_name].crop), matching whatever the
+    checkpoint was actually trained with, rather than a hardcoded constant. When context
+    is given, prepends a left panel of the conditioning demo frames the model was shown."""
+    task_spec = config.get('tasks_cfgs', {}).get(env_name, {})
+    crop_params = task_spec.get('crop', [0, 30, 120, 120])
+    panel = _context_strip(context)
+
+    writer = None
+    for t in range(len(rollout)):
+        obs_t = rollout[t]['obs']
+        if f'{camera_name}_image' not in obs_t:
+            continue
+        if writer is None:
+            img_h, img_w = obs_t[f'{camera_name}_image'].shape[:2]
+            panel_w = 0
+            if panel is not None:
+                panel_w = max(1, int(panel.shape[1] * img_h / panel.shape[0]))
+            writer = open_h264_rgb_writer(video_path, img_w + panel_w, img_h, 20)
+        _write_video_frame(writer, None, camera_name, obs_t, None, None,
+                           crop_params=crop_params, left_panel=panel)
+    close_video_writer(writer)
+
+
 def _proc(model, config, results_dir, heights, widths, size, shape, color, env_name, baseline, variation, max_T, controller_path, model_name, gpu_id, save, gt_bb, sub_action, gt_action, real, place, seed, n, gt_file, demo_file=None):
     
     json_name = results_dir + '/traj{}.json'.format(n)
@@ -259,8 +315,16 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
     if os.path.exists(json_name) and os.path.exists(pkl_name):
         f = open(json_name)
         task_success_flags = json.load(f)
-        print("Using previous results at {}. Loaded eval traj #{}, task#{}, reached? {} picked? {} success? {} ".format(
-            json_name, n, task_success_flags['variation_id'], task_success_flags['reached'], task_success_flags['picked'], task_success_flags['success']))
+        # cond_target_obj_detector's gt_file/--test_gt replay path (object_detection_inference
+        # in utils.py) only ever returns avg_iou/avg_tp/avg_fp/avg_fn -- no variation_id/
+        # reached/picked/success, unlike the live-env rollout path's info dict. Print
+        # whichever keys are actually present instead of assuming the live-env shape.
+        if 'variation_id' in task_success_flags:
+            print("Using previous results at {}. Loaded eval traj #{}, task#{}, reached? {} picked? {} success? {} ".format(
+                json_name, n, task_success_flags['variation_id'], task_success_flags['reached'], task_success_flags['picked'], task_success_flags['success']))
+        else:
+            print("Using previous results at {}. Loaded eval traj #{}: {}".format(
+                json_name, n, task_success_flags))
     else:
         if variation is not None:
             variation_id = variation[n % len(variation)]
@@ -341,6 +405,8 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                         res_dict[k] = v
                 json.dump(res_dict, open(
                     results_dir+'/traj{}.json'.format(n), 'w'))
+                save_rollout_video(rollout, results_dir+'/traj{}_camera_front_rgb.mp4'.format(n),
+                                   config, env_name, context=context)
         else:
             rollout, task_success_flags = return_rollout
             if save:

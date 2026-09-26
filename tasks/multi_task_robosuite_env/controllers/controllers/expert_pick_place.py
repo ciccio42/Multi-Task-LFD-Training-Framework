@@ -253,16 +253,22 @@ class PickPlaceController:
 def get_expert_trajectory(env_type, controller_type, renderer=False, camera_obs=True, task=None, ret_env=False, seed=None, env_seed=None, gpu_id=0, render_camera="frontview", object_set=1, **kwargs):
     assert 'gpu' in str(
         mujoco_py.cymj), 'Make sure to render with GPU to make eval faster'
-    # reassign the gpu id
+    # reassign the gpu id -- spreads rendering onto a different physical GPU than the
+    # model's compute GPU, but only makes sense (and only has device-file permissions)
+    # when more than one GPU is actually visible to this process (e.g. a full 4-GPU dev
+    # box). On a single-GPU SLURM allocation (--gres=gpu:1) there is only device 0, so
+    # the remap must be a no-op or MjRenderContextOffscreen fails with a permission error
+    # on a /dev/dri render node this job was never granted.
     visible_ids = os.environ['CUDA_VISIBLE_DEVICES'].split(',')
-    if gpu_id == 3:
-        gpu_id = 0
-    elif gpu_id == 0:
-        gpu_id = 3  # 1
-    elif gpu_id == 1:
-        gpu_id = 2
-    elif gpu_id == 2:
-        gpu_id = 1  # 3
+    if len(visible_ids) > 1:
+        if gpu_id == 3:
+            gpu_id = 0
+        elif gpu_id == 0:
+            gpu_id = 3  # 1
+        elif gpu_id == 1:
+            gpu_id = 2
+        elif gpu_id == 2:
+            gpu_id = 1  # 3
     print(f"GPU-ID {gpu_id}")
     seed = seed if seed is not None else random.getrandbits(32)
     env_seed = seed if env_seed is None else env_seed

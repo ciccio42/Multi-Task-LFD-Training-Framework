@@ -1,0 +1,35 @@
+import torch
+from functools import partial
+from multi_task_il.models.command_encoder.muse.architecture import MUSE
+
+import json
+
+
+def get_model(path_to_pt_model, path_to_tf_model):
+    from multi_task_il.models.command_encoder.muse.tokenizer import get_tokenizer, tokenize
+
+    print(f"get tokenizer...")
+    tokenizer = get_tokenizer(path_to_tf_model)
+    tokenize = partial(tokenize, tokenizer=tokenizer)
+
+    model_torch = MUSE(
+        num_embeddings=128010,
+        embedding_dim=512,
+        d_model=512,
+        num_heads=8,
+    )
+    model_torch.load_state_dict(
+        torch.load(path_to_pt_model)
+    )
+
+    return model_torch, tokenize
+
+
+if __name__ == '__main__':
+
+    model_torch, tokenize = get_model()
+
+    sentence = "Hello, world!"
+    res = model_torch(tokenize(sentence))
+
+    print(f"res: {res.shape}")

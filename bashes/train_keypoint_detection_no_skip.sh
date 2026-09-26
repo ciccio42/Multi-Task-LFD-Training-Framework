@@ -1,23 +1,20 @@
 #!/bin/bash
 
-# export MUJOCO_PY_MUJOCO_PATH=/user/frosa/.mujoco/mujoco210
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/frosa/.mujoco/mujoco210/bin
-# # export MUJOCO_PY_MUJOCO_PATH="/home/frosa_Loc/.mujoco/mujoco210"
-# # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/frosa_Loc/.mujoco/mujoco210/bin
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/frosa/miniconda3/envs/multi_task_lfd/lib
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
-# export CUDA_VISIBLE_DEVICES=0
-# export HYDRA_FULL_ERROR=1
-
+#SBATCH -A did_robot_learning_359
 #SBATCH --partition=gpuq
-#SBATCH --gres=gpu:1   # Request 1 GPU
+#SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=32
+#SBATCH --export=ALL
+
+export MUJOCO_PY_MUJOCO_PATH="/home/rsofnc000/.mujoco/mujoco210"
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 
 export HYDRA_FULL_ERROR=1
-EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder
+EXPERT_DATA=/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset
+SAVE_PATH=/mnt/beegfs/frosa/checkpoint_save_folder/checkpoint_save_folder/iros
 POLICY='${cond_target_obj_detector}'
 DATASET_TARGET=multi_task_il.datasets.multi_task_keypoint_dataset.MultiTaskPairedKeypointDetectionDataset
 
@@ -30,10 +27,25 @@ VAL_FREQ=-1
 PRINT_FREQ=20
 DEVICE=0
 DEBUG=false
-WANDB_LOG=false
+WANDB_LOG=true
 
 EPOCH=90 # start from 16
 BSIZE=80 #16 #32
+
+TASK_NAME="${1}"
+RESUME_PATH="${2}"
+RESUME_STEP="${3}"
+FINETUNE="${4:-false}"
+RESUME="${5:-false}"
+DEMO_NAME="${6:-panda}" # [human_rgb or panda]
+SAVE_PATH="${7:-/home/rsofnc000/checkpoint_save_folder/100_180_new}"
+echo "Task Name is: $TASK_NAME"
+echo "Resume Path is: $RESUME_PATH"
+echo "Resume Step is: $RESUME_STEP"
+echo "Finetune is: $FINETUNE"
+echo "Resume is: $RESUME"
+echo "Demo Name is: $DEMO_NAME"
+echo "Save Path is: $SAVE_PATH"
 
 COMPUTE_OBJ_DISTRIBUTION=false
 CONFIG_PATH=../experiments/
@@ -67,9 +79,6 @@ if [ "$TASK_NAME" == 'nut_assembly' ]; then
     EXP_NAME=1Task-${TASK_str}-CTOD-KP_MO_0_4_8
     PROJECT_NAME=${EXP_NAME}
     SET_SAME_N=7
-    RESUME_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder/${EXP_NAME}-Batch74/
-    RESUME_STEP=72675
-    RESUME=false
 elif [ "$TASK_NAME" == 'button' ] || [ "$TASK_NAME" == 'press_button_close_after_reaching' ]; then
     echo "BUTTON"
     TASK_str="press_button_close_after_reaching"
@@ -85,18 +94,12 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
     EXP_NAME=1Task-${TASK_str}-CTOD-KP_NO_0_3_5
     PROJECT_NAME=${EXP_NAME}
     SET_SAME_N=7
-    RESUME_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder/${EXP_NAME}-Batch74/
-    RESUME_STEP=72675
-    RESUME=false
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     TASK_str="pick_place"
-    EXP_NAME=1Task-${TASK_str}-CTOD-KP_NO_0_5_10_15
+    EXP_NAME=1Task-${TASK_str}-Simulated-Agent-Human-Demonstration-UR5e-Agent-COD
     PROJECT_NAME=${EXP_NAME}
-    SET_SAME_N=7
-    RESUME_PATH=/home/rsofnc000/checkpoint_save_folder/1Task-pick_place-CTOD-KP_NO_0_5_10_15-Batch84
-    RESUME_STEP=10410
-    RESUME=true
+    SET_SAME_N=5
 elif [ "$TASK_NAME" == 'multi' ]; then
     echo "Multi Task"
     TASK_str=["pick_place","nut_assembly","stack_block","press_button_close_after_reaching"]
@@ -108,7 +111,7 @@ elif [ "$TASK_NAME" == 'multi' ]; then
     RESUME=false
 fi
 
-srun --output=training_${TASK_NAME}.txt --job-name=training_${TASK_NAME} -w "gnode03" python -u ../training/train_scripts/train_any.py \
+srun --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u ../training/train_scripts/train_any.py \
     --config-path ${CONFIG_PATH} \
     --config-name ${CONFIG_NAME} \
     policy=${POLICY} \

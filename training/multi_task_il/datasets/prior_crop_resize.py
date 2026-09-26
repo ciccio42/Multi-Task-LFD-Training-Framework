@@ -18,6 +18,7 @@ import glob
 from torchvision.transforms import ToTensor
 from torchvision.transforms.functional import resized_crop
 import yaml
+from PIL import Image
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 logger = logging.getLogger("BB-Creator")
@@ -66,7 +67,7 @@ def prior_crop_resize(task_name, task_spec, pkl_file_path,):
         for camera_name in ["camera_front"]:
             # take current image
             img = traj[t].get('obs').get(f'{camera_name}_img')[:, :, ::-1]
-            cv2.imwrite("original.png", img)
+            Image.fromarray(np.asarray(img, dtype=np.uint8)).save("original.png")
             cv2.waitKey(0)
             cv2.destroyAllWindows()
 
@@ -84,7 +85,7 @@ def prior_crop_resize(task_name, task_spec, pkl_file_path,):
             # start = time.time()
             obs = resized_crop(obs, top=top, left=left, height=box_h,
                                width=box_w, size=(100, 180))
-            cv2.imwrite("cropped.png", obs)
+            Image.fromarray(np.asarray(np.moveaxis(obs.numpy()*255, 0, -1), dtype=np.uint8)).save("cropped.png")
 
 
 if __name__ == '__main__':

@@ -1,45 +1,65 @@
 #!/bin/bash
-# export MUJOCO_PY_MUJOCO_PATH=/user/frosa/.mujoco/mujoco210
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/frosa/.mujoco/mujoco210/bin
-# export MUJOCO_PY_MUJOCO_PATH="/home/frosa_Loc/.mujoco/mujoco210"
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/frosa_Loc/.mujoco/mujoco210/bin
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/frosa/miniconda3/envs/multi_task_lfd/lib
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
-# export CUDA_VISIBLE_DEVICES=0
-# export HYDRA_FULL_ERROR=1
 
+#SBATCH -A hpc_default
 #SBATCH --partition=gpuq
-#SBATCH --gres=gpu:1   # Request 1 GPU
+#SBATCH -w gnode01
+#SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=32
+#SBATCH --export=ALL
 
+export MUJOCO_PY_MUJOCO_PATH=/home/rsofnc000/.mujoco/mujoco210
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 export HYDRA_FULL_ERROR=1
+
 EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder
+
 POLICY='${cond_target_obj_detector}'
-DATASET_TARGET=multi_task_il.datasets.multi_task_cond_target_obj_dataset.CondTargetObjDetectorDataset
+DATASET_TARGET=multi_task_il.datasets.multi_task_target_obj_datasets.MultiTaskPairedKeypointDetectionDataset
 TASKS_CONFIG=7_tasks_real
 AGENT_NAME=real_new_ur5e
 
-echo $1
-TASK_NAME="$1"
+TASK_NAME="${1}"
+RESUME_FOLDER="${2}"
+RESUME_STEP="${3}"
+FINETUNE="${4:-false}"
+RESUME="${5:-false}"
+DEMO_NAME="${6:-panda}" # [human_rgb or panda]
+SAVE_PATH="${7:-/home/rsofnc000/checkpoint_save_folder/100_180_new}"
+echo "Task Name is: $TASK_NAME"
+echo "Resume Folder is: $RESUME_FOLDER"
+echo "Resume Step is: $RESUME_STEP"
+echo "Finetune is: $FINETUNE"
+echo "Resume is: $RESUME"
+echo "Demo Name is: $DEMO_NAME"
+echo "Save Path is: $SAVE_PATH"
+
+# Set offset_x and offset_y based on DEMO_NAME
+if [ "$DEMO_NAME" = "human_rgb" ]; then
+    OFFSET_X=2.0
+    OFFSET_Y=1.5
+elif [ "$DEMO_NAME" = "panda" ]; then
+    OFFSET_X=1.5
+    OFFSET_Y=1.5
+fi
 
 SAVE_FREQ=-1
-LOG_FREQ=20
+LOG_FREQ=10
 VAL_FREQ=-1
-PRINT_FREQ=20
-DEVICE=0
+PRINT_FREQ=$LOG_FREQ
+DEVICE=-1
 DEBUG=false
 WANDB_LOG=true
 
 EPOCH=90 # start from 16
-BSIZE=80 #16 #32
+BSIZE=32 #16 #32
 
 COMPUTE_OBJ_DISTRIBUTION=false
 CONFIG_PATH=../experiments/
 CONFIG_NAME=config_cond_target_obj_detector_real.yaml
-LOADER_WORKERS=8
+LOADER_WORKERS=16
 BALANCING_POLICY=0
 OBS_T=7
 
@@ -53,19 +73,23 @@ ONLY_FIRST_FRAMES=false
 ROLLOUT=false
 PERFORM_AUGS=true
 NON_SEQUENTIAL=true
+NORMALIZE_IMG=false
 
 DROP_DIM=4      # 2    # 3
 OUT_FEATURE=128 # 512 # 256
-DIM_H=13        #14        # 7 (100 DROP_DIM 3)        #8         # 4         # 7
-DIM_W=23        #14        # 12 (180 DROP_DIM 3)        #8         # 6         # 12
+# use (13,23) when image is 100,180
+# use (28,28) when image is 224,224
+DIM_H=13
+DIM_W=23
 HEIGHT=100
 WIDTH=180
 N_CLASSES=2
+DAGGER=false
 
 if [ "$TASK_NAME" == 'nut_assembly' ]; then
     echo "NUT-ASSEMBLY"
     TASK_str="nut_assembly"
-    EXP_NAME=1Task-${TASK_str}-CTOD_No_0_4_8
+    EXP_NAME=1Task-${TASK_str}-CTOD-KP_NO_0_4_8
     PROJECT_NAME=${EXP_NAME}
     SET_SAME_N=7
     RESUME_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder/${EXP_NAME}-Batch74/
@@ -74,43 +98,41 @@ if [ "$TASK_NAME" == 'nut_assembly' ]; then
 elif [ "$TASK_NAME" == 'button' ] || [ "$TASK_NAME" == 'press_button_close_after_reaching' ]; then
     echo "BUTTON"
     TASK_str="press_button_close_after_reaching"
-    EXP_NAME=1Task-press_button-CTOD
+    EXP_NAME=1Task-press_button-CTOD-KP
     PROJECT_NAME=${EXP_NAME}
 
     RESUME_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder/${EXP_NAME}-Batch74/
     RESUME_STEP=72675
-    RESUME=true
+    RESUME=false
 elif [ "$TASK_NAME" == 'stack_block' ]; then
     echo "STACK_BLOCK"
     TASK_str="stack_block"
-    EXP_NAME=1Task-${TASK_str}-CTOD_No_0_3_5
+    EXP_NAME=1Task-${TASK_str}-CTOD-KP_NO_0_3_5
     PROJECT_NAME=${EXP_NAME}
-
+    SET_SAME_N=7
     RESUME_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder/${EXP_NAME}-Batch74/
     RESUME_STEP=72675
     RESUME=false
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     TASK_str="pick_place"
-    EXP_NAME=Real-1Task-${TASK_str}-CTOD-Finetune
+    EXP_NAME=Real-CTOD-${TASK_str}-Demo-${DEMO_NAME}-Finetune-${FINETUNE}-NORMALIZE-${NORMALIZE_IMG}
     PROJECT_NAME=${EXP_NAME}
-    SET_SAME_N=7
-    RESUME_PATH=/home/rsofnc000/checkpoint_save_folder/1Task-Pick-Place-Cond-Target-Obj-Detector-separate-demo-agent-Batch80
-    RESUME_STEP=64152
-    RESUME=false
-    FINETUNE=true
+    SET_SAME_N=2
+    RESUME_PATH=${RESUME_FOLDER}
+    RESUME_STEP=${RESUME_STEP}
 elif [ "$TASK_NAME" == 'multi' ]; then
     echo "Multi Task"
     TASK_str=["pick_place","nut_assembly","stack_block","press_button_close_after_reaching"]
-    EXP_NAME=4Task-CTOD #1Task-${TASK_str}-CTOD
+    EXP_NAME=4Task-CTOD-KP #1Task-${TASK_str}-CTOD-KP
     PROJECT_NAME=${EXP_NAME}
-
     RESUME_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder/${EXP_NAME}-Batch74/
     RESUME_STEP=72675
     RESUME=false
 fi
-# srun --output=train_${PROJECT_NAME}.txt --job-name=${PROJECT_NAME}
-python -u ../training/train_scripts/train_any.py \
+
+echo "Running srun command..."
+srun -A hpc_default --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u ../training/train_scripts/train_any.py \
     --config-path ${CONFIG_PATH} \
     --config-name ${CONFIG_NAME} \
     policy=${POLICY} \
@@ -127,8 +149,9 @@ python -u ../training/train_scripts/train_any.py \
     bsize=${BSIZE} \
     vsize=${BSIZE} \
     epochs=${EPOCH} \
-    dataset_cfg.obs_T=${OBS_T} \
+    finetune=${FINETUNE} \
     dataset_cfg.agent_name=${AGENT_NAME} \
+    dataset_cfg.obs_T=${OBS_T} \
     dataset_cfg.non_sequential=${NON_SEQUENTIAL} \
     dataset_cfg.compute_obj_distribution=${COMPUTE_OBJ_DISTRIBUTION} \
     dataset_cfg.first_frames=${FIRST_FRAMES} \
@@ -136,6 +159,9 @@ python -u ../training/train_scripts/train_any.py \
     dataset_cfg.height=${HEIGHT} \
     dataset_cfg.width=${WIDTH} \
     dataset_cfg.perform_augs=${PERFORM_AUGS} \
+    dataset_cfg.mix_sim_real=false \
+    dataset_cfg.dagger=${DAGGER} \
+    dataset_cfg.demo_name=${DEMO_NAME} \
     samplers.balancing_policy=${BALANCING_POLICY} \
     early_stopping_cfg.patience=${EARLY_STOPPING_PATIECE} \
     cond_target_obj_detector_cfg.height=${HEIGHT} \
@@ -145,6 +171,9 @@ python -u ../training/train_scripts/train_any.py \
     cond_target_obj_detector_cfg.n_channels=${OUT_FEATURE} \
     cond_target_obj_detector_cfg.conv_drop_dim=${DROP_DIM} \
     cond_target_obj_detector_cfg.n_classes=${N_CLASSES} \
+    cond_target_obj_detector_cfg.x_offset=${OFFSET_X} \
+    cond_target_obj_detector_cfg.y_offset=${OFFSET_Y} \
+    augs.normalize=${NORMALIZE_IMG} \
     project_name=${PROJECT_NAME} \
     EXPERT_DATA=${EXPERT_DATA} \
     save_path=${SAVE_PATH} \
@@ -157,5 +186,4 @@ python -u ../training/train_scripts/train_any.py \
     debug=${DEBUG} \
     wandb_log=${WANDB_LOG} \
     resume=${RESUME} \
-    finetune=${FINETUNE} \
     loader_workers=${LOADER_WORKERS}

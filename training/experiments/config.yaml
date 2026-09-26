@@ -17,6 +17,9 @@ exp_name:       -1
 epochs:         10
 bsize:          30
 vsize:          ${bsize} # optionally, set to a different batchsize for validation loader
+node_id: 0
+num_gpus: 1
+num_nodes: 1
 optimizer:      null #Adam # RMSProp
 loss: ""
 bb_sequence: 1
@@ -102,25 +105,25 @@ dataset_cfg:
   normalize_action: True
   load_bb: True
   # x, y, z, e_x, e_y, e_z
-  # normalization_ranges: [[-0.35,  0.35],
-  #                       [-0.35,  0.35],
-  #                       [ 0.60,  1.20],
-  #                       [-3.14,  3.14911766],
-  #                       [-3.14911766, 3.14911766],
-  #                       [-3.14911766,  3.14911766]]
-  # use when convert is true
-  normalization_ranges: [[-0.40,  0.40],
-                        [0.10,  0.90],
-                        [ -0.20,  0.20],
-                        [-3.14911766,  3.14911766],
+  normalization_ranges: [[-0.35,  0.35],
+                        [-0.35,  0.35],
+                        [ 0.60,  1.20],
+                        [-3.14,  3.14911766],
                         [-3.14911766, 3.14911766],
                         [-3.14911766,  3.14911766]]
+  # use when convert is true
+  # normalization_ranges: [[-0.40,  0.40],
+  #                       [0.10,  0.90],
+  #                       [ -0.20,  0.20],
+  #                       [-3.14911766,  3.14911766],
+  #                       [-3.14911766, 3.14911766],
+  #                       [-3.14911766,  3.14911766]]
   n_action_bin: 256
   take_first_frame: ${policy.concat_target_obj_embedding}
   data_augs:        ${augs}
   non_sequential:   False
   crop_twice:       True
-  state_spec:       [joint_pos, gripper_state]
+  state_spec:       [joint_pos]
   allow_val_skip:   ${val_skip}
   allow_train_skip: ${train_skip}
   use_strong_augs:  True 
@@ -135,26 +138,21 @@ dataset_cfg:
   convert_action: False
 
 augs:
-  # strong_jitter:     1  
-  # weak_jitter:       1 # 0.1 Mosaic; 1 Tosil 
-  # grayscale:         1 # 0.1 Mosaic; 1 Tosil
-  # blur:              [0.1, 2.0] 
-  # flip:              0.05   # only flip for the strong augs
-  # weak_crop_scale:   [0.8, 1.0]  # [0.8, 1.0] Mosaic; [0.99, 1.0] Tosil
-  # strong_crop_scale: [0.8, 1.0] # [0.8, 1.0] Mosaic; [0.99, 1.0] Tosil
-  # weak_crop_ratio:   [1.8, 1.8] # [1.8, 1.8] Mosaic; [1.0, 1.0] Tosil
-  # strong_crop_ratio: [1.8, 1.8] # [1.8, 1.8] Mosaic; [1.0, 1.0] Tosil
-  # use_affine:        False  
-  # rand_trans:        0.1
-
   old_aug: false
-  brightness: [0.9, 1.1]
-  contrast: [0.9, 1.1]
-  saturation: [0.9, 1.1]
-  hue: [0.0, 0.0]
-  p: 0.1 
-  horizontal_flip_p: 0.1
-  
+  brightness: [0.6, 1.4] #[0.9, 1.1]
+  contrast: [0.7, 1.3] #[0.9, 1.1]
+  saturation: [0.7, 1.3] #[0.9, 1.1]
+  hue: [-0.05, 0.05] #[0.0, 0.0]
+  p: 0.5 
+  horizontal_flip_p: 0.0
+  affine: False
+  affine_p: 0.0
+  black_patch_prob: 0.0
+  black_patch_params:
+    num_patches: 1
+    min_size: 5
+    max_size: 30
+
   brightness_strong: [0.875, 1.125]
   contrast_strong: [0.5, 1.5]
   saturation_strong: [0.5, 1.5]
@@ -216,7 +214,7 @@ attn:
   attn_heads:       4
   attn_ff:          128
   pos_enc:          True 
-  fuse_starts:      0   # default 0 so attend everywhere
+  fuse_starts:      2   # default 0 so attend everywhere
   causal:           True
   attend_demo:      True
   demo_out:         True
@@ -239,7 +237,7 @@ mosaic:
   load_inv: True
   concat_target_obj_embedding: False
   latent_dim:         40
-  sdim:               7
+  sdim:               6
   concat_state:       True
   concat_bb:       True
   zero_bb_after_pick: False

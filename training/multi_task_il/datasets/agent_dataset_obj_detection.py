@@ -181,7 +181,7 @@ class AgentDatasetObjDetection(Dataset):
             chosen_t = torch.randperm(end)
             chosen_t = chosen_t[chosen_t != 0][:self._obs_T]
 
-        images, images_cp, bb, obj_classes, action, states, points = create_sample(
+        images, images_cp, _wrist_images, bb, obj_classes, action, states, points = create_sample(
             dataset_loader=self,
             traj=traj,
             chosen_t=chosen_t,

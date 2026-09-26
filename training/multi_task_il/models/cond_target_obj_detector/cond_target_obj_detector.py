@@ -18,9 +18,8 @@ from torchvision.models.video import r2plus1d_18, R2Plus1D_18_Weights
 import cv2
 import matplotlib.pyplot as plt
 import time
+
 DEBUG = False
-
-
 def get_backbone(backbone_name="slow_r50", video_backbone=True, pretrained=False, conv_drop_dim=3):
     if video_backbone:
         print(f"Loading video backbone {backbone_name}.....")
@@ -140,6 +139,12 @@ class ClassificationModule(nn.Module):
         # define classification head
         self.cls_head = nn.Linear(hidden_dim, n_classes)
 
+        # second-stage (Fast-R-CNN-style) box-regression head: refines
+        # each proposal with a class-agnostic (tx,ty,tw,th) delta, on top
+        # of the first-stage RPN regression. Sibling of cls_head, sharing
+        # the same pooled-ROI trunk.
+        self.reg_head = nn.Linear(hidden_dim, 4)
+
     def forward(self, feature_map, proposals_list, gt_classes=None):
 
         # if gt_classes is None:
@@ -147,8 +152,9 @@ class ClassificationModule(nn.Module):
         # else:
         #     mode = 'train'
 
-        # apply roi pooling on proposals followed by avg pooling
-        roi_out = ops.roi_pool(feature_map, proposals_list, self.roi_size)
+        # apply roi align (sub-pixel accurate, unlike roi_pool's
+        # grid-quantized sampling) on proposals followed by avg pooling
+        roi_out = ops.roi_align(feature_map, proposals_list, self.roi_size)
         roi_out = self.avg_pool(roi_out)
 
         # flatten the output
@@ -161,12 +167,15 @@ class ClassificationModule(nn.Module):
 
         # get the classification scores
         cls_scores = self.cls_head(out)  # Number of positive bb, Num classes
+        # get the second-stage box-regression deltas, relative to the
+        # proposal box each ROI was pooled from
+        bbox_deltas = self.reg_head(out)  # Number of positive bb, 4
 
-        return cls_scores
+        return cls_scores, bbox_deltas
 
 
 class FiLM(nn.Module):
-    def __init__(self, backbone_name="resnet18", conv_drop_dim=3, n_res_blocks=18, n_classes=1, n_channels=128, task_embedding_dim=128):
+    def __init__(self, backbone_name="resnet18", conv_drop_dim=3, n_res_blocks=18, n_classes=1, n_channels=128, task_embedding_dim=128, pretrained=False):
         super(FiLM, self).__init__()
 
         self.task_embedding_dim = task_embedding_dim
@@ -175,7 +184,7 @@ class FiLM(nn.Module):
             task_embedding_dim, 2 * n_res_blocks * n_channels)
         self.feature_extractor = get_backbone(backbone_name=backbone_name,
                                               video_backbone=False,
-                                              pretrained=False,
+                                              pretrained=pretrained,
                                               conv_drop_dim=conv_drop_dim)
         self.res_blocks = nn.ModuleList()
 
@@ -263,14 +272,15 @@ class ProposalModule(nn.Module):
             return conf_scores_pred, reg_offsets_pred
 
 
-def make_model(model_dict, backbone_name="resnet18", task_embedding_dim=128, conv_drop_dim=3):
+def make_model(model_dict, backbone_name="resnet18", task_embedding_dim=128, conv_drop_dim=3, pretrained=False):
     backbone = FiLM(
         backbone_name=backbone_name,
         conv_drop_dim=conv_drop_dim,
         n_res_blocks=model_dict['n_res_blocks'],
         n_classes=model_dict['n_classes'],
         n_channels=model_dict['n_channels'],
-        task_embedding_dim=task_embedding_dim)
+        task_embedding_dim=task_embedding_dim,
+        pretrained=pretrained)
     # for name, module in backbone.named_children():
     #     if name == "res_blocks":
     #         for name, module in backbone.res_blocks.named_children():
@@ -352,7 +362,7 @@ class CondModule(nn.Module):
 
 class AgentModule(nn.Module):
 
-    def __init__(self, height=120, width=160, obs_T=4, model_name="resnet18", pretrained=False, load_film=True, n_res_blocks=6, n_classes=2, task_embedding_dim=128, dim_H=7, dim_W=7, conv_drop_dim=3, anc_scales=[1.0, 1.5, 2.0, 3.0, 4.0], anc_ratios=[0.2, 0.5, 0.8, 1, 1.2, 1.5, 2.0]):
+    def __init__(self, height=120, width=160, obs_T=4, model_name="resnet18", pretrained=False, load_film=True, n_res_blocks=6, n_classes=2, task_embedding_dim=128, dim_H=7, dim_W=7, conv_drop_dim=3, anc_scales=[1.0, 1.5, 2.0, 3.0, 4.0], anc_ratios=[0.2, 0.5, 0.8, 1, 1.2, 1.5, 2.0], x_offset=1.5, y_offset=1.5, pos_thresh=0.5, neg_thresh=0.3, conf_thresh=0.7, nms_thresh=0.5, roi_size=(7, 7)):
         super().__init__()
         self.task_embedding_dim = task_embedding_dim
         if not load_film:
@@ -374,7 +384,8 @@ class AgentModule(nn.Module):
             model_dict['n_channels'] = n_channels
             backbone = make_model(model_dict=model_dict,
                                   task_embedding_dim=task_embedding_dim,
-                                  conv_drop_dim=conv_drop_dim)
+                                  conv_drop_dim=conv_drop_dim,
+                                  pretrained=pretrained)
             backbone.out_channels = n_channels
             self.out_channels_backbone = n_channels
             self._backbone = backbone
@@ -395,11 +406,10 @@ class AgentModule(nn.Module):
             self.n_anc_boxes = len(self.anc_scales) * len(self.anc_ratios)
 
             # IoU thresholds for +ve and -ve anchors
-
-            self.pos_thresh = 0.4
-            self.neg_thresh = 0.3
-            self.conf_thresh = 0.7
-            self.nms_thresh = 0.5
+            self.pos_thresh = pos_thresh
+            self.neg_thresh = neg_thresh
+            self.conf_thresh = conf_thresh
+            self.nms_thresh = nms_thresh
 
             self.proposal_module = ProposalModule(
                 self.out_channels_backbone,
@@ -408,12 +418,14 @@ class AgentModule(nn.Module):
             self.classifier = ClassificationModule(
                 out_channels=self.out_channels_backbone,
                 n_classes=n_classes,
-                roi_size=(2, 2))
+                roi_size=roi_size)
 
             # generate anchors
             start = time.time()
             self.anc_pts_x, self.anc_pts_y = gen_anc_centers(
-                out_size=(self.out_h, self.out_w))
+                out_size=(self.out_h, self.out_w),
+                x_offset=x_offset,
+                y_offset=y_offset)
             print(f"Gen anc centers {time.time()-start}")
 
             start = time.time()
@@ -511,7 +523,7 @@ class AgentModule(nn.Module):
                                                   (int(anc_box[2]),
                                                    int(anc_box[3])),
                                                   color=(0, 0, 255), thickness=1)
-                        cv2.imwrite("prova_anch_box.png", image)
+                cv2.imwrite("prova_anch_box.png", image)
 
             if not inference:
                 # if the model is training
@@ -522,7 +534,7 @@ class AgentModule(nn.Module):
                     torch.tensor(self.height_scale_factor, dtype=float),
                     mode='p2a').float()
 
-                positive_anc_ind, negative_anc_ind, GT_conf_scores, GT_offsets, GT_class_pos, positive_anc_coords, negative_anc_coords, positive_anc_ind_sep = get_req_anchors(
+                positive_anc_ind, negative_anc_ind, GT_conf_scores, GT_offsets, GT_class_pos, positive_anc_coords, negative_anc_coords, positive_anc_ind_sep, GT_bboxes_pos = get_req_anchors(
                     anc_boxes_all.to(agent_obs.get_device()),
                     gt_bboxes_proj.to(agent_obs.get_device()),
                     gt_classes.to(agent_obs.get_device()),
@@ -538,17 +550,32 @@ class AgentModule(nn.Module):
 
                 # get separate proposals for each sample
                 pos_proposals_list = []
-                class_positive_list = []
+                # class_positive_list = []
                 batch_size = B
-                for idx in range(batch_size):
-                    proposal_idxs = torch.where(positive_anc_ind_sep == idx)[0]
-                    proposals_sep = proposals[proposal_idxs].detach().clone()
-                    class_sep = GT_class_pos[proposal_idxs].detach().clone()
-                    pos_proposals_list.append(proposals_sep)
-                    class_positive_list.append(class_sep)
 
-                cls_scores = self.classifier(
+                # Create a mask for each index in the batch
+                batch_indices = torch.arange(batch_size, device=positive_anc_ind_sep.device).unsqueeze(1)
+                mask = positive_anc_ind_sep.unsqueeze(0) == batch_indices
+
+                # Use the mask to gather proposals and classes
+                pos_proposals_list = [proposals[torch.where(mask[i])[0]].detach().clone() for i in range(batch_size)]
+                # class_positive_list = [GT_class_pos[torch.where(mask[i])[0]].detach().clone() for i in range(batch_size)]
+                # print(f"Time to separate proposals {time.time()-start_time}")
+
+                cls_scores, bbox_deltas_2nd = self.classifier(
                     feature_map, pos_proposals_list, GT_class_pos)
+
+                # second-stage (Fast-R-CNN-style) box refinement: regress
+                # each (detached) first-stage proposal towards its
+                # matched gt box, on top of the RPN's own regression.
+                # proposals_detached matches bbox_deltas_2nd 1:1 since
+                # both come from the same pos_proposals_list ordering.
+                proposals_detached = torch.cat(pos_proposals_list, dim=0)
+                GT_bboxes_pos = GT_bboxes_pos.to(agent_obs.get_device())
+                GT_offsets_2nd = calc_gt_offsets(
+                    proposals_detached, GT_bboxes_pos)
+                refined_boxes = generate_proposals(
+                    proposals_detached, bbox_deltas_2nd)
 
                 ret_dict['feature_map'] = feature_map
                 ret_dict['proposals'] = pos_proposals_list
@@ -558,6 +585,10 @@ class AgentModule(nn.Module):
                 ret_dict['conf_scores_neg'] = conf_scores_neg
                 ret_dict['cls_scores'] = cls_scores
                 ret_dict['GT_class_pos'] = GT_class_pos
+                ret_dict['GT_offsets_2nd'] = GT_offsets_2nd
+                ret_dict['offsets_pos_2nd'] = bbox_deltas_2nd
+                ret_dict['refined_boxes'] = refined_boxes
+                ret_dict['GT_bboxes_pos'] = GT_bboxes_pos
 
                 # if DEBUG:
                 #     # test plot proposal
@@ -674,22 +705,32 @@ class AgentModule(nn.Module):
                         # conf_scores_final.append(conf_scores_pos)
                     # print(f"Sequential {time.time()-start}")
 
-                    cls_scores = self.classifier(feature_map, proposals_final)
+                    cls_scores, bbox_deltas_2nd = self.classifier(
+                        feature_map, proposals_final)
                     cls_probs = F.softmax(cls_scores, dim=-1)
                     # get classes with highest probability
                     classes_all = torch.argmax(cls_probs, dim=-1)
 
+                    # second-stage box refinement: apply the classifier's
+                    # per-proposal deltas on top of the RPN proposals
+                    proposals_final_flat = torch.cat(proposals_final, dim=0)
+                    refined_boxes_flat = generate_proposals(
+                        proposals_final_flat, bbox_deltas_2nd) if proposals_final_flat.shape[0] > 0 else proposals_final_flat
+
                     classes_final = []
-                    # slice classes to map to their corresponding image
+                    proposals_refined = []
+                    # slice classes/boxes to map to their corresponding image
                     c = 0
                     for i in range(B):
                         # get the number of proposals for each image
                         n_proposals = len(proposals_final[i])
                         classes_final.append(classes_all[c: c+n_proposals])
+                        proposals_refined.append(
+                            refined_boxes_flat[c: c+n_proposals])
                         c += n_proposals
 
                     # print(f"Inference time {time.time()-start}")
-                    ret_dict['proposals'] = proposals_final
+                    ret_dict['proposals'] = proposals_refined
                     ret_dict['conf_scores_final'] = conf_scores_final
                     ret_dict['cls_scores'] = cls_scores
                     ret_dict['feature_map'] = feature_map
@@ -736,7 +777,14 @@ class CondTargetObjectDetector(nn.Module):
                                           task_embedding_dim=cond_target_obj_detector_cfg.task_embedding_dim,
                                           anc_ratios=cond_target_obj_detector_cfg.anc_ratios,
                                           anc_scales=cond_target_obj_detector_cfg.anc_scales,
-                                          n_classes=cond_target_obj_detector_cfg.get('n_classes', 2))
+                                          n_classes=cond_target_obj_detector_cfg.get('n_classes', 2),
+                                          x_offset=cond_target_obj_detector_cfg.x_offset,
+                                          y_offset=cond_target_obj_detector_cfg.y_offset,
+                                          pos_thresh=cond_target_obj_detector_cfg.get('pos_thresh', 0.5),
+                                          neg_thresh=cond_target_obj_detector_cfg.get('neg_thresh', 0.3),
+                                          conf_thresh=cond_target_obj_detector_cfg.get('conf_thresh', 0.7),
+                                          nms_thresh=cond_target_obj_detector_cfg.get('nms_thresh', 0.5),
+                                          roi_size=tuple(cond_target_obj_detector_cfg.get('roi_size', [7, 7])),)
 
         # summary(self)
         model_parameters = filter(lambda p: p.requires_grad, self.parameters())
@@ -747,11 +795,11 @@ class CondTargetObjectDetector(nn.Module):
         self.activations = None
         self.gradients = None
 
-    def forward(self, inputs: dict, inference: bool = False):
-        cond_video = inputs['demo']
-        agent_obs = inputs['images']
-        gt_bb = inputs['gt_bb']
-        gt_classes = inputs['gt_classes']
+    def forward(self, inputs: list, inference: bool = False):
+        cond_video = inputs[0] # B, T_demo, C, H, W
+        agent_obs = inputs[1] # B, T_frame, C, H, W
+        gt_bb = inputs[2]
+        gt_classes = inputs[3]
 
         cond_emb = self._cond_backbone(cond_video)
         # print(f"Cond embedding shape: {cond_emb.shape}")

@@ -1,46 +1,69 @@
 #!/bin/bash
-
-# export MUJOCO_PY_MUJOCO_PATH=/user/frosa/.mujoco/mujoco210
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/frosa/.mujoco/mujoco210/bin
-# # export MUJOCO_PY_MUJOCO_PATH="/home/frosa_Loc/.mujoco/mujoco210"
-# # export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/frosa_Loc/.mujoco/mujoco210/bin
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/user/frosa/miniconda3/envs/multi_task_lfd/lib
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
-# export CUDA_VISIBLE_DEVICES=0
-# export HYDRA_FULL_ERROR=1
-
+#SBATCH -A did_robot_learning_359
 #SBATCH --partition=gpuq
-#SBATCH --gres=gpu:1   # Request 1 GPU
+#SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=32
+#SBATCH --export=ALL
 
+export MUJOCO_PY_MUJOCO_PATH=/home/rsofnc000/.mujoco/mujoco210
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
 export HYDRA_FULL_ERROR=1
-EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder
+
+EXPERT_DATA=/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset
+
 POLICY='${cond_target_obj_detector}'
 DATASET_TARGET=multi_task_il.datasets.multi_task_keypoint_dataset.MultiTaskPairedKeypointDetectionDataset
 TASKS_CONFIG=7_tasks_real
-AGENT_NAME=real_new_ur5e
-# export CUDA_VISIBLE_DEVICES=1
-echo $1
-TASK_NAME="$1"
+
+TASK_NAME="${1}"
+RESUME_FOLDER="${2}"
+RESUME_STEP="${3}"
+FINETUNE="${4:-false}"
+RESUME="${5:-false}"
+DEMO_NAME="${6:-panda}" # [human_rgb or panda]
+SAVE_PATH="${7:-/home/rsofnc000/checkpoint_save_folder/100_180_new}"
+MAX_EPOCHS="${8:-1000}" # default to 1000 if not provided
+# was hardcoded to real_eye_in_hand_ur5e - made overridable ($9, not $8 since run_bash.py already
+# passes MAX_EPOCHS as its 8th positional arg - unread by this script before, kept that way) since
+# resuming a checkpoint trained with a DIFFERENT agent_name (e.g. real_new_ur5e, a separate
+# front-camera-only dataset dir) would silently switch the real robot data source mid-training
+# otherwise. Default preserved for existing callers that don't pass $9.
+AGENT_NAME="${9:-real_eye_in_hand_ur5e}"
+echo "Task Name is: $TASK_NAME"
+echo "Resume Folder is: $RESUME_FOLDER"
+echo "Resume Step is: $RESUME_STEP"
+echo "Finetune is: $FINETUNE"
+echo "Resume is: $RESUME"
+echo "Demo Name is: $DEMO_NAME"
+echo "Save Path is: $SAVE_PATH"
+
+# Set offset_x and offset_y based on DEMO_NAME
+if [ "$DEMO_NAME" = "human_rgb" ]; then
+    OFFSET_X=2.0
+    OFFSET_Y=1.5
+elif [ "$DEMO_NAME" = "panda" ]; then
+    OFFSET_X=1.5
+    OFFSET_Y=1.5
+fi
 
 SAVE_FREQ=-1
-LOG_FREQ=20
+LOG_FREQ=10
 VAL_FREQ=-1
-PRINT_FREQ=20
-DEVICE=0
+PRINT_FREQ=$LOG_FREQ
+DEVICE=-1
 DEBUG=false
-WANDB_LOG=false
+WANDB_LOG=true
 
-EPOCH=90 # start from 16
-BSIZE=80 #16 #32
+EPOCH=${MAX_EPOCHS} # start from 16
+BSIZE=32 #16 #32
 
 COMPUTE_OBJ_DISTRIBUTION=false
 CONFIG_PATH=../experiments/
 CONFIG_NAME=config_cond_target_obj_detector_real.yaml
-LOADER_WORKERS=8
+LOADER_WORKERS=1
 BALANCING_POLICY=0
 OBS_T=7
 
@@ -54,11 +77,14 @@ ONLY_FIRST_FRAMES=false
 ROLLOUT=false
 PERFORM_AUGS=true
 NON_SEQUENTIAL=true
+NORMALIZE_IMG=false
 
 DROP_DIM=4      # 2    # 3
 OUT_FEATURE=128 # 512 # 256
-DIM_H=13        #14        # 7 (100 DROP_DIM 3)        #8         # 4         # 7
-DIM_W=23        #14        # 12 (180 DROP_DIM 3)        #8         # 6         # 12
+# use (13,23) when image is 100,180
+# use (28,28) when image is 224,224
+DIM_H=13
+DIM_W=23
 HEIGHT=100
 WIDTH=180
 N_CLASSES=4
@@ -94,25 +120,23 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     TASK_str="pick_place"
-    EXP_NAME=Real-1Task-${TASK_str}-KP-Finetune
+    EXP_NAME=Real-1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-COD-SKIP-0-5-10-15
     PROJECT_NAME=${EXP_NAME}
-    SET_SAME_N=7
-    RESUME_PATH=/home/rsofnc000/checkpoint_save_folder/1Task-Pick-Place-KP-Batch112
-    RESUME_STEP=37476
-    RESUME=false
-    FINETUNE=true
+    SET_SAME_N=5
+    RESUME_PATH=${RESUME_FOLDER}
+    RESUME_STEP=${RESUME_STEP}
 elif [ "$TASK_NAME" == 'multi' ]; then
     echo "Multi Task"
     TASK_str=["pick_place","nut_assembly","stack_block","press_button_close_after_reaching"]
     EXP_NAME=4Task-CTOD-KP #1Task-${TASK_str}-CTOD-KP
     PROJECT_NAME=${EXP_NAME}
-
     RESUME_PATH=/user/frosa/multi_task_lfd/checkpoint_save_folder/${EXP_NAME}-Batch74/
     RESUME_STEP=72675
     RESUME=false
 fi
 
-sbatch --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u ../training/train_scripts/train_any.py \
+echo "Running srun command..."
+srun -A hpc_default --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python -u ../training/train_scripts/train_any.py \
     --config-path ${CONFIG_PATH} \
     --config-name ${CONFIG_NAME} \
     policy=${POLICY} \
@@ -141,6 +165,7 @@ sbatch --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python 
     dataset_cfg.perform_augs=${PERFORM_AUGS} \
     dataset_cfg.mix_sim_real=false \
     dataset_cfg.dagger=${DAGGER} \
+    dataset_cfg.demo_name=${DEMO_NAME} \
     samplers.balancing_policy=${BALANCING_POLICY} \
     early_stopping_cfg.patience=${EARLY_STOPPING_PATIECE} \
     cond_target_obj_detector_cfg.height=${HEIGHT} \
@@ -150,6 +175,9 @@ sbatch --output=training_${EXP_NAME}.txt --job-name=training_${EXP_NAME} python 
     cond_target_obj_detector_cfg.n_channels=${OUT_FEATURE} \
     cond_target_obj_detector_cfg.conv_drop_dim=${DROP_DIM} \
     cond_target_obj_detector_cfg.n_classes=${N_CLASSES} \
+    cond_target_obj_detector_cfg.x_offset=${OFFSET_X} \
+    cond_target_obj_detector_cfg.y_offset=${OFFSET_Y} \
+    augs.normalize=${NORMALIZE_IMG} \
     project_name=${PROJECT_NAME} \
     EXPERT_DATA=${EXPERT_DATA} \
     save_path=${SAVE_PATH} \

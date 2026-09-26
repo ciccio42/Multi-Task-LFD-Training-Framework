@@ -306,8 +306,7 @@ def pick_place_eval_demo_cond(model, env, context, gpu_id, variation_id, img_for
                 gripper_state = -1
             else:
                 gripper_state = action[-1]
-            states.append(np.concatenate(
-                (obs['joint_pos'], [gripper_state])).astype(np.float32)[None])
+            states.append(obs['joint_pos'].astype(np.float32)[None])
 
             obs, reward, info, action, env_done, time_action = task_run_action(
                 traj=traj,

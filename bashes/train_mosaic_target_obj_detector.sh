@@ -1,10 +1,12 @@
 #!/bin/bash
 
+#SBATCH --exclude=tnode[01-17]
 #SBATCH --partition=gpuq
-#SBATCH --gres=gpu:1   # Request 1 GPU
+#SBATCH --gres=gpu:2
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=32
+#SBATCH --export=ALL
 
 export MUJOCO_PY_MUJOCO_PATH="/home/rsofnc000/.mujoco/mujoco210"
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
@@ -15,7 +17,7 @@ echo $1
 TASK_NAME="$1"
 
 EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset/
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder
+SAVE_PATH=/home/rsofnc000/checkpoint_save_folder/luigi_models
 POLICY='${mosaic}'
 TARGET='multi_task_il.models.mt_rep.VideoImitation'
 
@@ -27,11 +29,12 @@ DEBUG=false
 WANDB_LOG=true
 ROLLOUT=false
 EPOCH=90
-LOADER_WORKERS=32
+LOADER_WORKERS=16
 CONFIG_PATH=../experiments
 CONFIG_NAME=config.yaml
 CONCAT_IMG_EMB=true
 CONCAT_DEMO_EMB=true
+DEMO_NAME=human_rgb
 
 NORMALIZE_ACTION=true
 CHANGE_COMMAND_EPOCH=true
@@ -48,18 +51,18 @@ INV_MUL=0.0 #0.0
 FREEZE_TARGET_OBJ_DETECTOR=false
 REMOVE_CLASS_LAYERS=false
 CONCAT_TARGET_OBJ_EMBEDDING=false
-CONCAT_STATE=true
+CONCAT_STATE=false # true
 
-CONVERT_ACTION=false # when change this parameter check the normalization ranges
+CONVERT_ACTION=true # when change this parameter check the normalization ranges
 
-ZERO_BB_AFTER_PICK=false
+ZERO_BB_AFTER_PICK=true
 
 if [ "$TASK_NAME" == 'nut_assembly' ]; then
     echo "NUT-ASSEMBLY"
     #SBATCH --job-name=nut_assembly
     ### Nut-Assembly ###
-    RESUME_PATH=1Task-nut_assembly-Contrastive-false-Inverse-false-trial-2-Batch27
-    RESUME_STEP=18640
+    RESUME_PATH=
+    RESUME_STEP=
     RESUME=false
 
     LOAD_TARGET_OBJ_DETECTOR=true
@@ -213,13 +216,13 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     ### Pick-Place ###
-    RESUME_PATH=1Task-pick_place-Contrastive-false-Inverse-false-CONCAT_IMG_EMB-false-CONCAT_DEMO_EMB-true-Batch32
-    RESUME_STEP=99417
-    RESUME=false
+    RESUME_PATH=1Task-pick_place-MOSAIC-CTOD-State-false-Convertion_true-ZERO_BB_AFTER_PICK-Human_Demo-Batch32
+    RESUME_STEP=16
+    RESUME=true
 
     LOAD_TARGET_OBJ_DETECTOR=true
-    TARGET_OBJ_DETECTOR_STEP=64152 #68526 #129762 #198900 #65250
-    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/1Task-Pick-Place-Cond-Target-Obj-Detector-separate-demo-agent-Batch80
+    TARGET_OBJ_DETECTOR_STEP=26290 #68526 #129762 #198900 #65250
+    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/1Task-pick_place-CTOD-Human-Demonstration-Batch112
     CONCAT_BB=true
 
     BSIZE=32 #32 #128 #64 #32
@@ -255,7 +258,7 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     COSINE_ANNEALING=false
 
     TASK_str="pick_place" #[pick_place,nut_assembly,stack_block,button]
-    EXP_NAME=1Task-${TASK_str}-MOSAIC-CTOD-State-${CONCAT_STATE}-ZERO_BB_AFTER_PICK_Convertion_${CONVERT_ACTION}
+    EXP_NAME=1Task-${TASK_str}-MOSAIC-CTOD-State-${CONCAT_STATE}-Convertion_${CONVERT_ACTION}-ZERO_BB_AFTER_PICK-Human_Demo
     PROJECT_NAME=${EXP_NAME}
 elif [ "$TASK_NAME" == 'multi' ]; then
     echo "Multi Task"
@@ -328,6 +331,7 @@ srun --output=${EXP_NAME}.txt --job-name=${EXP_NAME} python -u ../training/train
     dataset_cfg.width=${WIDTH} \
     dataset_cfg.split_pick_place=${SPLIT_PICK_PLACE} \
     dataset_cfg.convert_action=${CONVERT_ACTION} \
+    dataset_cfg.demo_name=${DEMO_NAME} \
     samplers.balancing_policy=${BALANCING_POLICY} \
     mosaic._target_=${TARGET} \
     mosaic.load_target_obj_detector=${LOAD_TARGET_OBJ_DETECTOR} \

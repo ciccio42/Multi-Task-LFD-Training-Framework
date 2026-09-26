@@ -27,6 +27,10 @@ from multi_task_test.utils import *
 from multi_task_test import *
 import re
 from colorama import Back
+import sys
+sys.path.insert(0, "/mnt/beegfs/frosa/Multi-Task-LFD-Framework/utils")
+from create_video_from_pkl import (open_h264_rgb_writer, close_video_writer,
+                                   write_frame as _write_video_frame)
 
 
 def seed_everything(seed=42):
@@ -46,7 +50,7 @@ def extract_last_number(path):
     return int(check_point_number)
 
 
-def object_detection_inference(model, config, ctr, heights=100, widths=200, size=0, shape=0, color=0, max_T=150, env_name='place', gpu_id=-1, baseline=None, variation=None, controller_path=None, seed=None, action_ranges=[], model_name=None, gt_file=None, gt_bb=False, real=False, place_bb_flag=True):
+def object_detection_inference(model, config, ctr, heights=100, widths=200, size=0, shape=0, color=0, max_T=150, env_name='place', gpu_id=-1, baseline=None, variation=None, controller_path=None, seed=None, action_ranges=[], model_name=None, gt_file=None, gt_bb=False, demo_file=None, real=False, place_bb_flag=True):
 
     if gpu_id == -1:
         gpu_id = int(ctr % torch.cuda.device_count())
@@ -77,7 +81,8 @@ def object_detection_inference(model, config, ctr, heights=100, widths=200, size
                                                                     gpu_id=gpu_id,
                                                                     variation=variation, random_frames=random_frames,
                                                                     controller_path=controller_path,
-                                                                    seed=seed)
+                                                                    seed=seed,
+                                                                    demo_file=demo_file)
     else:
         env = None
         variation_id = None
@@ -99,8 +104,9 @@ def object_detection_inference(model, config, ctr, heights=100, widths=200, size
             context_data_trj, T_context, sample_sides=True, random_frames=random_frames)
         # convert BGR context image to RGB and scale to 0-1
         for i, img in enumerate(context):
-            cv2.imwrite(f"context_{i}.png", np.array(img[:, :, ::-1]))
-        context = [img_formatter(i[:, :, ::-1])[None] for i in context]
+            cv2.imwrite(f"context_{i}.png", np.array(img)) # [:, :, ::-1]
+        context = [img_formatter(i)[None] for i in context] # [:, :, ::-1]
+        
         # assert len(context ) == 6
         if isinstance(context[0], np.ndarray):
             context = torch.from_numpy(np.concatenate(context, 0))[None]
@@ -140,7 +146,7 @@ def object_detection_inference(model, config, ctr, heights=100, widths=200, size
 
 
 def rollout_imitation(model, config, ctr,
-                      heights=100, widths=200, size=0, shape=0, color=0, max_T=150, env_name='place', gpu_id=-1, baseline=None, variation=None, controller_path=None, seed=None, action_ranges=[], model_name=None, gt_bb=False, sub_action=False, gt_action=4, real=True, gt_file=None, place=False):
+                      heights=100, widths=200, size=0, shape=0, color=0, max_T=150, env_name='place', gpu_id=-1, baseline=None, variation=None, controller_path=None, seed=None, action_ranges=[], model_name=None, gt_bb=False, sub_action=False, gt_action=4, real=True, gt_file=None, demo_file=None, place=False):
     if gpu_id == -1:
         gpu_id = int(ctr % torch.cuda.device_count())
     print(f"Model GPU id {gpu_id}")
@@ -162,6 +168,14 @@ def rollout_imitation(model, config, ctr,
             assert 'multi' in config.train_cfg.dataset._target_, config.train_cfg.dataset._target_
             T_context = config.train_cfg.dataset.demo_T
 
+        # ottengo:
+        # 1) env: ambiente
+        # 2) context: i 4 frame della dimostrazione
+        # 3) variation_id: id della variazione del task
+        # 4) expert_traj: la traiettoria eseguita dall'esperto (pick_place controller)
+        # 5) gt_env: ambiente di gt (?)
+        # skip_teacher = True
+        
         env, context, variation_id, expert_traj, gt_env = build_env_context(img_formatter,
                                                                             T_context=T_context,
                                                                             ctr=ctr,
@@ -175,8 +189,9 @@ def rollout_imitation(model, config, ctr,
                                                                             variation=variation, random_frames=random_frames,
                                                                             controller_path=controller_path,
                                                                             ret_gt_env=True,
-                                                                            seed=seed)
-
+                                                                            seed=seed,
+                                                                            demo_file=demo_file,
+                                                                           )
         build_task = TASK_MAP.get(env_name, None)
         assert build_task, 'Got unsupported task '+env_name
         eval_fn = get_eval_fn(env_name=env_name)
@@ -241,14 +256,75 @@ def rollout_imitation(model, config, ctr,
         return traj, info
 
 
-def _proc(model, config, results_dir, heights, widths, size, shape, color, env_name, baseline, variation, max_T, controller_path, model_name, gpu_id, save, gt_bb, sub_action, gt_action, real, place, seed, n, gt_file):
+def _context_strip(context):
+    """context: the same [1, T, C, H, W] (or [T, C, H, W]) float 0-1 tensor saved as
+    demo{n}.pkl -- the T conditioning frames the model was actually shown, already
+    cropped/resized by build_tvf_formatter_obj_detector (no Normalize applied, see that
+    function -- it's commented out -- so *255 is the correct, only denormalization
+    needed). Stacks the T frames vertically into one uint8 RGB strip for the video's
+    left panel, so the conditioning context is visible alongside the rollout it drove."""
+    if context is None:
+        return None
+    if hasattr(context, 'detach'):
+        context = context.detach().cpu().numpy()
+    if context.ndim == 5:
+        context = context[0]
+    frames = []
+    for i in range(context.shape[0]):
+        img = np.moveaxis(context[i], 0, -1)
+        img = np.clip(img * 255, 0, 255).astype(np.uint8)
+        frames.append(np.ascontiguousarray(img))
+    max_w = max(f.shape[1] for f in frames)
+    frames = [np.pad(f, ((0, 0), (0, max_w - f.shape[1]), (0, 0))) if f.shape[1] < max_w
+             else f for f in frames]
+    return np.concatenate(frames, axis=0)
+
+
+def save_rollout_video(rollout, video_path, config, env_name, context=None, camera_name='camera_front'):
+    """Renders one mp4 straight from a finished rollout, drawing predicted (green=target,
+    yellow=place) and ground-truth (blue) boxes per frame via create_video_from_pkl.py's
+    write_frame -- reused as-is rather than duplicated so both video paths (this direct one
+    and utils/stage_rollouts_for_video.py's post-hoc one) stay in sync. crop_params come
+    from this eval's own config (tasks_cfgs[env_name].crop), matching whatever the
+    checkpoint was actually trained with, rather than a hardcoded constant. When context
+    is given, prepends a left panel of the conditioning demo frames the model was shown."""
+    task_spec = config.get('tasks_cfgs', {}).get(env_name, {})
+    crop_params = task_spec.get('crop', [0, 30, 120, 120])
+    panel = _context_strip(context)
+
+    writer = None
+    for t in range(len(rollout)):
+        obs_t = rollout[t]['obs']
+        if f'{camera_name}_image' not in obs_t:
+            continue
+        if writer is None:
+            img_h, img_w = obs_t[f'{camera_name}_image'].shape[:2]
+            panel_w = 0
+            if panel is not None:
+                panel_w = max(1, int(panel.shape[1] * img_h / panel.shape[0]))
+            writer = open_h264_rgb_writer(video_path, img_w + panel_w, img_h, 20)
+        _write_video_frame(writer, None, camera_name, obs_t, None, None,
+                           crop_params=crop_params, left_panel=panel)
+    close_video_writer(writer)
+
+
+def _proc(model, config, results_dir, heights, widths, size, shape, color, env_name, baseline, variation, max_T, controller_path, model_name, gpu_id, save, gt_bb, sub_action, gt_action, real, place, seed, n, gt_file, demo_file=None):
+    
     json_name = results_dir + '/traj{}.json'.format(n)
     pkl_name = results_dir + '/traj{}.pkl'.format(n)
     if os.path.exists(json_name) and os.path.exists(pkl_name):
         f = open(json_name)
         task_success_flags = json.load(f)
-        print("Using previous results at {}. Loaded eval traj #{}, task#{}, reached? {} picked? {} success? {} ".format(
-            json_name, n, task_success_flags['variation_id'], task_success_flags['reached'], task_success_flags['picked'], task_success_flags['success']))
+        # cond_target_obj_detector's gt_file/--test_gt replay path (object_detection_inference
+        # in utils.py) only ever returns avg_iou/avg_tp/avg_fp/avg_fn -- no variation_id/
+        # reached/picked/success, unlike the live-env rollout path's info dict. Print
+        # whichever keys are actually present instead of assuming the live-env shape.
+        if 'variation_id' in task_success_flags:
+            print("Using previous results at {}. Loaded eval traj #{}, task#{}, reached? {} picked? {} success? {} ".format(
+                json_name, n, task_success_flags['variation_id'], task_success_flags['reached'], task_success_flags['picked'], task_success_flags['success']))
+        else:
+            print("Using previous results at {}. Loaded eval traj #{}: {}".format(
+                json_name, n, task_success_flags))
     else:
         if variation is not None:
             variation_id = variation[n % len(variation)]
@@ -281,6 +357,7 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                                                gt_action=gt_action,
                                                real=real,
                                                gt_file=gt_file,
+                                               demo_file=demo_file,
                                                place=place)
         else:
             if variation is not None:
@@ -307,6 +384,7 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                                                         model_name=model_name,
                                                         gpu_id=gpu_id,
                                                         gt_file=gt_file,
+                                                        demo_file=demo_file,
                                                         real=real,
                                                         place_bb_flag=place)
 
@@ -327,6 +405,8 @@ def _proc(model, config, results_dir, heights, widths, size, shape, color, env_n
                         res_dict[k] = v
                 json.dump(res_dict, open(
                     results_dir+'/traj{}.json'.format(n), 'w'))
+                save_rollout_video(rollout, results_dir+'/traj{}_camera_front_rgb.mp4'.format(n),
+                                   config, env_name, context=context)
         else:
             rollout, task_success_flags = return_rollout
             if save:
@@ -381,6 +461,8 @@ if __name__ == '__main__':
     parser.add_argument(
         '--sub_action', action='store_true')
     parser.add_argument('--gt_action', default=4, type=int)
+    parser.add_argument('--human_demo', action='store_true')
+    parser.add_argument('--validate_on_train_ids', action='store_true')
 
     args = parser.parse_args()
 
@@ -390,11 +472,11 @@ if __name__ == '__main__':
         print("Waiting for debugger attach")
         debugpy.wait_for_client()
 
-    # seed_everything(seed=42)
+    seed_everything(seed=42)
 
     try_path = args.model
     real = True if "Real" in try_path else False
-    place = True if ("KP" in try_path or "Double" in try_path) else False
+    place = True if ("-KP" in try_path or "Double" in try_path or 'COD' in try_path) else False
     # if 'log' not in args.model and 'mosaic' not in args.model:
     #     print("Appending dir to given exp_name: ", args.model)
     #     try_path = join(LOG_PATH, args.model)
@@ -460,7 +542,7 @@ if __name__ == '__main__':
         model_saved_step = model_saved_step[0][:-3]
         print("loading model from saved training step %s" %
               model_saved_step)
-        results_dir = os.path.join(results_dir, 'step-'+model_saved_step)
+        results_dir = os.path.join(results_dir, f"val_train_ids_{args.validate_on_train_ids}",'step-'+model_saved_step)
         os.makedirs(results_dir, exist_ok=True)
         print("Made new path for results at: %s" % results_dir)
         config_path = os.path.expanduser(args.config) if args.config else os.path.join(
@@ -473,7 +555,11 @@ if __name__ == '__main__':
 
         if args.wandb_log:
             model_name = model_path.split("/")[-2]
-            wandb.login(key='1d9590e10967b8af6602ddae665dbcc77f88fbd5')
+
+            # key = os.getenv("WANDB_KEY")
+            # assert key != None, "Please set the WANDB_KEY environment variable"
+            # wandb.login(key=key)
+            wandb.login(key='227ed2fded06f63748a7a29dae55acdda7d131ff', relogin=True)
             run = wandb.init(
                 entity="francescorosa97",
                 project=args.project_name,
@@ -554,23 +640,87 @@ if __name__ == '__main__':
         color = args.color
         variation = args.variation
         seed = args.seed
-        max_T = 95
+        max_T = 150
 
         dataset = None
         if args.test_gt:
             from hydra.utils import instantiate
-            from torch.utils.data import DataLoader
-            from multiprocessing import cpu_count
-            from multi_task_il.datasets.utils import DIYBatchSampler, collate_by_task
             config.dataset_cfg.mode = "train"
-            config.EXPERT_DATA = "/raid/home/frosa_Loc/no_opt_dataset"
+            # Leave config.EXPERT_DATA as loaded from the checkpoint's own config.yaml
+            # (already the correct, current dataset root -- e.g. .../opt_dataset -- that
+            # this same checkpoint was actually trained against, with agent/demo subdirs
+            # named to match dataset_cfg.agent_name/demo_name). The previous hardcoded
+            # override pointed at .../no_opt_dataset, an older dataset copy whose demo-side
+            # directory is named "human_dataset" instead of "{demo_name}_{task_name}",
+            # which made every subtask's demo_files glob come up empty.
             dataset = instantiate(config.get('dataset_cfg', None))
-            pkl_file_dict = dataset.agent_files
+            # object_detection_inference's gt_file branch indexes gt_file[1]/[2]/[3] as
+            # (task_name, context_pkl_path, traj_pkl_path) -- build that tuple here by
+            # pairing each agent (trajectory-to-replay) file with a demo (context) file
+            # from the same (task_name, task_id) subtask, both already split to mode="train"
+            # by create_train_val_dict. Previously this just appended bare agent_files
+            # paths, which _proc/object_detection_inference then tried to index as a
+            # 4-tuple (gt_file[1], gt_file[2]...) -- indexing into single characters of a
+            # path string and crashing on pickle.load of a one-character "filename".
             pkl_file_list = []
-            for task_name in pkl_file_dict.keys():
-                for task_id in pkl_file_dict[task_name].keys():
-                    for pkl_file in pkl_file_dict[task_name][task_id]:
-                        pkl_file_list.append(pkl_file)
+            for task_name, task_dict in dataset.agent_files.items():
+                for task_id, agent_paths in task_dict.items():
+                    demo_paths = dataset.demo_files.get(task_name, {}).get(task_id, [])
+                    if not agent_paths or not demo_paths:
+                        continue
+                    # cap per-subtask samples at eval_each_task, same as the human_demo
+                    # branch does, so a full training-set replay doesn't explode into
+                    # thousands of rollouts by default.
+                    sampled_agent_paths = agent_paths[:args.eval_each_task]
+                    for i, agent_path in enumerate(sampled_agent_paths):
+                        demo_path = demo_paths[i % len(demo_paths)]
+                        pkl_file_list.append((task_id, task_name, demo_path, agent_path))
+            args.N = len(pkl_file_list)
+
+        # if human_demo, load the dataset and generate the seeds for demo files
+        if args.human_demo:
+            from hydra.utils import instantiate
+            config.EXPERT_DATA = "/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset"
+            config.dataset_cfg.mode = "val"
+            config.dataset_cfg.agent_name="ur5e"
+            config.dataset_cfg.demo_name="human_rgb"
+            if len(config.tasks_cfgs.pick_place.skip_ids) != 0 and not args.validate_on_train_ids:
+                # all_task = set(config.tasks_cfgs.pick_place.task_ids)
+                # train_skip_tasks = set(config.tasks_cfgs.pick_place.skip_ids)
+                # val_skip_tasks = list(all_task - train_skip_tasks)
+                # config.tasks_cfgs.pick_place.skip_ids = val_skip_tasks
+
+                config.dataset_cfg.validation_on_skipped_task = True
+                print("Evaluating on human demos on tasks: ", list(config.tasks_cfgs.pick_place.skip_ids))
+            elif len(config.tasks_cfgs.pick_place.skip_ids) != 0 and args.validate_on_train_ids:
+                print("Evaluating on human demos on tasks: ", list(set(config.tasks_cfgs.pick_place.task_ids) - set(config.tasks_cfgs.pick_place.skip_ids)))
+                config.dataset_cfg.validation_on_skipped_task = False
+                
+            
+            dataset = instantiate(config.get('dataset_cfg', None))
+            
+            variation = list()
+            demo_files = dataset.demo_files['pick_place']
+            pkl_file_list = []
+            for task_id in demo_files.keys():
+                
+                if len(demo_files[task_id]) < args.eval_each_task:
+                    print(f"Task {task_id} has only {len(demo_files[task_id])} demo files, which is less than eval_each_task {args.eval_each_task}. Using all available demo files for this task.")
+                    # repeat demo files until we have enough for eval_each_task
+                    repeat_times = (args.eval_each_task + len(demo_files[task_id]) - 1) // len(demo_files[task_id])  # ceiling division
+                    demo_files[task_id] = demo_files[task_id] * repeat_times
+                    if len(demo_files[task_id]) > args.eval_each_task:
+                        demo_files[task_id] = demo_files[task_id][:args.eval_each_task]
+                        print(f"Task {task_id} truncated to {len(demo_files[task_id])} demo files.")
+                else:
+                    # sample 10 demo files for each task
+                    demo_files[task_id] = random.sample(demo_files[task_id], args.eval_each_task)
+                
+                for pkl_file in demo_files[task_id]:
+                    #for i in range(args.eval_each_task): # 10 test for each demo
+                    variation.append(task_id)
+                    pkl_file_list.append(pkl_file)
+            
             args.N = len(pkl_file_list)
 
         parallel = args.num_workers > 1
@@ -603,14 +753,27 @@ if __name__ == '__main__':
 
         random.seed(42)
         np.random.seed(42)
+                
         seeds = []
         if args.test_gt:
             for i in range(args.N):
                 seeds.append((random.getrandbits(32), i,
                               pkl_file_list[i % len(pkl_file_list)], -1))
         else:
-            seeds = [(random.getrandbits(32), i, None) for i in range(args.N)]
+            if args.human_demo:
+                for i in range(args.N):
+                    seeds.append((random.getrandbits(32),
+                                i,
+                                None, # agent path, not used
+                                pkl_file_list[i % len(pkl_file_list)])) # demo path
+            else:
+                seeds = [(random.getrandbits(32), i, None) for i in range(args.N)]
 
+        # saving seeds for reproducibility
+        with open(os.path.join(results_dir, 'seeds.txt'), 'w') as file_save:
+            for seed in seeds:
+                file_save.write(f"{seed[0]}\n")
+        
         if parallel:
             with Pool(args.num_workers) as p:
                 task_success_flags = p.starmap(f, seeds)
@@ -619,8 +782,12 @@ if __name__ == '__main__':
                 task_success_flags = [f(seeds[i][0], seeds[i][1], seeds[i][2])
                                       for i, _ in enumerate(seeds)]
             else:
-                task_success_flags = [f(seeds[i][0], seeds[i][1], seeds[i][2])
-                                      for i, n in enumerate(range(args.N))]
+                if args.human_demo:
+                    task_success_flags = [f(seeds[i][0], seeds[i][1], seeds[i][2], seeds[i][3])
+                                        for i, _ in enumerate(range(args.N))]
+                else:
+                    task_success_flags = [f(seeds[i][0], seeds[i][1], seeds[i][2])
+                                        for i, n in enumerate(range(args.N))]
 
         if "cond_target_obj_detector" not in model_name:
             final_results = dict()

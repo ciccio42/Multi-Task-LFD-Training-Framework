@@ -151,6 +151,7 @@ class PickPlace(SingleArmEnv):
         self.bin_id = task_id % 4
         self.bin_size = np.array((0.16, 0.16))
         self.object_set = env_conf['object_set']
+        self.initial_qpos = env_conf['initial_qpos']
         print(f"Object set {self.object_set}")
         self.env_name = "pick_place"
 
@@ -236,6 +237,7 @@ class PickPlace(SingleArmEnv):
             camera_heights=camera_heights,
             camera_widths=camera_widths,
             camera_depths=camera_depths,
+            initial_qpos=self.initial_qpos
         )
 
     def init_object_dicts(self):

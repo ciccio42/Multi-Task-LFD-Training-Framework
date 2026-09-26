@@ -3,14 +3,8 @@ import torch
 from os.path import join, expanduser
 from multi_task_il.datasets import load_traj, split_files
 import cv2
-from torch.utils.data import Dataset, Sampler, SubsetRandomSampler, RandomSampler, WeightedRandomSampler
 from torch.utils.data._utils.collate import default_collate
-from torchvision import transforms
-from torchvision.transforms import RandomAffine, ToTensor, Normalize, \
-    RandomGrayscale, ColorJitter, RandomApply, RandomHorizontalFlip, GaussianBlur, RandomResizedCrop
-from torchvision.transforms.functional import resized_crop
 from robosuite.utils.transform_utils import quat2axisangle, axisangle2quat, quat2mat, mat2quat 
-
 import pickle as pkl
 from collections import defaultdict, OrderedDict
 import glob
@@ -23,12 +17,13 @@ from operator import concat
 from multi_task_il.utils import normalize_action
 import time
 import math
+from PIL import Image
 from tqdm import tqdm
 import logging
-import time
-import albumentations as A
-from albumentations.pytorch import ToTensorV2
 import itertools
+from torchvision.transforms import ToPILImage
+import json
+import os
 
 logging.basicConfig(
     level=logging.INFO,
@@ -112,8 +107,6 @@ ENV_OBJECTS = {
     }
 }
 
-JITTER_FACTORS = {'brightness': 0.4,
-                  'contrast': 0.4, 'saturation': 0.4, 'hue': 0.1}
 
 
 #
@@ -149,15 +142,31 @@ def collate_by_task(batch):
     return per_task_data
 
 
-def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_name: str = "panda", root_dir: str = "", task_spec=None, split: list = [0.9, 0.1], allow_train_skip: bool = False, allow_val_skip: bool = False, mix_variations: bool = False, mode='train', mix_sim_real=False):
+def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_name: str = "panda", root_dir: str = "", task_spec=None, split: list = [0.9, 0.1], allow_train_skip: bool = False, allow_val_skip: bool = False, mix_variations: bool = False, mode='train', mix_sim_real=False, validation_on_skipped_task=False, trajectory_manifest=None):
 
-    count = 0
+    sample_indx = 0
     agent_file_cnt = 0
     demo_file_cnt = 0
-    validation_on_skipped_task = False
+    count = 0
+    pair_cnt = 0
+
+    # Optional spawn-region-restricted (or otherwise trajectory-restricted) training subset: a
+    # manifest JSON of the form {"task_00": ["/abs/path/.../task_00/traj004.pkl", ...], ...} - the
+    # same format open_x_embodiment's TFDS builders (ur5e_pick_place.py) already write per
+    # spawn-region dataset variant to record which raw trajectories belong to that variant. Only
+    # basenames are used below (matched against whatever agent_dir this call resolves to), since
+    # the manifest's absolute paths may point at a different on-disk copy of the dataset than
+    # root_dir resolves to (both copies share identical traj000.pkl.. numbering per task).
+    manifest = None
+    if trajectory_manifest is not None:
+        with open(trajectory_manifest, 'r') as f:
+            manifest = json.load(f)
 
     for spec in task_spec:
-        if mode == 'val' and len(spec.get('skip_ids', [])) != 0:
+        
+        # if mode == 'val' and len(spec.get('skip_ids', [])) != 0:
+        #     validation_on_skipped_task = True
+        if mode == 'train':
             validation_on_skipped_task = False
 
         name, date = spec.get('name', None), spec.get('date', None)
@@ -183,6 +192,8 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
                 root_dir, name, '{}_{}_{}'.format(date, demo_name, name))
         dataset_loader.subtask_to_idx[name] = defaultdict(list)
         dataset_loader.demo_subtask_to_idx[name] = defaultdict(list)
+        
+       
         for _id in range(spec.get('n_tasks')):
 
             # take demo file from no-skipped tasks
@@ -203,7 +214,13 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
             task_id = 'task_{:02d}'.format(_id)
             task_dir = expanduser(join(agent_dir,  task_id, '*.pkl'))
             agent_files = sorted(glob.glob(task_dir))
-            
+
+            if manifest is not None:
+                allowed_basenames = {os.path.basename(p) for p in manifest.get(task_id, [])}
+                agent_files = [p for p in agent_files if os.path.basename(p) in allowed_basenames]
+                assert len(agent_files) != 0, "trajectory_manifest {!r} matched no files for task {}, subtask {} in dir {}".format(
+                    trajectory_manifest, name, _id, task_dir)
+
             if 'real' in task_dir and dataset_loader._mix_sim_real:
                 task_dir_sim = task_dir.replace(agent_name, agent_name.replace('real_new_', ''))
                 agent_files.extend(sorted(glob.glob(task_dir_sim)))
@@ -244,88 +261,37 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
 
             dataset_loader.agent_files[name][_id] = deepcopy(agent_files)
             dataset_loader.demo_files[name][_id] = deepcopy(demo_files)
-
-            dataset_loader.object_distribution[name][task_id] = OrderedDict()
-
-            if dataset_loader.compute_obj_distribution:
-                dataset_loader.object_distribution_to_indx[name][task_id] = [
-                    [] for i in range(len(ENV_OBJECTS[name]['ranges']))]
-                # for each subtask, create a dict with the object name
-                # assign the slot at each file
-                for agent in agent_files:
-                    # compute object distribution if requested
-                    if dataset_loader.compute_obj_distribution:
-                        # load pickle file
-                        with open(agent, "rb") as f:
-                            agent_file_data = pkl.load(f)
-                        # take trj
-                        trj = agent_file_data['traj']
-                        # take target object id
-                        target_obj_id = trj[1]['obs']['target-object']
-                        for id, obj_name in enumerate(ENV_OBJECTS[name]['obj_names']):
-                            if id == target_obj_id:
-                                if obj_name not in dataset_loader.object_distribution[name][task_id]:
-                                    dataset_loader.object_distribution[name][task_id][obj_name] = OrderedDict(
-                                    )
-                                # get object position
-                                if name == 'nut_assembly':
-                                    if id == 0:
-                                        pos = trj[1]['obs']['round-nut_pos']
-                                    else:
-                                        pos = trj[1]['obs'][f'round-nut-{id+1}_pos']
-                                else:
-                                    pos = trj[1]['obs'][f'{obj_name}_pos']
-                                for i, pos_range in enumerate(ENV_OBJECTS[name]["ranges"]):
-                                    if pos[1] >= pos_range[0] and pos[1] <= pos_range[1]:
-                                        dataset_loader.object_distribution[name][task_id][obj_name][agent] = i
-                                        break
-                                break
-
-            if not dataset_loader._mix_demo_agent and not dataset_loader._change_command_epoch:
-                for demo in demo_files:
-                    for agent in agent_files:
-                        dataset_loader.all_file_pairs[count] = (
-                            name, _id, demo, agent)
-                        dataset_loader.task_to_idx[name].append(count)
-                        dataset_loader.subtask_to_idx[name][task_id].append(
-                            count)
-                        if dataset_loader.compute_obj_distribution:
-                            # take objs for the current task_id
-                            for obj in dataset_loader.object_distribution[name][task_id].keys():
-                                # take the slot for the given agent file
-                                if agent in dataset_loader.object_distribution[name][task_id][obj]:
-                                    slot_indx = dataset_loader.object_distribution[name][task_id][obj][agent]
-                                    # assign the slot for the given agent file
-                                    dataset_loader.object_distribution_to_indx[name][task_id][slot_indx].append(
-                                        count)
-                                    dataset_loader.index_to_slot[count] = slot_indx
-                        count += 1
-            elif not dataset_loader._mix_demo_agent and dataset_loader._change_command_epoch:
-                print(f"Loading task {name} - sub-task {_id}")
-                for agent in tqdm(agent_files):
+            
+            if not dataset_loader._mix_demo_agent:
+                print(f"Loading {name} - {task_id}")
+                for indx_demo, demo in enumerate(demo_files):
+                    dataset_loader.all_demo_files[demo_file_cnt] = (name, _id, demo)
+                    dataset_loader.demo_task_to_idx[name].append(demo_file_cnt)
+                    dataset_loader.demo_subtask_to_idx[name][task_id].append(demo_file_cnt)
+                    demo_file_cnt += 1
+                    
+                for indx_agent, agent in enumerate(agent_files):
                     # open file and check trajectory lenght
                     with open(agent, "rb") as f:
                         agent_data = pkl.load(f)
-                        trj_len = agent_data['len']
-                    # for t in range(trj_len):
-                    dataset_loader.all_agent_files[agent_file_cnt] = (
-                        name, _id, agent, trj_len)
-                    dataset_loader.task_to_idx[name].append(agent_file_cnt)
-                    dataset_loader.subtask_to_idx[name][task_id].append(
-                        agent_file_cnt)
-                    count += trj_len
-                    agent_file_cnt += 1
+                        # trj_len = agent_data['len']
+                        trj_len = len(agent_data['traj'])
+                        
+                        dataset_loader.all_agent_files[agent_file_cnt] = (name, _id, agent, trj_len)
+                        agent_file_cnt += 1
+                        
+                        
+                        # dataset_loader.all_file_pairs[sample_indx] = (name, _id, demo, agent, trj_len)
+                        dataset_loader.task_to_idx[name].append(sample_indx)
+                        dataset_loader.subtask_to_idx[name][task_id].append(sample_indx)
+                        sample_indx += 1
+                        count += trj_len
+                        # pair_cnt += 1
+                    
 
-                for demo_indx, demo in enumerate(demo_files):
-                    dataset_loader.all_demo_files[demo_file_cnt] = (
-                        name, _id, demo)
-                    dataset_loader.demo_task_to_idx[name].append(
-                        demo_file_cnt)
-                    dataset_loader.demo_subtask_to_idx[name][task_id].append(
-                        demo_file_cnt)
-                    demo_file_cnt += 1
-
+        # for C(T)OD                    
         if dataset_loader._mix_demo_agent:
+            count = 0
             num_variation_per_object = NUM_VARIATION_PER_OBEJECT[name][0]
             num_objects = NUM_VARIATION_PER_OBEJECT[name][1]
 
@@ -365,6 +331,13 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
                     # take indices for different manipulated objects
                     target_obj_id = int(_id/num_variation_per_object)
                     for sub_task_id in range(spec.get('n_tasks')):
+                        
+                        # check if the sub-task represents the same manipulated object
+                        if len(spec.get('skip_ids', [])) != 0:
+                            target_obj_sub_task_id = int(sub_task_id/num_variation_per_object)
+                            if target_obj_id != target_obj_sub_task_id and mode == 'train':
+                                continue
+                        
                         if not validation_on_skipped_task:
                             if sub_task_id in spec.get('skip_ids', []):
                                 # print(f"Sub_task id {sub_task_id}")
@@ -386,10 +359,15 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
                             if not validation_on_skipped_task:
                                 div = spec.get('n_tasks') - \
                                     len(spec.get('skip_ids', [])) - 1
+                                # agent_files.extend(random.sample(
+                                #     dataset_loader.agent_files[name][sub_task_id], round(different_sample_number / div)))
+                                agent_files.extend(random.sample(
+                                    dataset_loader.agent_files[name][sub_task_id], round(different_sample_number / (num_variation_per_object-1))))
                             else:
                                 div = len(spec.get('skip_ids', [])) - 1
-                            agent_files.extend(random.sample(
-                                dataset_loader.agent_files[name][sub_task_id], round(different_sample_number / div)))
+                                agent_files.extend(random.sample(
+                                    dataset_loader.agent_files[name][sub_task_id], round(different_sample_number / div)))
+                                
                     for agent_file in agent_files:
                         dataset_loader.all_file_pairs[count] = (
                             name, _id, demo_file, agent_file)
@@ -397,8 +375,9 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
                         dataset_loader.subtask_to_idx[name][_id].append(
                             count)
                         count += 1
+                        pair_cnt += 1
 
-        print('Done loading Task {}, agent/demo trajctores pairs reach a count of: {}'.format(name, count))
+        print(f"Task {name} has\n\tDemo files: {demo_file_cnt}\n\tAgent files: {agent_file_cnt}\n\tTotal pairs: {pair_cnt}\n\tTotal samples: {count}")
 
         if spec.get('demo_crop', None) is not None:
             dataset_loader.demo_crop[name] = spec.get(
@@ -415,10 +394,12 @@ def create_train_val_dict(dataset_loader=object, agent_name: str = "ur5e", demo_
             dataset_loader.task_crops[name] = spec.get(
                 'crop', [0, 0, 0, 0])
 
-    return count
+    with open(os.path.join(root_dir, name, f'{mode}_{demo_name}_{agent_name}_all_file_pairs.json'), 'w') as f:
+        json.dump(dataset_loader.all_file_pairs, f)
+    return count, pair_cnt
 
 
-def make_demo(dataset, traj, task_name):
+def make_demo(dataset, traj, task_name, human_demo=False):
     """
     Do a near-uniform sampling of the demonstration trajectory
     """
@@ -437,13 +418,23 @@ def make_demo(dataset, traj, task_name):
                 n = clip(np.random.randint(
                     int(i * per_bracket), int((i + 1) * per_bracket)))
             # frames.append(_make_frame(n))
-            # convert from BGR to RGB and scale to 0-1 range
-            obs = copy.copy(
-                traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
+
+            if not human_demo and (dataset.width != 224 and dataset.height != 224):
+                obs = copy.copy(
+                    traj.get(n)['obs']['camera_front_image'])#[:, :, ::-1]
+                # pil_img = ToPILImage()(obs)
+                # pil_img.save("demo_frame.png")
+            elif dataset.width == 224 and dataset.height == 224:
+                obs = copy.copy(
+                    traj.get(n)['obs']['camera_front_image'])
+            else:
+                obs = copy.copy(
+                    traj.get(n)['obs']['camera_front_image'])
+            
             processed = dataset.frame_aug(
                 task_name,
                 obs,
-                perform_aug=False,
+                perform_aug=True,
                 frame_number=i,
                 perform_scale_resize=True)
             frames.append(processed)
@@ -488,9 +479,10 @@ def make_demo(dataset, traj, task_name):
                         break
                 n = start_moving + int((end_moving-start_moving)/2)
 
-            # convert from BGR to RGB and scale to 0-1 range
+            # camera_front_image is already stored as RGB (verified against
+            # raw human_rgb demo pkls) -- flipping here corrupts it into BGR.
             obs = copy.copy(
-                traj.get(n)['obs']['camera_front_image'][:, :, ::-1])
+                traj.get(n)['obs']['camera_front_image'])
 
             processed = dataset.frame_aug(task_name,
                                           obs,
@@ -537,6 +529,24 @@ def adjust_bb(dataset_loader, bb, obs, img_width=360, img_height=200, top=0, lef
         y1 = int((y1_old - top) * y_scale)
         y2 = int((y2_old - top) * y_scale)
 
+        if x1 <= 0:
+            x1 = 0
+        if x2 <= 0:
+            x2 = 0
+        if y1 <= 0:
+            y1 = 0
+        if y2 <= 0:
+            y2 = 0
+
+        if x1 >= dataset_loader.width:
+            x1 = dataset_loader.width-1
+        if x2 >= dataset_loader.width:
+            x2 = dataset_loader.width-1
+        if y1 >= dataset_loader.height:
+            y1 = dataset_loader.height-1
+        if y2 >= dataset_loader.height:
+            y2 = dataset_loader.height-1
+
         if DEBUG:
             image = cv2.rectangle(np.ascontiguousarray(np.array(np.moveaxis(
                 obs.numpy()*255, 0, -1), dtype=np.uint8)),
@@ -546,248 +556,12 @@ def adjust_bb(dataset_loader, bb, obs, img_width=360, img_height=200, top=0, lef
                     y2),
                 color=(0, 0, 255),
                 thickness=1)
-            if x1 < 0:
-                x1 = 0
-            if x2 < 0:
-                x2 = 0
-            if y1 < 0:
-                y1 = 0
-            if y2 < 0:
-                y2 = 0
-
-            if x1 > dataset_loader.width:
-                x1 = dataset_loader.width
-            if x2 > dataset_loader.width:
-                x2 = dataset_loader.width
-            if y1 > dataset_loader.height:
-                y1 = dataset_loader.height
-            if y2 > dataset_loader.height:
-                y2 = dataset_loader.height
-            cv2.imwrite("bb_cropped.png", image)
+            
+            Image.fromarray(np.asarray(image, dtype=np.uint8)).save("bb_cropped.png")
 
         # replace with new bb
         bb[obj_indx] = np.array([[x1, y1, x2, y2]])
     return bb
-
-
-def create_data_aug(dataset_loader=object):
-
-    assert dataset_loader.data_augs, 'Must give some basic data-aug parameters'
-    if dataset_loader.mode == 'train':
-        print('Data aug parameters:', dataset_loader.data_augs)
-
-    dataset_loader.toTensor = ToTensor()
-    old_aug = dataset_loader.data_augs.get('old_aug', True)
-    if old_aug:
-        dataset_loader.normalize = Normalize(
-            mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        jitters = {k: v * dataset_loader.data_augs.get('weak_jitter', 0)
-                   for k, v in JITTER_FACTORS.items()}
-        weak_jitter = ColorJitter(**jitters)
-
-        weak_scale = dataset_loader.data_augs.get(
-            'weak_crop_scale', (0.8, 1.0))
-        weak_ratio = dataset_loader.data_augs.get(
-            'weak_crop_ratio', (1.6, 1.8))
-        randcrop = RandomResizedCrop(
-            size=(dataset_loader.height, dataset_loader.width), scale=weak_scale, ratio=weak_ratio)
-        if dataset_loader.data_augs.use_affine:
-            randcrop = RandomAffine(degrees=0, translate=(dataset_loader.data_augs.get(
-                'rand_trans', 0.1), dataset_loader.data_augs.get('rand_trans', 0.1)))
-        dataset_loader.transforms = transforms.Compose([
-            RandomApply([weak_jitter], p=0.1),
-            RandomApply(
-                [GaussianBlur(kernel_size=5, sigma=dataset_loader.data_augs.get('blur', (0.1, 2.0)))], p=0.1),
-            randcrop,
-            # dataset_loader.normalize
-        ])
-
-        print("Using strong augmentations?", dataset_loader.use_strong_augs)
-        jitters = {k: v * dataset_loader.data_augs.get('strong_jitter', 0)
-                   for k, v in JITTER_FACTORS.items()}
-        strong_jitter = ColorJitter(**jitters)
-        dataset_loader.grayscale = RandomGrayscale(
-            dataset_loader.data_augs.get("grayscale", 0))
-        strong_scale = dataset_loader.data_augs.get(
-            'strong_crop_scale', (0.2, 0.76))
-        strong_ratio = dataset_loader.data_augs.get(
-            'strong_crop_ratio', (1.2, 1.8))
-        dataset_loader.strong_augs = transforms.Compose([
-            RandomApply([strong_jitter], p=0.05),
-            dataset_loader.grayscale,
-            RandomHorizontalFlip(p=dataset_loader.data_augs.get('flip', 0)),
-            RandomApply(
-                [GaussianBlur(kernel_size=5, sigma=dataset_loader.data_augs.get('blur', (0.1, 2.0)))], p=0.01),
-            RandomResizedCrop(
-                size=(dataset_loader.height, dataset_loader.width), scale=strong_scale, ratio=strong_ratio),
-            # dataset_loader.normalize,
-        ])
-    else:
-        dataset_loader.transforms = transforms.Compose([
-            transforms.ColorJitter(
-                brightness=list(dataset_loader.data_augs.get(
-                    "brightness", [0.875, 1.125])),
-                contrast=list(dataset_loader.data_augs.get(
-                    "contrast", [0.5, 1.5])),
-                saturation=list(dataset_loader.data_augs.get(
-                    "contrast", [0.5, 1.5])),
-                hue=list(dataset_loader.data_augs.get("hue", [-0.05, 0.05])),
-            )
-        ])
-        print("Using strong augmentations?", dataset_loader.use_strong_augs)
-        dataset_loader.strong_augs = transforms.Compose([
-            transforms.ColorJitter(
-                brightness=list(dataset_loader.data_augs.get(
-                    "brightness_strong", [0.875, 1.125])),
-                contrast=list(dataset_loader.data_augs.get(
-                    "contrast_strong", [0.5, 1.5])),
-                saturation=list(dataset_loader.data_augs.get(
-                    "contrast_strong", [0.5, 1.5])),
-                hue=list(dataset_loader.data_augs.get(
-                    "hue_strong", [-0.05, 0.05]))
-            ),
-        ])
-
-        dataset_loader.affine_transform = A.Compose([
-            # A.Rotate(limit=(-angle, angle), p=1),
-            A.ShiftScaleRotate(shift_limit=0.1,
-                               rotate_limit=0,
-                               scale_limit=0,
-                               p=dataset_loader.data_augs.get(
-                                   "p", 9.0))
-        ])
-
-    def horizontal_flip(obs, bb=None, p=0.1):
-        if random.random() < p:
-            height, width = obs.shape[-2:]
-            obs = obs.flip(-1)
-            if bb is not None:
-                # For each bounding box
-                for obj_indx, obj_bb in enumerate(bb):
-                    x1, y1, x2, y2 = obj_bb
-                    x1_new = width - x2
-                    x2_new = width - x1
-                    # replace with new bb
-                    bb[obj_indx] = np.array([[x1_new, y1, x2_new, y2]])
-        return obs, bb
-
-    def frame_aug(task_name, obs, second=False, bb=None, class_frame=None, perform_aug=True, frame_number=-1, perform_scale_resize=True, agent=False, sim_crop=False):
-
-        if perform_scale_resize:
-            img_height, img_width = obs.shape[:2]
-            """applies to every timestep's RGB obs['camera_front_image']"""
-            if len(getattr(dataset_loader, "demo_crop", OrderedDict())) != 0 and not agent:
-                crop_params = dataset_loader.demo_crop.get(
-                    task_name, [0, 0, 0, 0])
-            if len(getattr(dataset_loader, "agent_crop", OrderedDict())) != 0 and agent and not sim_crop:
-                crop_params = dataset_loader.agent_crop.get(
-                    task_name, [0, 0, 0, 0])
-            if len(getattr(dataset_loader, "agent_sim_crop", OrderedDict())) != 0 and agent and sim_crop:
-                crop_params = dataset_loader.agent_sim_crop.get(
-                    task_name, [0, 0, 0, 0])
-            if len(getattr(dataset_loader, "task_crops", OrderedDict())) != 0:
-                crop_params = dataset_loader.task_crops.get(
-                    task_name, [0, 0, 0, 0])
-
-            top, left = crop_params[0], crop_params[2]
-            img_height, img_width = obs.shape[0], obs.shape[1]
-            box_h, box_w = img_height - top - \
-                crop_params[1], img_width - left - crop_params[3]
-
-            obs = dataset_loader.toTensor(obs)
-            # ---- Resized crop ----#
-            obs = resized_crop(obs, top=top, left=left, height=box_h,
-                               width=box_w, size=(dataset_loader.height, dataset_loader.width))
-            if DEBUG:
-                cv2.imwrite(f"prova_resized_{frame_number}.png", np.moveaxis(
-                    obs.numpy()*255, 0, -1))
-            if bb is not None and class_frame is not None:
-                bb = adjust_bb(dataset_loader=dataset_loader,
-                               bb=bb,
-                               obs=obs,
-                               img_height=img_height,
-                               img_width=img_width,
-                               top=top,
-                               left=left,
-                               box_w=box_w,
-                               box_h=box_h)
-
-            if dataset_loader.data_augs.get('null_bb', False) and bb is not None:
-                bb[0][0] = 0.0
-                bb[0][1] = 0.0
-                bb[0][2] = 0.0
-                bb[0][3] = 0.0
-        else:
-            obs = dataset_loader.toTensor(obs)
-            if bb is not None and class_frame is not None:
-                for obj_indx, obj_bb in enumerate(bb):
-                    # Convert normalized bounding box coordinates to actual coordinates
-                    x1, y1, x2, y2 = obj_bb
-                    # replace with new bb
-                    bb[obj_indx] = np.array([[x1, y1, x2, y2]])
-
-        # ---- Affine Transformation ----#
-        if dataset_loader.data_augs.get('affine', False) and agent:
-            obs_to_affine = np.array(np.moveaxis(
-                obs.numpy()*255, 0, -1), dtype=np.uint8)
-            norm_bb = A.augmentations.bbox_utils.normalize_bboxes(
-                bb, obs_to_affine.shape[0], obs_to_affine.shape[1])
-
-            transformed = dataset_loader.affine_transform(
-                image=obs_to_affine,
-                bboxes=norm_bb)
-            obs = dataset_loader.toTensor(transformed['image'])
-            bb_denorm = np.array(A.augmentations.bbox_utils.denormalize_bboxes(bboxes=transformed['bboxes'],
-                                                                               rows=obs_to_affine.shape[0],
-                                                                               cols=obs_to_affine.shape[1]
-                                                                               ))
-            for obj_indx, obj_bb in enumerate(bb_denorm):
-                if bb_denorm[obj_indx][0] > obs_to_affine.shape[1]:
-                    bb_denorm[obj_indx][0] = obs_to_affine.shape[1]
-                if bb_denorm[obj_indx][1] > obs_to_affine.shape[0]:
-                    bb_denorm[obj_indx][1] = obs_to_affine.shape[0]
-                if bb_denorm[obj_indx][2] > obs_to_affine.shape[1]:
-                    bb_denorm[obj_indx][2] = obs_to_affine.shape[1]
-                if bb_denorm[obj_indx][3] > obs_to_affine.shape[0]:
-                    bb_denorm[obj_indx][3] = obs_to_affine.shape[0]
-            bb = bb_denorm
-        # ---- Augmentation ----#
-        if dataset_loader.use_strong_augs and second:
-            augmented = dataset_loader.strong_augs(obs)
-            if DEBUG:
-                cv2.imwrite("strong_augmented.png", np.moveaxis(
-                    augmented.numpy()*255, 0, -1))
-        else:
-            if perform_aug:
-                augmented = dataset_loader.transforms(obs)
-            else:
-                augmented = obs
-            if DEBUG:
-                if agent:
-                    cv2.imwrite("weak_augmented.png", np.moveaxis(
-                        augmented.numpy()*255, 0, -1))
-        assert augmented.shape == obs.shape
-
-        if bb is not None:
-            if DEBUG:
-                image = np.ascontiguousarray(np.array(np.moveaxis(
-                    augmented.numpy()*255, 0, -1), dtype=np.uint8))
-                for single_bb in bb:
-                    try:
-                        image = cv2.rectangle(image,
-                                              (int(single_bb[0]),
-                                               int(single_bb[1])),
-                                              (int(single_bb[2]),
-                                               int(single_bb[3])),
-                                              color=(0, 0, 255),
-                                              thickness=1)
-                    except:
-                        print("Exception")
-                cv2.imwrite("bb_cropped_after_aug.png", image)
-            return augmented, bb, class_frame
-        else:
-            return augmented
-    return frame_aug
 
 
 def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, command=None, subtask_id=-1, agent_task_id=-1, take_place_loc=False):
@@ -896,9 +670,17 @@ def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, comm
             elif i == 3 and distractor:
                 object_name = no_place_obj_name
         try:
+            
+            if 'bin' in object_name and task_name == 'pick_place':
+                top_left = step_t['obs']['obj_bb']["camera_front"][object_name]['bottom_right_corner'] #step_t['obs']['obj_bb']["camera_front"][object_name]['bottom_right_corner']
+                bottom_right = step_t['obs']['obj_bb']["camera_front"][object_name]['upper_left_corner'] #step_t['obs']['obj_bb']["camera_front"][object_name]['upper_left_corner']
+            else:
+                top_left = step_t['obs']['obj_bb']["camera_front"][object_name]['bottom_right_corner']
+                bottom_right = step_t['obs']['obj_bb']["camera_front"][object_name]['upper_left_corner']
+            
             # if not getattr(dataset_loader, "real", False):
-            top_left = step_t['obs']['obj_bb']["camera_front"][object_name]['bottom_right_corner']
-            bottom_right = step_t['obs']['obj_bb']["camera_front"][object_name]['upper_left_corner']
+            #     top_left = step_t['obs']['obj_bb']["camera_front"][object_name]['bottom_right_corner']
+            #     bottom_right = step_t['obs']['obj_bb']["camera_front"][object_name]['upper_left_corner']
             # else:
             #     top_left = step_t['obs']['obj_bb']["camera_front"][object_name]['upper_left_corner']
             #     bottom_right = step_t['obs']['obj_bb']["camera_front"][object_name]['bottom_right_corner']
@@ -931,14 +713,14 @@ def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, comm
                                   color=color,
                                   thickness=1)
             if DEBUG:
-                cv2.imwrite("GT_bb_prova.png", image)
+                Image.fromarray(np.asarray(image, dtype=np.uint8)).save("GT_bb_prova.png")
 
         bb.append([top_left_x, top_left_y,
                    bottom_right_x, bottom_right_y])
 
         # 1 Target
         # 0 No-target
-        # 2 Target-plase
+        # 2 Target-place
         # 3 No-Target-place
 
         if i == 0:
@@ -954,7 +736,7 @@ def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, comm
         image = np.array(
             step_t['obs']['camera_front_image'][:, :, ::-1])
         for i, single_bb in enumerate(bb):
-            if i == 0 or i == 2:
+            if i == 0 or i == 3:
                 color = (0, 255, 0) # green no-targ
             else:
                 color = (255, 0, 0) # blue target
@@ -965,7 +747,7 @@ def create_gt_bb(dataset_loader, traj, step_t, task_name, distractor=False, comm
                                    int(single_bb[3])),
                                   color=color,
                                   thickness=1)
-        cv2.imwrite("GT_bb_prova_full_bb.png", image)
+        Image.fromarray(np.asarray(image, dtype=np.uint8)).save("GT_bb_prova_full_bb.png")
 
     return np.array(bb), np.array(cl)
 
@@ -1089,7 +871,7 @@ def create_gt_bb_all_obj(dataset_loader, traj, step_t, task_name, distractor=Fal
                                   color=color,
                                   thickness=1)
             if DEBUG:
-                cv2.imwrite("GT_bb_prova.png", image)
+                Image.fromarray(np.asarray(image, dtype=np.uint8)).save("GT_bb_prova.png")
 
         bb.append([top_left_x, top_left_y,
                    bottom_right_x, bottom_right_y])
@@ -1177,10 +959,11 @@ def trasform_from_world_to_bl(action):
     
     return action_bl
 
-def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_action=False, load_state=False, load_eef_point=False, distractor=False, subtask_id=-1, agent_task_id=-1, bb_sequence=False, take_place_loc=False, sim_crop=True, convert_action=True):
+def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_action=False, load_state=False, load_eef_point=False, distractor=False, subtask_id=-1, agent_task_id=-1, bb_sequence=False, take_place_loc=False, sim_crop=True, convert_action=True, human_demo=False):
 
     images = []
     images_cp = []
+    wrist_images = []
     bb = []
     obj_classes = []
     actions = []
@@ -1190,24 +973,52 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
     time_sample = time.time()
     crop_params = dataset_loader.task_crops.get(task_name, [0, 0, 0, 0])
     for j, t in enumerate(chosen_t):
-        t = t.item()
+        try:
+            t = t.item()
+        except:
+            pass
         step_t = traj.get(t)
 
+        # This used to gate the flip on `human_demo`, which is derived from
+        # the DEMO file path ("human" in demo_file) -- nothing to do with
+        # the AGENT frame being loaded right here. Since every production
+        # config uses DEMO_NAME=human_rgb, human_demo was always True,
+        # collapsing every branch below to "flip" regardless of real vs sim.
+        # That happened to match real agent data (verified: raw
+        # real_eye_in_hand_ur5e_pick_place camera_front_image is BGR) but
+        # silently corrupted sim agent data (verified: raw ur5e_pick_place
+        # camera_front_image is already RGB). Gate on the agent's actual
+        # source (the same real/sim_crop split already used above) instead.
         if not getattr(dataset_loader, "real", False) or (getattr(dataset_loader, "real", False) and sim_crop):
-            # cv2.imwrite("prova.png", step_t['obs']['camera_front_image'])
-            image = copy.copy(
-                step_t['obs']['camera_front_image'][:, :, ::-1])
+            # sim-sourced camera_front_image is already RGB
+            image = copy.copy(step_t['obs']['camera_front_image'])
         else:
             if step_t['obs'].get('camera_front_image_full_size', None) is not None:
                 image = copy.copy(
                 cv2.imdecode(step_t['obs']['camera_front_image_full_size'], cv2.IMREAD_COLOR))
             else:
+                # real-sourced camera_front_image is stored BGR (unlike the
+                # human demo videos, which are RGB -- see make_demo())
                 image = copy.copy(
-                    step_t['obs']['camera_front_image'])
+                    step_t['obs']['camera_front_image'][:,:,::-1])
 
         if DEBUG:
-            cv2.imwrite("original_image.png", image)
+            Image.fromarray(np.asarray(image, dtype=np.uint8)).save("original_image.png")
 
+        
+        # Real eye_in_hand_image is stored BGR (needs the flip); sim's is
+        # already RGB (rendered by the same backend as camera_front_image,
+        # which needs no flip either) -- flipping it would corrupt colors.
+        wrist_image = step_t['obs'].get('eye_in_hand_image', None)
+        if wrist_image is not None:
+            if getattr(dataset_loader, "real", False):
+                wrist_image = wrist_image[:, :, ::-1]
+            wrist_image = copy.copy(wrist_image)
+        if DEBUG:
+            if wrist_image is not None:
+                Image.fromarray(np.asarray(wrist_image, dtype=np.uint8)).save("original_wrist_image.png")
+
+        
         # Create GT BB
         bb_time = time.time()
         if getattr(dataset_loader, '_bbs_T', 1) == 1:
@@ -1249,13 +1060,31 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
             end_aug = time.time()
             logger.debug(f"Aug time: {end_aug-aug_time}")
             images.append(processed)
-            # cv2.imwrite("augmented_obs.png", np.array(np.moveaxis(
-            #     copy.deepcopy(processed).cpu().numpy()*255, 0, -1), dtype=np.uint8))
+            
+            # if t == 1 or t == 2:
+            #     pil_image = ToPILImage()(copy.deepcopy(processed).cpu())
+            #     pil_image.save("augmented_image.png")
+            
+            
         else:
             bb_aug = bb_frame
 
         bb.append(torch.from_numpy(bb_aug.astype(np.int32)))
         obj_classes.append((torch.from_numpy(class_frame.astype(np.int32))))
+
+        if wrist_image is not None:
+            # no crop calibration exists for the wrist camera: skip cropping but
+            # still resize to the target size and go through the same aug/normalize
+            # pipeline as the front camera
+            wrist_processed = dataset_loader.frame_aug(
+                task_name,
+                wrist_image,
+                False,
+                perform_scale_resize=True,
+                agent=True,
+                sim_crop=sim_crop,
+                wrist_crop=True)
+            wrist_images.append(wrist_processed)
 
         if dataset_loader.aug_twice:
             aug_twice_time = time.time()
@@ -1276,7 +1105,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                     step_t['obs']['camera_front_image'][:, :, ::-1], dtype=np.uint8)
                 image_point = cv2.circle(cv2.UMat(image_point), (step_t['obs']['eef_point'][1], step_t['obs']['eef_point'][0]), radius=1, color=(
                     0, 0, 255), thickness=1)
-                cv2.imwrite("gt_point.png", cv2.UMat(image_point))
+                Image.fromarray(cv2.UMat(image_point).get()).save("gt_point.png")
 
             points.append(np.array(
                 adjust_points(step_t['obs']['eef_point'],
@@ -1290,7 +1119,7 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                     processed.numpy()*255, 0, -1), dtype=np.uint8)
                 image = cv2.circle(cv2.UMat(image), (points[-1][0][1], points[-1][0][0]), radius=1, color=(
                     0, 0, 255), thickness=1)
-                cv2.imwrite("adjusted_point.png", cv2.UMat(image))
+                Image.fromarray(cv2.UMat(image).get()).save("adjusted_point.png")
             logger.debug(f"EEF point: {time.time()-eef_point_time}")
 
         if load_action and (j >= 1 or ("real" in dataset_loader.agent_name and not dataset_loader.pick_next)):
@@ -1354,8 +1183,11 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                     norm_end = time.time()
                     # print(f"Norm time {norm_end-norm_start}")
                 elif k == 'gripper_state':
-                    state_component = np.array(
-                        [step_t['action'][-1]], dtype=np.float32)
+                    try:
+                        state_component = np.array(
+                            [step_t['action'][-1]], dtype=np.float32)
+                    except:
+                        print("Error on gripper state")
                 else:                        
                     if step_t['obs'].get(k, None) is not None and isinstance(step_t['obs'][k], int):
                         state_component = np.array(
@@ -1391,650 +1223,8 @@ def create_sample(dataset_loader, traj, chosen_t, task_name, command, load_actio
                                   color=(0, 0, 255),
                                   thickness=1)
             # print(f"Command {command}")
-            cv2.imwrite("GT_bb_after_aug.png", image)
+            Image.fromarray(np.asarray(image, dtype=np.uint8)).save("GT_bb_after_aug.png")
     end_time_sample = time.time()
     logger.debug(f"Sample time {end_time_sample-time_sample}")
-    return images, images_cp, bb, obj_classes, actions, states, points
+    return images, images_cp, wrist_images, bb, obj_classes, actions, states, points
 
-
-class DIYBatchSampler(Sampler):
-    """
-    Customize any possible combination of both task families and sub-tasks in a batch of data.
-    """
-
-    def __init__(
-        self,
-        task_to_idx,
-        subtask_to_idx,
-        object_distribution_to_indx,
-        sampler_spec=dict(),
-        tasks_spec=dict(),
-        n_step=0,
-    ):
-        """
-        Args:
-        - batch_size:
-            total number of samples draw at each yield step
-        - task_to_idx: {
-            task_name: [all_idxs_for this task]}
-        - sub_task_to_idx: {
-            task_name: {
-                {sub_task_id: [all_idxs_for this sub-task]}}
-           all indics in both these dict()'s should sum to the total dataset size,
-        - tasks_spec:
-            should additionally contain batch-constructon guide:
-            explicitly specify how to contruct the batch, use this spec we should be
-            able to construct a mapping from each batch index to a fixed pair
-            of [task_name, subtask_id] to sample from,
-            but if set shuffle=true, the sampled batch would lose this ordering,
-            e.g. give a _list_: ['${place}', '${nut_hard}']
-            batch spec is extracted from:
-                {'place':
-                        {'task_ids':     [0,1,2],
-                        'n_per_task':    [5, 10, 5]}
-                'nut_hard':
-                        {'task_ids':     [4],
-                        'n_per_task':    [6]}
-                'stack':
-                        {...}
-                }
-                will yield a batch of 36 points, where first 5 comes from pickplace subtask#0, last 6 comes from nut-assembly task#4
-        - shuffle:
-            if true, we lose control over how each batch is distributed to gpus
-        """
-        batch_size = sampler_spec.get('batch_size', 30)
-        drop_last = sampler_spec.get('drop_last', False)
-
-        if not isinstance(batch_size, int) or isinstance(batch_size, bool) or \
-                batch_size <= 0:
-            raise ValueError("batch_size should be a positive integer value, "
-                             "but got batch_size={}".format(batch_size))
-        if not isinstance(drop_last, bool):
-            raise ValueError("drop_last should be a boolean value, but got "
-                             "drop_last={}".format(drop_last))
-
-        self.shuffle = sampler_spec.get('shuffle', False)
-
-        if not isinstance(batch_size, int) or isinstance(batch_size, bool) or \
-                batch_size <= 0:
-            raise ValueError("batch_size should be a positive integer value, "
-                             "but got batch_size={}".format(batch_size))
-        if not isinstance(drop_last, bool):
-            raise ValueError("drop_last should be a boolean value, but got "
-                             "drop_last={}".format(drop_last))
-
-        self.task_samplers = OrderedDict()
-        self.task_iterators = OrderedDict()
-        self.task_info = OrderedDict()
-        self.balancing_policy = sampler_spec.get('balancing_policy', 0)
-        self.object_distribution_to_indx = object_distribution_to_indx
-        self.num_step = n_step
-        for spec in tasks_spec:
-            task_name = spec.name
-            idxs = task_to_idx.get(task_name)
-            self.task_samplers[task_name] = OrderedDict(
-                {'all_sub_tasks': SubsetRandomSampler(idxs)})  # uniformly draw from union of all sub-tasks
-            self.task_iterators[task_name] = OrderedDict(
-                {'all_sub_tasks': iter(SubsetRandomSampler(idxs))})
-            assert task_name in subtask_to_idx.keys(), \
-                'Mismatch between {} task idxs and subtasks!'.format(
-                    task_name)
-            num_loaded_sub_tasks = len(subtask_to_idx[task_name].keys())
-            first_id = list(subtask_to_idx[task_name].keys())[0]
-
-            sub_task_size = len(subtask_to_idx[task_name].get(first_id))
-            print("Task {} loaded {} subtasks, starting from {}, should all have sizes {}".format(
-                task_name, num_loaded_sub_tasks, first_id, sub_task_size))
-
-            for sub_task, sub_idxs in subtask_to_idx[task_name].items():
-
-                # the balancing has been requested
-                if self.balancing_policy == 1 and self.object_distribution_to_indx != None:
-                    self.task_samplers[task_name][sub_task] = [SubsetRandomSampler(
-                        sample_list) for sample_list in object_distribution_to_indx[task_name][sub_task]]
-                    self.task_iterators[task_name][sub_task] = [iter(SubsetRandomSampler(
-                        sample_list)) for sample_list in object_distribution_to_indx[task_name][sub_task]]
-                    for i, sample_list in enumerate(object_distribution_to_indx[task_name][sub_task]):
-                        if len(sample_list) == 0:
-                            print(
-                                f"Task {task_name} - Sub-task {sub_task} - Position {i}")
-
-                else:
-                    self.task_samplers[task_name][sub_task] = SubsetRandomSampler(
-                        sub_idxs)
-                    # assert len(sub_idxs) == sub_task_size, \
-                    #     'Got uneven data sizes for sub-{} under the task {}!'.format(
-                    #         sub_task, task_name)
-                    self.task_iterators[task_name][sub_task] = iter(
-                        SubsetRandomSampler(sub_idxs))
-                    # print('subtask indexs:', sub_task, max(sub_idxs))
-            curr_task_info = {
-                'size':         len(idxs),
-                'n_tasks':      len(subtask_to_idx[task_name].keys()),
-                'sub_id_to_name': {i: name for i, name in enumerate(subtask_to_idx[task_name].keys())},
-                'traj_per_subtask': sub_task_size,
-                'sampler_len': -1  # to be decided below
-            }
-            self.task_info[task_name] = curr_task_info
-
-        n_tasks = len(self.task_samplers.keys())
-        n_total = sum([info['size'] for info in self.task_info.values()])
-
-        self.idx_map = OrderedDict()
-        idx = 0
-        for spec in tasks_spec:
-            name = spec.name
-            _ids = spec.get('task_ids', None)
-            n = spec.get('n_per_task', None)
-            assert (
-                _ids and n), 'Must specify which subtask ids to use and how many is contained in each batch'
-            info = self.task_info[name]
-            subtask_names = info.get('sub_id_to_name')
-            for subtask in subtask_names.values():
-                for _ in range(n):
-                    # position idx of batch is a sample of task [name] subtask [subtask]
-                    self.idx_map[idx] = (name, subtask)
-                    idx += 1
-                sub_length = int(info['traj_per_subtask'] / n)
-                self.task_info[name]['sampler_len'] = max(
-                    sub_length, self.task_info[name]['sampler_len'])
-        # print("Index map:", self.idx_map)
-        # number of steps that I need for covering all the couple (demo, agent)
-        self.max_len = max([info['sampler_len']
-                            for info in self.task_info.values()])
-        print('Max length for sampler iterator:', self.max_len)
-        self.n_tasks = n_tasks
-
-        # assert idx == batch_size, "The constructed batch size {} doesn't match desired {}".format(
-        #     idx, batch_size)
-        self.batch_size = idx
-        self.drop_last = drop_last
-
-        print("Shuffling to break the task ordering in each batch? ", self.shuffle)
-
-    def __iter__(self):
-        """Given task families A,B,C, each has sub-tasks A00, A01,...
-        Fix a total self.batch_size, sample different numbers of datapoints from
-        each task"""
-        batch = []
-        for i in range(self.max_len):
-            # for each sample in the batch
-            for idx in range(self.batch_size):
-                (name, sub_task) = self.idx_map[idx]
-
-                if self.balancing_policy == 1 and self.object_distribution_to_indx != None:
-                    slot_indx = idx % len(self.task_samplers[name][sub_task])
-                    # take one sample for the current task, sub_task, and slot
-                    sampler = self.task_samplers[name][sub_task][slot_indx]
-                    iterator = self.task_iterators[name][sub_task][slot_indx]
-                    try:
-                        batch.append(next(iterator))
-                    except StopIteration:  # print('early sstop:', i, name)
-                        # re-start the smaller-sized tasks
-                        print("Stop iteration")
-                        iterator = iter(sampler)
-                        batch.append(next(iterator))
-                        self.task_iterators[name][sub_task][slot_indx] = iterator
-                else:
-                    # print(name, sub_task)
-                    sampler = self.task_samplers[name][sub_task]
-                    iterator = self.task_iterators[name][sub_task]
-                    try:
-                        batch.append(next(iterator))
-                    except StopIteration:  # print('early sstop:', i, name)
-                        # re-start the smaller-sized tasks
-                        print("Stop Iteration")
-                        iterator = iter(sampler)
-                        batch.append(next(iterator))
-                        self.task_iterators[name][sub_task] = iterator
-
-            if len(batch) == self.batch_size:
-                if self.shuffle:
-                    random.shuffle(batch)
-                yield batch
-                batch = []
-            if len(batch) > 0 and not self.drop_last:
-                if self.shuffle:
-                    random.shuffle(batch)
-                yield batch
-
-    def __len__(self):
-        # Since different task may have different data sizes,
-        # define total length of sampler as number of iterations to
-        # exhaust the last task
-        return self.max_len
-
-
-class TrajectoryBatchSampler(Sampler):
-
-    def __init__(
-        self,
-        agent_task_to_idx,
-        agent_subtask_to_idx,
-        demo_task_to_idx,
-        demo_subtask_to_idx,
-        sampler_spec=dict(),
-        tasks_spec=dict(),
-        n_step=0,
-        epoch_steps=0
-    ):
-
-        batch_size = sampler_spec.get('batch_size', 30)
-        drop_last = sampler_spec.get('drop_last', False)
-
-        if not isinstance(batch_size, int) or isinstance(batch_size, bool) or \
-                batch_size <= 0:
-            raise ValueError("batch_size should be a positive integer value, "
-                             "but got batch_size={}".format(batch_size))
-        if not isinstance(drop_last, bool):
-            raise ValueError("drop_last should be a boolean value, but got "
-                             "drop_last={}".format(drop_last))
-
-        self.shuffle = sampler_spec.get('shuffle', False)
-
-        if not isinstance(batch_size, int) or isinstance(batch_size, bool) or \
-                batch_size <= 0:
-            raise ValueError("batch_size should be a positive integer value, "
-                             "but got batch_size={}".format(batch_size))
-        if not isinstance(drop_last, bool):
-            raise ValueError("drop_last should be a boolean value, but got "
-                             "drop_last={}".format(drop_last))
-
-        self.task_info = OrderedDict()
-        self.balancing_policy = sampler_spec.get('balancing_policy', 0)
-        self.num_step = n_step
-
-        # Create sampler for agent trajectories
-        self.agent_task_samplers = OrderedDict()
-        self.agent_task_iterators = OrderedDict()
-        self.agent_task_to_idx = agent_task_to_idx
-        self.agent_subtask_to_idx = agent_subtask_to_idx
-        for spec in tasks_spec:
-            task_name = spec.name
-            idxs = agent_task_to_idx.get(task_name)
-            self.agent_task_samplers[task_name] = OrderedDict(
-                {'all_sub_tasks': RandomSampler(data_source=idxs
-                                                )})  # uniformly draw from union of all sub-tasks
-            self.agent_task_iterators[task_name] = OrderedDict(
-                {'all_sub_tasks': iter(RandomSampler(data_source=idxs
-                                                     ))})
-            assert task_name in agent_subtask_to_idx.keys(), \
-                'Mismatch between {} task idxs and subtasks!'.format(
-                    task_name)
-            num_loaded_sub_tasks = len(agent_subtask_to_idx[task_name].keys())
-            first_id = list(agent_subtask_to_idx[task_name].keys())[0]
-
-            sub_task_size = len(agent_subtask_to_idx[task_name].get(first_id))
-            print("Task {} loaded {} subtasks, starting from {}, should all have sizes {}".format(
-                task_name, num_loaded_sub_tasks, first_id, sub_task_size))
-
-            for sub_task, sub_idxs in agent_subtask_to_idx[task_name].items():
-
-                if len(sub_idxs) == 10:
-                    self.train = False
-                else:
-                    self.train = True
-
-                self.agent_task_samplers[task_name][sub_task] = RandomSampler(
-                    data_source=sub_idxs)
-                # assert len(sub_idxs) == sub_task_size, \
-                #     'Got uneven data sizes for sub-{} under the task {}!'.format(
-                #         sub_task, task_name)
-                self.agent_task_iterators[task_name][sub_task] = iter(
-                    RandomSampler(data_source=sub_idxs))
-                # print('subtask indexs:', sub_task, max(sub_idxs))
-            curr_task_info = {
-                'size':         len(idxs),
-                'n_tasks':      len(agent_subtask_to_idx[task_name].keys()),
-                'sub_id_to_name': {i: name for i, name in enumerate(agent_subtask_to_idx[task_name].keys())},
-                'traj_per_subtask': sub_task_size,
-                'sampler_len': -1  # to be decided below
-            }
-            self.task_info[task_name] = curr_task_info
-
-        # Create sampler for demo trajectories
-        self.demo_task_samplers = OrderedDict()
-        self.demo_task_iterators = OrderedDict()
-        self.demo_task_to_idx = demo_task_to_idx
-        self.demo_subtask_to_idx = demo_subtask_to_idx
-        for spec in tasks_spec:
-            task_name = spec.name
-            idxs = demo_task_to_idx.get(task_name)
-            self.demo_task_samplers[task_name] = OrderedDict(
-                {'all_sub_tasks': RandomSampler(data_source=idxs)})  # uniformly draw from union of all sub-tasks
-            self.demo_task_iterators[task_name] = OrderedDict(
-                {'all_sub_tasks': iter(RandomSampler(data_source=idxs))})
-            assert task_name in demo_subtask_to_idx.keys(), \
-                'Mismatch between {} task idxs and subtasks!'.format(
-                    task_name)
-            num_loaded_sub_tasks = len(demo_subtask_to_idx[task_name].keys())
-            first_id = list(demo_subtask_to_idx[task_name].keys())[0]
-
-            sub_task_size = len(demo_subtask_to_idx[task_name].get(first_id))
-            print("Task {} loaded {} subtasks, starting from {}, should all have sizes {}".format(
-                task_name, num_loaded_sub_tasks, first_id, sub_task_size))
-
-            for sub_task, sub_idxs in demo_subtask_to_idx[task_name].items():
-
-                self.demo_task_samplers[task_name][sub_task] = RandomSampler(
-                    data_source=sub_idxs)
-                # assert len(sub_idxs) == sub_task_size, \
-                #     'Got uneven data sizes for sub-{} under the task {}!'.format(
-                #         sub_task, task_name)
-                self.demo_task_iterators[task_name][sub_task] = iter(
-                    RandomSampler(sub_idxs))
-                # print('subtask indexs:', sub_task, max(sub_idxs))
-
-        n_tasks = len(self.agent_task_samplers.keys())
-        n_total = sum([info['size'] for info in self.task_info.values()])
-
-        self.idx_map = OrderedDict()
-        idx = 0
-        for spec in tasks_spec:
-            name = spec.name
-            _ids = spec.get('task_ids', None)
-            _skip_ids = spec.get('skip_ids', [])
-            n = spec.get('n_per_task', None)
-            assert (
-                _ids and n), 'Must specify which subtask ids to use and how many is contained in each batch'
-            info = self.task_info[name]
-            subtask_names = info.get('sub_id_to_name')
-            for subtask in subtask_names.values():
-                for _ in range(n):
-                    # position idx of batch is a sample of task [name] subtask [subtask]
-                    self.idx_map[idx] = (name, subtask)
-                    idx += 1
-                sub_length = int(info['traj_per_subtask'] / n)
-                self.task_info[name]['sampler_len'] = max(
-                    sub_length, self.task_info[name]['sampler_len'])
-        # print("Index map:", self.idx_map)
-
-        self.max_len = epoch_steps
-        print('Max length for sampler iterator:', self.max_len)
-        self.n_tasks = n_tasks
-        self.epoch_steps = epoch_steps
-
-        assert idx == batch_size, "The constructed batch size {} doesn't match desired {}".format(
-            idx, batch_size)
-        self.batch_size = idx
-        self.drop_last = drop_last
-        print("Shuffling to break the task ordering in each batch? ", self.shuffle)
-
-    def __iter__(self):
-        """Given task families A,B,C, each has sub-tasks A00, A01,...
-        Fix a total self.batch_size, sample different numbers of datapoints from
-        each task"""
-        batch = []
-        print("Reset agent_demo_pair")
-        agent_demo_pair = dict()
-        for i in range(self.max_len):
-            batch = []
-            if i % self.epoch_steps == 0:
-                print("Reset agent_demo_pair")
-                agent_demo_pair = dict()
-
-            # for each sample in the batch
-            for idx in range(self.batch_size):
-                (name, sub_task) = self.idx_map[idx]
-
-                agent_sampler = self.agent_task_samplers[name][sub_task]
-                agent_iterator = self.agent_task_iterators[name][sub_task]
-
-                try:
-                    agent_indx = self.agent_subtask_to_idx[name][sub_task][next(
-                        agent_iterator)]
-                except StopIteration:  # print('early sstop:', i, name)
-                    # re-start the smaller-sized tasks
-                    # if self.train:
-                    #     print("Stop iteration for Agent Train")
-                    # else:
-                    #     print("Stop iteration for Agent Val")
-                    agent_iterator = iter(agent_sampler)
-                    agent_indx = self.agent_subtask_to_idx[name][sub_task][next(
-                        agent_iterator)]
-                    self.agent_task_iterators[name][sub_task] = agent_iterator
-
-                # check if the agent_indx has already sampled
-                # if agent_demo_pair.get(agent_indx, None) is None:
-                demo_sampler = self.demo_task_samplers[name][sub_task]
-                demo_iterator = self.demo_task_iterators[name][sub_task]
-                # new agent_indx in epoch
-                # sample demo for current
-                try:
-                    demo_indx = self.demo_subtask_to_idx[name][sub_task][next(
-                        demo_iterator)]
-                except StopIteration:  # print('early sstop:', i, name)
-                    # re-start the smaller-sized tasks
-                    # if self.train:
-                    #     print("Stop iteration for Demo Train")
-                    # else:
-                    #     print("Stop iteration for Demo Val")
-                    demo_iterator = iter(demo_sampler)
-                    demo_indx = self.demo_subtask_to_idx[name][sub_task][next(
-                        demo_iterator)]
-                    self.demo_task_iterators[name][sub_task] = demo_iterator
-                agent_demo_pair[agent_indx] = demo_indx
-
-                batch.append([agent_indx, agent_demo_pair[agent_indx]])
-
-            if len(batch) == self.batch_size:
-                if self.shuffle:
-                    random.shuffle(batch)
-                yield batch
-                batch = []
-            if len(batch) > 0 and not self.drop_last:
-                if self.shuffle:
-                    random.shuffle(batch)
-                yield batch
-
-    def __len__(self):
-        # Since different task may have different data sizes,
-        # define total length of sampler as number of iterations to
-        # exhaust the last task
-        print(f"Sampler max-len {self.max_len}")
-        return self.max_len
-
-
-class AgentBatchSampler(Sampler):
-
-    def __init__(
-        self,
-        agent_task_to_idx,
-        agent_subtask_to_idx,
-        sampler_spec=dict(),
-        tasks_spec=dict(),
-        n_step=0,
-        epoch_steps=0
-    ):
-
-        batch_size = sampler_spec.get('batch_size', 30)
-        drop_last = sampler_spec.get('drop_last', False)
-
-        if not isinstance(batch_size, int) or isinstance(batch_size, bool) or \
-                batch_size <= 0:
-            raise ValueError("batch_size should be a positive integer value, "
-                             "but got batch_size={}".format(batch_size))
-        if not isinstance(drop_last, bool):
-            raise ValueError("drop_last should be a boolean value, but got "
-                             "drop_last={}".format(drop_last))
-
-        self.shuffle = sampler_spec.get('shuffle', False)
-
-        if not isinstance(batch_size, int) or isinstance(batch_size, bool) or \
-                batch_size <= 0:
-            raise ValueError("batch_size should be a positive integer value, "
-                             "but got batch_size={}".format(batch_size))
-        if not isinstance(drop_last, bool):
-            raise ValueError("drop_last should be a boolean value, but got "
-                             "drop_last={}".format(drop_last))
-
-        self.task_info = OrderedDict()
-        self.balancing_policy = sampler_spec.get('balancing_policy', 0)
-        self.num_step = n_step
-
-        # Create sampler for agent trajectories
-        self.agent_task_samplers = OrderedDict()
-        self.agent_task_iterators = OrderedDict()
-        self.agent_task_to_idx = agent_task_to_idx
-        self.agent_subtask_to_idx = agent_subtask_to_idx
-        for spec in tasks_spec:
-            task_name = spec.name
-            idxs = agent_task_to_idx.get(task_name)
-            self.agent_task_samplers[task_name] = OrderedDict(
-                {'all_sub_tasks': RandomSampler(data_source=idxs,
-                                                replacement=True,
-                                                num_samples=1)})  # uniformly draw from union of all sub-tasks
-            self.agent_task_iterators[task_name] = OrderedDict(
-                {'all_sub_tasks': iter(RandomSampler(data_source=idxs,
-                                                     replacement=True,
-                                                     num_samples=1))})
-            assert task_name in agent_subtask_to_idx.keys(), \
-                'Mismatch between {} task idxs and subtasks!'.format(
-                    task_name)
-            num_loaded_sub_tasks = len(agent_subtask_to_idx[task_name].keys())
-            first_id = list(agent_subtask_to_idx[task_name].keys())[0]
-
-            sub_task_size = len(agent_subtask_to_idx[task_name].get(first_id))
-            print("Task {} loaded {} subtasks, starting from {}, should all have sizes {}".format(
-                task_name, num_loaded_sub_tasks, first_id, sub_task_size))
-
-            for sub_task, sub_idxs in agent_subtask_to_idx[task_name].items():
-
-                self.agent_task_samplers[task_name][sub_task] = RandomSampler(
-                    data_source=sub_idxs,
-                    replacement=True,
-                    num_samples=1)
-                assert len(sub_idxs) == sub_task_size, \
-                    'Got uneven data sizes for sub-{} under the task {}!'.format(
-                        sub_task, task_name)
-                self.agent_task_iterators[task_name][sub_task] = iter(
-                    RandomSampler(data_source=sub_idxs,
-                                  replacement=True,
-                                  num_samples=1))
-                # print('subtask indexs:', sub_task, max(sub_idxs))
-            curr_task_info = {
-                'size':         len(idxs),
-                'n_tasks':      len(agent_subtask_to_idx[task_name].keys()),
-                'sub_id_to_name': {i: name for i, name in enumerate(agent_subtask_to_idx[task_name].keys())},
-                'traj_per_subtask': sub_task_size,
-                'sampler_len': -1  # to be decided below
-            }
-            self.task_info[task_name] = curr_task_info
-
-        # Create sampler for demo trajectories
-        self.demo_task_samplers = OrderedDict()
-        self.demo_task_iterators = OrderedDict()
-        for spec in tasks_spec:
-            task_name = spec.name
-            self.demo_task_samplers[task_name] = OrderedDict(
-                {'all_sub_tasks': RandomSampler(data_source=idxs,
-                                                replacement=True,
-                                                num_samples=1)})  # uniformly draw from union of all sub-tasks
-            self.demo_task_iterators[task_name] = OrderedDict(
-                {'all_sub_tasks': iter(RandomSampler(data_source=idxs,
-                                                     replacement=True,
-                                                     num_samples=1))})
-
-            print("Task {} loaded {} subtasks, starting from {}, should all have sizes {}".format(
-                task_name, num_loaded_sub_tasks, first_id, sub_task_size))
-
-        n_tasks = len(self.agent_task_samplers.keys())
-        n_total = sum([info['size'] for info in self.task_info.values()])
-
-        self.idx_map = OrderedDict()
-        idx = 0
-        for spec in tasks_spec:
-            name = spec.name
-            _ids = spec.get('task_ids', None)
-            _skip_ids = spec.get('skip_ids', [])
-            n = spec.get('n_per_task', None)
-            assert (
-                _ids and n), 'Must specify which subtask ids to use and how many is contained in each batch'
-            info = self.task_info[name]
-            subtask_names = info.get('sub_id_to_name')
-            for subtask in subtask_names.values():
-                for _ in range(n):
-                    # position idx of batch is a sample of task [name] subtask [subtask]
-                    self.idx_map[idx] = (name, subtask)
-                    idx += 1
-                sub_length = int(info['traj_per_subtask'] / n)
-                self.task_info[name]['sampler_len'] = max(
-                    sub_length, self.task_info[name]['sampler_len'])
-        # print("Index map:", self.idx_map)
-
-        self.max_len = epoch_steps
-        print('Max length for sampler iterator:', self.max_len)
-        self.n_tasks = n_tasks
-        self.epoch_steps = epoch_steps
-
-        assert idx == batch_size, "The constructed batch size {} doesn't match desired {}".format(
-            idx, batch_size)
-        self.batch_size = idx
-        self.drop_last = drop_last
-        print("Shuffling to break the task ordering in each batch? ", self.shuffle)
-
-    def __iter__(self):
-        """Given task families A,B,C, each has sub-tasks A00, A01,...
-        Fix a total self.batch_size, sample different numbers of datapoints from
-        each task"""
-        batch = []
-        print("Reset agent_demo_pair")
-        agent_demo_pair = dict()
-        for i in range(self.max_len):
-            batch = []
-            if i % self.epoch_steps == 0:
-                print("Reset agent_demo_pair")
-                agent_demo_pair = dict()
-
-            # for each sample in the batch
-            for idx in range(self.batch_size):
-                (name, sub_task) = self.idx_map[idx]
-
-                agent_sampler = self.agent_task_samplers[name][sub_task]
-                agent_iterator = self.agent_task_iterators[name][sub_task]
-
-                try:
-                    agent_indx = self.agent_subtask_to_idx[name][sub_task][next(
-                        agent_iterator)]
-                except StopIteration:  # print('early sstop:', i, name)
-                    # re-start the smaller-sized tasks
-                    agent_iterator = iter(agent_sampler)
-                    agent_indx = self.agent_subtask_to_idx[name][sub_task][next(
-                        agent_iterator)]
-                    self.agent_task_iterators[name][sub_task] = agent_iterator
-
-                # check if the agent_indx has already sampled
-                # if agent_demo_pair.get(agent_indx, None) is None:
-                    demo_sampler = self.demo_task_samplers[name][sub_task]
-                    demo_iterator = self.demo_task_iterators[name][sub_task]
-                    # new agent_indx in epoch
-                    # sample demo for current
-                    try:
-                        demo_indx = self.demo_subtask_to_idx[name][sub_task][next(
-                            demo_iterator)]
-                    except StopIteration:  # print('early sstop:', i, name)
-                        # re-start the smaller-sized tasks
-                        demo_iterator = iter(demo_sampler)
-                        demo_indx = self.demo_subtask_to_idx[name][sub_task][next(
-                            demo_iterator)]
-                        self.demo_task_iterators[name][sub_task] = demo_iterator
-                    agent_demo_pair[agent_indx] = demo_indx
-
-                batch.append([agent_indx, agent_demo_pair[agent_indx]])
-
-            if len(batch) == self.batch_size:
-                if self.shuffle:
-                    random.shuffle(batch)
-                yield batch
-                batch = []
-            if len(batch) > 0 and not self.drop_last:
-                if self.shuffle:
-                    random.shuffle(batch)
-                yield batch
-
-    def __len__(self):
-        # Since different task may have different data sizes,
-        # define total length of sampler as number of iterations to
-        # exhaust the last task
-        print(f"Sampler max-len {self.max_len}")
-        return self.max_len

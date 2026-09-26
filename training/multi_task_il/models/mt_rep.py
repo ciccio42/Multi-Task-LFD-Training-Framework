@@ -808,12 +808,7 @@ class VideoImitation(nn.Module):
 
         if self._concat_bb and not predict_gt_bb:
             # run inference for target object detector
-            model_input = dict()
-            model_input['demo'] = context
-            model_input['images'] = images
-            model_input['gt_bb'] = bb
-            model_input['gt_classes'] = gt_classes
-            prediction = self._object_detector(model_input,
+            prediction = self._object_detector([context, images, bb, gt_classes],
                                                inference=True)
             if len(prediction['classes_final']) == B*obs_T:
                 predicted_bb_list = list()
@@ -839,6 +834,13 @@ class VideoImitation(nn.Module):
                                                       width_scale_factor=scale_factor[0],
                                                       height_scale_factor=scale_factor[1],
                                                       mode='a2p')[0][target_indx_flags][target_max_score_indx]
+                        
+                        # plot predicted bb
+                        # img = np.moveaxis(images[indx, 0].cpu().numpy()*255, 0, -1).astype(np.uint8)
+                        # img = np.ascontiguousarray(img)
+                        # img = cv2.rectangle(img, (int(predicted_bb[0].item()), int(predicted_bb[1].item())), (int(predicted_bb[2].item()), int(predicted_bb[3].item())), (0, 255, 0), 2)
+                        # pil_image = Image.fromarray(img)
+                        # pil_image.save(f"predicted_bb_{t}.png")
                     else:
                         # print("No bb target for some frames")
                         # Get index for target object

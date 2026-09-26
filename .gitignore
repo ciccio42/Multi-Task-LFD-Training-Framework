@@ -157,3 +157,11 @@ bashes/*.png
 /training/multi_task_il/datasets/*.jpg
 /training/multi_task_il/datasets/*.png
 bashes/*.out
+bashes/video_encoder/*.out
+bashes/video_encoder/outputs/*
+bashes/video_encoder/wandb/*
+training/multi_task_il/models/command_encoder/test_scripts/*out
+training/multi_task_il/models/command_encoder/test_scripts/*txt
+bashes/video_encoder/*txt
+training/multi_task_il/models/command_encoder/muse/models/universal-sentence-encoder-multilingual-large-3/*
+training/multi_task_il/models/command_encoder/muse/models/*pt

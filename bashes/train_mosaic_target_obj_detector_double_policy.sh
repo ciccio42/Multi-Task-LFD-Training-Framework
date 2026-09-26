@@ -1,22 +1,23 @@
 #!/bin/bash
 
+#SBATCH -A did_robot_learning_359
 #SBATCH --partition=gpuq
-#SBATCH --gres=gpu:1   # Request 1 GPU
+#SBATCH --exclude=gnode09
+#SBATCH --gres=gpu:1
 #SBATCH --ntasks=1
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=32
+#SBATCH --export=ALL
 
-export MUJOCO_PY_MUJOCO_PATH="/home/rsofnc000/.mujoco/mujoco210"
+
+export MUJOCO_PY_MUJOCO_PATH=/home/rsofnc000/.mujoco/mujoco210
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/rsofnc000/.mujoco/mujoco210/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
-export CUDA_VISIBLE_DEVICES=0
+export HYDRA_FULL_ERROR=1
 
 export HYDRA_FULL_ERROR=1
-echo $1
-TASK_NAME="$1"
 
-EXPERT_DATA=/home/rsofnc000/dataset/opt_dataset/
-SAVE_PATH=/home/rsofnc000/checkpoint_save_folder
+EXPERT_DATA=/mnt/beegfs/frosa/robot_datasets/dataset/opt_dataset
 POLICY='${mosaic}'
 TARGET='multi_task_il.models.mt_rep_double_policy.VideoImitation'
 
@@ -33,11 +34,26 @@ CONFIG_PATH=../experiments
 CONFIG_NAME=config.yaml
 CONCAT_IMG_EMB=true
 CONCAT_DEMO_EMB=true
-CONCAT_STATE=true
+CONCAT_STATE=false
 CONVERT_ACTION=false
 
 CONCAT_BB=true
 LOAD_TARGET_OBJ_DETECTOR=true
+
+TASK_NAME="${1}"
+RESUME_FOLDER="${2}"
+RESUME_STEP="${3}"
+FINETUNE="${4:-false}"
+RESUME="${5:-false}"
+DEMO_NAME="${6:-panda}" # [human_rgb or panda]
+SAVE_PATH="${7:-/home/rsofnc000/checkpoint_save_folder/100_180_new}"
+echo "Task Name is: $TASK_NAME"
+echo "Resume Folder is: $RESUME_FOLDER"
+echo "Resume Step is: $RESUME_STEP"
+echo "Finetune is: $FINETUNE"
+echo "Resume is: $RESUME"
+echo "Demo Name is: $DEMO_NAME"
+echo "Save Path is: $SAVE_PATH"
 
 if [ "$TASK_NAME" == 'nut_assembly' ]; then
     echo "NUT-ASSEMBLY"
@@ -222,14 +238,13 @@ elif [ "$TASK_NAME" == 'stack_block' ]; then
 elif [ "$TASK_NAME" == 'pick_place' ]; then
     echo "Pick-Place"
     ### Pick-Place ###
-    RESUME_PATH=1Task-pick_place-Double-Policy-Contrastive-false-Inverse-false-CONCAT_IMG_EMB-false-CONCAT_DEMO_EMB-true-Batch32
-    RESUME_STEP=99417
-    RESUME=false
+    RESUME_PATH=${RESUME_FOLDER}
+    RESUME_STEP=${RESUME_STEP}
 
-    TARGET_OBJ_DETECTOR_STEP=37476 #68526 #129762 #198900 #65250
-    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/1Task-Pick-Place-KP-Batch112
+    TARGET_OBJ_DETECTOR_STEP=40
+    TARGET_OBJ_DETECTOR_PATH=${SAVE_PATH}/1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-COD-SKIP-12-13-14-15-Batch60
 
-    BSIZE=32 #32 #128 #64 #32
+    BSIZE=24 #32 #128 #64 #32
     COMPUTE_OBJ_DISTRIBUTION=false
     # Policy 1: At each slot is assigned a RandomSampler
     BALANCING_POLICY=0
@@ -241,11 +256,11 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
 
     LOAD_CONTRASTIVE=false
     LOAD_INV=false
-    CONTRASTIVE_PRE=1.0
-    CONTRASTIVE_POS=1.0
+    CONTRASTIVE_PRE=0.0
+    CONTRASTIVE_POS=0.0
     MUL_INTM=0
     BC_MUL=1.0
-    INV_MUL=1.0
+    INV_MUL=0.0
 
     FREEZE_TARGET_OBJ_DETECTOR=false
     REMOVE_CLASS_LAYERS=false
@@ -258,8 +273,8 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     COMPRESSOR_DIM=256 #256 MT #128 2Task, Nut, button, stack #256 Pick-place
     HIDDEN_DIM=512     #256 MT #128 2Task, Nut, button, stack #512 Pick-place
     CONCAT_DEMO_HEAD=false
-    CONCAT_DEMO_ACT=true
-    PRETRAINED=false
+    CONCAT_DEMO_ACT=false
+    PRETRAINED=true
     NULL_BB=false
 
     EARLY_STOPPING_PATIECE=-1
@@ -278,8 +293,9 @@ elif [ "$TASK_NAME" == 'pick_place' ]; then
     COSINE_ANNEALING=false
 
     TASK_str="pick_place" #[pick_place,nut_assembly,stack_block,button]
-    EXP_NAME=1Task-${TASK_str}-Double-Policy-Convert_action_State_${CONCAT_STATE}_Convert_${CONVERT_ACTION}
+    EXP_NAME=1Task-pick_place-Simulated-Agent-Human-Demonstration-UR5e-Agent-MOSAIC-COD-SKIP-12-13-14-15
     PROJECT_NAME=${EXP_NAME}
+
 elif [ "$TASK_NAME" == 'multi' ]; then
     echo "Multi Task"
     ### Pick-Place ###
@@ -345,7 +361,7 @@ elif [ "$TASK_NAME" == 'multi' ]; then
     PROJECT_NAME=${EXP_NAME}
 fi
 
-srun --output=training_${EXP_NAME}.txt --job-name=training_${TASK_NAME} python -u ../training/train_scripts/train_any.py \
+srun python -u ../training/train_scripts/train_any.py \
     --config-path ${CONFIG_PATH} \
     --config-name ${CONFIG_NAME} \
     policy=${POLICY} \
@@ -367,6 +383,7 @@ srun --output=training_${EXP_NAME}.txt --job-name=training_${TASK_NAME} python -
     dataset_cfg.width=${WIDTH} \
     dataset_cfg.split_pick_place=${SPLIT_PICK_PLACE} \
     dataset_cfg.convert_action=${CONVERT_ACTION} \
+    dataset_cfg.demo_name=${DEMO_NAME} \
     samplers.balancing_policy=${BALANCING_POLICY} \
     mosaic._target_=${TARGET} \
     mosaic.load_target_obj_detector=${LOAD_TARGET_OBJ_DETECTOR} \

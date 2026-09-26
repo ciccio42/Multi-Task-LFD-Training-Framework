@@ -18,16 +18,18 @@ import sys
 from multi_task_il.datasets.savers import _compress_obs
 import os
 from multi_task_il.datasets.utils import OBJECTS_POS_DIM
+from PIL import Image
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 logger = logging.getLogger("BB-Creator")
 
 KEY_INTEREST = ["joint_pos", "joint_vel", "eef_pos",
                 "eef_quat", "gripper_qpos", "gripper_qvel", "camera_front_image",
+                "eye_in_hand_image",
                 "target-box-id", "target-object", "obj_bb",
                 "extent", "zfar", "znear", "eef_point", "ee_aa", "target-peg"]
 OFFSET = 0.0
-WORKERS = 1
+WORKERS = cpu_count()
 
 
 def crop_resize_img(task_cfg, task_name, obs, bb):
@@ -39,7 +41,7 @@ def crop_resize_img(task_cfg, task_name, obs, bb):
         crop_params[1], img_width - left - crop_params[3]
 
     cropped_img = obs[top:box_h, left:box_w]
-    cv2.imwrite("cropped.jpg", cropped_img)
+    Image.fromarray(np.asarray(cropped_img, dtype=np.uint8)).save("cropped.jpg")
 
     img_res = cv2.resize(cropped_img, (180, 100))
     adj_bb = None
@@ -193,7 +195,30 @@ def overwrite_pkl_file(pkl_file_path, sample, traj_obj_bb):
         'task_id': sample['task_id']}, open(pkl_file_path, 'wb'))
 
 
-def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
+def save_debug_images(debug_dir, t, camera_front_image, eye_in_hand_image, camera_front_bb):
+    """Save camera_front_image with bounding-boxes drawn and eye_in_hand_image untouched."""
+    os.makedirs(debug_dir, exist_ok=True)
+
+    front_img = np.asarray(camera_front_image, dtype=np.uint8).copy()
+    if camera_front_bb:
+        for obj_name, bb in camera_front_bb.items():
+            upper_left = tuple(int(v) for v in bb['upper_left_corner'])
+            bottom_right = tuple(int(v) for v in bb['bottom_right_corner'])
+            front_img = cv2.rectangle(front_img,
+                                      upper_left,
+                                      bottom_right,
+                                      color=(0, 255, 0),
+                                      thickness=1)
+    Image.fromarray(cv2.cvtColor(front_img, cv2.COLOR_BGR2RGB)).save(
+        os.path.join(debug_dir, f"camera_front_t{t}.png"))
+
+    if eye_in_hand_image is not None:
+        eye_in_hand_img = np.asarray(eye_in_hand_image, dtype=np.uint8)
+        Image.fromarray(cv2.cvtColor(eye_in_hand_img, cv2.COLOR_BGR2RGB)).save(
+            os.path.join(debug_dir, f"eye_in_hand_t{t}.png"))
+
+
+def opt_traj(task_name, task_spec, out_path, rescale_bb, real, save_trj, pkl_file_path):
     # pkl_file_path = os.path.join(task_path, pkl_file_path)
     # logger.info(f"Task id {dir} - Trajectory {pkl_file_path}")
     # 2. Load pickle file
@@ -288,7 +313,9 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
                             color=(255, 0, 0),
                             thickness=2,
                             radius=1)
-                        cv2.imwrite("prova_bin_points.jpg", image)
+                        #cv2.imwrite("prova_bin_points.jpg", image)
+                        pil_img = Image.fromarray(image)
+                        pil_img.save("prova_bin_points.png")
                         p_x_corner_list = []
                         p_y_corner_list = []
                         # 3.1 create a box around the object
@@ -410,8 +437,11 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
                             (x_max, y_max),
                             color=(255, 0, 0),
                             thickness=2)
-                        if t == len(sample['traj'])-1:
-                            cv2.imwrite("prova_bin_bb.jpg", image)
+                        pil_img = Image.fromarray(image)
+                        pil_img.save(f"prova_bin_bb_{t}_bin_{bin_indx}.png")
+                        
+                        # if t == len(sample['traj'])-1:
+                        #     cv2.imwrite("prova_bin_bb.jpg", image)
             elif 'press_button' in task_name:
                 for camera_name in ["camera_front"]:
                     last_bb_all_obj = last_bb_for_all_cameras[camera_name]
@@ -494,12 +524,24 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
                                            radius=1,
                                            color=(255, 0, 0),
                                            thickness=1)
-                        cv2.imwrite(f"prova_bin_points_{obj_name}.jpg", image)
+                        Image.fromarray(np.asarray(image, dtype=np.uint8)).save(f"prova_bin_points_{obj_name}.jpg")
 
         if "real" in pkl_file_path or args.real:
             gripper = sample['traj'].get(t)['action'][-1]
             if start_pick_t == 0 and gripper == 1.0:
                 start_pick_t = t
+
+    task_dir = os.path.basename(os.path.dirname(pkl_file_path))
+    trj_name_noext = os.path.splitext(os.path.basename(pkl_file_path))[0]
+    debug_dir = os.path.join(".", "debug_images", task_dir, trj_name_noext)
+    for t in range(len(sample['traj'])):
+        obs = sample['traj'].get(t)['obs']
+        camera_front_bb = obs.get('obj_bb', {}).get('camera_front', None)
+        save_debug_images(debug_dir,
+                          t,
+                          obs.get('camera_front_image', None),
+                          obs.get('eye_in_hand_image', None),
+                          camera_front_bb)
 
     if ("real" in pkl_file_path or args.real) and "task_00" in pkl_file_path:
         sampled_trj = list()
@@ -517,7 +559,7 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
                 img = sample['traj'].get(t)['obs'].get(
                     f"{camera_name}_image", None)
                 if img is not None:
-                    cv2.imwrite("original.png", img)
+                    Image.fromarray(np.asarray(img, dtype=np.uint8)).save("original.png")
                     bb_dict = sample['traj'].get(
                         t)['obs'].get("obj_bb", None)
                     bb = None
@@ -540,14 +582,15 @@ def opt_traj(task_name, task_spec, out_path, rescale_bb, real, pkl_file_path):
                                             adj_bb[obj_name]['bottom_right_corner'],
                                             (0, 255, 0),
                                             1)
-                    cv2.imwrite("prova.png", img)
+                    Image.fromarray(np.asarray(img, dtype=np.uint8)).save("prova.png")
                     # print("prova image")
 
-    trj_name = pkl_file_path.split('/')[-1]
-    out_pkl_file_path = os.path.join(out_path, trj_name)
-    with open(out_pkl_file_path, "wb") as f:
-        print(out_pkl_file_path)
-        pickle.dump(sample, f)
+    if save_trj:
+        trj_name = pkl_file_path.split('/')[-1]
+        out_pkl_file_path = os.path.join(out_path, trj_name)
+        with open(out_pkl_file_path, "wb") as f:
+            print(out_pkl_file_path)
+            pickle.dump(sample, f)
 
 
 if __name__ == '__main__':
@@ -564,6 +607,8 @@ if __name__ == '__main__':
     parser.add_argument('--rescale_bb', action='store_true')
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--real', action='store_true')
+    parser.add_argument('--save_trj', action='store_true',
+                        help="Save the optimized trajectories (.pkl) to out_path")
 
     args = parser.parse_args()
 
@@ -584,7 +629,7 @@ if __name__ == '__main__':
     else:
         out_path = os.path.join(args.out_path,
                                 f"{args.task_name}_opt",
-                                f"{args.robot_name}_{args.task_name}")
+                                f"{args.robot_name}_{args.task_name}_eye_in_hand")
 
     os.makedirs(name=out_path, exist_ok=True)
 
@@ -615,6 +660,7 @@ if __name__ == '__main__':
                                       task_conf,
                                       out_task,
                                       args.rescale_bb,
-                                      args.real
+                                      args.real,
+                                      args.save_trj
                                       )
                 p.map(f, trj_list)

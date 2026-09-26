@@ -14,7 +14,7 @@ import copy
 
 from multi_task_il.utils import normalize_action
 from multi_task_il.datasets.utils import *
-
+from multi_task_il.datasets.data_aug import DataAugmentation
 
 class MultiTaskPairedDataset(Dataset):
     def __init__(
@@ -56,11 +56,13 @@ class MultiTaskPairedDataset(Dataset):
             mix_sim_real=False,
             convert_action=False,
             dagger=False,
+            validation_on_skipped_task=False,
             ** params):
 
         self.task_crops = OrderedDict()
         self.demo_crop = OrderedDict()
         self.agent_crop = OrderedDict()
+        self.agent_sim_crop = OrderedDict()
         # each idx i maps to a unique tuple of (task_name, sub_task_id, agent.pkl, demo.pkl)
         self.all_file_pairs = OrderedDict()
         self.all_agent_files = OrderedDict()
@@ -75,6 +77,7 @@ class MultiTaskPairedDataset(Dataset):
         self.mode = mode
         self.pick_next = pick_next
         self.split_pick_place = split_pick_place
+        self.validation_on_skipped_task = validation_on_skipped_task
 
         self.select_random_frames = select_random_frames
         self.balance_target_obj_pos = balance_target_obj_pos
@@ -109,19 +112,19 @@ class MultiTaskPairedDataset(Dataset):
         # Frame distribution for each trajectory
         self._frame_distribution = OrderedDict()
         self._mix_demo_agent = False
-        count = create_train_val_dict(self,
-                                      agent_name,
-                                      demo_name,
-                                      root_dir,
-                                      tasks_spec,
-                                      split,
-                                      allow_train_skip,
-                                      allow_val_skip)
+        count, pairs_cnt = create_train_val_dict(self,
+                                      agent_name=agent_name,
+                                      demo_name=demo_name,
+                                      root_dir=root_dir,
+                                      task_spec=tasks_spec,
+                                      split=split,
+                                      allow_train_skip=allow_train_skip,
+                                      allow_val_skip=allow_val_skip,
+                                      mode=mode,
+                                      validation_on_skipped_task=validation_on_skipped_task)
 
-        if not self._change_command_epoch:
-            self.pairs_count = count
-        else:
-            self.file_count = count
+        self.pairs_cnt = pairs_cnt
+        self.step_cnt = count
 
         self.task_count = len(tasks_spec)
 
@@ -137,64 +140,78 @@ class MultiTaskPairedDataset(Dataset):
 
         self.use_strong_augs = use_strong_augs
         self.data_augs = data_augs
-        self.frame_aug = create_data_aug(self)
+        self.frame_aug = DataAugmentation(data_augs=data_augs,
+                                          mode=mode,
+                                          height=height,
+                                          width=width,
+                                          use_strong_augs=use_strong_augs,
+                                          task_crops=self.task_crops,
+                                          agent_sim_crop=self.agent_sim_crop,
+                                          demo_crop=self.demo_crop,
+                                          agent_crop=self.agent_crop,)
 
     def __len__(self):
         """NOTE: we should count total possible demo-agent pairs, not just single-file counts
         total pairs should sum over all possible sub-task pairs"""
-        if not self._change_command_epoch:
-            return self.pairs_count
-        else:
-            return self.file_count
+        return self.step_cnt
 
     def __getitem__(self, idx):
         """since the data is organized by task, use a mapping here to convert
         an index to a proper sub-task index """
         if self.mode == 'train':
             pass
-        if not self._change_command_epoch:
-            (task_name, sub_task_id, demo_file,
-             agent_file) = self.all_file_pairs[idx]
-        else:
-            (task_name, sub_task_id, agent_file,
-                trj_length) = self.all_agent_files[idx[0]]
-            _, _, demo_file = self.all_demo_files[idx[1]]
-
+        demo_indx = idx[0]
+        sample_idx = idx[1]
+        frame_idx = idx[2]
+        #(task_name, sub_task_id, demo_file, agent_file, traj_len) = self.all_file_pairs[sample_idx]
+        (_, _, demo_file) = self.all_demo_files[demo_indx]
+        (task_name, sub_task_id, agent_file, trj_len) = self.all_agent_files[sample_idx]
+        
+        human_demo = False
+        if ("human" in demo_file):
+            human_demo = True
+        
         # if agent_file not in self.all_file_pairs:
         #     self._frame_distribution[agent_file] = np.zeros((1, 250))
         start = time.time()
         demo_traj, agent_traj = load_traj(demo_file), load_traj(agent_file)
         
         sim_crop = False
-        if "real_new" not in agent_file:
+        if "real" not in agent_file:
             sim_crop = True
         
         end = time.time()
         logger.debug(f"Loading time {end-start}")
         # start = time.time()
-        demo_data = make_demo(self, demo_traj[0], task_name)
+        demo_data = make_demo(self, demo_traj[0], task_name, human_demo)
         # end = time.time()
         # print(f"Make demo {end-start}")
         # start = time.time()
         traj = self._make_traj(
+            frame_idx,
             agent_traj[0],
             agent_traj[1],
             task_name,
             sub_task_id,
             sim_crop,
-            self._convert_action)
+            self._convert_action,
+            human_demo)
         # end = time.time()
         # print(f"Make traj {end-start}")
         # print(sub_task_id)
         return {'demo_data': demo_data, 'traj': traj, 'task_name': task_name, 'task_id': sub_task_id}
 
-    def _make_traj(self, traj, command, task_name, sub_task_id, sim_crop, convert_action):
+    def _make_traj(self, start_frame, traj, command, task_name, sub_task_id, sim_crop, convert_action, human_demo):
 
         ret_dict = {}
 
         end = len(traj)
-        start = torch.randint(low=1, high=max(
-            1, end - self._obs_T + 1), size=(1,))
+        # if(start_frame == 0):
+        #     start_frame = 1
+        # start = start_frame if start_frame + self._obs_T < end else start_frame - (self._obs_T - (end - 1 - start_frame))
+        
+        # print("start frame with randint", start_frame)
+        start = torch.randint(low=1, high=max(1, end - self._obs_T + 1), size=(1,))
 
         if self._take_first_frame:
             first_frame = [torch.tensor(1)]
@@ -208,8 +225,8 @@ class MultiTaskPairedDataset(Dataset):
 
         first_phase = None
         if self.split_pick_place:
-            first_t = chosen_t[0].item()
-            last_t = chosen_t[-1].item()
+            first_t = chosen_t[0] #.item()
+            last_t = chosen_t[-1] #.item()
             if task_name == 'nut_assembly' or task_name == 'pick_place' or 'button' in task_name or 'stack_block' in task_name:
                 first_step_gripper_state = traj.get(first_t)['action'][-1]
                 first_phase = True if first_step_gripper_state == -1.0 or first_step_gripper_state == 0.0 else False
@@ -227,7 +244,7 @@ class MultiTaskPairedDataset(Dataset):
                     for indx, step in enumerate(range(step_change+1-self._obs_T, step_change+1)):
                         chosen_t[indx] = torch.tensor(step)
 
-        images, images_cp, bb, obj_classes, action, states, points = create_sample(
+        images, images_cp, wrist_images, bb, obj_classes, action, states, points = create_sample(
             dataset_loader=self,
             traj=traj,
             chosen_t=chosen_t,
@@ -238,12 +255,16 @@ class MultiTaskPairedDataset(Dataset):
             load_eef_point=self._load_eef_point,
             agent_task_id=sub_task_id,
             sim_crop=sim_crop,
-            convert_action=convert_action)
+            convert_action=convert_action,
+            human_demo=human_demo)
 
         ret_dict['images'] = torch.stack(images)
 
         if self.aug_twice:
             ret_dict['images_cp'] = torch.stack(images_cp)
+
+        if len(wrist_images) == len(images):
+            ret_dict['wrist_images'] = torch.stack(wrist_images)
 
         ret_dict['gt_bb'] = torch.stack(bb)
         ret_dict['gt_classes'] = torch.stack(obj_classes)
